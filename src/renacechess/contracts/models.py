@@ -214,18 +214,20 @@ class ArtifactRefV1(BaseModel):
     model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
 
     cache_path: str = Field(
-        ..., alias="cachePath", description="Path to cached artifact (relative to cache root or absolute)"
+        ...,
+        alias="cachePath",
+        description="Path to cached artifact (relative to cache root or absolute)",
     )
     sha256: str = Field(
         ...,
         description="SHA-256 hash of artifact (lowercase hex)",
         pattern="^[a-f0-9]{64}$",
     )
-    size_bytes: int = Field(
-        ..., alias="sizeBytes", ge=0, description="Size of artifact in bytes"
-    )
+    size_bytes: int = Field(..., alias="sizeBytes", ge=0, description="Size of artifact in bytes")
     media_type: str = Field(
-        ..., alias="mediaType", description="MIME type of artifact (e.g., 'application/x-chess-pgn', 'application/zstd')"
+        ...,
+        alias="mediaType",
+        description="MIME type of artifact (e.g., 'application/x-chess-pgn', 'application/zstd')",
     )
     compression: Literal["zstd"] | None = Field(
         None, description="Compression format if applicable (optional)"
@@ -275,9 +277,7 @@ class IngestReceiptV1(BaseModel):
 
     model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
 
-    schema_version: Literal["v1"] = Field(
-        "v1", alias="schemaVersion", description="Schema version"
-    )
+    schema_version: Literal["v1"] = Field("v1", alias="schemaVersion", description="Schema version")
     created_at: datetime = Field(
         ..., alias="createdAt", description="ISO 8601 timestamp of receipt creation"
     )

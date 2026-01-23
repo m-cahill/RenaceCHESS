@@ -3,7 +3,10 @@
 import hashlib
 from pathlib import Path
 
-import zstandard as zstd  # type: ignore[import-not-found]
+try:
+    import zstandard as zstd  # type: ignore[import-not-found]
+except ImportError:
+    zstd = None
 
 from renacechess.ingest.cache import CacheManager
 
@@ -34,6 +37,11 @@ def decompress_zst(
 
     if not source_path.suffix == ".zst":
         raise ValueError(f"Source file must have .zst extension, got {source_path.suffix}")
+
+    if zstd is None:
+        raise ImportError(
+            "zstandard library is required for decompression. Install with: pip install zstandard"
+        )
 
     # Create output directory
     derived_dir = cache.get_derived_dir(source_id)

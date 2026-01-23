@@ -40,10 +40,11 @@ class FileFetcher:
         # Parse URI
         parsed = urlparse(uri)
         if parsed.scheme == "file":
-            # Handle Windows paths: file:///C:/path or file:///path
+            # Handle file:// URIs
             path_str = parsed.path
-            # Remove leading slash for Windows absolute paths
-            if path_str.startswith("/") and len(path_str) > 1 and path_str[1].isalpha():
+            # On Unix, file:///path -> /path (keep leading slash)
+            # On Windows, file:///C:/path -> C:/path (remove leading slash if drive letter)
+            if path_str.startswith("/") and len(path_str) > 2 and path_str[2] == ":":
                 # Windows drive letter: /C:/path -> C:/path
                 path_str = path_str[1:]
             source_path = Path(path_str)
