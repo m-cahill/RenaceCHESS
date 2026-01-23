@@ -50,4 +50,3 @@ def canonical_hash(obj: Any) -> str:
         Hexadecimal hash string.
     """
     return stable_hash(canonical_json_dump(obj))
-

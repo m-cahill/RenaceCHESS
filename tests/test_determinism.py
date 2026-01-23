@@ -2,8 +2,6 @@
 
 import json
 
-import pytest
-
 from renacechess.determinism import canonical_hash, canonical_json_dump, stable_hash
 
 
@@ -61,4 +59,3 @@ def test_canonical_hash_different_objects() -> None:
     hash2 = canonical_hash(obj2)
 
     assert hash1 != hash2
-

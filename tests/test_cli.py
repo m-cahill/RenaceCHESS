@@ -15,7 +15,11 @@ def test_cli_demo_command(tmp_path: Path, capsys) -> None:
     sample_pgn = Path(__file__).parent / "data" / "sample.pgn"
     output_file = tmp_path / "demo.json"
 
-    with patch.object(sys, "argv", ["renacechess", "demo", "--pgn", str(sample_pgn), "--out", str(output_file)]):
+    with patch.object(
+        sys,
+        "argv",
+        ["renacechess", "demo", "--pgn", str(sample_pgn), "--out", str(output_file)],
+    ):
         main()
 
     # Check that output file was created
@@ -74,11 +78,23 @@ def test_cli_demo_command_with_ply(tmp_path: Path) -> None:
     sample_pgn = Path(__file__).parent / "data" / "sample.pgn"
     output_file = tmp_path / "demo.json"
 
-    with patch.object(sys, "argv", ["renacechess", "demo", "--pgn", str(sample_pgn), "--out", str(output_file), "--ply", "10"]):
+    with patch.object(
+        sys,
+        "argv",
+        [
+            "renacechess",
+            "demo",
+            "--pgn",
+            str(sample_pgn),
+            "--out",
+            str(output_file),
+            "--ply",
+            "10",
+        ],
+    ):
         main()
 
     assert output_file.exists()
     content = output_file.read_text(encoding="utf-8")
     payload = json.loads(content)
     assert "position" in payload
-

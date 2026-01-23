@@ -3,15 +3,14 @@
 import math
 from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 import chess
 import chess.pgn
 
 from renacechess.contracts.models import (
+    HDI,
     ContextBridgeMeta,
     ContextBridgePayload,
-    HDI,
     HDIComponents,
     HumanWDL,
     HumanWDLContainer,
@@ -25,7 +24,7 @@ from renacechess.determinism import canonical_hash
 
 
 def generate_demo_payload(
-    pgn_path: Path, ply: int = 6, generated_at: Optional[datetime] = None
+    pgn_path: Path, ply: int = 6, generated_at: datetime | None = None
 ) -> dict:
     """Generate deterministic demo payload from PGN.
 
@@ -46,16 +45,16 @@ def generate_demo_payload(
     # Step to target ply
     board = game.board()
     move_count = 0
-    for move in game.mainline_moves():
+    for chess_move in game.mainline_moves():
         if move_count >= ply:
             break
-        board.push(move)
+        board.push(chess_move)
         move_count += 1
 
     # Get position info
     fen = board.fen()
     side_to_move = "white" if board.turn == chess.WHITE else "black"
-    legal_moves_uci = [move.uci() for move in board.legal_moves]
+    legal_moves_uci = [chess_move.uci() for chess_move in board.legal_moves]
     legal_moves_uci.sort()  # Deterministic ordering
 
     # Generate deterministic stub policy
@@ -68,19 +67,19 @@ def generate_demo_payload(
         decay_factor = 0.7
         probabilities = []
         for i in range(num_moves):
-            prob = decay_factor ** i
+            prob = decay_factor**i
             probabilities.append(prob)
         total = sum(probabilities)
         probabilities = [p / total for p in probabilities]
 
         for uci, prob in zip(legal_moves_uci, probabilities):
-            top_moves.append(PolicyMove(uci=uci, p=prob))
+            top_moves.append(PolicyMove(uci=uci, san=None, p=prob))
 
     # Compute entropy (Shannon entropy)
     entropy = 0.0
-    for move in top_moves:
-        if move.p > 0:
-            entropy -= move.p * math.log2(move.p)
+    for policy_move in top_moves:
+        if policy_move.p > 0:
+            entropy -= policy_move.p * math.log2(policy_move.p)
     entropy = max(0.0, entropy)
 
     # Compute top gap
@@ -102,28 +101,30 @@ def generate_demo_payload(
     draw_prob = 0.1 + (difficulty * 0.1)  # 0.1 to 0.2
     loss_prob = 1.0 - win_prob - draw_prob
 
-    pre_wdl = HumanWDL(w=win_prob, d=draw_prob, l=loss_prob)
+    pre_wdl = HumanWDL(w=win_prob, d=draw_prob, loss=loss_prob)
 
     # Generate postByMove WDL (deterministic variation)
-    post_by_move = {}
-    for move in top_moves[:5]:  # Top 5 moves only
+    post_by_move: dict[str, HumanWDL] = {}
+    for policy_move in top_moves[:5]:  # Top 5 moves only
         # Slight variation based on move index
-        move_factor = 1.0 - (move.p * 0.1)  # Better moves slightly improve win prob
+        move_factor = 1.0 - (policy_move.p * 0.1)  # Better moves slightly improve win prob
         post_win = max(0.1, min(0.9, win_prob * move_factor))
         post_draw = draw_prob
         post_loss = 1.0 - post_win - post_draw
-        post_by_move[move.uci] = HumanWDL(w=post_win, d=post_draw, l=post_loss)
+        post_by_move[policy_move.uci] = HumanWDL(w=post_win, d=post_draw, loss=post_loss)
 
     # Compute HDI
-    wdl_sensitivity = abs(pre_wdl.w - post_by_move.get(legal_moves_uci[0] if legal_moves_uci else "", pre_wdl).w)
+    first_move_uci = legal_moves_uci[0] if legal_moves_uci else ""
+    first_move_wdl = post_by_move.get(first_move_uci, pre_wdl)
+    wdl_sensitivity = abs(pre_wdl.w - first_move_wdl.w)
     hdi_value = (entropy * 0.4) + ((1.0 - top_gap) * 0.3) + (wdl_sensitivity * 0.3)
 
     hdi = HDI(
         value=hdi_value,
         components=HDIComponents(
             entropy=entropy,
-            topGap=top_gap,
-            wdlSensitivity=wdl_sensitivity,
+            top_gap=top_gap,
+            wdl_sensitivity=wdl_sensitivity,
         ),
     )
 
@@ -150,7 +151,9 @@ def generate_demo_payload(
             NarrativeSeed(
                 type="critical",
                 severity="high",
-                facts=[f"High Human Difficulty Index ({hdi_value:.2f}) indicates critical position"],
+                facts=[
+                    f"High Human Difficulty Index ({hdi_value:.2f}) indicates critical position"
+                ],
             )
         )
 
@@ -170,32 +173,31 @@ def generate_demo_payload(
     payload = ContextBridgePayload(
         position=Position(
             fen=fen,
-            sideToMove=side_to_move,
-            legalMoves=legal_moves_uci,
+            side_to_move=side_to_move,
+            legal_moves=legal_moves_uci,
         ),
         conditioning=PositionConditioning(
-            skillBucket="1200-1400",
-            timePressureBucket="NORMAL",
-            timeControlClass="blitz",
+            skill_bucket="1200-1400",
+            time_pressure_bucket="NORMAL",
+            time_control_class="blitz",
         ),
         policy=Policy(
-            topMoves=top_moves,
+            top_moves=top_moves,
             entropy=entropy,
-            topGap=top_gap,
+            top_gap=top_gap,
         ),
-        humanWDL=HumanWDLContainer(
+        human_wdl=HumanWDLContainer(
             pre=pre_wdl,
-            postByMove=post_by_move,
+            post_by_move=post_by_move,
         ),
         hdi=hdi,
-        narrativeSeeds=narrative_seeds,
+        narrative_seeds=narrative_seeds,
         meta=ContextBridgeMeta(
-            schemaVersion="v1",
-            generatedAt=generated_at,
-            inputHash=input_hash,
+            schema_version="v1",
+            generated_at=generated_at,
+            input_hash=input_hash,
         ),
     )
 
-    # Convert to dict for JSON serialization
-    return payload.model_dump(mode="json")
-
+    # Convert to dict for JSON serialization (use aliases for camelCase JSON)
+    return payload.model_dump(mode="json", by_alias=True)

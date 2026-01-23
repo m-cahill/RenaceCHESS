@@ -76,4 +76,3 @@ def test_demo_payload_deterministic(sample_pgn_path: Path) -> None:
 
     # Should be identical
     assert json1 == json2
-

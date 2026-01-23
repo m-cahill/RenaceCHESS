@@ -46,4 +46,18 @@
 - **Files:** docs/milestones/PoC/M00/M00_summary.md, docs/milestones/PoC/M00/M00_audit.md
 - **Status:** ✅ Complete
 
+### Entry 007
+- **Timestamp:** 2026-01-23T[ci_analysis_complete]
+- **Tool:** run_terminal_cmd, write
+- **Purpose:** Monitor CI run 21271461853 and generate run analysis document
+- **Files:** docs/milestones/PoC/M00/M00_run1.md
+- **Status:** ✅ Complete - Analysis document created, merge blocked due to lint/type errors
+
+### Entry 008
+- **Timestamp:** 2026-01-23T[fixes_start]
+- **Tool:** search_replace, write
+- **Purpose:** Apply CI fixes per user directive: Field aliases for N815, line breaks for E501, rename l to loss, fix MyPy errors
+- **Files:** src/renacechess/contracts/models.py, src/renacechess/demo/pgn_overlay.py, tests/, docs/milestones/PoC/M00/M00_audit.md
+- **Status:** In progress
+
 

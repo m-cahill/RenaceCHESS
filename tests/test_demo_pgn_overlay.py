@@ -96,4 +96,3 @@ def test_generate_demo_payload_policy_probabilities() -> None:
     # All probabilities should be between 0 and 1
     for move in top_moves:
         assert 0.0 <= move["p"] <= 1.0
-
