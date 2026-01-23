@@ -7,7 +7,7 @@ from typing import Any
 try:
     import zstandard as zstd  # type: ignore
 except ImportError:
-    zstd = None  # type: ignore
+    zstd = None
 
 from renacechess.ingest.cache import CacheManager
 
