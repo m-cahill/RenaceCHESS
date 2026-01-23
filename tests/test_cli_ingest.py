@@ -91,7 +91,10 @@ def test_ingest_from_lichess_url_builder() -> None:
 
     # Verify URL building
     expected_url = build_lichess_url("standard_rated", "2024-01")
-    assert expected_url == "https://database.lichess.org/standard/lichess_db_standard_rated_2024-01.pgn.zst"
+    assert (
+        expected_url
+        == "https://database.lichess.org/standard/lichess_db_standard_rated_2024-01.pgn.zst"
+    )
 
     # Test different months
     url2 = build_lichess_url("standard_rated", "2023-12")
@@ -107,4 +110,3 @@ def test_ingest_invalid_month_format() -> None:
 
     with pytest.raises(ValueError):
         build_lichess_url("standard_rated", "2024-13")
-

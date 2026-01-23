@@ -82,9 +82,7 @@ def main() -> None:
     ingest_subparsers = ingest_parser.add_subparsers(dest="ingest_command")
 
     # Ingest lichess subcommand
-    lichess_parser = ingest_subparsers.add_parser(
-        "lichess", help="Ingest Lichess monthly dump"
-    )
+    lichess_parser = ingest_subparsers.add_parser("lichess", help="Ingest Lichess monthly dump")
     lichess_parser.add_argument(
         "--month",
         type=str,

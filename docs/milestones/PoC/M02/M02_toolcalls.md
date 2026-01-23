@@ -139,3 +139,9 @@
 - **Files:** `README.md`
 - **Status:** ✅ Complete
 
+### 2026-01-23 - Phase 4: CI Fixes (Run 1)
+- **Tool:** `search_replace` - Fix CI failures
+- **Purpose:** Fix linting, type checking, and test failures from first CI run
+- **Files:** `src/renacechess/contracts/models.py`, `src/renacechess/ingest/decompress.py`, `src/renacechess/ingest/fetch.py`, `tests/test_ingest_golden.py`
+- **Status:** ✅ Complete (fixed line length, type ignores, file:// URI handling, golden test paths)
+
