@@ -215,3 +215,4 @@ Both issues are **in-scope for M01** and should be fixed before merge.
 **Analysis Date:** 2026-01-23  
 **Analyst:** Cursor AI (workflow prompt)
 
+
