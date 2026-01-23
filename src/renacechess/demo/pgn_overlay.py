@@ -23,34 +23,19 @@ from renacechess.contracts.models import (
 from renacechess.determinism import canonical_hash
 
 
-def generate_demo_payload(
-    pgn_path: Path, ply: int = 6, generated_at: datetime | None = None
+def generate_payload_from_board(
+    board: chess.Board, ply: int, generated_at: datetime | None = None
 ) -> dict:
-    """Generate deterministic demo payload from PGN.
+    """Generate deterministic Context Bridge payload from a chess board position.
 
     Args:
-        pgn_path: Path to PGN file.
-        ply: Target ply number (default: 6).
+        board: Chess board at the target position.
+        ply: Ply number (for metadata).
         generated_at: Override generation timestamp (for testing).
 
     Returns:
         Dictionary representation of ContextBridgePayload (ready for JSON serialization).
     """
-    # Parse PGN
-    with pgn_path.open() as f:
-        game = chess.pgn.read_game(f)
-        if game is None:
-            raise ValueError(f"Failed to parse PGN from {pgn_path}")
-
-    # Step to target ply
-    board = game.board()
-    move_count = 0
-    for chess_move in game.mainline_moves():
-        if move_count >= ply:
-            break
-        board.push(chess_move)
-        move_count += 1
-
     # Get position info
     fen = board.fen()
     side_to_move = "white" if board.turn == chess.WHITE else "black"
@@ -199,5 +184,36 @@ def generate_demo_payload(
         ),
     )
 
-    # Convert to dict for JSON serialization (use aliases for camelCase JSON)
-    return payload.model_dump(mode="json", by_alias=True)
+    # Convert to dict for JSON serialization (use aliases for camelCase JSON, exclude None)
+    return payload.model_dump(mode="json", by_alias=True, exclude_none=True)
+
+
+def generate_demo_payload(
+    pgn_path: Path, ply: int = 6, generated_at: datetime | None = None
+) -> dict:
+    """Generate deterministic demo payload from PGN.
+
+    Args:
+        pgn_path: Path to PGN file.
+        ply: Target ply number (default: 6).
+        generated_at: Override generation timestamp (for testing).
+
+    Returns:
+        Dictionary representation of ContextBridgePayload (ready for JSON serialization).
+    """
+    # Parse PGN
+    with pgn_path.open() as f:
+        game = chess.pgn.read_game(f)
+        if game is None:
+            raise ValueError(f"Failed to parse PGN from {pgn_path}")
+
+    # Step to target ply
+    board = game.board()
+    move_count = 0
+    for chess_move in game.mainline_moves():
+        if move_count >= ply:
+            break
+        board.push(chess_move)
+        move_count += 1
+
+    return generate_payload_from_board(board, ply, generated_at)

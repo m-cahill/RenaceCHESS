@@ -9,6 +9,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | Milestone | Status | Branch | Completion Date | Description |
 |-----------|--------|--------|-----------------|-------------|
 | M00 | ✅ Closed | `m00-bootstrap` → `main` | 2026-01-23 | Repository Bootstrap + Contract Skeleton + Deterministic Demo |
+| M01 | ✅ Closed | `m01-dataset-shards` → `main` | 2026-01-23 | Deterministic Dataset Shard Builder (PGN → JSONL + Manifest) |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -17,6 +18,16 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 - **Remediation Commit:** `1c29812b5942adcd8a36374130b30a31c538158e`
 - **Audit:** `docs/milestones/PoC/M00/M00_audit.md`
 - **Summary:** `docs/milestones/PoC/M00/M00_summary.md`
+
+**M01 Details:**
+- **CI Run 1:** 21279550886 (FAILURE - Format check + coverage 89.02% < 90%)
+- **CI Run 2-3:** Intermediate runs (linting fixes)
+- **CI Run 4:** 21279736846 (SUCCESS - All gates passing)
+- **Final Coverage:** 92.12% lines (exceeds 90% threshold)
+- **Test Count:** 51 tests (up from 40)
+- **PR:** #3 (ready for merge)
+- **Audit:** `docs/milestones/PoC/M01/M01_audit.md`
+- **Summary:** `docs/milestones/PoC/M01/M01_summary.md`
 
 ---
 
@@ -84,5 +95,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-01-23 (M00 closeout)
+**Last Updated:** 2026-01-23 (M01 closeout)
+
 

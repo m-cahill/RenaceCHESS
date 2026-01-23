@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class Position(BaseModel):
     """Chess position representation."""
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
 
     fen: str = Field(..., description="FEN string representation of the position")
     side_to_move: Literal["white", "black"] = Field(
@@ -23,7 +23,7 @@ class Position(BaseModel):
 class PositionConditioning(BaseModel):
     """Conditioning variables for position evaluation."""
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
 
     skill_bucket: str = Field(
         ..., alias="skillBucket", description="Skill bucket identifier (e.g., '1200-1400')"
@@ -47,7 +47,7 @@ class PolicyMove(BaseModel):
 class Policy(BaseModel):
     """Move policy distribution."""
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
 
     top_moves: list[PolicyMove] = Field(
         ..., alias="topMoves", description="Top moves with probabilities"
@@ -61,7 +61,7 @@ class Policy(BaseModel):
 class HumanWDL(BaseModel):
     """Human win/draw/loss probabilities."""
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
 
     w: float = Field(..., ge=0.0, le=1.0, description="Win probability")
     d: float = Field(..., ge=0.0, le=1.0, description="Draw probability")
@@ -77,7 +77,7 @@ class HumanWDL(BaseModel):
 class HDIComponents(BaseModel):
     """Components of Human Difficulty Index."""
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
 
     entropy: float = Field(..., ge=0.0, description="Policy entropy component")
     top_gap: float = Field(..., alias="topGap", ge=0.0, le=1.0, description="Top gap component")
@@ -106,7 +106,7 @@ class NarrativeSeed(BaseModel):
 class ContextBridgeMeta(BaseModel):
     """Metadata for Context Bridge payload."""
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
 
     schema_version: Literal["v1"] = Field("v1", alias="schemaVersion", description="Schema version")
     generated_at: datetime = Field(
@@ -120,7 +120,7 @@ class ContextBridgeMeta(BaseModel):
 class HumanWDLContainer(BaseModel):
     """Container for pre-move and post-move WDL probabilities."""
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
 
     pre: HumanWDL = Field(..., description="WDL probabilities before move")
     post_by_move: dict[str, HumanWDL] = Field(
@@ -133,7 +133,7 @@ class HumanWDLContainer(BaseModel):
 class ContextBridgePayload(BaseModel):
     """LLM Context Bridge payload (v1)."""
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
 
     position: Position = Field(..., description="Chess position")
     conditioning: PositionConditioning = Field(..., description="Conditioning variables")
@@ -151,7 +151,7 @@ class ContextBridgePayload(BaseModel):
 class DatasetManifestShardRef(BaseModel):
     """Reference to a dataset shard."""
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
 
     shard_id: str = Field(..., alias="shardId", description="Unique shard identifier")
     hash: str = Field(..., description="SHA-256 hash of shard file")
@@ -161,7 +161,7 @@ class DatasetManifestShardRef(BaseModel):
 class DatasetManifestSplitAssignments(BaseModel):
     """Split assignments for dataset."""
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
 
     train: list[str] = Field(default_factory=list, description="Training split shard IDs")
     val: list[str] = Field(default_factory=list, description="Validation split shard IDs")
@@ -173,7 +173,7 @@ class DatasetManifestSplitAssignments(BaseModel):
 class DatasetManifest(BaseModel):
     """Dataset manifest (v1)."""
 
-    model_config = ConfigDict(populate_by_name=True)
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
 
     schema_version: Literal["v1"] = Field("v1", alias="schemaVersion", description="Schema version")
     created_at: datetime = Field(
