@@ -8,6 +8,7 @@ from renacechess.dataset.builder import build_dataset
 from renacechess.dataset.config import DatasetBuildConfig
 from renacechess.demo.pgn_overlay import generate_demo_payload
 from renacechess.determinism import canonical_json_dump
+from renacechess.ingest.ingest import ingest_from_lichess, ingest_from_url
 
 
 def main() -> None:
@@ -76,6 +77,64 @@ def main() -> None:
         help="Stop processing at this ply number (exclusive)",
     )
 
+    # Ingest command
+    ingest_parser = subparsers.add_parser("ingest", help="Ingest Lichess database exports")
+    ingest_subparsers = ingest_parser.add_subparsers(dest="ingest_command")
+
+    # Ingest lichess subcommand
+    lichess_parser = ingest_subparsers.add_parser(
+        "lichess", help="Ingest Lichess monthly dump"
+    )
+    lichess_parser.add_argument(
+        "--month",
+        type=str,
+        required=True,
+        help="Month in YYYY-MM format (e.g., 2024-01)",
+    )
+    lichess_parser.add_argument(
+        "--out",
+        type=Path,
+        required=True,
+        help="Output directory for receipt and artifacts",
+    )
+    lichess_parser.add_argument(
+        "--cache-dir",
+        type=Path,
+        default=Path.home() / ".renacechess" / "cache",
+        help="Cache directory (default: ~/.renacechess/cache)",
+    )
+    lichess_parser.add_argument(
+        "--decompress",
+        action="store_true",
+        help="Decompress .zst to .pgn",
+    )
+
+    # Ingest url subcommand
+    url_parser = ingest_subparsers.add_parser("url", help="Ingest from explicit URL or file")
+    url_parser.add_argument(
+        "--url",
+        type=str,
+        required=True,
+        help="URL (http/https) or file path (file:// or local path)",
+    )
+    url_parser.add_argument(
+        "--out",
+        type=Path,
+        required=True,
+        help="Output directory for receipt and artifacts",
+    )
+    url_parser.add_argument(
+        "--cache-dir",
+        type=Path,
+        default=Path.home() / ".renacechess" / "cache",
+        help="Cache directory (default: ~/.renacechess/cache)",
+    )
+    url_parser.add_argument(
+        "--decompress",
+        action="store_true",
+        help="Decompress .zst to .pgn",
+    )
+
     args = parser.parse_args()
 
     if args.command == "demo":
@@ -110,6 +169,32 @@ def main() -> None:
                 sys.exit(1)
         else:
             dataset_parser.print_help()
+            sys.exit(1)
+    elif args.command == "ingest":
+        if args.ingest_command == "lichess":
+            try:
+                ingest_from_lichess(
+                    month=args.month,
+                    output_dir=args.out,
+                    cache_dir=args.cache_dir,
+                    decompress=args.decompress,
+                )
+            except Exception as e:
+                print(f"Error: {e}", file=sys.stderr)
+                sys.exit(1)
+        elif args.ingest_command == "url":
+            try:
+                ingest_from_url(
+                    url=args.url,
+                    output_dir=args.out,
+                    cache_dir=args.cache_dir,
+                    decompress=args.decompress,
+                )
+            except Exception as e:
+                print(f"Error: {e}", file=sys.stderr)
+                sys.exit(1)
+        else:
+            ingest_parser.print_help()
             sys.exit(1)
     else:
         parser.print_help()
