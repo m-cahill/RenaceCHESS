@@ -28,6 +28,20 @@ pip install -e ".[dev]"
 python -m renacechess.cli demo --pgn tests/data/sample.pgn --out demo.json
 ```
 
+### Build Dataset
+
+```bash
+# Build dataset from PGN files
+python -m renacechess.cli dataset build \
+  --pgn tests/data/sample.pgn \
+  --out datasets/sample/ \
+  --max-positions 1000 \
+  --start-ply 0 \
+  --end-ply 40
+```
+
+See [Dataset Documentation](docs/DATASETS.md) for detailed format and usage.
+
 ### Development
 
 ```bash
@@ -50,6 +64,7 @@ make demo
 renacechess/
 ├── src/renacechess/
 │   ├── contracts/          # Versioned schemas and Pydantic models
+│   ├── dataset/            # Dataset builder (PGN → JSONL + manifest)
 │   ├── demo/               # Deterministic demo payload generator
 │   ├── cli.py              # CLI entry point
 │   └── determinism.py     # Canonical JSON and hashing helpers
@@ -65,6 +80,7 @@ renacechess/
 - [Project Anchor](docs/ANCHOR.md) - Project vision and north star
 - [Governance](docs/GOVERNANCE.md) - Milestone conventions and workflow
 - [Assumed Guarantees](docs/ASSUMED_GUARANTEES.md) - What we inherit from RediAI v3
+- [Dataset Format](docs/DATASETS.md) - Dataset structure, build process, and deterministic rules
 
 ## License
 

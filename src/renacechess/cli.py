@@ -4,6 +4,8 @@ import argparse
 import sys
 from pathlib import Path
 
+from renacechess.dataset.builder import build_dataset
+from renacechess.dataset.config import DatasetBuildConfig
 from renacechess.demo.pgn_overlay import generate_demo_payload
 from renacechess.determinism import canonical_json_dump
 
@@ -35,6 +37,47 @@ def main() -> None:
         help="Target ply number (default: 6)",
     )
 
+    # Dataset build command
+    dataset_parser = subparsers.add_parser(
+        "dataset", help="Build dataset from PGN files"
+    )
+    dataset_subparsers = dataset_parser.add_subparsers(dest="dataset_command")
+
+    build_parser = dataset_subparsers.add_parser("build", help="Build dataset shards")
+    build_parser.add_argument(
+        "--pgn",
+        type=Path,
+        required=True,
+        action="append",
+        help="Path to PGN file or directory (can be specified multiple times)",
+    )
+    build_parser.add_argument(
+        "--out",
+        type=Path,
+        required=True,
+        help="Output directory for shards and manifest",
+    )
+    build_parser.add_argument(
+        "--max-games",
+        type=int,
+        help="Maximum number of games to process (global limit)",
+    )
+    build_parser.add_argument(
+        "--max-positions",
+        type=int,
+        help="Maximum number of positions to process (global limit)",
+    )
+    build_parser.add_argument(
+        "--start-ply",
+        type=int,
+        help="Start processing from this ply number (inclusive)",
+    )
+    build_parser.add_argument(
+        "--end-ply",
+        type=int,
+        help="Stop processing at this ply number (exclusive)",
+    )
+
     args = parser.parse_args()
 
     if args.command == "demo":
@@ -50,6 +93,25 @@ def main() -> None:
                 print(json_str)
         except Exception as e:
             print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
+    elif args.command == "dataset":
+        if args.dataset_command == "build":
+            try:
+                config = DatasetBuildConfig(
+                    pgn_paths=args.pgn,
+                    output_dir=args.out,
+                    max_games=args.max_games,
+                    max_positions=args.max_positions,
+                    start_ply=args.start_ply,
+                    end_ply=args.end_ply,
+                )
+                build_dataset(config)
+                print(f"Dataset built successfully in {args.out}", file=sys.stderr)
+            except Exception as e:
+                print(f"Error: {e}", file=sys.stderr)
+                sys.exit(1)
+        else:
+            dataset_parser.print_help()
             sys.exit(1)
     else:
         parser.print_help()

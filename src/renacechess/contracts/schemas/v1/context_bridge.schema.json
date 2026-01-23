@@ -49,7 +49,7 @@
           "description": "Time pressure bucket"
         },
         "timeControlClass": {
-          "type": "string",
+          "type": ["string", "null"],
           "enum": ["blitz", "rapid", "classical"],
           "description": "Time control class (optional)"
         }
@@ -70,7 +70,7 @@
                 "description": "Move in UCI format"
               },
               "san": {
-                "type": "string",
+                "type": ["string", "null"],
                 "description": "Move in SAN format (optional)"
               },
               "p": {
