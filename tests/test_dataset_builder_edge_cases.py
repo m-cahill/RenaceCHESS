@@ -116,4 +116,3 @@ def test_builder_directory_with_pgn_files(tmp_path: Path):
     # Should produce shard
     shard_path = tmp_path / "output" / "shards" / "shard_000.jsonl"
     assert shard_path.exists()
-
