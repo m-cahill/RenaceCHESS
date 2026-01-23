@@ -78,11 +78,11 @@ def test_ingest_receipt_golden(tmp_path: Path) -> None:
         golden_dict = json.loads(golden_content)
         receipt_dict_parsed = json.loads(canonical_json)
 
-        # Compare key fields (excluding timestamps and paths which may vary by platform)
-        assert receipt_dict_parsed["schemaVersion"] == golden_dict["schemaVersion"]
-        # URI may differ by platform (Windows vs Unix paths), so compare only filename
-        # Use PurePath for platform-agnostic path handling
-        from pathlib import PurePath
+            # Compare key fields (excluding timestamps and paths which may vary by platform)
+            assert receipt_dict_parsed["schemaVersion"] == golden_dict["schemaVersion"]
+            # URI may differ by platform (Windows vs Unix paths), so compare only filename
+            # Use PurePath for platform-agnostic path handling
+            from pathlib import PurePath
 
             receipt_uri = receipt_dict_parsed["source"]["uri"]
             golden_uri = golden_dict["source"]["uri"]
@@ -93,9 +93,11 @@ def test_ingest_receipt_golden(tmp_path: Path) -> None:
             # If golden has full path but receipt has just filename, that's OK (platform difference)
             # Both should have the same filename component
             if receipt_filename and golden_filename:
-                assert receipt_filename == golden_filename or receipt_uri.endswith(
-                    golden_filename
-                ) or golden_uri.endswith(receipt_filename), (
+                assert (
+                    receipt_filename == golden_filename
+                    or receipt_uri.endswith(golden_filename)
+                    or golden_uri.endswith(receipt_filename)
+                ), (
                     f"Filename mismatch: {receipt_filename} != {golden_filename} "
                     f"(receipt_uri={receipt_uri}, golden_uri={golden_uri})"
                 )
