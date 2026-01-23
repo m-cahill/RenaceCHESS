@@ -79,3 +79,21 @@
 - **Files:** `docs/milestones/PoC/M01/M01_run1.md`
 - **Status:** ✅ Complete
 
+### 2026-01-23 - Run 1 Remediation
+- **Tool:** `run_terminal_cmd`, `write` - Fix formatting and add coverage tests
+- **Purpose:** Resolve CI Run 1 failures
+- **Files:** Formatted 11 files, added `tests/test_dataset_builder_edge_cases.py`, updated `tests/test_cli_dataset_build.py`
+- **Status:** ✅ Complete (Coverage: 89.02% → 92.12%)
+
+### 2026-01-23 - CI Run 2-4 Monitoring
+- **Tool:** `run_terminal_cmd` - Monitor CI runs and fix linting issues
+- **Purpose:** Resolve intermediate linting failures and achieve green CI
+- **Files:** `tests/test_dataset_builder_edge_cases.py` (linting fixes)
+- **Status:** ✅ Complete (Run 4: SUCCESS)
+
+### 2026-01-23 - CI Run 2 Analysis
+- **Tool:** `write` - Create CI run analysis document for successful run
+- **Purpose:** Document successful CI Run 4 (final run)
+- **Files:** `docs/milestones/PoC/M01/M01_run2.md`
+- **Status:** ✅ Complete
+
