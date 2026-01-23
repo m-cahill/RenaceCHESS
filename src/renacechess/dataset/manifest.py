@@ -2,6 +2,7 @@
 
 from datetime import datetime
 from pathlib import Path
+from typing import Literal
 
 from renacechess.contracts.models import (
     DatasetManifest,
@@ -102,7 +103,9 @@ def generate_manifest_v2(
         created_at = generated_at
 
     # Build assembly config (treat 0 as None for max_games/max_positions)
-    max_games_val = config.max_games if config.max_games is not None and config.max_games > 0 else None
+    max_games_val = (
+        config.max_games if config.max_games is not None and config.max_games > 0 else None
+    )
     max_positions_val = (
         config.max_positions
         if config.max_positions is not None and config.max_positions > 0
@@ -165,9 +168,15 @@ def generate_manifest_v2(
             # Extract receipt ID from path (filename without extension)
             receipt_id = Path(path).stem
 
+        # Type narrowing for Literal type
+        if input_type == "ingest_receipt":
+            input_type_literal: Literal["ingest_receipt", "pgn_file"] = "ingest_receipt"
+        else:
+            input_type_literal = "pgn_file"
+
         input_refs.append(
             DatasetManifestInputV2(
-                type=input_type,  # type: ignore[assignment]
+                type=input_type_literal,
                 digest=digest or "",
                 receipt_id=receipt_id,
                 path=path,

@@ -1,6 +1,7 @@
 """Dataset builder for converting PGN files to JSONL shards."""
 
 from datetime import datetime
+from io import TextIOWrapper
 from pathlib import Path
 
 import chess
@@ -27,7 +28,7 @@ class ShardWriter:
         self.shard_size = shard_size
         self.current_shard_index = 0
         self.current_shard_records = 0
-        self.current_shard_file = None
+        self.current_shard_file: TextIOWrapper | None = None
         self.shard_info: list[tuple[str, Path, int]] = []  # (shard_id, path, record_count)
         self.shard_splits: dict[str, set[str]] = {}  # shard_id -> set of split names
 
@@ -45,6 +46,7 @@ class ShardWriter:
         self.current_shard_file = shard_path.open("w", encoding="utf-8")
         self.current_shard_records = 0
         self.shard_info.append((shard_id, shard_path, 0))
+        self.current_shard_index += 1
 
     def write_record(self, record: dict, split: str) -> None:
         """Write a record to current shard, rolling to next shard if needed.
@@ -55,8 +57,9 @@ class ShardWriter:
         """
         if self.current_shard_file is None or self.current_shard_records >= self.shard_size:
             self._open_new_shard()
-            # After _open_new_shard(), current_shard_file is guaranteed to be set
-            assert self.current_shard_file is not None
+
+        # After _open_new_shard(), current_shard_file is guaranteed to be set
+        assert self.current_shard_file is not None, "Shard file not initialized"
 
         json_bytes = canonical_json_dump(record)
         json_str = json_bytes.decode("utf-8")

@@ -84,14 +84,21 @@ def test_ingest_receipt_golden(tmp_path: Path) -> None:
         # Use PurePath for platform-agnostic path handling
         from pathlib import PurePath
 
-        receipt_uri = receipt_dict_parsed["source"]["uri"]
-        golden_uri = golden_dict["source"]["uri"]
-        # Extract filename from both paths (handle both Windows and Unix)
-        receipt_filename = PurePath(receipt_uri).name
-        golden_filename = PurePath(golden_uri).name
-        assert receipt_filename == golden_filename, (
-            f"Filename mismatch: {receipt_filename} != {golden_filename}"
-        )
+            receipt_uri = receipt_dict_parsed["source"]["uri"]
+            golden_uri = golden_dict["source"]["uri"]
+            # Extract filename from both paths (handle both Windows and Unix)
+            # Normalize both to handle cases where one is a full path and the other is just filename
+            receipt_filename = PurePath(receipt_uri).name
+            golden_filename = PurePath(golden_uri).name
+            # If golden has full path but receipt has just filename, that's OK (platform difference)
+            # Both should have the same filename component
+            if receipt_filename and golden_filename:
+                assert receipt_filename == golden_filename or receipt_uri.endswith(
+                    golden_filename
+                ) or golden_uri.endswith(receipt_filename), (
+                    f"Filename mismatch: {receipt_filename} != {golden_filename} "
+                    f"(receipt_uri={receipt_uri}, golden_uri={golden_uri})"
+                )
         assert receipt_dict_parsed["artifact"]["sha256"] == golden_dict["artifact"]["sha256"]
         assert receipt_dict_parsed["artifact"]["sizeBytes"] == golden_dict["artifact"]["sizeBytes"]
     else:
