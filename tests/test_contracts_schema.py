@@ -8,9 +8,9 @@ import jsonschema
 import pytest
 
 from renacechess.contracts.models import (
+    HDI,
     ContextBridgePayload,
     DatasetManifest,
-    HDI,
     HDIComponents,
     HumanWDL,
     HumanWDLContainer,
@@ -25,7 +25,15 @@ from renacechess.determinism import canonical_json_dump
 
 def load_schema(schema_name: str) -> dict:
     """Load JSON schema from schemas directory."""
-    schema_path = Path(__file__).parent.parent / "src" / "renacechess" / "contracts" / "schemas" / "v1" / f"{schema_name}.schema.json"
+    schema_path = (
+        Path(__file__).parent.parent
+        / "src"
+        / "renacechess"
+        / "contracts"
+        / "schemas"
+        / "v1"
+        / f"{schema_name}.schema.json"
+    )
     return json.loads(schema_path.read_text())
 
 
@@ -43,35 +51,35 @@ def test_policy_move_model() -> None:
 def test_policy_model() -> None:
     """Test Policy model."""
     moves = [
-        PolicyMove(uci="e2e4", p=0.6),
-        PolicyMove(uci="d2d4", p=0.4),
+        PolicyMove(uci="e2e4", san=None, p=0.6),
+        PolicyMove(uci="d2d4", san=None, p=0.4),
     ]
-    policy = Policy(topMoves=moves, entropy=0.97, topGap=0.2)
-    assert len(policy.topMoves) == 2
+    policy = Policy(top_moves=moves, entropy=0.97, top_gap=0.2)
+    assert len(policy.top_moves) == 2
     assert policy.entropy == 0.97
-    assert policy.topGap == 0.2
+    assert policy.top_gap == 0.2
 
 
 def test_human_wdl_model() -> None:
     """Test HumanWDL model validation."""
-    wdl = HumanWDL(w=0.5, d=0.3, l=0.2)
-    assert wdl.w + wdl.d + wdl.l == pytest.approx(1.0)
+    wdl = HumanWDL(w=0.5, d=0.3, loss=0.2)
+    assert wdl.w + wdl.d + wdl.loss == pytest.approx(1.0)
 
     # Should raise if probabilities don't sum to 1
     with pytest.raises(ValueError, match="must sum to 1"):
-        HumanWDL(w=0.5, d=0.3, l=0.1)
+        HumanWDL(w=0.5, d=0.3, loss=0.1)
 
 
 def test_human_wdl_container_model() -> None:
     """Test HumanWDLContainer model."""
-    pre = HumanWDL(w=0.5, d=0.3, l=0.2)
+    pre = HumanWDL(w=0.5, d=0.3, loss=0.2)
     post_by_move = {
-        "e2e4": HumanWDL(w=0.6, d=0.2, l=0.2),
-        "d2d4": HumanWDL(w=0.4, d=0.3, l=0.3),
+        "e2e4": HumanWDL(w=0.6, d=0.2, loss=0.2),
+        "d2d4": HumanWDL(w=0.4, d=0.3, loss=0.3),
     }
-    container = HumanWDLContainer(pre=pre, postByMove=post_by_move)
+    container = HumanWDLContainer(pre=pre, post_by_move=post_by_move)
     assert container.pre == pre
-    assert len(container.postByMove) == 2
+    assert len(container.post_by_move) == 2
 
 
 def test_context_bridge_payload_model_to_json() -> None:
@@ -81,33 +89,33 @@ def test_context_bridge_payload_model_to_json() -> None:
     payload = ContextBridgePayload(
         position=Position(
             fen="rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1",
-            sideToMove="black",
-            legalMoves=["e7e6", "e7e5"],
+            side_to_move="black",
+            legal_moves=["e7e6", "e7e5"],
         ),
         conditioning=PositionConditioning(
-            skillBucket="1200-1400",
-            timePressureBucket="NORMAL",
+            skill_bucket="1200-1400",
+            time_pressure_bucket="NORMAL",
         ),
         policy=Policy(
-            topMoves=[
-                PolicyMove(uci="e7e5", p=0.6),
-                PolicyMove(uci="e7e6", p=0.4),
+            top_moves=[
+                PolicyMove(uci="e7e5", san=None, p=0.6),
+                PolicyMove(uci="e7e6", san=None, p=0.4),
             ],
             entropy=0.97,
-            topGap=0.2,
+            top_gap=0.2,
         ),
-        humanWDL=HumanWDLContainer(
-            pre=HumanWDL(w=0.5, d=0.3, l=0.2),
-            postByMove={
-                "e7e5": HumanWDL(w=0.6, d=0.2, l=0.2),
-                "e7e6": HumanWDL(w=0.4, d=0.3, l=0.3),
+        human_wdl=HumanWDLContainer(
+            pre=HumanWDL(w=0.5, d=0.3, loss=0.2),
+            post_by_move={
+                "e7e5": HumanWDL(w=0.6, d=0.2, loss=0.2),
+                "e7e6": HumanWDL(w=0.4, d=0.3, loss=0.3),
             },
         ),
         hdi=HDI(
             value=0.65,
-            components=HDIComponents(entropy=0.97, topGap=0.2, wdlSensitivity=0.1),
+            components=HDIComponents(entropy=0.97, top_gap=0.2, wdl_sensitivity=0.1),
         ),
-        narrativeSeeds=[
+        narrative_seeds=[
             NarrativeSeed(
                 type="confusing",
                 severity="medium",
@@ -115,14 +123,14 @@ def test_context_bridge_payload_model_to_json() -> None:
             )
         ],
         meta=ContextBridgeMeta(
-            schemaVersion="v1",
-            generatedAt=datetime(2024, 1, 1, 12, 0, 0),
-            inputHash="abc123",
+            schema_version="v1",
+            generated_at=datetime(2024, 1, 1, 12, 0, 0),
+            input_hash="abc123",
         ),
     )
 
-    # Serialize to dict, excluding None values
-    payload_dict = payload.model_dump(mode="json", exclude_none=True)
+    # Serialize to dict with aliases (camelCase JSON), excluding None values
+    payload_dict = payload.model_dump(mode="json", by_alias=True, exclude_none=True)
 
     # Should be JSON-serializable
     json_bytes = canonical_json_dump(payload_dict)
@@ -138,31 +146,30 @@ def test_context_bridge_payload_schema_version() -> None:
     from renacechess.contracts.models import ContextBridgeMeta
 
     meta = ContextBridgeMeta(
-        schemaVersion="v1",
-        generatedAt=datetime.now(),
-        inputHash="test",
+        schema_version="v1",
+        generated_at=datetime.now(),
+        input_hash="test",
     )
-    assert meta.schemaVersion == "v1"
+    assert meta.schema_version == "v1"
 
 
 def test_dataset_manifest_model() -> None:
     """Test DatasetManifest model."""
     from renacechess.contracts.models import (
-        DatasetManifestShardRef,
         DatasetManifestSplitAssignments,
     )
 
     manifest = DatasetManifest(
-        schemaVersion="v1",
-        createdAt=datetime(2024, 1, 1, 12, 0, 0),
-        shardRefs=[],
-        filterConfigHash="config123",
-        splitAssignments=DatasetManifestSplitAssignments(),
+        schema_version="v1",
+        created_at=datetime(2024, 1, 1, 12, 0, 0),
+        shard_refs=[],
+        filter_config_hash="config123",
+        split_assignments=DatasetManifestSplitAssignments(),
     )
 
-    assert manifest.schemaVersion == "v1"
-    assert len(manifest.shardRefs) == 0
-    assert manifest.filterConfigHash == "config123"
+    assert manifest.schema_version == "v1"
+    assert len(manifest.shard_refs) == 0
+    assert manifest.filter_config_hash == "config123"
 
 
 def test_dataset_manifest_schema_validation() -> None:
@@ -177,7 +184,6 @@ def test_dataset_manifest_schema_validation() -> None:
         splitAssignments=DatasetManifestSplitAssignments(),
     )
 
-    manifest_dict = manifest.model_dump(mode="json")
+    manifest_dict = manifest.model_dump(mode="json", by_alias=True)
     schema = load_schema("dataset_manifest")
     jsonschema.validate(manifest_dict, schema)
-

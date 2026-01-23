@@ -1,9 +1,9 @@
 """Contracts module for RenaceCHESS schemas and models."""
 
 from renacechess.contracts.models import (
+    HDI,
     ContextBridgePayload,
     DatasetManifest,
-    HDI,
     HDIComponents,
     HumanWDL,
     HumanWDLContainer,
@@ -27,4 +27,3 @@ __all__ = [
     "Position",
     "PositionConditioning",
 ]
-
