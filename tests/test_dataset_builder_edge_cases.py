@@ -92,9 +92,8 @@ def test_builder_start_ply_greater_than_end_ply(tmp_path: Path):
 
     build_dataset(config)
 
-    # Should produce empty or minimal shard (no positions in range)
-    shard_path = tmp_path / "shards" / "shard_000.jsonl"
     # Builder should handle this gracefully (no positions in range)
+    # Shard may be empty or contain no positions in the specified range
 
 
 def test_builder_directory_with_pgn_files(tmp_path: Path):
