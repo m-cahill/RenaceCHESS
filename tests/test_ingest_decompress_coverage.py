@@ -11,7 +11,7 @@ from renacechess.ingest.decompress import decompress_zst
 def test_decompress_zst_full_path(tmp_path: Path) -> None:
     """Test full decompression path with valid .zst file."""
     try:
-        import zstandard  # type: ignore[import-not-found]
+        import zstandard  # noqa: F401
     except ImportError:
         pytest.skip("zstandard not available")
 
@@ -43,7 +43,7 @@ def test_decompress_zst_full_path(tmp_path: Path) -> None:
 def test_decompress_zst_error_cleanup(tmp_path: Path) -> None:
     """Test that temp file is cleaned up on error."""
     try:
-        import zstandard  # type: ignore[import-not-found]
+        import zstandard  # noqa: F401
     except ImportError:
         pytest.skip("zstandard not available")
 

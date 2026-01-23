@@ -5,10 +5,10 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    import zstandard as zstd  # type: ignore[import-not-found]
+    import zstandard as zstd
 else:
     try:
-        import zstandard as zstd  # type: ignore[import-not-found]
+        import zstandard as zstd
     except ImportError:
         zstd = None
 

@@ -76,7 +76,7 @@ def test_ingest_from_url_decompress_missing_zstandard(tmp_path: Path) -> None:
 def test_ingest_from_url_artifact_not_found_after_fetch(tmp_path: Path) -> None:
     """Test that missing artifact after fetch raises FileNotFoundError."""
     try:
-        import zstandard  # type: ignore[import-not-found]
+        import zstandard  # noqa: F401
     except ImportError:
         pytest.skip("zstandard not available")
 
@@ -139,7 +139,7 @@ def test_ingest_from_url_decompress_non_zstd(tmp_path: Path) -> None:
 def test_ingest_from_url_absolute_path_fallback(tmp_path: Path) -> None:
     """Test that absolute path fallback works when relative path doesn't exist."""
     try:
-        import zstandard  # type: ignore[import-not-found]
+        import zstandard  # noqa: F401
     except ImportError:
         pytest.skip("zstandard not available")
 

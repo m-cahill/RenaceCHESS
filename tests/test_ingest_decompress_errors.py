@@ -37,7 +37,6 @@ def test_decompress_zst_missing_zstandard(tmp_path: Path, monkeypatch) -> None:
     import sys
 
     if "renacechess.ingest.decompress" in sys.modules:
-        import importlib
 
         import renacechess.ingest.decompress as decompress_module
 

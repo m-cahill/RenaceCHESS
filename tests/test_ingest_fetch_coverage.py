@@ -7,7 +7,7 @@ import pytest
 import requests
 
 from renacechess.ingest.cache import CacheManager
-from renacechess.ingest.fetch import FetchResult, HttpFetcher
+from renacechess.ingest.fetch import HttpFetcher
 
 
 def test_http_fetcher_success(tmp_path: Path) -> None:

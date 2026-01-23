@@ -7,6 +7,7 @@ import pytest
 # Skip entire module if zstandard not available
 try:
     import zstandard as zstd
+
     from renacechess.ingest.cache import CacheManager
     from renacechess.ingest.decompress import decompress_zst
 except ImportError:

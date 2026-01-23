@@ -1,10 +1,10 @@
 """Targeted tests for CLI ingest command to raise coverage."""
 
+import sys
 from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-import sys
 
 from renacechess.cli import main
 
@@ -91,7 +91,7 @@ def test_cli_ingest_lichess_with_decompress(tmp_path: Path, capsys, monkeypatch)
 def test_cli_ingest_url_with_decompress(tmp_path: Path, capsys) -> None:
     """Test CLI ingest url with decompress flag."""
     try:
-        import zstandard  # type: ignore[import-not-found]
+        import zstandard  # noqa: F401
     except ImportError:
         pytest.skip("zstandard not available")
 

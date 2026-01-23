@@ -5,7 +5,6 @@ from pathlib import Path
 import pytest
 
 from renacechess.ingest.ingest import ingest_from_lichess, ingest_from_url
-from renacechess.ingest.lichess import build_lichess_url
 
 
 def test_ingest_from_lichess_invalid_month(tmp_path: Path) -> None:
@@ -60,7 +59,7 @@ def test_ingest_from_url_with_provided_source_id(tmp_path: Path) -> None:
 def test_ingest_from_url_decompress_path(tmp_path: Path) -> None:
     """Test decompression path in ingest_from_url."""
     try:
-        import zstandard  # type: ignore[import-not-found]
+        import zstandard  # noqa: F401
     except ImportError:
         pytest.skip("zstandard not available")
 
@@ -95,7 +94,7 @@ def test_ingest_from_url_decompress_path(tmp_path: Path) -> None:
 def test_ingest_from_url_decompress_relative_path_fallback(tmp_path: Path) -> None:
     """Test that relative path calculation handles ValueError."""
     try:
-        import zstandard  # type: ignore[import-not-found]
+        import zstandard  # noqa: F401
     except ImportError:
         pytest.skip("zstandard not available")
 

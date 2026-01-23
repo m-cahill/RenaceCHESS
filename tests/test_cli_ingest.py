@@ -25,8 +25,8 @@ def test_ingest_from_url_local_file(tmp_path: Path) -> None:
     assert len(receipt_files) == 1
 
     # Verify cached artifact exists
-    from renacechess.ingest.receipt import load_receipt
     from renacechess.ingest.cache import CacheManager
+    from renacechess.ingest.receipt import load_receipt
 
     cache = CacheManager(cache_dir)
     receipt = load_receipt(cache, receipt_files[0].stem)
