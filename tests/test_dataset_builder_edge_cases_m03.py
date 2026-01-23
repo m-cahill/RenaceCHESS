@@ -47,13 +47,13 @@ def test_config_shard_size_validation():
         )
 
 
-def test_config_shard_size_warning(tmp_path: Path, caplog):
+def test_config_shard_size_warning(tmp_path: Path):
     """Test that small shard size triggers warning."""
     import warnings
 
     with warnings.catch_warnings(record=True) as w:
         warnings.simplefilter("always")
-        config = DatasetBuildConfig(
+        DatasetBuildConfig(
             pgn_paths=[Path("test.pgn")],
             output_dir=tmp_path,
             shard_size=50,  # < 100
@@ -78,9 +78,6 @@ def test_build_dataset_empty_shard(tmp_path: Path):
 
     manifest_path = tmp_path / "manifest.json"
     assert manifest_path.exists()
-    import json
-
-    manifest = json.loads(manifest_path.read_text())
     # May have zero shards or one empty shard depending on implementation
     # For now, just verify it doesn't crash
 

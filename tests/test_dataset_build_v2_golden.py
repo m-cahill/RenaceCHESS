@@ -75,8 +75,10 @@ def test_dataset_build_v2_determinism(tmp_path: Path):
 
     # Clean and rebuild
     for p in shard_paths1:
-        p.unlink()
-    manifest_path1.unlink()
+        if p.exists():
+            p.unlink()
+    if manifest_path1.exists():
+        manifest_path1.unlink()
 
     # Build second time
     build_dataset(config, generated_at=frozen_time)

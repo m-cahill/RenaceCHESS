@@ -101,11 +101,17 @@ def generate_manifest_v2(
     else:
         created_at = generated_at
 
-    # Build assembly config
+    # Build assembly config (treat 0 as None for max_games/max_positions)
+    max_games_val = config.max_games if config.max_games is not None and config.max_games > 0 else None
+    max_positions_val = (
+        config.max_positions
+        if config.max_positions is not None and config.max_positions > 0
+        else None
+    )
     assembly_config = DatasetManifestAssemblyConfigV2(
         shard_size=config.shard_size,
-        max_games=config.max_games,
-        max_positions=config.max_positions,
+        max_games=max_games_val,
+        max_positions=max_positions_val,
         start_ply=config.start_ply,
         end_ply=config.end_ply,
     )
@@ -161,7 +167,7 @@ def generate_manifest_v2(
 
         input_refs.append(
             DatasetManifestInputV2(
-                type=input_type,  # type: ignore[arg-type]
+                type=input_type,  # type: ignore[assignment]
                 digest=digest or "",
                 receipt_id=receipt_id,
                 path=path,

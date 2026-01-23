@@ -44,7 +44,10 @@ def main() -> None:
 
     build_parser = dataset_subparsers.add_parser(
         "build",
-        help="Build dataset shards from PGN files or ingest receipts (receipts recommended for provenance)",
+        help=(
+            "Build dataset shards from PGN files or ingest receipts "
+            "(receipts recommended for provenance)"
+        ),
     )
     # Mutually exclusive input sources
     input_group = build_parser.add_mutually_exclusive_group(required=True)
@@ -52,13 +55,19 @@ def main() -> None:
         "--pgn",
         type=Path,
         action="append",
-        help="Path to PGN file or directory (can be specified multiple times). For backward compatibility.",
+        help=(
+            "Path to PGN file or directory (can be specified multiple times). "
+            "For backward compatibility."
+        ),
     )
     input_group.add_argument(
         "--receipt",
         type=Path,
         action="append",
-        help="Path to ingest receipt JSON file (can be specified multiple times). Recommended for auditable provenance.",
+        help=(
+            "Path to ingest receipt JSON file (can be specified multiple times). "
+            "Recommended for auditable provenance."
+        ),
     )
     build_parser.add_argument(
         "--out",

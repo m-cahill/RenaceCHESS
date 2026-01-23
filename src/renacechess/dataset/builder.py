@@ -55,6 +55,8 @@ class ShardWriter:
         """
         if self.current_shard_file is None or self.current_shard_records >= self.shard_size:
             self._open_new_shard()
+            # After _open_new_shard(), current_shard_file is guaranteed to be set
+            assert self.current_shard_file is not None
 
         json_bytes = canonical_json_dump(record)
         json_str = json_bytes.decode("utf-8")
@@ -251,6 +253,11 @@ def build_dataset(config: DatasetBuildConfig, generated_at: datetime | None = No
     input_digests: list[str] = []
     input_info: list[tuple[str, str | None, str | None]] = []  # (type, digest, path)
 
+    # Initialize counters and split tracking
+    games_processed = 0
+    positions_processed = 0
+    split_counts: dict[str, list[str]] = {"train": [], "val": [], "frozenEval": []}
+
     if config.pgn_paths is not None:
         # Process PGN files directly
         pgn_files = _collect_pgn_files_from_paths(config.pgn_paths)
@@ -260,10 +267,6 @@ def build_dataset(config: DatasetBuildConfig, generated_at: datetime | None = No
             input_info.append(("pgn_file", digest, str(pgn_path.resolve())))
 
         # Process all PGN files
-        games_processed = 0
-        positions_processed = 0
-        split_counts: dict[str, list[str]] = {"train": [], "val": [], "frozenEval": []}
-
         for pgn_file in pgn_files:
             games_processed, positions_processed = _process_pgn_file(
                 pgn_file,
@@ -284,9 +287,6 @@ def build_dataset(config: DatasetBuildConfig, generated_at: datetime | None = No
             input_info.append(("ingest_receipt", digest, str(receipt_path.resolve())))
 
         # Process all PGN files from receipts
-        games_processed = 0
-        positions_processed = 0
-        split_counts: dict[str, list[str]] = {"train": [], "val": [], "frozenEval": []}
 
         for pgn_path, _, receipt_path in pgn_info_list:
             games_processed, positions_processed = _process_pgn_file(

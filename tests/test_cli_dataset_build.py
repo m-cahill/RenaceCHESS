@@ -42,9 +42,9 @@ def test_cli_dataset_build(tmp_path: Path):
     manifest_path = output_dir / "manifest.json"
     assert manifest_path.exists()
 
-    # Verify manifest is valid JSON
+    # Verify manifest is valid JSON (v2 in M03+)
     manifest = json.loads(manifest_path.read_text())
-    assert manifest["schemaVersion"] == "v1"
+    assert manifest["schemaVersion"] == "v2"
 
 
 def test_cli_dataset_build_with_filters(tmp_path: Path):

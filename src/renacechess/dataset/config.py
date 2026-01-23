@@ -43,7 +43,7 @@ class DatasetBuildConfig:
         Returns:
             Dictionary representation suitable for canonical JSON hashing.
         """
-        result = {
+        result: dict = {
             "shard_size": self.shard_size,
             "max_games": self.max_games,
             "max_positions": self.max_positions,

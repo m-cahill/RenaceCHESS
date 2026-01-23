@@ -213,7 +213,10 @@ class DatasetManifestInputV2(BaseModel):
     type: Literal["ingest_receipt", "pgn_file"] = Field(..., description="Input type")
     digest: str = Field(
         ...,
-        description="SHA-256 hash: for receipts, use receipt.artifact.sha256 (or derived if available); for PGN files, compute from file content",
+        description=(
+            "SHA-256 hash: for receipts, use receipt.artifact.sha256 "
+            "(or derived if available); for PGN files, compute from file content"
+        ),
         pattern="^[a-f0-9]{64}$",
     )
     receipt_id: str | None = Field(
@@ -227,9 +230,14 @@ class DatasetManifestAssemblyConfigV2(BaseModel):
 
     model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
 
-    shard_size: int = Field(..., alias="shardSize", ge=1, description="Maximum number of records per shard")
+    shard_size: int = Field(
+        ..., alias="shardSize", ge=1, description="Maximum number of records per shard"
+    )
     max_games: int | None = Field(
-        None, alias="maxGames", ge=1, description="Maximum number of games to process (null = no limit)"
+        None,
+        alias="maxGames",
+        ge=1,
+        description="Maximum number of games to process (null = no limit)",
     )
     max_positions: int | None = Field(
         None,
@@ -238,10 +246,16 @@ class DatasetManifestAssemblyConfigV2(BaseModel):
         description="Maximum number of positions to process (null = no limit)",
     )
     start_ply: int | None = Field(
-        None, alias="startPly", ge=0, description="Start processing from this ply number (inclusive, null = no lower bound)"
+        None,
+        alias="startPly",
+        ge=0,
+        description="Start processing from this ply number (inclusive, null = no lower bound)",
     )
     end_ply: int | None = Field(
-        None, alias="endPly", ge=0, description="Stop processing at this ply number (exclusive, null = no upper bound)"
+        None,
+        alias="endPly",
+        ge=0,
+        description="Stop processing at this ply number (exclusive, null = no upper bound)",
     )
 
 
@@ -266,7 +280,10 @@ class DatasetManifestV2(BaseModel):
     dataset_digest: str = Field(
         ...,
         alias="datasetDigest",
-        description="SHA-256 hash combining assemblyConfigHash, input digests, and schema versions (stable dataset identity)",
+        description=(
+            "SHA-256 hash combining assemblyConfigHash, input digests, "
+            "and schema versions (stable dataset identity)"
+        ),
         pattern="^[a-f0-9]{64}$",
     )
     inputs: list[DatasetManifestInputV2] = Field(
@@ -277,7 +294,9 @@ class DatasetManifestV2(BaseModel):
         ..., alias="assemblyConfig", description="Assembly configuration parameters"
     )
     split_assignments: DatasetManifestSplitAssignments = Field(
-        ..., alias="splitAssignments", description="Split assignments (record-level, not shard-level)"
+        ...,
+        alias="splitAssignments",
+        description="Split assignments (record-level, not shard-level)",
     )
     filter_config_hash: str | None = Field(
         None,

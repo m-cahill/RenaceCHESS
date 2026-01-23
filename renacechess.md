@@ -10,6 +10,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 |-----------|--------|--------|-----------------|-------------|
 | M00 | ✅ Closed | `m00-bootstrap` → `main` | 2026-01-23 | Repository Bootstrap + Contract Skeleton + Deterministic Demo |
 | M01 | ✅ Closed | `m01-dataset-shards` → `main` | 2026-01-23 | Deterministic Dataset Shard Builder (PGN → JSONL + Manifest) |
+| M02 | ✅ Closed | `m02-lichess-ingestion` → `main` | 2026-01-23 | Deterministic Lichess Ingestion |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -28,6 +29,17 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 - **PR:** #3 (ready for merge)
 - **Audit:** `docs/milestones/PoC/M01/M01_audit.md`
 - **Summary:** `docs/milestones/PoC/M01/M01_summary.md`
+
+**M02 Details:**
+- **CI Run 1:** 21283043075 (FAILURE - Type checking, golden test, coverage 83.37% < 90%)
+- **CI Run 2:** 21283688678 (FAILURE - Lint hygiene, MyPy, golden test)
+- **CI Run 3:** 21284581552 (SUCCESS - All gates passing)
+- **Final Coverage:** 93.94% lines (exceeds 90% threshold)
+- **Test Count:** 144 tests (up from 95)
+- **PR:** #4 (ready for merge)
+- **Final Commit:** `5d8b3e2`
+- **Audit:** `docs/milestones/PoC/M02/M02_audit.md`
+- **Summary:** `docs/milestones/PoC/M02/M02_summary.md`
 
 ---
 
@@ -80,6 +92,11 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 - **Pydantic Model:** `renacechess.contracts.models.DatasetManifest`
 - **Status:** ✅ Complete and validated (stubbed but real)
 
+### Ingest Receipt Schema (v1)
+- **Location:** `src/renacechess/contracts/schemas/v1/ingest_receipt.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.IngestReceiptV1`
+- **Status:** ✅ Complete and validated
+
 ---
 
 ## Key Guarantees Established in M00
@@ -95,6 +112,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-01-23 (M01 closeout)
+**Last Updated:** 2026-01-23 (M02 closeout)
 
 
