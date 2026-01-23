@@ -188,3 +188,102 @@ class DatasetManifest(BaseModel):
     split_assignments: DatasetManifestSplitAssignments = Field(
         ..., alias="splitAssignments", description="Split assignments"
     )
+
+
+class SourceArtifactRefV1(BaseModel):
+    """Source artifact reference (v1)."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    uri: str = Field(..., description="Original source URI (URL or file:// path)")
+    resolved_uri: str | None = Field(
+        None, alias="resolvedUri", description="Resolved/final URI after redirects (optional)"
+    )
+    etag: str | None = Field(None, description="HTTP ETag if available (optional)")
+    last_modified: datetime | None = Field(
+        None, alias="lastModified", description="Last modified timestamp from source (optional)"
+    )
+    content_length: int | None = Field(
+        None, alias="contentLength", description="Content length in bytes from source (optional)"
+    )
+
+
+class ArtifactRefV1(BaseModel):
+    """Cached artifact reference (v1)."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    cache_path: str = Field(
+        ...,
+        alias="cachePath",
+        description="Path to cached artifact (relative to cache root or absolute)",
+    )
+    sha256: str = Field(
+        ...,
+        description="SHA-256 hash of artifact (lowercase hex)",
+        pattern="^[a-f0-9]{64}$",
+    )
+    size_bytes: int = Field(..., alias="sizeBytes", ge=0, description="Size of artifact in bytes")
+    media_type: str = Field(
+        ...,
+        alias="mediaType",
+        description="MIME type of artifact (e.g., 'application/x-chess-pgn', 'application/zstd')",
+    )
+    compression: Literal["zstd"] | None = Field(
+        None, description="Compression format if applicable (optional)"
+    )
+
+
+class DerivedArtifactRefV1(BaseModel):
+    """Derived artifact reference (v1) - e.g., decompressed files."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    decompressed_path: str = Field(
+        ..., alias="decompressedPath", description="Path to decompressed artifact"
+    )
+    decompressed_sha256: str = Field(
+        ...,
+        alias="decompressedSha256",
+        description="SHA-256 hash of decompressed artifact (lowercase hex)",
+        pattern="^[a-f0-9]{64}$",
+    )
+    decompressed_size_bytes: int = Field(
+        ...,
+        alias="decompressedSizeBytes",
+        ge=0,
+        description="Size of decompressed artifact in bytes",
+    )
+
+
+class ProvenanceV1(BaseModel):
+    """Provenance information (v1)."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    tool_version: str = Field(
+        ..., alias="toolVersion", description="Version of renacechess tool used"
+    )
+    platform: str | None = Field(
+        None, description="Platform identifier (e.g., 'linux-x86_64') - optional"
+    )
+    python_version: str | None = Field(
+        None, alias="pythonVersion", description="Python version (e.g., '3.11.0') - optional"
+    )
+
+
+class IngestReceiptV1(BaseModel):
+    """Ingest receipt (v1) - documents downloaded/cached artifacts."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    schema_version: Literal["v1"] = Field("v1", alias="schemaVersion", description="Schema version")
+    created_at: datetime = Field(
+        ..., alias="createdAt", description="ISO 8601 timestamp of receipt creation"
+    )
+    source: SourceArtifactRefV1 = Field(..., description="Source artifact reference")
+    artifact: ArtifactRefV1 = Field(..., description="Cached artifact reference")
+    derived: DerivedArtifactRefV1 | None = Field(
+        None, description="Derived artifacts (e.g., decompressed files) - optional"
+    )
+    provenance: ProvenanceV1 = Field(..., description="Provenance information")

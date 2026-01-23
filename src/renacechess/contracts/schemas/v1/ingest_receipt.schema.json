@@ -1,0 +1,120 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Ingest Receipt",
+  "description": "Schema for ingest receipt (v1) - documents downloaded/cached artifacts",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "createdAt",
+    "source",
+    "artifact",
+    "provenance"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "v1",
+      "description": "Schema version"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of receipt creation"
+    },
+    "source": {
+      "type": "object",
+      "required": ["uri"],
+      "properties": {
+        "uri": {
+          "type": "string",
+          "description": "Original source URI (URL or file:// path)"
+        },
+        "resolvedUri": {
+          "type": ["string", "null"],
+          "description": "Resolved/final URI after redirects (optional)"
+        },
+        "etag": {
+          "type": ["string", "null"],
+          "description": "HTTP ETag if available (optional)"
+        },
+        "lastModified": {
+          "type": ["string", "null"],
+          "format": "date-time",
+          "description": "Last modified timestamp from source (optional)"
+        },
+        "contentLength": {
+          "type": ["integer", "null"],
+          "description": "Content length in bytes from source (optional)"
+        }
+      }
+    },
+    "artifact": {
+      "type": "object",
+      "required": ["cachePath", "sha256", "sizeBytes", "mediaType"],
+      "properties": {
+        "cachePath": {
+          "type": "string",
+          "description": "Path to cached artifact (relative to cache root or absolute)"
+        },
+        "sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "SHA-256 hash of artifact (lowercase hex)"
+        },
+        "sizeBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Size of artifact in bytes"
+        },
+        "mediaType": {
+          "type": "string",
+          "description": "MIME type of artifact (e.g., 'application/x-chess-pgn', 'application/zstd')"
+        },
+        "compression": {
+          "type": ["string", "null"],
+          "enum": ["zstd", null],
+          "description": "Compression format if applicable (optional)"
+        }
+      }
+    },
+    "derived": {
+      "type": ["object", "null"],
+      "description": "Derived artifacts (e.g., decompressed files) - optional",
+      "properties": {
+        "decompressedPath": {
+          "type": "string",
+          "description": "Path to decompressed artifact"
+        },
+        "decompressedSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "SHA-256 hash of decompressed artifact (lowercase hex)"
+        },
+        "decompressedSizeBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Size of decompressed artifact in bytes"
+        }
+      }
+    },
+    "provenance": {
+      "type": "object",
+      "required": ["toolVersion"],
+      "properties": {
+        "toolVersion": {
+          "type": "string",
+          "description": "Version of renacechess tool used"
+        },
+        "platform": {
+          "type": ["string", "null"],
+          "description": "Platform identifier (e.g., 'linux-x86_64') - optional"
+        },
+        "pythonVersion": {
+          "type": ["string", "null"],
+          "description": "Python version (e.g., '3.11.0') - optional"
+        }
+      }
+    }
+  }
+}
+

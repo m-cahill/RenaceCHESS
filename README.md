@@ -42,6 +42,23 @@ python -m renacechess.cli dataset build \
 
 See [Dataset Documentation](docs/DATASETS.md) for detailed format and usage.
 
+### Ingest Lichess Database Exports
+
+```bash
+# Ingest a monthly dump (with decompression)
+renacechess ingest lichess \
+  --month 2024-01 \
+  --out ./ingested/ \
+  --decompress
+
+# Ingest from local file
+renacechess ingest url \
+  --url /path/to/file.pgn \
+  --out ./ingested/
+```
+
+See [Ingestion Documentation](docs/INGESTION.md) for detailed usage and cache management.
+
 ### Development
 
 ```bash
@@ -66,10 +83,11 @@ renacechess/
 │   ├── contracts/          # Versioned schemas and Pydantic models
 │   ├── dataset/            # Dataset builder (PGN → JSONL + manifest)
 │   ├── demo/               # Deterministic demo payload generator
+│   ├── ingest/             # Lichess ingestion pipeline (download, cache, decompress)
 │   ├── cli.py              # CLI entry point
-│   └── determinism.py     # Canonical JSON and hashing helpers
+│   └── determinism.py      # Canonical JSON and hashing helpers
 ├── tests/
-│   ├── data/               # Test data (sample PGN)
+│   ├── data/               # Test data (sample PGN, fixtures)
 │   ├── golden/             # Golden file regression tests
 │   └── test_*.py           # Test suite
 └── docs/                   # Documentation
@@ -81,6 +99,7 @@ renacechess/
 - [Governance](docs/GOVERNANCE.md) - Milestone conventions and workflow
 - [Assumed Guarantees](docs/ASSUMED_GUARANTEES.md) - What we inherit from RediAI v3
 - [Dataset Format](docs/DATASETS.md) - Dataset structure, build process, and deterministic rules
+- [Ingestion](docs/INGESTION.md) - Lichess database export ingestion and cache management
 
 ## License
 
