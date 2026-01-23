@@ -5,9 +5,9 @@ from pathlib import Path
 from typing import Any
 
 try:
-    import zstandard as zstd  # type: ignore[import-untyped]
+    import zstandard as zstd  # type: ignore
 except ImportError:
-    zstd = None  # type: ignore[assignment]
+    zstd = None  # type: ignore
 
 from renacechess.ingest.cache import CacheManager
 
