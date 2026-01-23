@@ -1,0 +1,158 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Dataset Manifest v2",
+  "description": "Schema for dataset manifest (v2) - includes assembly config and input provenance",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "createdAt",
+    "shardRefs",
+    "assemblyConfigHash",
+    "datasetDigest",
+    "splitAssignments"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "v2",
+      "description": "Schema version"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of creation"
+    },
+    "shardRefs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["shardId", "hash", "path", "records"],
+        "properties": {
+          "shardId": {
+            "type": "string",
+            "description": "Unique shard identifier (e.g., 'shard_000')"
+          },
+          "hash": {
+            "type": "string",
+            "description": "SHA-256 hash of shard file (lowercase hex)",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "path": {
+            "type": "string",
+            "description": "Relative or absolute path to shard file"
+          },
+          "records": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Number of records in this shard"
+          }
+        }
+      },
+      "description": "List of shard references"
+    },
+    "assemblyConfigHash": {
+      "type": "string",
+      "description": "SHA-256 hash of canonical JSON for assembly parameters (shard size, filters, etc.)",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "datasetDigest": {
+      "type": "string",
+      "description": "SHA-256 hash of canonical JSON combining assemblyConfigHash, input digests, and schema versions (stable dataset identity)",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "inputs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "digest"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["ingest_receipt", "pgn_file"],
+            "description": "Input type"
+          },
+          "digest": {
+            "type": "string",
+            "description": "SHA-256 hash: for receipts, use receipt.artifact.sha256 (or derived if available); for PGN files, compute from file content",
+            "pattern": "^[a-f0-9]{64}$"
+          },
+          "receiptId": {
+            "type": "string",
+            "description": "Receipt identifier (only for type='ingest_receipt')"
+          },
+          "path": {
+            "type": "string",
+            "description": "Path to input (receipt path or PGN file path)"
+          }
+        }
+      },
+      "description": "List of input sources (receipts or PGN files) used to build this dataset"
+    },
+    "assemblyConfig": {
+      "type": "object",
+      "required": ["shardSize"],
+      "properties": {
+        "shardSize": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Maximum number of records per shard"
+        },
+        "maxGames": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "Maximum number of games to process (null = no limit)"
+        },
+        "maxPositions": {
+          "type": ["integer", "null"],
+          "minimum": 1,
+          "description": "Maximum number of positions to process (null = no limit)"
+        },
+        "startPly": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Start processing from this ply number (inclusive, null = no lower bound)"
+        },
+        "endPly": {
+          "type": ["integer", "null"],
+          "minimum": 0,
+          "description": "Stop processing at this ply number (exclusive, null = no upper bound)"
+        }
+      },
+      "description": "Assembly configuration parameters"
+    },
+    "splitAssignments": {
+      "type": "object",
+      "required": ["train", "val", "frozenEval"],
+      "properties": {
+        "train": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of shard IDs assigned to training split"
+        },
+        "val": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of shard IDs assigned to validation split"
+        },
+        "frozenEval": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of shard IDs assigned to frozen evaluation split"
+        }
+      },
+      "description": "Split assignments (record-level, not shard-level)"
+    },
+    "filterConfigHash": {
+      "type": "string",
+      "description": "Legacy filter config hash (kept for v1 compatibility, deprecated in v2)",
+      "pattern": "^[a-f0-9]{64}$"
+    }
+  }
+}
+

@@ -42,19 +42,40 @@ def main() -> None:
     dataset_parser = subparsers.add_parser("dataset", help="Build dataset from PGN files")
     dataset_subparsers = dataset_parser.add_subparsers(dest="dataset_command")
 
-    build_parser = dataset_subparsers.add_parser("build", help="Build dataset shards")
-    build_parser.add_argument(
+    build_parser = dataset_subparsers.add_parser(
+        "build",
+        help="Build dataset shards from PGN files or ingest receipts (receipts recommended for provenance)",
+    )
+    # Mutually exclusive input sources
+    input_group = build_parser.add_mutually_exclusive_group(required=True)
+    input_group.add_argument(
         "--pgn",
         type=Path,
-        required=True,
         action="append",
-        help="Path to PGN file or directory (can be specified multiple times)",
+        help="Path to PGN file or directory (can be specified multiple times). For backward compatibility.",
+    )
+    input_group.add_argument(
+        "--receipt",
+        type=Path,
+        action="append",
+        help="Path to ingest receipt JSON file (can be specified multiple times). Recommended for auditable provenance.",
     )
     build_parser.add_argument(
         "--out",
         type=Path,
         required=True,
         help="Output directory for shards and manifest",
+    )
+    build_parser.add_argument(
+        "--shard-size",
+        type=int,
+        default=10000,
+        help="Maximum number of records per shard (default: 10000)",
+    )
+    build_parser.add_argument(
+        "--cache-dir",
+        type=Path,
+        help="Cache directory for resolving relative receipt paths (optional)",
     )
     build_parser.add_argument(
         "--max-games",
@@ -152,9 +173,20 @@ def main() -> None:
     elif args.command == "dataset":
         if args.dataset_command == "build":
             try:
+                # Validate mutually exclusive inputs
+                if args.pgn and args.receipt:
+                    print(
+                        "Error: Cannot specify both --pgn and --receipt (mutually exclusive)",
+                        file=sys.stderr,
+                    )
+                    sys.exit(1)
+
                 config = DatasetBuildConfig(
-                    pgn_paths=args.pgn,
                     output_dir=args.out,
+                    shard_size=args.shard_size,
+                    pgn_paths=args.pgn,
+                    receipt_paths=args.receipt,
+                    cache_dir=args.cache_dir,
                     max_games=args.max_games,
                     max_positions=args.max_positions,
                     start_ply=args.start_ply,

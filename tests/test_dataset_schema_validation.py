@@ -9,8 +9,9 @@ from renacechess.dataset.builder import build_dataset
 from renacechess.dataset.config import DatasetBuildConfig
 
 
-def load_schema(schema_name: str) -> dict:
+def load_schema(schema_name: str, version: str = "") -> dict:
     """Load JSON schema from schemas directory."""
+    schema_file = f"{schema_name}{version}.schema.json"
     schema_path = (
         Path(__file__).parent.parent
         / "src"
@@ -18,7 +19,7 @@ def load_schema(schema_name: str) -> dict:
         / "contracts"
         / "schemas"
         / "v1"
-        / f"{schema_name}.schema.json"
+        / schema_file
     )
     return json.loads(schema_path.read_text())
 
@@ -37,15 +38,25 @@ def test_context_bridge_schema_validation():
     jsonschema.validate(instance=payload, schema=schema)
 
 
-def test_dataset_manifest_schema_validation(tmp_path: Path):
-    """Test that generated manifests validate against Dataset Manifest schema."""
+def test_dataset_manifest_v1_schema_validation(tmp_path: Path):
+    """Test that v1 manifests validate against Dataset Manifest v1 schema."""
     schema = load_schema("dataset_manifest")
+
+    # Build a test dataset (will create v2, but we can test v1 schema separately)
+    # For now, this test verifies v1 schema still exists and is valid
+    assert schema["properties"]["schemaVersion"]["const"] == "v1"
+
+
+def test_dataset_manifest_v2_schema_validation(tmp_path: Path):
+    """Test that generated v2 manifests validate against Dataset Manifest v2 schema."""
+    schema = load_schema("dataset_manifest", ".v2")
 
     # Build a test dataset
     pgn_path = Path(__file__).parent / "data" / "sample.pgn"
     config = DatasetBuildConfig(
         pgn_paths=[pgn_path],
         output_dir=tmp_path,
+        shard_size=10,
         max_positions=10,
     )
     build_dataset(config)
@@ -53,6 +64,7 @@ def test_dataset_manifest_schema_validation(tmp_path: Path):
     # Load and validate manifest
     manifest_path = tmp_path / "manifest.json"
     manifest = json.loads(manifest_path.read_text())
+    assert manifest["schemaVersion"] == "v2"
     jsonschema.validate(instance=manifest, schema=schema)
 
 
