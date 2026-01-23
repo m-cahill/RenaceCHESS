@@ -2,11 +2,12 @@
 
 import hashlib
 from pathlib import Path
+from typing import Any
 
 try:
-    import zstandard as zstd  # type: ignore[import-not-found]
+    import zstandard as zstd  # type: ignore[import-untyped]
 except ImportError:
-    zstd = None
+    zstd = None  # type: ignore[assignment]
 
 from renacechess.ingest.cache import CacheManager
 

@@ -78,15 +78,17 @@ def test_ingest_receipt_golden(tmp_path: Path) -> None:
         golden_dict = json.loads(golden_content)
         receipt_dict_parsed = json.loads(canonical_json)
 
-            # Compare key fields (excluding timestamps and paths which may vary by platform)
-            assert receipt_dict_parsed["schemaVersion"] == golden_dict["schemaVersion"]
-            # URI may differ by platform (Windows vs Unix paths), so compare only filename
-            receipt_uri = receipt_dict_parsed["source"]["uri"]
-            golden_uri = golden_dict["source"]["uri"]
-            # Extract filename from both paths (handle both Windows and Unix)
-            receipt_filename = Path(receipt_uri).name
-            golden_filename = Path(golden_uri).name
-            assert receipt_filename == golden_filename, f"Filename mismatch: {receipt_filename} != {golden_filename}"
+        # Compare key fields (excluding timestamps and paths which may vary by platform)
+        assert receipt_dict_parsed["schemaVersion"] == golden_dict["schemaVersion"]
+        # URI may differ by platform (Windows vs Unix paths), so compare only filename
+        receipt_uri = receipt_dict_parsed["source"]["uri"]
+        golden_uri = golden_dict["source"]["uri"]
+        # Extract filename from both paths (handle both Windows and Unix)
+        receipt_filename = Path(receipt_uri).name
+        golden_filename = Path(golden_uri).name
+        assert receipt_filename == golden_filename, (
+            f"Filename mismatch: {receipt_filename} != {golden_filename}"
+        )
         assert receipt_dict_parsed["artifact"]["sha256"] == golden_dict["artifact"]["sha256"]
         assert receipt_dict_parsed["artifact"]["sizeBytes"] == golden_dict["artifact"]["sizeBytes"]
     else:
