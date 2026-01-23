@@ -54,10 +54,17 @@
 - **Status:** ✅ Complete - Analysis document created, merge blocked due to lint/type errors
 
 ### Entry 008
-- **Timestamp:** 2026-01-23T[fixes_start]
-- **Tool:** search_replace, write
+- **Timestamp:** 2026-01-23T[fixes_complete]
+- **Tool:** search_replace, write, run_terminal_cmd
 - **Purpose:** Apply CI fixes per user directive: Field aliases for N815, line breaks for E501, rename l to loss, fix MyPy errors
-- **Files:** src/renacechess/contracts/models.py, src/renacechess/demo/pgn_overlay.py, tests/, docs/milestones/PoC/M00/M00_audit.md
-- **Status:** In progress
+- **Files:** src/renacechess/contracts/models.py, src/renacechess/demo/pgn_overlay.py, tests/, pyproject.toml, docs/milestones/PoC/M00/M00_audit.md
+- **Status:** ✅ Complete - All fixes applied, committed (1c29812), pushed to m00-bootstrap
+
+### Entry 009
+- **Timestamp:** 2026-01-23T[ci_monitoring]
+- **Tool:** run_terminal_cmd, write
+- **Purpose:** Monitor CI Run 2 after fixes and generate run analysis document
+- **Files:** docs/milestones/PoC/M00/M00_run2.md
+- **Status:** ✅ Complete - CI Run 2 passed, analysis document created
 
 
