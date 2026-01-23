@@ -38,9 +38,7 @@ def main() -> None:
     )
 
     # Dataset build command
-    dataset_parser = subparsers.add_parser(
-        "dataset", help="Build dataset from PGN files"
-    )
+    dataset_parser = subparsers.add_parser("dataset", help="Build dataset from PGN files")
     dataset_subparsers = dataset_parser.add_subparsers(dest="dataset_command")
 
     build_parser = dataset_subparsers.add_parser("build", help="Build dataset shards")

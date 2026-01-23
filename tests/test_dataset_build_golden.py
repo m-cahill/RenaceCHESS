@@ -87,4 +87,3 @@ def test_dataset_build_determinism(tmp_path: Path):
     # Should be byte-identical
     assert shard_content1 == shard_content2
     assert manifest_content1 == manifest_content2
-

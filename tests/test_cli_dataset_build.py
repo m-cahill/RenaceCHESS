@@ -87,3 +87,83 @@ def test_cli_dataset_build_with_filters(tmp_path: Path):
         assert len(lines) > 0
         assert len(lines) <= 5  # max-positions limit
 
+
+def test_cli_dataset_build_error_handling(tmp_path: Path):
+    """Test CLI error handling for dataset build command."""
+    # Test with non-existent PGN file
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "renacechess.cli",
+            "dataset",
+            "build",
+            "--pgn",
+            str(tmp_path / "nonexistent.pgn"),
+            "--out",
+            str(tmp_path / "output"),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "Error:" in result.stderr
+
+
+def test_cli_dataset_build_empty_directory(tmp_path: Path):
+    """Test CLI with empty directory."""
+    empty_dir = tmp_path / "empty"
+    empty_dir.mkdir()
+    output_dir = tmp_path / "output"
+
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "renacechess.cli",
+            "dataset",
+            "build",
+            "--pgn",
+            str(empty_dir),
+            "--out",
+            str(output_dir),
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+    assert "Error:" in result.stderr
+
+
+def test_cli_dataset_build_invalid_command(tmp_path: Path):
+    """Test CLI with invalid dataset command."""
+    result = subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "renacechess.cli",
+            "dataset",
+            "invalid",
+        ],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode != 0
+
+
+def test_cli_no_command():
+    """Test CLI with no command specified."""
+    result = subprocess.run(
+        [sys.executable, "-m", "renacechess.cli"],
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+
+    assert result.returncode != 0

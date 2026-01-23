@@ -67,3 +67,15 @@
 - **Files:** `src/renacechess/dataset/builder.py`, `tests/test_cli_dataset_build.py`
 - **Status:** ✅ Complete
 
+### 2026-01-23 - PR Creation and CI Monitoring
+- **Tool:** `run_terminal_cmd` - Create PR and monitor CI
+- **Purpose:** Create PR #3 and monitor workflow run 21279550886
+- **Files:** N/A
+- **Status:** ✅ Complete (CI Run 1 failed - formatting and coverage issues)
+
+### 2026-01-23 - CI Run 1 Analysis
+- **Tool:** `write` - Create CI run analysis document
+- **Purpose:** Document CI Run 1 failures (formatting, coverage)
+- **Files:** `docs/milestones/PoC/M01/M01_run1.md`
+- **Status:** ✅ Complete
+

@@ -89,4 +89,3 @@ def test_json_serialization_uses_aliases():
     assert "legal_moves" in json_dict_no_alias
     assert "sideToMove" not in json_dict_no_alias
     assert "legalMoves" not in json_dict_no_alias
-

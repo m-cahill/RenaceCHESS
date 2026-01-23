@@ -28,4 +28,3 @@ class DatasetBuildConfig:
             "end_ply": self.end_ply,
             "pgn_paths": sorted(str(p.resolve()) for p in self.pgn_paths),
         }
-

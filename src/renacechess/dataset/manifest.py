@@ -72,4 +72,3 @@ def generate_manifest(
     manifest_dict = manifest.model_dump(mode="json", by_alias=True)
     manifest_json = canonical_json_dump(manifest_dict).decode("utf-8")
     manifest_path.write_text(manifest_json, encoding="utf-8")
-

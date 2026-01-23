@@ -76,4 +76,3 @@ def test_jsonl_schema_validation(tmp_path: Path):
             if line.strip():
                 record = json.loads(line)
                 jsonschema.validate(instance=record, schema=schema)
-
