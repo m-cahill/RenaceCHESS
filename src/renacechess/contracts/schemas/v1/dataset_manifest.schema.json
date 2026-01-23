@@ -1,0 +1,80 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Dataset Manifest",
+  "description": "Schema for dataset manifest (v1)",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "createdAt",
+    "shardRefs",
+    "filterConfigHash",
+    "splitAssignments"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "v1",
+      "description": "Schema version"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of creation"
+    },
+    "shardRefs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["shardId", "hash", "path"],
+        "properties": {
+          "shardId": {
+            "type": "string",
+            "description": "Unique shard identifier"
+          },
+          "hash": {
+            "type": "string",
+            "description": "SHA-256 hash of shard file"
+          },
+          "path": {
+            "type": "string",
+            "description": "Relative or absolute path to shard file"
+          }
+        }
+      },
+      "description": "List of shard references (can be empty in M00)"
+    },
+    "filterConfigHash": {
+      "type": "string",
+      "description": "Hash of filter configuration used to generate dataset"
+    },
+    "splitAssignments": {
+      "type": "object",
+      "required": ["train", "val", "frozenEval"],
+      "properties": {
+        "train": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of shard IDs assigned to training split"
+        },
+        "val": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of shard IDs assigned to validation split"
+        },
+        "frozenEval": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of shard IDs assigned to frozen evaluation split"
+        }
+      },
+      "description": "Split assignments (can be empty in M00)"
+    }
+  }
+}
+
