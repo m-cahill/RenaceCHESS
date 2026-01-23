@@ -4,9 +4,9 @@ import hashlib
 from pathlib import Path
 
 try:
-    import zstandard as zstd  # type: ignore[import-untyped]
+    import zstandard as zstd  # type: ignore[import-not-found]
 except ImportError:
-    zstd = None  # type: ignore[assignment,unused-ignore]
+    zstd = None
 
 from renacechess.ingest.cache import CacheManager
 
