@@ -15,23 +15,7 @@ def test_ingest_from_url_empty_filename_gets_fallback(tmp_path: Path) -> None:
     source_file = tmp_path / "test.pgn"
     source_file.write_bytes(b"test content")
 
-    # Mock urlparse to return empty filename
-    from urllib.parse import urlparse
-
-    original_parse = urlparse
-
-    def mock_parse(url):
-        parsed = original_parse(url)
-        # Create a mock with empty path name
-        mock_parsed = Mock()
-        mock_parsed.scheme = parsed.scheme
-        mock_parsed.path = "/"  # Path with no filename
-        return mock_parsed
-
-    # Actually, it's easier to test with a real URL that has no filename
-    # But file:// URLs always have a path. Let's test the actual code path
-    # by using a URL that would naturally have empty filename
-    # For file://, we can't easily get empty filename, so let's test the .zst detection
+    # Test that .zst files get correct media type
     source_zst = tmp_path / "test.pgn.zst"
     source_zst.write_bytes(b"compressed")
 
