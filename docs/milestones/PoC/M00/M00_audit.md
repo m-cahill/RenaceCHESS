@@ -1,8 +1,8 @@
 # M00 Audit — Repository Bootstrap
 
 **Milestone:** M00  
-**Audit Date:** 2026-01-22  
-**Status:** ✅ **PASS**
+**Audit Date:** 2026-01-23  
+**Status:** ✅ **CLOSED, IMMUTABLE, AUDIT-DEFENSIBLE**
 
 ---
 
@@ -181,5 +181,15 @@ All deliverables met:
 - ✅ All CI gates passing (lint, typecheck, test)
 - ✅ M00_plan/M00_summary/M00_audit/M00_run1 committed
 
-**Ready for:** CI Run 2 verification and final merge decision
+**CI Run 2 Evidence:**
+- **Run ID:** 21271784917
+- **Commit:** `1c29812b5942adcd8a36374130b30a31c538158e`
+- **Status:** ✅ **SUCCESS** — All CI gates passing
+- **Results:**
+  - Ruff: 0 errors (all 28 Run 1 errors resolved)
+  - MyPy: 0 errors (all 7 Run 1 errors resolved)
+  - Pytest: 27/27 passing, 93.36% coverage
+- **URL:** https://github.com/m-cahill/RenaceCHESS/actions/runs/21271784917
+
+**Final Status:** ✅ **CLOSED** — Merged to `main`, milestone complete and immutable
 
