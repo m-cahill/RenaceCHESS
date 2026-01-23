@@ -2,12 +2,15 @@
 
 import hashlib
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING
 
-try:
-    import zstandard as zstd  # type: ignore
-except ImportError:
-    zstd = None
+if TYPE_CHECKING:
+    import zstandard as zstd  # type: ignore[import-not-found]
+else:
+    try:
+        import zstandard as zstd  # type: ignore[import-not-found]
+    except ImportError:
+        zstd = None
 
 from renacechess.ingest.cache import CacheManager
 

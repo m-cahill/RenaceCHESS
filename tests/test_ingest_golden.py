@@ -81,11 +81,14 @@ def test_ingest_receipt_golden(tmp_path: Path) -> None:
         # Compare key fields (excluding timestamps and paths which may vary by platform)
         assert receipt_dict_parsed["schemaVersion"] == golden_dict["schemaVersion"]
         # URI may differ by platform (Windows vs Unix paths), so compare only filename
+        # Use PurePath for platform-agnostic path handling
+        from pathlib import PurePath
+
         receipt_uri = receipt_dict_parsed["source"]["uri"]
         golden_uri = golden_dict["source"]["uri"]
         # Extract filename from both paths (handle both Windows and Unix)
-        receipt_filename = Path(receipt_uri).name
-        golden_filename = Path(golden_uri).name
+        receipt_filename = PurePath(receipt_uri).name
+        golden_filename = PurePath(golden_uri).name
         assert receipt_filename == golden_filename, (
             f"Filename mismatch: {receipt_filename} != {golden_filename}"
         )
