@@ -86,8 +86,6 @@ def get_pgn_path_from_receipt(
     return resolved_path, digest
 
 
-
-
 def compute_pgn_digest(pgn_path: Path) -> str:
     """Compute SHA-256 digest of PGN file (normalized line endings).
 
@@ -102,4 +100,3 @@ def compute_pgn_digest(pgn_path: Path) -> str:
     # Normalize line endings: \r\n -> \n, standalone \r -> \n
     normalized = content.replace(b"\r\n", b"\n").replace(b"\r", b"\n")
     return stable_hash(normalized)
-

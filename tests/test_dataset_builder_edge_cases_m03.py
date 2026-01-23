@@ -107,4 +107,3 @@ def test_build_dataset_single_record_shard(tmp_path: Path):
     # Each shard should have at most 1 record
     for shard_ref in manifest["shardRefs"]:
         assert shard_ref["records"] <= 1
-

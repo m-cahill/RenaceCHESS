@@ -149,9 +149,7 @@ def generate_manifest_v2(
         shard_id for shard_id in shard_ids if "val" in shard_splits.get(shard_id, set())
     )
     frozen_eval_shards = sorted(
-        shard_id
-        for shard_id in shard_ids
-        if "frozenEval" in shard_splits.get(shard_id, set())
+        shard_id for shard_id in shard_ids if "frozenEval" in shard_splits.get(shard_id, set())
     )
 
     split_assignments = DatasetManifestSplitAssignments(

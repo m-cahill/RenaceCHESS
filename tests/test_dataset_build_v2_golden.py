@@ -160,4 +160,3 @@ def test_dataset_build_v2_dataset_digest(tmp_path: Path):
     assert len(manifest["inputs"]) == 1
     assert manifest["inputs"][0]["digest"] is not None
     assert len(manifest["inputs"][0]["digest"]) == 64
-

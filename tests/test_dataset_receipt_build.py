@@ -224,4 +224,3 @@ def test_compute_pgn_digest_line_ending_normalization(tmp_path: Path):
     digest_mixed = compute_pgn_digest(pgn_mixed)
 
     assert digest_win == digest_unix == digest_mixed
-
