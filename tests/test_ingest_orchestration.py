@@ -178,4 +178,3 @@ def test_ingest_from_url_absolute_path_fallback(tmp_path: Path) -> None:
     receipt2 = load_receipt(cache, source_id)
     assert receipt2.derived is not None
     assert receipt2.derived.decompressed_sha256 is not None
-

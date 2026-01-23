@@ -37,7 +37,6 @@ def test_decompress_zst_missing_zstandard(tmp_path: Path, monkeypatch) -> None:
     import sys
 
     if "renacechess.ingest.decompress" in sys.modules:
-
         import renacechess.ingest.decompress as decompress_module
 
         # Temporarily set zstd to None
@@ -50,4 +49,3 @@ def test_decompress_zst_missing_zstandard(tmp_path: Path, monkeypatch) -> None:
         finally:
             # Restore original
             decompress_module.zstd = original_zstd
-

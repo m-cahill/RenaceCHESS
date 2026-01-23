@@ -119,4 +119,3 @@ def test_http_fetcher_redirect(tmp_path: Path) -> None:
         assert result.path is not None
         # The resolved_uri is stored in the receipt, not in FetchResult
         # FetchResult only has path, sha256, size_bytes, and metadata
-

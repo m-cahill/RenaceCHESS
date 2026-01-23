@@ -21,9 +21,7 @@ def test_cli_ingest_missing_subcommand(capsys) -> None:
 
 def test_cli_ingest_lichess_missing_month(tmp_path: Path, capsys) -> None:
     """Test that lichess command with missing --month shows error."""
-    with patch.object(
-        sys, "argv", ["renacechess", "ingest", "lichess", "--out", str(tmp_path)]
-    ):
+    with patch.object(sys, "argv", ["renacechess", "ingest", "lichess", "--out", str(tmp_path)]):
         with pytest.raises(SystemExit):
             main()
         # argparse will show error about missing required argument
@@ -31,9 +29,7 @@ def test_cli_ingest_lichess_missing_month(tmp_path: Path, capsys) -> None:
 
 def test_cli_ingest_lichess_missing_out(tmp_path: Path, capsys) -> None:
     """Test that lichess command with missing --out shows error."""
-    with patch.object(
-        sys, "argv", ["renacechess", "ingest", "lichess", "--month", "2024-01"]
-    ):
+    with patch.object(sys, "argv", ["renacechess", "ingest", "lichess", "--month", "2024-01"]):
         with pytest.raises(SystemExit):
             main()
         # argparse will show error about missing required argument
@@ -41,9 +37,7 @@ def test_cli_ingest_lichess_missing_out(tmp_path: Path, capsys) -> None:
 
 def test_cli_ingest_url_missing_url(tmp_path: Path, capsys) -> None:
     """Test that url command with missing --url shows error."""
-    with patch.object(
-        sys, "argv", ["renacechess", "ingest", "url", "--out", str(tmp_path)]
-    ):
+    with patch.object(sys, "argv", ["renacechess", "ingest", "url", "--out", str(tmp_path)]):
         with pytest.raises(SystemExit):
             main()
         # argparse will show error about missing required argument
@@ -51,9 +45,7 @@ def test_cli_ingest_url_missing_url(tmp_path: Path, capsys) -> None:
 
 def test_cli_ingest_url_missing_out(tmp_path: Path, capsys) -> None:
     """Test that url command with missing --out shows error."""
-    with patch.object(
-        sys, "argv", ["renacechess", "ingest", "url", "--url", "file:///test.pgn"]
-    ):
+    with patch.object(sys, "argv", ["renacechess", "ingest", "url", "--url", "file:///test.pgn"]):
         with pytest.raises(SystemExit):
             main()
         # argparse will show error about missing required argument
@@ -171,4 +163,3 @@ def test_cli_no_command(capsys) -> None:
         assert exc_info.value.code == 1
         captured = capsys.readouterr()
         assert "renacechess" in captured.out.lower() or "renacechess" in captured.err.lower()
-

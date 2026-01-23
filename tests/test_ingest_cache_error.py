@@ -22,4 +22,3 @@ def test_atomic_write_error_cleanup(tmp_path: Path) -> None:
         # Verify temp file was cleaned up
         temp_path = target_path.with_suffix(target_path.suffix + ".tmp")
         assert not temp_path.exists()
-

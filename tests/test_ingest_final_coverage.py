@@ -128,4 +128,3 @@ def test_ingest_from_url_print_derived_summary(tmp_path: Path, capsys) -> None:
     assert "Decompressed" in captured.err
     assert "Decompressed SHA-256" in captured.err
     assert "Decompressed size" in captured.err
-

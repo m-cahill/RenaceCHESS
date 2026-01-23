@@ -181,4 +181,3 @@ def test_ingest_from_url_decompress_non_zstd_skipped(tmp_path: Path) -> None:
 
     assert receipt.derived is None
     assert receipt.artifact.compression is None
-

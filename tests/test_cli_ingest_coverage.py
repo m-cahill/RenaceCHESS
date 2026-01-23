@@ -135,4 +135,3 @@ def test_cli_ingest_invalid_subcommand(capsys) -> None:
         captured = capsys.readouterr()
         # Should show help or error
         assert "ingest" in captured.out.lower() or "ingest" in captured.err.lower()
-

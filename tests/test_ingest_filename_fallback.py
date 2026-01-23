@@ -49,4 +49,3 @@ def test_ingest_from_url_empty_filename_gets_fallback(tmp_path: Path) -> None:
 
     assert receipt.artifact.media_type == "application/zstd"
     assert receipt.artifact.compression == "zstd"
-

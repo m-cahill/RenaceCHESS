@@ -60,4 +60,3 @@ def test_decompress_zst_error_cleanup(tmp_path: Path) -> None:
     # Verify no temp file left behind
     temp_files = list(cache.get_derived_dir("test_id").glob("*.tmp"))
     assert len(temp_files) == 0
-

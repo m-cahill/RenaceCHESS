@@ -64,4 +64,3 @@ def test_decompress_zst_error_cleanup_path(tmp_path: Path) -> None:
     derived_dir = cache.get_derived_dir("test_id")
     temp_files = list(derived_dir.glob("*.tmp")) if derived_dir.exists() else []
     assert len(temp_files) == 0
-
