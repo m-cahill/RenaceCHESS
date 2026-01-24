@@ -144,4 +144,3 @@ def test_eval_report_v2_without_accuracy() -> None:
     # Should still validate (accuracy is optional in schema)
     schema = load_schema("eval_report.v2")
     jsonschema.validate(report_dict, schema)
-

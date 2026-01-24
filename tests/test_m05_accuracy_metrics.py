@@ -148,4 +148,3 @@ def test_accuracy_metrics_coverage() -> None:
     assert metrics["labeled_record_count"] == 5
     # Coverage will be computed in runner using total_record_count
     # Here we just verify labeled_count is correct
-

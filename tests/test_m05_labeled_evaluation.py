@@ -235,4 +235,3 @@ def test_backward_compatibility_unlabeled_dataset(tmp_path: Path) -> None:
     # Should have no accuracy metrics
     assert "accuracy" not in eval_results["overall_metrics"]
     assert "labeled_record_count" not in eval_results["overall_metrics"]
-

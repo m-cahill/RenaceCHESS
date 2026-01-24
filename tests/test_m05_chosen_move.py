@@ -193,4 +193,3 @@ def test_chosen_move_schema_optional() -> None:
     # chosenMove with only UCI (no SAN) should validate
     payload_dict["chosenMove"] = {"uci": "e2e4"}
     jsonschema.validate(payload_dict, schema)
-
