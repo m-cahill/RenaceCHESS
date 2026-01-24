@@ -23,6 +23,13 @@
 | 2026-01-24T12:35:00Z | search_replace | Update runner to support model_path | src/renacechess/eval/runner.py | completed |
 | 2026-01-24T12:40:00Z | search_replace | Add train-policy CLI command | src/renacechess/cli.py | completed |
 | 2026-01-24T12:45:00Z | search_replace | Add model-path argument to eval command | src/renacechess/cli.py | completed |
+| 2026-01-24T13:00:00Z | write | Add model tests | tests/test_m08_model.py | completed |
+| 2026-01-24T13:05:00Z | write | Add learned policy tests | tests/test_m08_learned_policy.py | completed |
+| 2026-01-24T13:10:00Z | write | Add training tests | tests/test_m08_training.py | completed |
+| 2026-01-24T13:15:00Z | search_replace | Update factory tests for learned policy | tests/test_eval_baselines.py | completed |
+| 2026-01-24T13:20:00Z | run_terminal_cmd | Create branch m08-learned-policy-baseline | git checkout -b | completed |
+| 2026-01-24T13:25:00Z | run_terminal_cmd | Commit M08 changes | git commit | completed |
+| 2026-01-24T13:30:00Z | run_terminal_cmd | Push branch and create PR | git push, gh pr create | completed |
 
 ---
 
