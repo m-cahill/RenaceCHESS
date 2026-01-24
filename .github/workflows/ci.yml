@@ -28,21 +28,16 @@ jobs:
         run: ruff check .
       - name: Debug format issue
         run: |
-          echo "=== Git config ==="
-          git config --list | grep -E "core\.(autocrlf|eol|safecrlf)" || echo "No line-ending config"
-          cat .gitattributes || echo "No .gitattributes"
-          echo "=== File stats ==="
-          ls -la tests/test_m06_conditioning_buckets.py
-          echo "=== Git blob hash ==="
-          git ls-files -s tests/test_m06_conditioning_buckets.py
-          git hash-object tests/test_m06_conditioning_buckets.py
-          echo "=== File line endings and size ==="
+          echo "=== Git status ==="
+          git status
+          echo "=== Git log ==="
+          git log --oneline -3
+          echo "=== Force checkout from HEAD ==="
+          git checkout HEAD -- tests/test_m06_conditioning_buckets.py
+          echo "=== File after checkout ==="
           python -c "p=open('tests/test_m06_conditioning_buckets.py','rb').read(); print('CRLF:', p.count(b'\r\n'), 'LF:', p.count(b'\n') - p.count(b'\r\n'), 'Size:', len(p))"
-          echo "=== First 10 lines ==="
+          echo "=== First 10 lines after checkout ==="
           head -n 10 tests/test_m06_conditioning_buckets.py
-          echo "=== Ruff format diff ==="
-          ruff format --diff tests/test_m06_conditioning_buckets.py || true
-          echo "=== End diff ==="
       - name: Ruff format check
         run: ruff format --check .
 
