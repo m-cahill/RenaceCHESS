@@ -69,7 +69,7 @@ class TestTimeControlParsing:
         assert tc_raw == "60+0"
 
         tc_class, tc_raw = parse_time_control("120+1")
-        assert tc_class == "bullet"  # 120 + 40*1 = 160s
+        assert tc_class == "bullet"  # 120 + 40 * 1 = 160s
         assert tc_raw == "120+1"
 
     def test_parse_blitz_time_control(self) -> None:
