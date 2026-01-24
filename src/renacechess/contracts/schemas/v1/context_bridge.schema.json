@@ -228,6 +228,21 @@
           "description": "Hash of input data (PGN + position)"
         }
       }
+    },
+    "chosenMove": {
+      "type": ["object", "null"],
+      "description": "Ground-truth move that was actually played (optional label)",
+      "properties": {
+        "uci": {
+          "type": "string",
+          "description": "Move in UCI format (required)"
+        },
+        "san": {
+          "type": ["string", "null"],
+          "description": "Move in SAN format (optional)"
+        }
+      },
+      "required": ["uci"]
     }
   }
 }

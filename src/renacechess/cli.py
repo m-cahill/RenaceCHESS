@@ -8,7 +8,7 @@ from renacechess.dataset.builder import build_dataset
 from renacechess.dataset.config import DatasetBuildConfig
 from renacechess.demo.pgn_overlay import generate_demo_payload
 from renacechess.determinism import canonical_json_dump
-from renacechess.eval.report import build_eval_report, write_eval_report
+from renacechess.eval.report import build_eval_report, build_eval_report_v2, write_eval_report
 from renacechess.eval.runner import run_evaluation
 from renacechess.ingest.ingest import ingest_from_lichess, ingest_from_url
 
@@ -142,6 +142,16 @@ def main() -> None:
         type=str,
         help="Override creation timestamp (ISO 8601 format, for testing only)",
     )
+    run_parser.add_argument(
+        "--compute-accuracy",
+        action="store_true",
+        help="Compute ground-truth accuracy metrics (requires chosenMove labels in dataset)",
+    )
+    run_parser.add_argument(
+        "--top-k",
+        type=str,
+        help="Comma-separated list of K values for top-K accuracy (e.g., '1,3,5'). Default: 1",
+    )
 
     # Ingest command
     ingest_parser = subparsers.add_parser("ingest", help="Ingest Lichess database exports")
@@ -255,9 +265,29 @@ def main() -> None:
                 if args.created_at:
                     created_at = datetime.fromisoformat(args.created_at.replace("Z", "+00:00"))
 
+                # Parse top-K values
+                top_k_values = None
+                if args.top_k:
+                    try:
+                        top_k_values = [int(k.strip()) for k in args.top_k.split(",")]
+                        if not all(k > 0 for k in top_k_values):
+                            print(
+                                "Error: All top-K values must be positive integers",
+                                file=sys.stderr,
+                            )
+                            sys.exit(1)
+                    except ValueError:
+                        print(
+                            "Error: --top-k must be comma-separated integers (e.g., '1,3,5')",
+                            file=sys.stderr,
+                        )
+                        sys.exit(1)
+
                 # Build eval config
                 eval_config = {
                     "max_records": args.max_records,
+                    "compute_accuracy": args.compute_accuracy,
+                    "top_k_values": top_k_values,
                 }
 
                 # Run evaluation
@@ -266,10 +296,29 @@ def main() -> None:
                     policy_id=args.policy,
                     eval_config=eval_config,
                     max_records=args.max_records,
+                    compute_accuracy=args.compute_accuracy,
+                    top_k_values=top_k_values,
                 )
 
-                # Build report
-                report = build_eval_report(eval_results, created_at=created_at)
+                # Build report (v2 if accuracy enabled, v1 otherwise)
+                from renacechess.contracts.models import EvalReportV1, EvalReportV2
+
+                if args.compute_accuracy:
+                    # Validate that labeled records exist
+                    overall_metrics = eval_results.get("overall_metrics", {})
+                    labeled_count = overall_metrics.get("labeled_record_count", 0)
+                    if labeled_count == 0:
+                        print(
+                            "Error: --compute-accuracy requested but no labeled records found. "
+                            "Dataset must include chosenMove labels.",
+                            file=sys.stderr,
+                        )
+                        sys.exit(1)
+                    report: EvalReportV1 | EvalReportV2 = build_eval_report_v2(
+                        eval_results, created_at=created_at
+                    )
+                else:
+                    report = build_eval_report(eval_results, created_at=created_at)
 
                 # Write report
                 args.out.mkdir(parents=True, exist_ok=True)

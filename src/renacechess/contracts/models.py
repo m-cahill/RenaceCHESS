@@ -44,6 +44,15 @@ class PolicyMove(BaseModel):
     p: float = Field(..., ge=0.0, le=1.0, description="Probability of this move")
 
 
+class ChosenMove(BaseModel):
+    """Ground-truth move that was actually played (optional label)."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    uci: str = Field(..., description="Move in UCI format (required)")
+    san: str | None = Field(None, description="Move in SAN format (optional)")
+
+
 class Policy(BaseModel):
     """Move policy distribution."""
 
@@ -146,6 +155,11 @@ class ContextBridgePayload(BaseModel):
         ..., alias="narrativeSeeds", description="Narrative seeds for LLM"
     )
     meta: ContextBridgeMeta = Field(..., description="Metadata")
+    chosen_move: ChosenMove | None = Field(
+        None,
+        alias="chosenMove",
+        description="Ground-truth move that was actually played (optional label)",
+    )
 
 
 class DatasetManifestShardRef(BaseModel):
@@ -523,5 +537,133 @@ class EvalReportV1(BaseModel):
     )
     metrics: EvalMetricsV1 = Field(..., description="Policy validity metrics")
     splits: EvalReportSplitsV1 | None = Field(
+        None, description="Per-split metric breakdown (only includes splits that were evaluated)"
+    )
+
+
+# Evaluation Report Models (v2)
+
+
+class AccuracyMetrics(BaseModel):
+    """Ground-truth accuracy metrics (computed only over labeled records)."""
+
+    model_config = ConfigDict(
+        validate_by_alias=True,
+        validate_by_name=True,
+        extra="allow",  # Allow dynamic top-K fields (top1, top3, top5, etc.)
+    )
+
+    coverage: str = Field(
+        ...,
+        description=(
+            "Percentage of records that are labeled (fixed-decimal string, "
+            "labeledRecordCount / totalRecordCount)"
+        ),
+    )
+
+
+class EvalMetricsV2(BaseModel):
+    """Evaluation metrics (v2) - policy validity metrics + accuracy metrics."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    records_evaluated: int = Field(
+        ..., alias="recordsEvaluated", ge=0, description="Total number of records evaluated"
+    )
+    illegal_move_rate: str = Field(
+        ...,
+        alias="illegalMoveRate",
+        description=(
+            "Percentage of records where policy emits move not in legalMoves (fixed-decimal string)"
+        ),
+    )
+    top_k_legal_coverage: TopKLegalCoverage = Field(
+        ..., alias="topKLegalCoverage", description="Top-K legal coverage metrics"
+    )
+    policy_entropy: PolicyEntropyStats = Field(
+        ..., alias="policyEntropy", description="Policy entropy statistics"
+    )
+    unique_moves_emitted: int = Field(
+        ...,
+        alias="uniqueMovesEmitted",
+        ge=0,
+        description="Number of unique moves emitted across dataset",
+    )
+    total_record_count: int = Field(
+        ..., alias="totalRecordCount", ge=0, description="Total number of records in the dataset"
+    )
+    labeled_record_count: int = Field(
+        ...,
+        alias="labeledRecordCount",
+        ge=0,
+        description="Number of records that have chosenMove label (ground-truth move)",
+    )
+    accuracy: AccuracyMetrics | None = Field(
+        None,
+        description="Ground-truth accuracy metrics (computed only over labeled records, optional)",
+    )
+
+
+class EvalReportSplitsV2(BaseModel):
+    """Per-split evaluation metrics (v2)."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    train: EvalMetricsV2 | None = Field(None, description="Training split metrics (if evaluated)")
+    val: EvalMetricsV2 | None = Field(None, description="Validation split metrics (if evaluated)")
+    frozen_eval: EvalMetricsV2 | None = Field(
+        None, alias="frozenEval", description="Frozen evaluation split metrics (if evaluated)"
+    )
+
+
+class EvalReportV2(BaseModel):
+    """Evaluation report (v2) - policy validity evaluation + ground-truth accuracy metrics."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    schema_version: Literal["eval_report.v2"] = Field(
+        "eval_report.v2", alias="schemaVersion", description="Schema version"
+    )
+    created_at: datetime = Field(
+        ...,
+        alias="createdAt",
+        description="ISO 8601 timestamp of creation (injectable for determinism tests)",
+    )
+    dataset_digest: str = Field(
+        ...,
+        alias="datasetDigest",
+        description="SHA-256 hash copied from dataset manifest v2 (stable dataset identity)",
+        pattern="^[a-f0-9]{64}$",
+    )
+    assembly_config_hash: str = Field(
+        ...,
+        alias="assemblyConfigHash",
+        description="SHA-256 hash copied from dataset manifest v2 (assembly configuration hash)",
+        pattern="^[a-f0-9]{64}$",
+    )
+    policy_id: str = Field(
+        ..., alias="policyId", description="Policy identifier (e.g., 'baseline.uniform_random')"
+    )
+    eval_config_hash: str = Field(
+        ...,
+        alias="evalConfigHash",
+        description="SHA-256 hash of canonical JSON config (sorted keys, stable)",
+        pattern="^[a-f0-9]{64}$",
+    )
+    metrics: EvalMetricsV1 = Field(..., description="Policy validity metrics (unchanged from v1)")
+    total_record_count: int = Field(
+        ..., alias="totalRecordCount", ge=0, description="Total number of records in the dataset"
+    )
+    labeled_record_count: int = Field(
+        ...,
+        alias="labeledRecordCount",
+        ge=0,
+        description="Number of records that have chosenMove label (ground-truth move)",
+    )
+    accuracy: AccuracyMetrics | None = Field(
+        None,
+        description="Ground-truth accuracy metrics (computed only over labeled records, optional)",
+    )
+    splits: EvalReportSplitsV2 | None = Field(
         None, description="Per-split metric breakdown (only includes splits that were evaluated)"
     )
