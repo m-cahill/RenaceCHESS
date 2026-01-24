@@ -15,6 +15,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M04 | ✅ Closed | `m04-eval-harness` → `main` | 2026-01-24 | Evaluation Harness v0: Deterministic Policy Evaluation Over Dataset Manifests |
 | M05 | ✅ Closed (MERGED) | `m05-labeled-evaluation` → `main` | 2026-01-24 | Ground-Truth Labeled Evaluation v1: Accuracy Metrics and Evaluation Report v2 |
 | M06 | ✅ Closed (MERGED) | `m06-conditioned-frozen-eval` → `main` | 2026-01-24 | Conditioned, Frozen Human Evaluation: Skill/Time Conditioning + Frozen Eval Manifest |
+| M07 | ✅ Closed (MERGED) | `m07-hdi-v1` → `main` | 2026-01-24 | Human Difficulty Index (HDI) v1 + CLI Completion |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -92,6 +93,27 @@ This document tracks milestones, schema, migrations, and governance decisions fo
   - `src/renacechess/eval/conditioned_metrics.py` — Conditioned metrics accumulator
 - **Notable Resolution:** CRLF/LF drift resolved via `.gitattributes` + Ruff `line-ending = "lf"`
 
+**M07 Details:**
+- **Objective:** Deterministic, explainable Human Difficulty Index (HDI) + CLI completion
+- **CI Run 1:** 21311905879 (FAILURE - MyPy type error, line length violations)
+- **CI Run 2:** 21312179288 (FAILURE - CRLF format, unreachable code)
+- **CI Run 3:** 21312195286 (SUCCESS - All gates passing)
+- **Final CI Run (main):** 21312485033 (SUCCESS - All gates passing)
+- **Final Coverage:** Meets 90% threshold
+- **Test Count:** 267+ tests (26 new)
+- **PR:** #9 (merged)
+- **Final Commit:** `f252507`
+- **Audit:** `docs/milestones/PoC/M07/M07_audit.md`
+- **Summary:** `docs/milestones/PoC/M07/M07_summary.md`
+- **Key Files:**
+  - `src/renacechess/eval/hdi.py` — HDI computation module
+  - `src/renacechess/contracts/schemas/v1/eval_report.v4.schema.json` — Eval report v4 schema
+  - `docs/evaluation/M07_HDI.md` — HDI specification
+- **M06 Deferrals Closed:**
+  - M06-D01: CLI `--conditioned-metrics` → RESOLVED
+  - M06-D02: Frozen eval enforcement → RESOLVED
+- **HDI v1 Formula:** `0.40*entropy + 0.25*topGapInverted + 0.20*legalMovePressure + 0.15*outcomeSensitivity`
+
 ---
 
 ## Database Schema
@@ -167,6 +189,11 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 - **Location:** `src/renacechess/contracts/schemas/v1/eval_report.v3.schema.json`
 - **Pydantic Model:** `renacechess.contracts.models.EvalReportV3`
 - **Status:** ✅ Complete and validated (extends v2 with conditioned metrics by skill/time/pressure)
+
+### Evaluation Report Schema (v4)
+- **Location:** `src/renacechess/contracts/schemas/v1/eval_report.v4.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.EvalReportV4`
+- **Status:** ✅ Complete and validated (extends v3 with Human Difficulty Index - HDI)
 
 ### Frozen Eval Manifest Schema (v1)
 - **Location:** `src/renacechess/contracts/schemas/v1/frozen_eval_manifest.v1.schema.json`
