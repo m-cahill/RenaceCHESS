@@ -65,23 +65,36 @@ class FirstLegalPolicy:
         return [PolicyMove(uci=sorted_moves[0], san=None, p=1.0)]
 
 
-def create_policy_provider(policy_id: str, seed: int | None = None) -> Any:
+def create_policy_provider(
+    policy_id: str, seed: int | None = None, model_path: Path | None = None
+) -> Any:
     """Create a policy provider by ID.
 
     Args:
-        policy_id: Policy identifier (e.g., 'baseline.uniform_random').
+        policy_id: Policy identifier (e.g., 'baseline.uniform_random', 'learned.v1').
         seed: Random seed for policies that use randomness.
+        model_path: Path to trained model (required for learned policies).
 
     Returns:
         Policy provider instance.
 
     Raises:
-        ValueError: If policy_id is unknown.
+        ValueError: If policy_id is unknown or model_path is missing for learned policies.
     """
     if policy_id == "baseline.uniform_random":
         return UniformRandomLegalPolicy(seed=seed)
     elif policy_id == "baseline.first_legal":
         return FirstLegalPolicy()
+    elif policy_id == "learned.v1":
+        if model_path is None:
+            raise ValueError("model_path required for learned.v1 policy")
+        from renacechess.eval.learned_policy import LearnedHumanPolicyV1
+
+        # Metadata path is assumed to be next to model file
+        metadata_path = model_path.parent / "model_metadata.json"
+        if not metadata_path.exists():
+            raise FileNotFoundError(f"Model metadata not found: {metadata_path}")
+        return LearnedHumanPolicyV1(model_path, metadata_path)
     else:
         raise ValueError(f"Unknown policy ID: {policy_id}")
 

@@ -100,6 +100,45 @@ def test_create_policy_provider() -> None:
         assert "Unknown policy ID" in str(e)
 
 
+def test_create_policy_provider_learned(tmp_path: Path) -> None:
+    """Test create_policy_provider with learned policy."""
+    import torch
+
+    from renacechess.models.baseline_v1 import BaselinePolicyV1
+
+    # Create and save a minimal model
+    model = BaselinePolicyV1(move_vocab_size=10)
+    model.add_move_to_vocab("e2e4")
+
+    model_path = tmp_path / "model.pt"
+    torch.save(model.state_dict(), model_path)
+
+    # Save metadata
+    metadata = {
+        "model_type": "BaselinePolicyV1",
+        "move_vocab_size": 10,
+        "move_vocab": ["e2e4"],
+    }
+    metadata_path = tmp_path / "model_metadata.json"
+    with metadata_path.open("w", encoding="utf-8") as f:
+        import json
+
+        json.dump(metadata, f)
+
+    # Create learned policy
+    policy = create_policy_provider("learned.v1", model_path=model_path)
+    from renacechess.eval.learned_policy import LearnedHumanPolicyV1
+
+    assert isinstance(policy, LearnedHumanPolicyV1)
+
+    # Missing model_path should raise
+    try:
+        create_policy_provider("learned.v1")
+        assert False, "Should have raised ValueError"
+    except ValueError as e:
+        assert "model_path required" in str(e)
+
+
 def test_compute_policy_seed() -> None:
     """Test compute_policy_seed deterministic behavior."""
     dataset_digest = "a" * 64
