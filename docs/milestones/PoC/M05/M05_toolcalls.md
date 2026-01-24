@@ -23,4 +23,6 @@
 | 2026-01-24 | search_replace | Phase 3: Fix linting and type errors | Multiple files | ✅ Complete |
 | 2026-01-24 | run_terminal_cmd | Phase 3: Run tests and verify | pytest, ruff, mypy | ✅ Complete |
 | 2026-01-24 | run_terminal_cmd | Phase 3: Create branch and commit | git checkout -b, git commit | ✅ Complete |
+| 2026-01-24 | run_terminal_cmd | Phase 4: Monitor CI and fix issues | gh run view, ruff format, pytest | ✅ Complete |
+| 2026-01-24 | write | Phase 4: Generate CI run analysis | docs/milestones/PoC/M05/M05_run1.md | ✅ Complete |
 
