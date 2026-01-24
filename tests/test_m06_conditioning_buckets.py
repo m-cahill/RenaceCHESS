@@ -1,4 +1,5 @@
 """Tests for M06 conditioning bucket assignment functions."""
+# Format alignment fix
 
 import pytest
 
