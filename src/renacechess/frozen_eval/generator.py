@@ -180,39 +180,39 @@ def generate_frozen_eval_manifest(
     # Compute manifest hash first (exclude manifestHash field)
     # Build dict without hash for hashing
     manifest_dict_for_hash = {
-            "schemaVersion": 1,
-            "createdAt": created_at.isoformat(),
-            "sourceManifestRef": {
-                "datasetDigest": source_manifest.dataset_digest,
-                "manifestPath": str(source_manifest_path),
-            },
-            "records": [
-                {
-                    "recordKey": r.record_key,
-                    "shardId": r.shard_id,
-                    "shardHash": r.shard_hash,
-                    "skillBucketId": r.skill_bucket_id,
-                    "timeControlClass": r.time_control_class,
-                    "timePressureBucket": r.time_pressure_bucket,
-                }
-                for r in selected_records
-            ],
-            "stratificationTargets": {
-                "totalRecords": target_total_records,
-                "minPerSkillBucket": min_per_skill_bucket,
-            },
-            "countsBySkillBucketId": dict(counts_by_skill),
-            "countsByTimeControlClass": dict(counts_by_time_control),
-            "countsByTimePressureBucket": dict(counts_by_time_pressure),
-            "coverageShortfalls": [
-                {
-                    "axis": s.axis,
-                    "value": s.value,
-                    "target": s.target,
-                    "actual": s.actual,
-                }
-                for s in coverage_shortfalls
-            ],
+        "schemaVersion": 1,
+        "createdAt": created_at.isoformat(),
+        "sourceManifestRef": {
+            "datasetDigest": source_manifest.dataset_digest,
+            "manifestPath": str(source_manifest_path),
+        },
+        "records": [
+            {
+                "recordKey": r.record_key,
+                "shardId": r.shard_id,
+                "shardHash": r.shard_hash,
+                "skillBucketId": r.skill_bucket_id,
+                "timeControlClass": r.time_control_class,
+                "timePressureBucket": r.time_pressure_bucket,
+            }
+            for r in selected_records
+        ],
+        "stratificationTargets": {
+            "totalRecords": target_total_records,
+            "minPerSkillBucket": min_per_skill_bucket,
+        },
+        "countsBySkillBucketId": dict(counts_by_skill),
+        "countsByTimeControlClass": dict(counts_by_time_control),
+        "countsByTimePressureBucket": dict(counts_by_time_pressure),
+        "coverageShortfalls": [
+            {
+                "axis": s.axis,
+                "value": s.value,
+                "target": s.target,
+                "actual": s.actual,
+            }
+            for s in coverage_shortfalls
+        ],
     }
     manifest_bytes = canonical_json_dump(manifest_dict_for_hash)
     from renacechess.determinism import stable_hash
