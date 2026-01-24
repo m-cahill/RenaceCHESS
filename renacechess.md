@@ -58,8 +58,8 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 - **CI Run 2:** 21306130316 (SUCCESS - All gates passing)
 - **Final Coverage:** Meets 90% threshold (CI job passed)
 - **Test Count:** 180 tests (up from 160)
-- **PR:** #6 (ready for merge)
-- **Final Commit:** `c342498`
+- **PR:** #6 (merged)
+- **Final Commit:** `c99e148`
 - **Audit:** `docs/milestones/PoC/M04/M04_audit.md`
 - **Summary:** `docs/milestones/PoC/M04/M04_summary.md`
 
