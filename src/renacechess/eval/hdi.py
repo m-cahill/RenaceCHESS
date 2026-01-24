@@ -131,6 +131,7 @@ def compute_hdi_v1(
     norm_legal = normalize_legal_move_pressure(legal_moves_count)
 
     # Compute outcome sensitivity (use proxy if not provided)
+    outcome_source: Literal["proxy", "outcome_head"]
     if outcome_sensitivity is None:
         norm_outcome, source = compute_outcome_sensitivity_proxy(entropy, top_gap)
         outcome_source = source

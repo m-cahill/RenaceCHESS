@@ -4,13 +4,13 @@ import argparse
 import sys
 from pathlib import Path
 
+from renacechess.contracts.models import FrozenEvalManifestV1
 from renacechess.dataset.builder import build_dataset
 from renacechess.dataset.config import DatasetBuildConfig
 from renacechess.demo.pgn_overlay import generate_demo_payload
 from renacechess.determinism import canonical_json_dump
 from renacechess.eval.report import build_eval_report, build_eval_report_v2, write_eval_report
-from renacechess.contracts.models import FrozenEvalManifestV1
-from renacechess.eval.runner import run_evaluation, run_conditioned_evaluation
+from renacechess.eval.runner import run_conditioned_evaluation, run_evaluation
 from renacechess.frozen_eval import generate_frozen_eval_manifest, write_frozen_eval_manifest
 from renacechess.ingest.ingest import ingest_from_lichess, ingest_from_url
 
@@ -157,7 +157,10 @@ def main() -> None:
     run_parser.add_argument(
         "--conditioned-metrics",
         action="store_true",
-        help="Compute conditioned metrics stratified by skill/time (M07, generates eval_report.v4 with HDI)",
+        help=(
+            "Compute conditioned metrics stratified by skill/time "
+            "(M07, generates eval_report.v4 with HDI)"
+        ),
     )
     run_parser.add_argument(
         "--frozen-eval-manifest",
@@ -343,14 +346,15 @@ def main() -> None:
                     # M07: Frozen eval manifest is REQUIRED when --conditioned-metrics is used
                     if not args.frozen_eval_manifest:
                         print(
-                            "Error: --frozen-eval-manifest is REQUIRED when --conditioned-metrics is used. "
+                            "Error: --frozen-eval-manifest is REQUIRED when "
+                            "--conditioned-metrics is used. "
                             "This ensures evaluation comparability.",
                             file=sys.stderr,
                         )
                         sys.exit(1)
 
                     # Load and validate frozen eval manifest
-                    import json
+                        import json
 
                     try:
                         frozen_manifest_dict = json.loads(
@@ -400,16 +404,16 @@ def main() -> None:
                     report: EvalReportV1 | EvalReportV2 | EvalReportV3 | EvalReportV4 = (
                         EvalReportV4(
                             schema_version="eval_report.v4",
-                            created_at=created_at or datetime.now(),
-                            dataset_digest=eval_results["dataset_digest"],
-                            assembly_config_hash=eval_results["assembly_config_hash"],
-                            policy_id=eval_results["policy_id"],
-                            eval_config_hash=eval_results["eval_config_hash"],
+                        created_at=created_at or datetime.now(),
+                        dataset_digest=eval_results["dataset_digest"],
+                        assembly_config_hash=eval_results["assembly_config_hash"],
+                        policy_id=eval_results["policy_id"],
+                        eval_config_hash=eval_results["eval_config_hash"],
                             frozen_eval_manifest_hash=frozen_eval_manifest_hash,
-                            overall=eval_results["overall"],
-                            by_skill_bucket_id=eval_results["by_skill_bucket_id"],
-                            by_time_control_class=eval_results["by_time_control_class"],
-                            by_time_pressure_bucket=eval_results["by_time_pressure_bucket"],
+                        overall=eval_results["overall"],
+                        by_skill_bucket_id=eval_results["by_skill_bucket_id"],
+                        by_time_control_class=eval_results["by_time_control_class"],
+                        by_time_pressure_bucket=eval_results["by_time_pressure_bucket"],
                         )
                     )
                 else:

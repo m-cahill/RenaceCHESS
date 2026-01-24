@@ -763,7 +763,7 @@ class ConditionedMetrics(BaseModel):
     validity: ConditionedValidityMetrics | None = Field(
         None, description="Policy validity metrics (from v1/v2 reports)"
     )
-    hdi: "HDIMetrics | None" = Field(
+    hdi: HDIMetrics | None = Field(
         None,
         description="Human Difficulty Index (HDI) metrics (M07, optional for v3 compatibility)",
     )
@@ -898,7 +898,8 @@ class HDIOutcomeSensitivity(BaseModel):
     note: str = Field(
         ...,
         description=(
-            "Note about the source (e.g., 'entropy * (1 - topGap); replaced when outcome head exists')"
+            "Note about the source "
+            "(e.g., 'entropy * (1 - topGap); replaced when outcome head exists')"
         ),
     )
 
