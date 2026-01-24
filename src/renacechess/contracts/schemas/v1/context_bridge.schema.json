@@ -41,17 +41,38 @@
       "properties": {
         "skillBucket": {
           "type": "string",
-          "description": "Skill bucket identifier (e.g., '1200-1400')"
+          "description": "Skill bucket identifier (e.g., '1200-1400', legacy)"
         },
         "timePressureBucket": {
           "type": "string",
-          "enum": ["NORMAL", "LOW", "TROUBLE"],
-          "description": "Time pressure bucket"
+          "enum": ["NORMAL", "LOW", "TROUBLE", "early", "normal", "low", "trouble", "unknown"],
+          "description": "Time pressure bucket (legacy uppercase or M06 lowercase values)"
         },
         "timeControlClass": {
           "type": ["string", "null"],
-          "enum": ["blitz", "rapid", "classical"],
-          "description": "Time control class (optional)"
+          "enum": ["blitz", "rapid", "classical", "bullet", "unknown"],
+          "description": "Time control class (optional, legacy or M06 values)"
+        },
+        "skillBucketId": {
+          "type": ["string", "null"],
+          "enum": ["lt_800", "800_999", "1000_1199", "1200_1399", "1400_1599", "1600_1799", "gte_1800", "unknown", null],
+          "description": "M06 skill bucket ID (optional, M06 spec v1)"
+        },
+        "skillBucketSpecVersion": {
+          "type": ["integer", "null"],
+          "description": "Skill bucket spec version (1 for M06, null for legacy)"
+        },
+        "timeControlRaw": {
+          "type": ["string", "null"],
+          "description": "Original PGN TimeControl header string (optional, M06)"
+        },
+        "timeControlSpecVersion": {
+          "type": ["integer", "null"],
+          "description": "Time control spec version (1 for M06, null for legacy)"
+        },
+        "timePressureSpecVersion": {
+          "type": ["integer", "null"],
+          "description": "Time pressure spec version (1 for M06, null for legacy)"
         }
       }
     },

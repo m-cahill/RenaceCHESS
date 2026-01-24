@@ -4,9 +4,10 @@ import json
 from pathlib import Path
 from typing import Any
 
-from renacechess.contracts.models import DatasetManifestV2
+from renacechess.contracts.models import DatasetManifestV2, EvalReportV3
 from renacechess.dataset.split import compute_split_assignment
 from renacechess.eval.baselines import compute_policy_seed, create_policy_provider
+from renacechess.eval.conditioned_metrics import ConditionedMetricsAccumulator
 from renacechess.eval.metrics import MetricsAccumulator, format_fixed_decimal
 
 
@@ -187,6 +188,124 @@ def run_evaluation(
     # Add total record count for v2 reports (if accuracy is computed)
     if compute_accuracy:
         result["total_record_count"] = overall_accumulator.records_evaluated
+
+    return result
+
+
+def run_conditioned_evaluation(
+    manifest_path: Path,
+    policy_id: str,
+    eval_config: dict[str, Any],
+    max_records: int | None = None,
+    compute_accuracy: bool = False,
+    top_k_values: list[int] | None = None,
+    frozen_eval_manifest_hash: str | None = None,
+) -> dict[str, Any]:
+    """Run evaluation with conditioned metrics (M06).
+
+    Args:
+        manifest_path: Path to dataset manifest v2.
+        policy_id: Policy identifier (e.g., 'baseline.uniform_random').
+        eval_config: Evaluation configuration dict (for hashing).
+        max_records: Maximum number of records to evaluate (None = no limit).
+        compute_accuracy: Whether to compute accuracy metrics (requires chosenMove labels).
+        top_k_values: List of K values for top-K accuracy (e.g., [1, 3, 5]). Defaults to [1].
+        frozen_eval_manifest_hash: SHA-256 hash of frozen eval manifest (if frozen eval).
+
+    Returns:
+        Dictionary with evaluation results (ready for EvalReportV3 construction).
+    """
+    # Load manifest
+    manifest = load_manifest(manifest_path)
+    manifest_dir = manifest_path.parent
+
+    # Compute policy seed for deterministic RNG
+    eval_config_hash = _compute_eval_config_hash(eval_config)
+    policy_seed = compute_policy_seed(manifest.dataset_digest, policy_id, eval_config_hash)
+
+    # Create policy provider
+    policy = create_policy_provider(policy_id, seed=policy_seed)
+
+    # Initialize conditioned metrics accumulator
+    top_k_vals = top_k_values if top_k_values is not None else [1]
+    accumulator = ConditionedMetricsAccumulator(
+        compute_accuracy=compute_accuracy, top_k_values=top_k_vals
+    )
+
+    # Process shards in order
+    records_processed = 0
+    for shard_ref in manifest.shard_refs:
+        if max_records is not None and records_processed >= max_records:
+            break
+
+        shard_path = manifest_dir / shard_ref.path
+        if not shard_path.exists():
+            raise FileNotFoundError(f"Shard not found: {shard_path}")
+
+        # Process shard line-by-line (streaming)
+        with shard_path.open(encoding="utf-8") as f:
+            for line in f:
+                if max_records is not None and records_processed >= max_records:
+                    break
+
+                line = line.strip()
+                if not line:
+                    continue
+
+                record = json.loads(line)
+
+                # Extract conditioning metadata
+                conditioning = record.get("conditioning", {})
+                skill_bucket_id = conditioning.get("skillBucketId")
+                time_control_class = conditioning.get("timeControlClass")
+                time_pressure_bucket = conditioning.get("timePressureBucket")
+
+                # Extract position and policy data
+                position = record.get("position", {})
+                legal_moves = position.get("legalMoves", [])
+
+                # Extract chosen move (label)
+                chosen_move_obj = record.get("chosenMove")
+                chosen_move = chosen_move_obj.get("uci") if chosen_move_obj else None
+
+                # Extract policy output
+                predicted_moves = policy.predict(record)
+                policy_output = predicted_moves[0].uci if predicted_moves else None
+
+                # Extract policy metrics
+                policy_data = record.get("policy", {})
+                policy_entropy = policy_data.get("entropy")
+                policy_top_gap = policy_data.get("topGap")
+
+                # Add record to accumulator
+                accumulator.add_record(
+                    policy_output=policy_output,
+                    legal_moves=legal_moves,
+                    chosen_move=chosen_move,
+                    policy_entropy=policy_entropy,
+                    policy_top_gap=policy_top_gap,
+                    skill_bucket_id=skill_bucket_id,
+                    time_control_class=time_control_class,
+                    time_pressure_bucket=time_pressure_bucket,
+                )
+
+                records_processed += 1
+
+    # Build metrics
+    overall_metrics = accumulator.build_metrics()
+    stratified_metrics = accumulator.build_stratified_metrics()
+
+    result: dict[str, Any] = {
+        "dataset_digest": manifest.dataset_digest,
+        "assembly_config_hash": manifest.assembly_config_hash,
+        "policy_id": policy_id,
+        "eval_config_hash": eval_config_hash,
+        "frozen_eval_manifest_hash": frozen_eval_manifest_hash,
+        "overall": overall_metrics,
+        "by_skill_bucket_id": stratified_metrics["bySkillBucketId"],
+        "by_time_control_class": stratified_metrics["byTimeControlClass"],
+        "by_time_pressure_bucket": stratified_metrics["byTimePressureBucket"],
+    }
 
     return result
 

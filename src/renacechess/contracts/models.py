@@ -21,18 +21,60 @@ class Position(BaseModel):
 
 
 class PositionConditioning(BaseModel):
-    """Conditioning variables for position evaluation."""
+    """Conditioning variables for position evaluation.
+
+    M06 Extension:
+    - Added optional M06-specific fields (skillBucketId, spec versions, timeControlRaw)
+    - Extended enums to support both legacy and M06 values for backward compatibility
+    - Legacy fields (skillBucket, timePressureBucket, timeControlClass) remain required/optional as before
+    """
 
     model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
 
+    # Legacy fields (backward compatible)
     skill_bucket: str = Field(
-        ..., alias="skillBucket", description="Skill bucket identifier (e.g., '1200-1400')"
+        ..., alias="skillBucket", description="Skill bucket identifier (e.g., '1200-1400', legacy)"
     )
-    time_pressure_bucket: Literal["NORMAL", "LOW", "TROUBLE"] = Field(
-        ..., alias="timePressureBucket", description="Time pressure bucket"
+    time_pressure_bucket: Literal[
+        "NORMAL", "LOW", "TROUBLE", "early", "normal", "low", "trouble", "unknown"
+    ] = Field(
+        ...,
+        alias="timePressureBucket",
+        description="Time pressure bucket (legacy uppercase or M06 lowercase values)",
     )
-    time_control_class: Literal["blitz", "rapid", "classical"] | None = Field(
-        None, alias="timeControlClass", description="Time control class (optional)"
+    time_control_class: Literal["blitz", "rapid", "classical", "bullet", "unknown"] | None = Field(
+        None,
+        alias="timeControlClass",
+        description="Time control class (optional, legacy or M06 values)",
+    )
+
+    # M06-specific fields (optional, additive)
+    skill_bucket_id: Literal[
+        "lt_800", "800_999", "1000_1199", "1200_1399", "1400_1599", "1600_1799", "gte_1800", "unknown"
+    ] | None = Field(
+        None,
+        alias="skillBucketId",
+        description="M06 skill bucket ID (optional, M06 spec v1)",
+    )
+    skill_bucket_spec_version: int | None = Field(
+        None,
+        alias="skillBucketSpecVersion",
+        description="Skill bucket spec version (1 for M06, None for legacy)",
+    )
+    time_control_raw: str | None = Field(
+        None,
+        alias="timeControlRaw",
+        description="Original PGN TimeControl header string (optional, M06)",
+    )
+    time_control_spec_version: int | None = Field(
+        None,
+        alias="timeControlSpecVersion",
+        description="Time control spec version (1 for M06, None for legacy)",
+    )
+    time_pressure_spec_version: int | None = Field(
+        None,
+        alias="timePressureSpecVersion",
+        description="Time pressure spec version (1 for M06, None for legacy)",
     )
 
 
@@ -613,6 +655,282 @@ class EvalReportSplitsV2(BaseModel):
     val: EvalMetricsV2 | None = Field(None, description="Validation split metrics (if evaluated)")
     frozen_eval: EvalMetricsV2 | None = Field(
         None, alias="frozenEval", description="Frozen evaluation split metrics (if evaluated)"
+    )
+
+
+# Evaluation Report Models (v3) - Conditioned Metrics
+
+
+class DistributionStats(BaseModel):
+    """Distribution statistics for a metric."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    mean: str = Field(..., description="Mean value (fixed-decimal string)")
+    median: str | None = Field(None, description="Median value (fixed-decimal string, optional)")
+    stddev: str | None = Field(None, description="Standard deviation (fixed-decimal string, optional)")
+
+
+class ConditionedDistributionMetrics(BaseModel):
+    """Distribution metrics for conditioned evaluation."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    entropy: DistributionStats | None = Field(None, description="Policy entropy statistics")
+    top_gap: DistributionStats | None = Field(
+        None, alias="topGap", description="Top gap statistics"
+    )
+    legal_moves_count: DistributionStats | None = Field(
+        None, alias="legalMovesCount", description="Legal moves count statistics"
+    )
+
+
+class ConditionedValidityMetrics(BaseModel):
+    """Policy validity metrics for conditioned evaluation."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    illegal_rate: str = Field(
+        ..., alias="illegalRate", description="Illegal move rate (fixed-decimal string)"
+    )
+    top_k_legal_coverage: dict[str, str] = Field(
+        default_factory=dict,
+        alias="topKLegalCoverage",
+        description="Top-K legal coverage (keyed by K as string)",
+    )
+    policy_entropy: str | None = Field(
+        None, alias="policyEntropy", description="Mean policy entropy (fixed-decimal string)"
+    )
+    unique_moves_emitted: int | None = Field(
+        None, alias="uniqueMovesEmitted", ge=0, description="Unique moves emitted"
+    )
+
+
+class ConditionedAccuracyMetrics(BaseModel):
+    """Accuracy metrics for conditioned evaluation."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    top1: str = Field(..., description="Top-1 accuracy (fixed-decimal string)")
+    top_k: dict[str, str] = Field(
+        default_factory=dict,
+        alias="topK",
+        description="Top-K accuracy metrics (keyed by K as string, e.g., '3', '5', '10')",
+    )
+    coverage: str = Field(
+        ..., description="Coverage (labeled / total records, fixed-decimal string)"
+    )
+
+
+class ConditionedMetrics(BaseModel):
+    """Metrics for a single conditioning stratum (v3 report)."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    total_records: int = Field(
+        ..., alias="totalRecords", ge=0, description="Total number of records in this stratum"
+    )
+    labeled_records: int = Field(
+        ..., alias="labeledRecords", ge=0, description="Number of records with chosenMove label"
+    )
+    records_with_policy: int = Field(
+        ...,
+        alias="recordsWithPolicy",
+        ge=0,
+        description="Number of records with policy output",
+    )
+    accuracy: ConditionedAccuracyMetrics | None = Field(
+        None, description="Accuracy metrics (computed only over labeled records, optional)"
+    )
+    distribution: ConditionedDistributionMetrics | None = Field(
+        None, description="Distribution metrics (computed over all records with policy)"
+    )
+    validity: ConditionedValidityMetrics | None = Field(
+        None, description="Policy validity metrics (from v1/v2 reports)"
+    )
+
+
+class EvalReportV3(BaseModel):
+    """Evaluation report (v3) - adds conditioned metrics stratified by skill/time."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    schema_version: Literal["eval_report.v3"] = Field(
+        "eval_report.v3", alias="schemaVersion", description="Schema version"
+    )
+    created_at: datetime = Field(..., alias="createdAt", description="ISO 8601 timestamp of creation")
+    dataset_digest: str = Field(
+        ...,
+        alias="datasetDigest",
+        description="SHA-256 hash from dataset manifest v2 (stable dataset identity)",
+        pattern="^[a-f0-9]{64}$",
+    )
+    assembly_config_hash: str = Field(
+        ...,
+        alias="assemblyConfigHash",
+        description="SHA-256 hash from dataset manifest v2 (assembly configuration hash)",
+        pattern="^[a-f0-9]{64}$",
+    )
+    policy_id: str = Field(
+        ..., alias="policyId", description="Policy identifier (e.g., 'baseline.uniform_random')"
+    )
+    eval_config_hash: str = Field(
+        ...,
+        alias="evalConfigHash",
+        description="SHA-256 hash of canonical JSON config",
+        pattern="^[a-f0-9]{64}$",
+    )
+    frozen_eval_manifest_hash: str | None = Field(
+        None,
+        alias="frozenEvalManifestHash",
+        description="SHA-256 hash of frozen eval manifest (if frozen eval was used)",
+        pattern="^[a-f0-9]{64}$",
+    )
+    overall: ConditionedMetrics = Field(..., description="Overall metrics (all records)")
+    by_skill_bucket_id: dict[str, ConditionedMetrics] = Field(
+        default_factory=dict,
+        alias="bySkillBucketId",
+        description="Metrics stratified by M06 skill bucket ID",
+    )
+    by_time_control_class: dict[str, ConditionedMetrics] = Field(
+        default_factory=dict,
+        alias="byTimeControlClass",
+        description="Metrics stratified by time control class",
+    )
+    by_time_pressure_bucket: dict[str, ConditionedMetrics] = Field(
+        default_factory=dict,
+        alias="byTimePressureBucket",
+        description="Metrics stratified by time pressure bucket",
+    )
+
+
+# Frozen Eval Manifest Models
+
+
+class FrozenEvalManifestSourceRef(BaseModel):
+    """Reference to source dataset manifest v2 for frozen eval manifest."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    dataset_digest: str = Field(
+        ...,
+        alias="datasetDigest",
+        description="SHA-256 hash from source dataset manifest v2 (stable dataset identity)",
+        pattern="^[a-f0-9]{64}$",
+    )
+    manifest_path: str = Field(
+        ..., alias="manifestPath", description="Path to source dataset manifest v2"
+    )
+
+
+class FrozenEvalManifestRecord(BaseModel):
+    """Record reference in frozen eval manifest."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    record_key: str = Field(..., alias="recordKey", description="Record identifier (e.g., 'fen:ply')")
+    shard_id: str = Field(..., alias="shardId", description="Shard identifier containing this record")
+    shard_hash: str = Field(
+        ...,
+        alias="shardHash",
+        description="SHA-256 hash of the shard file",
+        pattern="^[a-f0-9]{64}$",
+    )
+    skill_bucket_id: Literal[
+        "lt_800", "800_999", "1000_1199", "1200_1399", "1400_1599", "1600_1799", "gte_1800", "unknown"
+    ] | None = Field(
+        None,
+        alias="skillBucketId",
+        description="M06 skill bucket ID for this record (if available)",
+    )
+    time_control_class: Literal["bullet", "blitz", "rapid", "classical", "unknown"] | None = Field(
+        None,
+        alias="timeControlClass",
+        description="Time control class for this record (if available)",
+    )
+    time_pressure_bucket: Literal["early", "normal", "low", "trouble", "unknown"] | None = Field(
+        None,
+        alias="timePressureBucket",
+        description="Time pressure bucket for this record (if available)",
+    )
+
+
+class FrozenEvalManifestStratificationTargets(BaseModel):
+    """Stratification targets for frozen eval manifest."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    total_records: int = Field(
+        ..., alias="totalRecords", ge=0, description="Target total record count"
+    )
+    min_per_skill_bucket: int = Field(
+        ...,
+        alias="minPerSkillBucket",
+        ge=0,
+        description="Hard minimum records per skill bucket (if available)",
+    )
+
+
+class FrozenEvalManifestCoverageShortfall(BaseModel):
+    """Coverage shortfall in frozen eval manifest."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    axis: Literal["skillBucketId", "timeControlClass", "timePressureBucket"] = Field(
+        ..., description="Conditioning axis with shortfall"
+    )
+    value: str = Field(..., description="Specific bucket/class/value with shortfall")
+    target: int = Field(..., ge=0, description="Target record count")
+    actual: int = Field(..., ge=0, description="Actual record count")
+
+
+class FrozenEvalManifestV1(BaseModel):
+    """Frozen evaluation manifest (v1) - immutable evaluation set with stratification metadata."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    schema_version: Literal[1] = Field(
+        1, alias="schemaVersion", description="Schema version"
+    )
+    created_at: datetime = Field(
+        ..., alias="createdAt", description="ISO 8601 timestamp of creation"
+    )
+    source_manifest_ref: FrozenEvalManifestSourceRef = Field(
+        ..., alias="sourceManifestRef", description="Reference to source dataset manifest v2"
+    )
+    records: list[FrozenEvalManifestRecord] = Field(
+        ..., description="Array of record references with conditioning metadata"
+    )
+    stratification_targets: FrozenEvalManifestStratificationTargets | None = Field(
+        None,
+        alias="stratificationTargets",
+        description="Stratification targets used during selection",
+    )
+    counts_by_skill_bucket_id: dict[str, int] = Field(
+        default_factory=dict,
+        alias="countsBySkillBucketId",
+        description="Record counts by M06 skill bucket ID (keyed by bucket ID)",
+    )
+    counts_by_time_control_class: dict[str, int] = Field(
+        default_factory=dict,
+        alias="countsByTimeControlClass",
+        description="Record counts by time control class (keyed by class)",
+    )
+    counts_by_time_pressure_bucket: dict[str, int] = Field(
+        default_factory=dict,
+        alias="countsByTimePressureBucket",
+        description="Record counts by time pressure bucket (keyed by bucket)",
+    )
+    coverage_shortfalls: list[FrozenEvalManifestCoverageShortfall] = Field(
+        default_factory=list,
+        alias="coverageShortfalls",
+        description="Coverage shortfalls (where targets not met)",
+    )
+    manifest_hash: str = Field(
+        ...,
+        alias="manifestHash",
+        description="SHA-256 hash of canonical JSON for this manifest (computed after all other fields)",
+        pattern="^[a-f0-9]{64}$",
     )
 
 
