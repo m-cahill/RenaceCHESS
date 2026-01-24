@@ -1,7 +1,7 @@
 # M06 Tool Calls Log
 
 **Milestone:** M06  
-**Status:** 🔄 **PLANNING**
+**Status:** ✅ **CLOSED / IMMUTABLE**
 
 ---
 
@@ -46,8 +46,19 @@
 | 2026-01-24T01:35:00Z | search_replace | Add CLI conditioned metrics flags | src/renacechess/cli.py | completed |
 | 2026-01-24T01:40:00Z | search_replace | Add frozen eval generate handler | src/renacechess/cli.py | completed |
 | 2026-01-24T01:45:00Z | read_lints | Verify all M06 code lints clean | multiple files | completed (0 errors) |
+| 2026-01-24T02:00:00Z | run_terminal_cmd | Create PR and run CI | gh pr create | completed |
+| 2026-01-24T02:15:00Z | run_terminal_cmd | CI analysis run 1 | gh run view | completed (failures) |
+| 2026-01-24T02:30:00Z | search_replace | Fix lint errors (undefined names, line lengths) | multiple files | completed |
+| 2026-01-24T02:45:00Z | run_terminal_cmd | CI runs 2-5 | gh run watch | completed (format failures) |
+| 2026-01-24T03:00:00Z | run_terminal_cmd | Ruff version alignment | pip install ruff==0.14.14 | completed |
+| 2026-01-24T03:15:00Z | write | Add .gitattributes for LF enforcement | .gitattributes | completed |
+| 2026-01-24T03:30:00Z | search_replace | Add ruff line-ending = "lf" config | pyproject.toml | completed |
+| 2026-01-24T03:45:00Z | run_terminal_cmd | Renormalize Python files | git add --renormalize . | completed |
+| 2026-01-24T04:00:00Z | run_terminal_cmd | Final CI verification | gh run list | completed (success) |
+| 2026-01-24T04:15:00Z | write | Generate M06_summary.md | docs/milestones/PoC/M06/M06_summary.md | completed |
+| 2026-01-24T04:20:00Z | write | Generate M06_audit.md | docs/milestones/PoC/M06/M06_audit.md | completed |
 
 ---
 
-*Tool calls will be logged here as M06 implementation progresses.*
+*M06 CLOSED / IMMUTABLE — No further tool calls.*
 
