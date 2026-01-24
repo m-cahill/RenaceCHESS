@@ -12,6 +12,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M01 | ✅ Closed | `m01-dataset-shards` → `main` | 2026-01-23 | Deterministic Dataset Shard Builder (PGN → JSONL + Manifest) |
 | M02 | ✅ Closed | `m02-lichess-ingestion` → `main` | 2026-01-23 | Deterministic Lichess Ingestion |
 | M03 | ✅ Closed | `m03-dataset-assembly` → `main` | 2026-01-23 | Deterministic Multi-Shard Dataset Assembly |
+| M04 | ✅ Closed | `m04-eval-harness` → `main` | 2026-01-24 | Evaluation Harness v0: Deterministic Policy Evaluation Over Dataset Manifests |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -51,6 +52,16 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 - **Final Commit:** `0acae10`
 - **Audit:** `docs/milestones/PoC/M03/M03_audit.md`
 - **Summary:** `docs/milestones/PoC/M03/M03_summary.md`
+
+**M04 Details:**
+- **CI Run 1:** 21306101033 (FAILURE - Formatting only, all tests passing)
+- **CI Run 2:** 21306130316 (SUCCESS - All gates passing)
+- **Final Coverage:** Meets 90% threshold (CI job passed)
+- **Test Count:** 180 tests (up from 160)
+- **PR:** #6 (ready for merge)
+- **Final Commit:** `c342498`
+- **Audit:** `docs/milestones/PoC/M04/M04_audit.md`
+- **Summary:** `docs/milestones/PoC/M04/M04_summary.md`
 
 ---
 
@@ -113,6 +124,11 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 - **Pydantic Model:** `renacechess.contracts.models.IngestReceiptV1`
 - **Status:** ✅ Complete and validated
 
+### Evaluation Report Schema (v1)
+- **Location:** `src/renacechess/contracts/schemas/v1/eval_report.v1.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.EvalReportV1`
+- **Status:** ✅ Complete and validated
+
 ---
 
 ## Key Guarantees Established in M00
@@ -128,6 +144,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-01-23 (M03 closeout)
+**Last Updated:** 2026-01-24 (M04 closeout)
 
 
