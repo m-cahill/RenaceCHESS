@@ -1,5 +1,7 @@
 """Pydantic models for RenaceCHESS contracts."""
 
+from __future__ import annotations
+
 from datetime import datetime
 from typing import Literal
 
@@ -736,7 +738,7 @@ class ConditionedAccuracyMetrics(BaseModel):
 
 
 class ConditionedMetrics(BaseModel):
-    """Metrics for a single conditioning stratum (v3 report)."""
+    """Metrics for a single conditioning stratum (v3 report, extended with HDI in v4)."""
 
     model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
 
@@ -760,6 +762,10 @@ class ConditionedMetrics(BaseModel):
     )
     validity: ConditionedValidityMetrics | None = Field(
         None, description="Policy validity metrics (from v1/v2 reports)"
+    )
+    hdi: HDIMetrics | None = Field(
+        None,
+        description="Human Difficulty Index (HDI) metrics (M07, optional for v3 compatibility)",
     )
 
 
@@ -817,6 +823,131 @@ class EvalReportV3(BaseModel):
         alias="byTimePressureBucket",
         description="Metrics stratified by time pressure bucket",
     )
+
+
+class EvalReportV4(BaseModel):
+    """Evaluation report (v4) - extends v3 with Human Difficulty Index (HDI) metrics (M07)."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    schema_version: Literal["eval_report.v4"] = Field(
+        "eval_report.v4", alias="schemaVersion", description="Schema version"
+    )
+    created_at: datetime = Field(
+        ..., alias="createdAt", description="ISO 8601 timestamp of creation"
+    )
+    dataset_digest: str = Field(
+        ...,
+        alias="datasetDigest",
+        description="SHA-256 hash from dataset manifest v2 (stable dataset identity)",
+        pattern="^[a-f0-9]{64}$",
+    )
+    assembly_config_hash: str = Field(
+        ...,
+        alias="assemblyConfigHash",
+        description="SHA-256 hash from dataset manifest v2 (assembly configuration hash)",
+        pattern="^[a-f0-9]{64}$",
+    )
+    policy_id: str = Field(
+        ..., alias="policyId", description="Policy identifier (e.g., 'baseline.uniform_random')"
+    )
+    eval_config_hash: str = Field(
+        ...,
+        alias="evalConfigHash",
+        description="SHA-256 hash of canonical JSON config",
+        pattern="^[a-f0-9]{64}$",
+    )
+    frozen_eval_manifest_hash: str | None = Field(
+        None,
+        alias="frozenEvalManifestHash",
+        description="SHA-256 hash of frozen eval manifest (if frozen eval was used)",
+        pattern="^[a-f0-9]{64}$",
+    )
+    overall: ConditionedMetrics = Field(..., description="Overall metrics (all records)")
+    by_skill_bucket_id: dict[str, ConditionedMetrics] = Field(
+        default_factory=dict,
+        alias="bySkillBucketId",
+        description="Metrics stratified by M06 skill bucket ID",
+    )
+    by_time_control_class: dict[str, ConditionedMetrics] = Field(
+        default_factory=dict,
+        alias="byTimeControlClass",
+        description="Metrics stratified by time control class",
+    )
+    by_time_pressure_bucket: dict[str, ConditionedMetrics] = Field(
+        default_factory=dict,
+        alias="byTimePressureBucket",
+        description="Metrics stratified by time pressure bucket",
+    )
+
+
+# HDI Models (M07) - for Evaluation Reports
+
+
+class HDIOutcomeSensitivity(BaseModel):
+    """Outcome sensitivity component for HDI (M07)."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    value: float = Field(
+        ..., ge=0.0, le=1.0, description="Outcome sensitivity value (normalized to [0.0, 1.0])"
+    )
+    source: Literal["proxy", "outcome_head"] = Field(
+        ..., description="Source of outcome sensitivity (proxy or outcome_head)"
+    )
+    note: str = Field(
+        ...,
+        description=(
+            "Note about the source "
+            "(e.g., 'entropy * (1 - topGap); replaced when outcome head exists')"
+        ),
+    )
+
+
+class HDIMetricsComponents(BaseModel):
+    """HDI component values for evaluation reports (M07)."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    entropy: float = Field(
+        ..., ge=0.0, le=1.0, description="Normalized policy entropy component [0.0, 1.0]"
+    )
+    top_gap_inverted: float = Field(
+        ...,
+        alias="topGapInverted",
+        ge=0.0,
+        le=1.0,
+        description="Inverted normalized top gap (higher = more ambiguous) [0.0, 1.0]",
+    )
+    legal_move_pressure: float = Field(
+        ...,
+        alias="legalMovePressure",
+        ge=0.0,
+        le=1.0,
+        description="Normalized legal move pressure [0.0, 1.0]",
+    )
+    outcome_sensitivity: HDIOutcomeSensitivity = Field(
+        ...,
+        alias="outcomeSensitivity",
+        description="Outcome sensitivity component (with source metadata)",
+    )
+
+
+class HDIMetrics(BaseModel):
+    """Human Difficulty Index (HDI) metrics for evaluation reports (M07)."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    value: float = Field(
+        ...,
+        ge=0.0,
+        le=1.0,
+        description="Human Difficulty Index scalar value [0.0, 1.0]",
+    )
+    spec_version: int = Field(
+        ..., alias="specVersion", description="HDI specification version (1 for M07)"
+    )
+    components: HDIMetricsComponents = Field(..., description="HDI component values")
 
 
 # Frozen Eval Manifest Models
