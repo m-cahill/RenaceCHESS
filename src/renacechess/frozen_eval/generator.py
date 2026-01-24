@@ -57,12 +57,14 @@ def generate_frozen_eval_manifest(
 
     # Read all shards and extract labeled records with conditioning metadata
     records: list[FrozenEvalManifestRecord] = []
-    shard_dir = source_manifest_path.parent / "shards"
+    manifest_dir = source_manifest_path.parent
 
     for shard_ref in source_manifest.shard_refs:
-        shard_path = shard_dir / shard_ref.path
+        # Try relative to manifest directory first
+        shard_path = manifest_dir / shard_ref.path
         if not shard_path.exists():
-            shard_path = Path(shard_ref.path)  # Try absolute path
+            # Try absolute path
+            shard_path = Path(shard_ref.path)
 
         if not shard_path.exists():
             raise FileNotFoundError(f"Shard file not found: {shard_ref.path}")
@@ -138,7 +140,11 @@ def generate_frozen_eval_manifest(
     for bucket_id, bucket_records in sorted_buckets:
         proportion = len(bucket_records) / total_available
         allocated = max(
-            min_per_skill_bucket if len(bucket_records) >= min_per_skill_bucket else len(bucket_records),
+            (
+                min_per_skill_bucket
+                if len(bucket_records) >= min_per_skill_bucket
+                else len(bucket_records)
+            ),
             int(target_total_records * proportion),
         )
         records_per_bucket[bucket_id] = min(allocated, len(bucket_records))
@@ -158,47 +164,82 @@ def generate_frozen_eval_manifest(
         selected_records.extend(sorted_bucket_records[:count])
 
     # Compute counts by conditioning axes
-    counts_by_skill = defaultdict(int)
-    counts_by_time_control = defaultdict(int)
-    counts_by_time_pressure = defaultdict(int)
+    counts_by_skill: dict[str, int] = defaultdict(int)
+    counts_by_time_control: dict[str, int] = defaultdict(int)
+    counts_by_time_pressure: dict[str, int] = defaultdict(int)
 
     for record in selected_records:
         counts_by_skill[record.skill_bucket_id or "unknown"] += 1
         counts_by_time_control[record.time_control_class or "unknown"] += 1
         counts_by_time_pressure[record.time_pressure_bucket or "unknown"] += 1
 
-    # Build manifest (without hash)
-    if created_at is None:
-        created_at = datetime.now()
+        # Build manifest (without hash)
+        if created_at is None:
+            created_at = datetime.now()
 
-    manifest = FrozenEvalManifestV1(
-        schema_version=1,
-        created_at=created_at,
-        source_manifest_ref=FrozenEvalManifestSourceRef(
-            dataset_digest=source_manifest.dataset_digest,
-            manifest_path=str(source_manifest_path),
-        ),
-        records=selected_records,
-        stratification_targets=FrozenEvalManifestStratificationTargets(
-            total_records=target_total_records,
-            min_per_skill_bucket=min_per_skill_bucket,
-        ),
-        counts_by_skill_bucket_id=dict(counts_by_skill),
-        counts_by_time_control_class=dict(counts_by_time_control),
-        counts_by_time_pressure_bucket=dict(counts_by_time_pressure),
-        coverage_shortfalls=coverage_shortfalls,
-        manifest_hash="",  # Computed after serialization
-    )
+        # Compute manifest hash first (exclude manifestHash field)
+        # Build dict without hash for hashing
+        manifest_dict_for_hash = {
+            "schemaVersion": 1,
+            "createdAt": created_at.isoformat(),
+            "sourceManifestRef": {
+                "datasetDigest": source_manifest.dataset_digest,
+                "manifestPath": str(source_manifest_path),
+            },
+            "records": [
+                {
+                    "recordKey": r.record_key,
+                    "shardId": r.shard_id,
+                    "shardHash": r.shard_hash,
+                    "skillBucketId": r.skill_bucket_id,
+                    "timeControlClass": r.time_control_class,
+                    "timePressureBucket": r.time_pressure_bucket,
+                }
+                for r in selected_records
+            ],
+            "stratificationTargets": {
+                "totalRecords": target_total_records,
+                "minPerSkillBucket": min_per_skill_bucket,
+            },
+            "countsBySkillBucketId": dict(counts_by_skill),
+            "countsByTimeControlClass": dict(counts_by_time_control),
+            "countsByTimePressureBucket": dict(counts_by_time_pressure),
+            "coverageShortfalls": [
+                {
+                    "axis": s.axis,
+                    "value": s.value,
+                    "target": s.target,
+                    "actual": s.actual,
+                }
+                for s in coverage_shortfalls
+            ],
+        }
+        manifest_bytes = canonical_json_dump(manifest_dict_for_hash)
+        from renacechess.determinism import stable_hash
 
-    # Compute manifest hash (exclude manifestHash field itself)
-    manifest_dict = manifest.model_dump(mode="json", by_alias=True, exclude={"manifest_hash"})
-    manifest_bytes = canonical_json_dump(manifest_dict)
-    manifest_hash = canonical_hash(manifest_bytes)
+        manifest_hash = stable_hash(manifest_bytes)
 
-    # Update hash
-    manifest.manifest_hash = manifest_hash
+        # Build manifest with computed hash
+        manifest = FrozenEvalManifestV1(
+            schema_version=1,
+            created_at=created_at,
+            source_manifest_ref=FrozenEvalManifestSourceRef(
+                dataset_digest=source_manifest.dataset_digest,
+                manifest_path=str(source_manifest_path),
+            ),
+            records=selected_records,
+            stratification_targets=FrozenEvalManifestStratificationTargets(
+                total_records=target_total_records,
+                min_per_skill_bucket=min_per_skill_bucket,
+            ),
+            counts_by_skill_bucket_id=dict(counts_by_skill),
+            counts_by_time_control_class=dict(counts_by_time_control),
+            counts_by_time_pressure_bucket=dict(counts_by_time_pressure),
+            coverage_shortfalls=coverage_shortfalls,
+            manifest_hash=manifest_hash,
+        )
 
-    return manifest
+        return manifest
 
 
 def write_frozen_eval_manifest(manifest: FrozenEvalManifestV1, output_path: Path) -> None:

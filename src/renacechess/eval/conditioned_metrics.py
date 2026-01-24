@@ -212,7 +212,9 @@ class ConditionedMetricsAccumulator:
                         sum(self.legal_moves_count_values) / len(self.legal_moves_count_values)
                     ),
                     median=format_fixed_decimal(
-                        sorted(self.legal_moves_count_values)[len(self.legal_moves_count_values) // 2]
+                        sorted(self.legal_moves_count_values)[
+                            len(self.legal_moves_count_values) // 2
+                        ]
                     )
                     if len(self.legal_moves_count_values) > 0
                     else None,

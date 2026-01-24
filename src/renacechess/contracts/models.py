@@ -26,7 +26,8 @@ class PositionConditioning(BaseModel):
     M06 Extension:
     - Added optional M06-specific fields (skillBucketId, spec versions, timeControlRaw)
     - Extended enums to support both legacy and M06 values for backward compatibility
-    - Legacy fields (skillBucket, timePressureBucket, timeControlClass) remain required/optional as before
+    - Legacy fields (skillBucket, timePressureBucket, timeControlClass)
+      remain required/optional as before
     """
 
     model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
@@ -50,7 +51,14 @@ class PositionConditioning(BaseModel):
 
     # M06-specific fields (optional, additive)
     skill_bucket_id: Literal[
-        "lt_800", "800_999", "1000_1199", "1200_1399", "1400_1599", "1600_1799", "gte_1800", "unknown"
+        "lt_800",
+        "800_999",
+        "1000_1199",
+        "1200_1399",
+        "1400_1599",
+        "1600_1799",
+        "gte_1800",
+        "unknown",
     ] | None = Field(
         None,
         alias="skillBucketId",
@@ -668,7 +676,9 @@ class DistributionStats(BaseModel):
 
     mean: str = Field(..., description="Mean value (fixed-decimal string)")
     median: str | None = Field(None, description="Median value (fixed-decimal string, optional)")
-    stddev: str | None = Field(None, description="Standard deviation (fixed-decimal string, optional)")
+    stddev: str | None = Field(
+        None, description="Standard deviation (fixed-decimal string, optional)"
+    )
 
 
 class ConditionedDistributionMetrics(BaseModel):
@@ -758,7 +768,9 @@ class EvalReportV3(BaseModel):
     schema_version: Literal["eval_report.v3"] = Field(
         "eval_report.v3", alias="schemaVersion", description="Schema version"
     )
-    created_at: datetime = Field(..., alias="createdAt", description="ISO 8601 timestamp of creation")
+    created_at: datetime = Field(
+        ..., alias="createdAt", description="ISO 8601 timestamp of creation"
+    )
     dataset_digest: str = Field(
         ...,
         alias="datasetDigest",
@@ -828,8 +840,12 @@ class FrozenEvalManifestRecord(BaseModel):
 
     model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
 
-    record_key: str = Field(..., alias="recordKey", description="Record identifier (e.g., 'fen:ply')")
-    shard_id: str = Field(..., alias="shardId", description="Shard identifier containing this record")
+    record_key: str = Field(
+        ..., alias="recordKey", description="Record identifier (e.g., 'fen:ply')"
+    )
+    shard_id: str = Field(
+        ..., alias="shardId", description="Shard identifier containing this record"
+    )
     shard_hash: str = Field(
         ...,
         alias="shardHash",
@@ -837,7 +853,14 @@ class FrozenEvalManifestRecord(BaseModel):
         pattern="^[a-f0-9]{64}$",
     )
     skill_bucket_id: Literal[
-        "lt_800", "800_999", "1000_1199", "1200_1399", "1400_1599", "1600_1799", "gte_1800", "unknown"
+        "lt_800",
+        "800_999",
+        "1000_1199",
+        "1200_1399",
+        "1400_1599",
+        "1600_1799",
+        "gte_1800",
+        "unknown",
     ] | None = Field(
         None,
         alias="skillBucketId",
@@ -929,7 +952,10 @@ class FrozenEvalManifestV1(BaseModel):
     manifest_hash: str = Field(
         ...,
         alias="manifestHash",
-        description="SHA-256 hash of canonical JSON for this manifest (computed after all other fields)",
+        description=(
+            "SHA-256 hash of canonical JSON for this manifest "
+            "(computed after all other fields)"
+        ),
         pattern="^[a-f0-9]{64}$",
     )
 
