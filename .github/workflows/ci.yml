@@ -28,11 +28,6 @@ jobs:
         run: ruff check .
       - name: Ruff format check
         run: ruff format --check .
-      - name: Diagnostic (M06 formatting issue)
-        if: failure()
-        run: |
-          ruff format --check --diff tests/test_m06_conditioning_buckets.py || true
-          python -c "p=open('tests/test_m06_conditioning_buckets.py','rb').read(); print('CRLF count:', p.count(b'\r\n')); print('First 16 bytes:', p[:16]); print('Last 16 bytes:', p[-16:])"
 
   typecheck:
     name: Type Check
