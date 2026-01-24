@@ -458,8 +458,7 @@ class EvalMetricsV1(BaseModel):
         ...,
         alias="illegalMoveRate",
         description=(
-            "Percentage of records where policy emits move not in legalMoves "
-            "(fixed-decimal string)"
+            "Percentage of records where policy emits move not in legalMoves (fixed-decimal string)"
         ),
     )
     top_k_legal_coverage: TopKLegalCoverage = Field(
