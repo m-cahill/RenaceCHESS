@@ -26,6 +26,8 @@ jobs:
           pip install -e ".[dev]"
       - name: Ruff lint
         run: ruff check .
+      - name: Ensure clean checkout
+        run: git checkout HEAD -- .
       - name: Ruff format check
         run: ruff format --check .
 
