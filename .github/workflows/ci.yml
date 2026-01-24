@@ -26,18 +26,8 @@ jobs:
           pip install -e ".[dev]"
       - name: Ruff lint
         run: ruff check .
-      - name: Debug format issue
-        run: |
-          echo "=== Git status ==="
-          git status
-          echo "=== Git log ==="
-          git log --oneline -3
-          echo "=== Force checkout from HEAD ==="
-          git checkout HEAD -- tests/test_m06_conditioning_buckets.py
-          echo "=== File after checkout ==="
-          python -c "p=open('tests/test_m06_conditioning_buckets.py','rb').read(); print('CRLF:', p.count(b'\r\n'), 'LF:', p.count(b'\n') - p.count(b'\r\n'), 'Size:', len(p))"
-          echo "=== First 10 lines after checkout ==="
-          head -n 10 tests/test_m06_conditioning_buckets.py
+      - name: Ensure clean checkout
+        run: git checkout HEAD -- .
       - name: Ruff format check
         run: ruff format --check .
 
