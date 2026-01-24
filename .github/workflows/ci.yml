@@ -32,10 +32,11 @@ jobs:
           ruff --version
           echo "=== pyproject.toml format section ==="
           grep -A2 'tool.ruff.format' pyproject.toml || echo "No format section"
-          echo "=== File line endings ==="
-          python -c "p=open('tests/test_m06_conditioning_buckets.py','rb').read(); print('CRLF:', p.count(b'\r\n'), 'LF:', p.count(b'\n') - p.count(b'\r\n'))"
-          echo "=== First 100 bytes ==="
-          python -c "print(open('tests/test_m06_conditioning_buckets.py','rb').read()[:100])"
+          echo "=== File line endings and size ==="
+          python -c "p=open('tests/test_m06_conditioning_buckets.py','rb').read(); print('CRLF:', p.count(b'\r\n'), 'LF:', p.count(b'\n') - p.count(b'\r\n'), 'Size:', len(p))"
+          echo "=== Ruff format diff ==="
+          ruff format --diff tests/test_m06_conditioning_buckets.py || true
+          echo "=== End diff ==="
       - name: Ruff format check
         run: ruff format --check .
 
