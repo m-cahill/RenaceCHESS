@@ -9,6 +9,7 @@ from renacechess.dataset.config import DatasetBuildConfig
 from renacechess.demo.pgn_overlay import generate_demo_payload
 from renacechess.determinism import canonical_json_dump
 from renacechess.eval.report import build_eval_report, build_eval_report_v2, write_eval_report
+from renacechess.contracts.models import FrozenEvalManifestV1
 from renacechess.eval.runner import run_evaluation, run_conditioned_evaluation
 from renacechess.frozen_eval import generate_frozen_eval_manifest, write_frozen_eval_manifest
 from renacechess.ingest.ingest import ingest_from_lichess, ingest_from_url
@@ -156,12 +157,12 @@ def main() -> None:
     run_parser.add_argument(
         "--conditioned-metrics",
         action="store_true",
-        help="Compute conditioned metrics stratified by skill/time (M06, generates eval_report.v3)",
+        help="Compute conditioned metrics stratified by skill/time (M07, generates eval_report.v4 with HDI)",
     )
     run_parser.add_argument(
         "--frozen-eval-manifest",
         type=Path,
-        help="Path to frozen eval manifest (M06, for frozen eval runs)",
+        help="Path to frozen eval manifest (M07, REQUIRED when --conditioned-metrics is used)",
     )
 
     # M06: Frozen eval generation command
@@ -337,19 +338,34 @@ def main() -> None:
                     "conditioned_metrics": args.conditioned_metrics,
                 }
 
-                # M06: Check for conditioned metrics mode
+                # M07: Check for conditioned metrics mode
                 if args.conditioned_metrics:
-                    # Load frozen eval manifest hash if provided
-                    frozen_eval_manifest_hash = None
-                    if args.frozen_eval_manifest:
-                        import json
+                    # M07: Frozen eval manifest is REQUIRED when --conditioned-metrics is used
+                    if not args.frozen_eval_manifest:
+                        print(
+                            "Error: --frozen-eval-manifest is REQUIRED when --conditioned-metrics is used. "
+                            "This ensures evaluation comparability.",
+                            file=sys.stderr,
+                        )
+                        sys.exit(1)
 
+                    # Load and validate frozen eval manifest
+                    import json
+
+                    try:
                         frozen_manifest_dict = json.loads(
                             args.frozen_eval_manifest.read_text(encoding="utf-8")
                         )
-                        frozen_eval_manifest_hash = frozen_manifest_dict.get("manifestHash")
+                        frozen_manifest = FrozenEvalManifestV1.model_validate(frozen_manifest_dict)
+                        frozen_eval_manifest_hash = frozen_manifest.manifest_hash
+                    except Exception as e:
+                        print(
+                            f"Error: Failed to load or validate frozen eval manifest: {e}",
+                            file=sys.stderr,
+                        )
+                        sys.exit(1)
 
-                    # Run conditioned evaluation (M06)
+                    # Run conditioned evaluation (M07)
                     eval_results = run_conditioned_evaluation(
                         manifest_path=args.dataset_manifest,
                         policy_id=args.policy,
@@ -360,25 +376,41 @@ def main() -> None:
                         frozen_eval_manifest_hash=frozen_eval_manifest_hash,
                     )
 
-                    # Build EvalReportV3
+                    # Validate frozen eval manifest hash matches (if provided in results)
+                    if (
+                        eval_results.get("frozen_eval_manifest_hash")
+                        and eval_results["frozen_eval_manifest_hash"] != frozen_eval_manifest_hash
+                    ):
+                        print(
+                            f"Error: Frozen eval manifest hash mismatch. "
+                            f"Expected {frozen_eval_manifest_hash}, "
+                            f"got {eval_results['frozen_eval_manifest_hash']}",
+                            file=sys.stderr,
+                        )
+                        sys.exit(1)
+
+                    # Build EvalReportV4 (M07 - includes HDI)
                     from renacechess.contracts.models import (
                         EvalReportV1,
                         EvalReportV2,
                         EvalReportV3,
+                        EvalReportV4,
                     )
 
-                    report: EvalReportV1 | EvalReportV2 | EvalReportV3 = EvalReportV3(
-                        schema_version="eval_report.v3",
-                        created_at=created_at or datetime.now(),
-                        dataset_digest=eval_results["dataset_digest"],
-                        assembly_config_hash=eval_results["assembly_config_hash"],
-                        policy_id=eval_results["policy_id"],
-                        eval_config_hash=eval_results["eval_config_hash"],
-                        frozen_eval_manifest_hash=eval_results.get("frozen_eval_manifest_hash"),
-                        overall=eval_results["overall"],
-                        by_skill_bucket_id=eval_results["by_skill_bucket_id"],
-                        by_time_control_class=eval_results["by_time_control_class"],
-                        by_time_pressure_bucket=eval_results["by_time_pressure_bucket"],
+                    report: EvalReportV1 | EvalReportV2 | EvalReportV3 | EvalReportV4 = (
+                        EvalReportV4(
+                            schema_version="eval_report.v4",
+                            created_at=created_at or datetime.now(),
+                            dataset_digest=eval_results["dataset_digest"],
+                            assembly_config_hash=eval_results["assembly_config_hash"],
+                            policy_id=eval_results["policy_id"],
+                            eval_config_hash=eval_results["eval_config_hash"],
+                            frozen_eval_manifest_hash=frozen_eval_manifest_hash,
+                            overall=eval_results["overall"],
+                            by_skill_bucket_id=eval_results["by_skill_bucket_id"],
+                            by_time_control_class=eval_results["by_time_control_class"],
+                            by_time_pressure_bucket=eval_results["by_time_pressure_bucket"],
+                        )
                     )
                 else:
                     # Run standard evaluation (v1/v2)

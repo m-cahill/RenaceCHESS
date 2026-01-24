@@ -13,6 +13,7 @@ from renacechess.contracts.models import (
     EvalReportV1,
     EvalReportV2,
     EvalReportV3,
+    EvalReportV4,
     PolicyEntropyStats,
     TopKLegalCoverage,
 )
@@ -240,12 +241,12 @@ def build_eval_report_v2(
 
 
 def write_eval_report(
-    report: EvalReportV1 | EvalReportV2 | EvalReportV3, output_path: Path
+    report: EvalReportV1 | EvalReportV2 | EvalReportV3 | EvalReportV4, output_path: Path
 ) -> None:
     """Write evaluation report to file in canonical JSON format.
 
     Args:
-        report: EvalReportV1, EvalReportV2, or EvalReportV3 instance.
+        report: EvalReportV1, EvalReportV2, EvalReportV3, or EvalReportV4 instance.
         output_path: Path to output file.
     """
     # Serialize to dict with aliases (camelCase JSON)

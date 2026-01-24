@@ -2,6 +2,8 @@
 
 This module implements stratified metric accumulation by conditioning axes
 (skill bucket, time control class, time pressure bucket).
+
+M07 Extension: Adds Human Difficulty Index (HDI) computation.
 """
 
 from collections import defaultdict
@@ -13,7 +15,11 @@ from renacechess.contracts.models import (
     ConditionedMetrics,
     ConditionedValidityMetrics,
     DistributionStats,
+    HDIMetrics,
+    HDIMetricsComponents,
+    HDIOutcomeSensitivity,
 )
+from renacechess.eval.hdi import compute_hdi_v1
 from renacechess.eval.metrics import format_fixed_decimal
 
 
@@ -236,6 +242,48 @@ class ConditionedMetricsAccumulator:
                 unique_moves_emitted=len(self.unique_moves),
             )
 
+        # HDI metrics (M07) - computed from mean values
+        hdi = None
+        if (
+            self.records_with_policy > 0
+            and self.entropy_values
+            and self.top_gap_values
+            and self.legal_moves_count_values
+        ):
+            # Compute HDI from mean values
+            mean_entropy = sum(self.entropy_values) / len(self.entropy_values)
+            mean_top_gap = sum(self.top_gap_values) / len(self.top_gap_values)
+            mean_legal_moves = sum(self.legal_moves_count_values) / len(
+                self.legal_moves_count_values
+            )
+
+            # Compute HDI v1 (using proxy for outcome sensitivity)
+            hdi_result = compute_hdi_v1(
+                entropy=mean_entropy,
+                top_gap=mean_top_gap,
+                legal_moves_count=int(mean_legal_moves),
+            )
+
+            # Convert to Pydantic models
+            outcome_sensitivity = HDIOutcomeSensitivity(
+                value=hdi_result["components"]["outcomeSensitivity"]["value"],
+                source=hdi_result["components"]["outcomeSensitivity"]["source"],
+                note=hdi_result["components"]["outcomeSensitivity"]["note"],
+            )
+
+            components = HDIMetricsComponents(
+                entropy=hdi_result["components"]["entropy"],
+                top_gap_inverted=hdi_result["components"]["topGapInverted"],
+                legal_move_pressure=hdi_result["components"]["legalMovePressure"],
+                outcome_sensitivity=outcome_sensitivity,
+            )
+
+            hdi = HDIMetrics(
+                value=hdi_result["value"],
+                spec_version=hdi_result["specVersion"],
+                components=components,
+            )
+
         return ConditionedMetrics(
             total_records=self.total_records,
             labeled_records=self.labeled_records,
@@ -243,6 +291,7 @@ class ConditionedMetricsAccumulator:
             accuracy=accuracy,
             distribution=distribution,
             validity=validity,
+            hdi=hdi,
         )
 
     def build_stratified_metrics(self) -> dict[str, dict[str, ConditionedMetrics]]:
