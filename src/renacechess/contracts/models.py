@@ -190,6 +190,122 @@ class DatasetManifest(BaseModel):
     )
 
 
+class DatasetManifestShardRefV2(BaseModel):
+    """Reference to a dataset shard (v2) - includes record count."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    shard_id: str = Field(..., alias="shardId", description="Unique shard identifier")
+    hash: str = Field(
+        ...,
+        description="SHA-256 hash of shard file (lowercase hex)",
+        pattern="^[a-f0-9]{64}$",
+    )
+    path: str = Field(..., description="Relative or absolute path to shard file")
+    records: int = Field(..., ge=0, description="Number of records in this shard")
+
+
+class DatasetManifestInputV2(BaseModel):
+    """Input source reference (v2) - receipt or PGN file."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    type: Literal["ingest_receipt", "pgn_file"] = Field(..., description="Input type")
+    digest: str = Field(
+        ...,
+        description=(
+            "SHA-256 hash: for receipts, use receipt.artifact.sha256 "
+            "(or derived if available); for PGN files, compute from file content"
+        ),
+        pattern="^[a-f0-9]{64}$",
+    )
+    receipt_id: str | None = Field(
+        None, alias="receiptId", description="Receipt identifier (only for type='ingest_receipt')"
+    )
+    path: str | None = Field(None, description="Path to input (receipt path or PGN file path)")
+
+
+class DatasetManifestAssemblyConfigV2(BaseModel):
+    """Assembly configuration (v2)."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    shard_size: int = Field(
+        ..., alias="shardSize", ge=1, description="Maximum number of records per shard"
+    )
+    max_games: int | None = Field(
+        None,
+        alias="maxGames",
+        ge=1,
+        description="Maximum number of games to process (null = no limit)",
+    )
+    max_positions: int | None = Field(
+        None,
+        alias="maxPositions",
+        ge=1,
+        description="Maximum number of positions to process (null = no limit)",
+    )
+    start_ply: int | None = Field(
+        None,
+        alias="startPly",
+        ge=0,
+        description="Start processing from this ply number (inclusive, null = no lower bound)",
+    )
+    end_ply: int | None = Field(
+        None,
+        alias="endPly",
+        ge=0,
+        description="Stop processing at this ply number (exclusive, null = no upper bound)",
+    )
+
+
+class DatasetManifestV2(BaseModel):
+    """Dataset manifest (v2) - includes assembly config and input provenance."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    schema_version: Literal["v2"] = Field("v2", alias="schemaVersion", description="Schema version")
+    created_at: datetime = Field(
+        ..., alias="createdAt", description="ISO 8601 timestamp of creation"
+    )
+    shard_refs: list[DatasetManifestShardRefV2] = Field(
+        ..., alias="shardRefs", description="List of shard references"
+    )
+    assembly_config_hash: str = Field(
+        ...,
+        alias="assemblyConfigHash",
+        description="SHA-256 hash of canonical JSON for assembly parameters",
+        pattern="^[a-f0-9]{64}$",
+    )
+    dataset_digest: str = Field(
+        ...,
+        alias="datasetDigest",
+        description=(
+            "SHA-256 hash combining assemblyConfigHash, input digests, "
+            "and schema versions (stable dataset identity)"
+        ),
+        pattern="^[a-f0-9]{64}$",
+    )
+    inputs: list[DatasetManifestInputV2] = Field(
+        default_factory=list,
+        description="List of input sources (receipts or PGN files) used to build this dataset",
+    )
+    assembly_config: DatasetManifestAssemblyConfigV2 = Field(
+        ..., alias="assemblyConfig", description="Assembly configuration parameters"
+    )
+    split_assignments: DatasetManifestSplitAssignments = Field(
+        ...,
+        alias="splitAssignments",
+        description="Split assignments (record-level, not shard-level)",
+    )
+    filter_config_hash: str | None = Field(
+        None,
+        alias="filterConfigHash",
+        description="Legacy filter config hash (kept for v1 compatibility, deprecated in v2)",
+        pattern="^[a-f0-9]{64}$",
+    )
+
+
 class SourceArtifactRefV1(BaseModel):
     """Source artifact reference (v1)."""
 

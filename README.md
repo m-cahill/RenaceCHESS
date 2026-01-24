@@ -31,13 +31,21 @@ python -m renacechess.cli demo --pgn tests/data/sample.pgn --out demo.json
 ### Build Dataset
 
 ```bash
-# Build dataset from PGN files
+# Build dataset from PGN files (backward compatible)
 python -m renacechess.cli dataset build \
   --pgn tests/data/sample.pgn \
   --out datasets/sample/ \
+  --shard-size 10000 \
   --max-positions 1000 \
   --start-ply 0 \
   --end-ply 40
+
+# Build dataset from ingest receipts (recommended for provenance)
+python -m renacechess.cli dataset build \
+  --receipt ingested/lichess-2024-01.json \
+  --out datasets/2024-jan/ \
+  --shard-size 10000 \
+  --cache-dir ~/.renacechess/cache
 ```
 
 See [Dataset Documentation](docs/DATASETS.md) for detailed format and usage.

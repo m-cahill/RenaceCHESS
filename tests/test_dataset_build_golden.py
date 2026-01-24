@@ -33,20 +33,28 @@ def test_dataset_build_golden(tmp_path: Path):
     manifest_path = tmp_path / "manifest.json"
     assert manifest_path.exists()
 
-    # Load and verify manifest structure
+    # Load and verify manifest structure (v2)
     manifest = json.loads(manifest_path.read_text())
-    assert manifest["schemaVersion"] == "v1"
+    assert manifest["schemaVersion"] == "v2"
     assert len(manifest["shardRefs"]) == 1
     assert manifest["shardRefs"][0]["shardId"] == "shard_000"
+    assert "records" in manifest["shardRefs"][0]
 
     # Verify shard hash matches manifest
     shard_content = shard_path.read_bytes()
     shard_hash = stable_hash(shard_content)
     assert manifest["shardRefs"][0]["hash"] == shard_hash
 
-    # Verify filter config hash is present
-    assert "filterConfigHash" in manifest
-    assert len(manifest["filterConfigHash"]) == 64  # SHA-256 hex length
+    # Verify v2-specific fields
+    assert "assemblyConfigHash" in manifest
+    assert len(manifest["assemblyConfigHash"]) == 64  # SHA-256 hex length
+    assert "datasetDigest" in manifest
+    assert len(manifest["datasetDigest"]) == 64
+    assert "assemblyConfig" in manifest
+    assert manifest["assemblyConfig"]["shardSize"] == 10000  # Default
+    assert "inputs" in manifest
+    assert len(manifest["inputs"]) == 1
+    assert manifest["inputs"][0]["type"] == "pgn_file"
 
     # Verify split assignments are present
     assert "splitAssignments" in manifest
