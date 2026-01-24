@@ -361,7 +361,11 @@ def main() -> None:
                     )
 
                     # Build EvalReportV3
-                    from renacechess.contracts.models import EvalReportV1, EvalReportV2, EvalReportV3
+                    from renacechess.contracts.models import (
+                        EvalReportV1,
+                        EvalReportV2,
+                        EvalReportV3,
+                    )
 
                     report: EvalReportV1 | EvalReportV2 | EvalReportV3 = EvalReportV3(
                         schema_version="eval_report.v3",
