@@ -41,13 +41,9 @@ class PolicyDataset(Dataset):
         # Load frozen eval manifest if provided
         self.frozen_eval_keys: set[str] = set()
         if frozen_eval_manifest_path is not None:
-            frozen_dict = json.loads(
-                frozen_eval_manifest_path.read_text(encoding="utf-8")
-            )
+            frozen_dict = json.loads(frozen_eval_manifest_path.read_text(encoding="utf-8"))
             frozen_manifest = FrozenEvalManifestV1.model_validate(frozen_dict)
-            self.frozen_eval_keys = {
-                record.record_key for record in frozen_manifest.records
-            }
+            self.frozen_eval_keys = {record.record_key for record in frozen_manifest.records}
 
         # Load all training records
         self.records: list[dict[str, Any]] = []
@@ -193,9 +189,7 @@ def train_baseline_policy(
     # Create data loader
     # Note: For M08 minimal baseline, we'll use a simple approach
     # In production, you'd want proper batching, but for now we'll train one-by-one
-    dataloader = DataLoader(
-        dataset, batch_size=1, shuffle=False
-    )  # Deterministic: no shuffle
+    dataloader = DataLoader(dataset, batch_size=1, shuffle=False)  # Deterministic: no shuffle
 
     # Loss and optimizer
     criterion = nn.CrossEntropyLoss()
@@ -270,4 +264,3 @@ def train_baseline_policy(
         json.dump(metadata, f, indent=2, sort_keys=True)
 
     return model_path
-

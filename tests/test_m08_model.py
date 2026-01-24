@@ -139,3 +139,45 @@ def test_baseline_policy_v1_deterministic() -> None:
     for move in legal_moves:
         assert abs(probs1[move] - probs2[move]) < 1e-6
 
+
+def test_baseline_policy_v1_skill_bucket_legacy_formats() -> None:
+    """Test skill bucket encoding with various legacy formats."""
+    model = BaselinePolicyV1()
+
+    # Test various legacy formats
+    assert model._encode_skill_bucket("800-999") == 1
+    assert model._encode_skill_bucket("1000-1199") == 2
+    assert model._encode_skill_bucket("1400-1599") == 4
+    assert model._encode_skill_bucket("1800-2000") == 6
+    assert model._encode_skill_bucket("invalid-format") == 7
+    assert model._encode_skill_bucket("") == 7
+
+
+def test_baseline_policy_v1_move_vocab_full() -> None:
+    """Test move vocabulary when full."""
+    model = BaselinePolicyV1(move_vocab_size=2)
+
+    # Fill vocabulary
+    idx1 = model.add_move_to_vocab("e2e4")
+    idx2 = model.add_move_to_vocab("d2d4")
+
+    # Adding more should hash to existing slots
+    idx3 = model.add_move_to_vocab("g1f3")
+    assert idx3 < model.move_vocab_size
+
+
+def test_baseline_policy_v1_forward_logits_empty() -> None:
+    """Test forward_logits with no legal moves in vocabulary."""
+    model = BaselinePolicyV1(move_vocab_size=10)
+    model.eval()
+
+    fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    legal_moves = ["a1a2"]  # Not in vocabulary
+
+    legal_logits, legal_moves_filtered, legal_indices = model.forward_logits(
+        fen, "1200_1399", "blitz", legal_moves
+    )
+
+    # Should return empty when no moves in vocabulary
+    assert len(legal_logits) == 0
+    assert len(legal_moves_filtered) == 0

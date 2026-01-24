@@ -46,9 +46,7 @@ class BaselinePolicyV1(nn.Module):
         # Embedding layers
         self.fen_embedding = nn.Embedding(fen_vocab_size, hidden_dim // 2)
         self.skill_embedding = nn.Embedding(skill_bucket_vocab_size, hidden_dim // 4)
-        self.time_control_embedding = nn.Embedding(
-            time_control_vocab_size, hidden_dim // 4
-        )
+        self.time_control_embedding = nn.Embedding(time_control_vocab_size, hidden_dim // 4)
 
         # Combined feature dimension
         feature_dim = hidden_dim // 2 + hidden_dim // 4 + hidden_dim // 4
@@ -284,9 +282,7 @@ class BaselinePolicyV1(nn.Module):
         else:
             # No legal moves in vocabulary: uniform distribution
             move_probs = {
-                move: 1.0 / len(legal_moves) if legal_moves else 0.0
-                for move in legal_moves
+                move: 1.0 / len(legal_moves) if legal_moves else 0.0 for move in legal_moves
             }
 
         return move_probs
-

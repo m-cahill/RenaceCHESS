@@ -130,4 +130,3 @@ def test_learned_policy_v1_empty_legal_moves(tmp_path: Path) -> None:
     moves = policy.predict(record)
 
     assert len(moves) == 0
-

@@ -81,7 +81,16 @@ def generate_frozen_eval_manifest(
                 conditioning = record_dict.get("conditioning", {})
                 skill_bucket_id = conditioning.get("skillBucketId")
                 time_control_class = conditioning.get("timeControlClass")
-                time_pressure_bucket = conditioning.get("timePressureBucket")
+                time_pressure_bucket_raw = conditioning.get("timePressureBucket")
+                # Normalize legacy uppercase values to lowercase (M06 format)
+                if time_pressure_bucket_raw == "NORMAL":
+                    time_pressure_bucket = "normal"
+                elif time_pressure_bucket_raw == "LOW":
+                    time_pressure_bucket = "low"
+                elif time_pressure_bucket_raw == "TROUBLE":
+                    time_pressure_bucket = "trouble"
+                else:
+                    time_pressure_bucket = time_pressure_bucket_raw
 
                 # Compute record key (FEN:ply)
                 fen = record_dict["position"]["fen"]

@@ -66,11 +66,11 @@ class LearnedHumanPolicyV1:
             move_probs = self.model(fen, skill_bucket, time_control, legal_moves)
 
         # Convert to PolicyMove list, sorted by probability
+        # Clamp probabilities to [0, 1] to handle floating-point precision issues
         policy_moves = [
-            PolicyMove(uci=move, san=None, p=prob)
+            PolicyMove(uci=move, san=None, p=max(0.0, min(1.0, prob)))
             for move, prob in move_probs.items()
         ]
         policy_moves.sort(key=lambda x: x.p, reverse=True)
 
         return policy_moves
-

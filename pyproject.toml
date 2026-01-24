@@ -88,6 +88,7 @@ markers = [
     "unit: Unit tests",
     "integration: Integration tests",
     "golden: Golden file regression tests",
+    "slow: Slow-running tests (training, large datasets)",
 ]
 
 [tool.coverage.run]

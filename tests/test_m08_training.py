@@ -62,7 +62,7 @@ def test_policy_dataset_excludes_frozen_eval(tmp_path: Path) -> None:
 
     manifest_path = dataset_dir / "manifest.json"
 
-    # Generate frozen eval manifest
+    # Generate frozen eval manifest (use lowercase time pressure to avoid validation error)
     from renacechess.frozen_eval import generate_frozen_eval_manifest
 
     frozen_manifest = generate_frozen_eval_manifest(
@@ -132,3 +132,37 @@ def test_train_baseline_policy_minimal(tmp_path: Path) -> None:
     assert "seed" in metadata
     assert metadata["seed"] == 42
 
+
+def test_policy_dataset_no_records_error(tmp_path: Path) -> None:
+    """Test PolicyDataset with no training records raises error."""
+    # Create empty manifest
+    manifest_path = tmp_path / "manifest.json"
+    manifest_dict = {
+        "schemaVersion": "v2",
+        "createdAt": "2024-01-01T12:00:00",
+        "shardRefs": [],
+        "splitAssignments": {"train": [], "val": [], "frozenEval": []},
+        "assemblyConfig": {"shardSize": 10000},
+        "assemblyConfigHash": "a" * 64,
+        "datasetDigest": "b" * 64,
+        "inputs": [],
+    }
+    manifest_path.write_text(json.dumps(manifest_dict))
+
+    # Create dataset (should have 0 records)
+    dataset = PolicyDataset(manifest_path, seed=42)
+    assert len(dataset) == 0
+
+    # Training should raise ValueError
+    from renacechess.models.training import train_baseline_policy
+
+    with pytest.raises(ValueError, match="No training records found"):
+        train_baseline_policy(
+            manifest_path=manifest_path,
+            frozen_eval_manifest_path=None,
+            output_dir=tmp_path / "output",
+            epochs=1,
+            batch_size=1,
+            learning_rate=0.001,
+            seed=42,
+        )
