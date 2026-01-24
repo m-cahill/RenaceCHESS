@@ -166,7 +166,10 @@ def test_generate_frozen_eval_manifest_insufficient_records(tmp_path: Path) -> N
             "conditioning": {"skillBucket": "1200-1400", "skillBucketId": "1200_1399"},
             "policy": {"topMoves": [{"uci": "e2e4", "p": 1.0}], "entropy": 0.0, "topGap": 0.0},
             "humanWDL": {"pre": {"w": 0.5, "d": 0.3, "l": 0.2}, "postByMove": {}},
-            "hdi": {"value": 0.5, "components": {"entropy": 0.0, "topGap": 0.0, "wdlSensitivity": 0.0}},
+            "hdi": {
+                "value": 0.5,
+                "components": {"entropy": 0.0, "topGap": 0.0, "wdlSensitivity": 0.0},
+            },
             "narrativeSeeds": [],
             "meta": {
                 "schemaVersion": "v1",
