@@ -13,6 +13,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M02 | ✅ Closed | `m02-lichess-ingestion` → `main` | 2026-01-23 | Deterministic Lichess Ingestion |
 | M03 | ✅ Closed | `m03-dataset-assembly` → `main` | 2026-01-23 | Deterministic Multi-Shard Dataset Assembly |
 | M04 | ✅ Closed | `m04-eval-harness` → `main` | 2026-01-24 | Evaluation Harness v0: Deterministic Policy Evaluation Over Dataset Manifests |
+| M05 | ✅ Closed (MERGED) | `m05-labeled-evaluation` → `main` | 2026-01-24 | Ground-Truth Labeled Evaluation v1: Accuracy Metrics and Evaluation Report v2 |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -62,6 +63,16 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 - **Final Commit:** `c99e148`
 - **Audit:** `docs/milestones/PoC/M04/M04_audit.md`
 - **Summary:** `docs/milestones/PoC/M04/M04_summary.md`
+
+**M05 Details:**
+- **CI Run 1:** 21306671140 (FAILURE - Formatting and coverage 89.18% < 90%)
+- **CI Run 2:** 21306722594 (SUCCESS - All gates passing)
+- **Final Coverage:** 92.38% (exceeds 90% threshold)
+- **Test Count:** 204 tests (up from 199)
+- **PR:** #7 (ready for merge)
+- **Final Commit:** `82e9454`
+- **Audit:** `docs/milestones/PoC/M05/M05_audit.md`
+- **Summary:** `docs/milestones/PoC/M05/M05_summary.md`
 
 ---
 
@@ -127,7 +138,17 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 ### Evaluation Report Schema (v1)
 - **Location:** `src/renacechess/contracts/schemas/v1/eval_report.v1.schema.json`
 - **Pydantic Model:** `renacechess.contracts.models.EvalReportV1`
-- **Status:** ✅ Complete and validated
+- **Status:** ✅ Complete and validated (immutable)
+
+### Evaluation Report Schema (v2)
+- **Location:** `src/renacechess/contracts/schemas/v1/eval_report.v2.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.EvalReportV2`
+- **Status:** ✅ Complete and validated (extends v1 with accuracy metrics)
+
+### Context Bridge Schema (v1) — Extended
+- **Location:** `src/renacechess/contracts/schemas/v1/context_bridge.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.ContextBridgePayload`
+- **Status:** ✅ Complete and validated (v1-compatible extension with optional `chosenMove` field)
 
 ---
 
@@ -144,6 +165,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-01-24 (M04 closeout)
+**Last Updated:** 2026-01-24 (M05 closeout)
 
 

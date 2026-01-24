@@ -7,7 +7,7 @@ from typing import Any
 from renacechess.contracts.models import DatasetManifestV2
 from renacechess.dataset.split import compute_split_assignment
 from renacechess.eval.baselines import compute_policy_seed, create_policy_provider
-from renacechess.eval.metrics import MetricsAccumulator
+from renacechess.eval.metrics import MetricsAccumulator, format_fixed_decimal
 
 
 def load_manifest(manifest_path: Path) -> DatasetManifestV2:
@@ -44,6 +44,8 @@ def run_evaluation(
     policy_id: str,
     eval_config: dict[str, Any],
     max_records: int | None = None,
+    compute_accuracy: bool = False,
+    top_k_values: list[int] | None = None,
 ) -> dict[str, Any]:
     """Run evaluation over dataset manifest.
 
@@ -52,9 +54,11 @@ def run_evaluation(
         policy_id: Policy identifier (e.g., 'baseline.uniform_random').
         eval_config: Evaluation configuration dict (for hashing).
         max_records: Maximum number of records to evaluate (None = no limit).
+        compute_accuracy: Whether to compute accuracy metrics (requires chosenMove labels).
+        top_k_values: List of K values for top-K accuracy (e.g., [1, 3, 5]). Defaults to [1].
 
     Returns:
-        Dictionary with evaluation results (ready for EvalReportV1 construction).
+        Dictionary with evaluation results (ready for EvalReportV1 or EvalReportV2 construction).
     """
     # Load manifest
     manifest = load_manifest(manifest_path)
@@ -67,12 +71,17 @@ def run_evaluation(
     # Create policy provider
     policy = create_policy_provider(policy_id, seed=policy_seed)
 
-    # Initialize accumulators
-    overall_accumulator = MetricsAccumulator()
+    # Initialize accumulators with accuracy config
+    top_k_vals = top_k_values if top_k_values is not None else [1]
+    overall_accumulator = MetricsAccumulator(
+        compute_accuracy=compute_accuracy, top_k_values=top_k_vals
+    )
     split_accumulators: dict[str, MetricsAccumulator] = {
-        "train": MetricsAccumulator(),
-        "val": MetricsAccumulator(),
-        "frozenEval": MetricsAccumulator(),
+        "train": MetricsAccumulator(compute_accuracy=compute_accuracy, top_k_values=top_k_vals),
+        "val": MetricsAccumulator(compute_accuracy=compute_accuracy, top_k_values=top_k_vals),
+        "frozenEval": MetricsAccumulator(
+            compute_accuracy=compute_accuracy, top_k_values=top_k_vals
+        ),
     }
 
     # Track which shards belong to which splits (from manifest)
@@ -138,7 +147,35 @@ def run_evaluation(
         if accumulator.records_evaluated > 0:
             split_metrics[split_name] = accumulator.compute_metrics()
 
-    return {
+    # Add total record count and coverage for accuracy metrics
+    if compute_accuracy:
+        # Total records evaluated (may be less than dataset total if max_records is set)
+        total_records_evaluated = overall_accumulator.records_evaluated
+        overall_metrics["total_record_count"] = total_records_evaluated
+        labeled_count = overall_metrics.get("labeled_record_count", 0)
+
+        # Compute coverage
+        if "accuracy" in overall_metrics:
+            coverage = (
+                (labeled_count / total_records_evaluated * 100.0)
+                if total_records_evaluated > 0
+                else 0.0
+            )
+            overall_metrics["accuracy"]["coverage"] = format_fixed_decimal(coverage)
+
+        # Add total_record_count to split metrics too
+        for split_name, split_dict in split_metrics.items():
+            split_dict["total_record_count"] = split_accumulators[split_name].records_evaluated
+            split_labeled = split_dict.get("labeled_record_count", 0)
+            if "accuracy" in split_dict:
+                split_coverage = (
+                    (split_labeled / split_dict["total_record_count"] * 100.0)
+                    if split_dict["total_record_count"] > 0
+                    else 0.0
+                )
+                split_dict["accuracy"]["coverage"] = format_fixed_decimal(split_coverage)
+
+    result: dict[str, Any] = {
         "dataset_digest": manifest.dataset_digest,
         "assembly_config_hash": manifest.assembly_config_hash,
         "policy_id": policy_id,
@@ -146,6 +183,12 @@ def run_evaluation(
         "overall_metrics": overall_metrics,
         "split_metrics": split_metrics,
     }
+
+    # Add total record count for v2 reports (if accuracy is computed)
+    if compute_accuracy:
+        result["total_record_count"] = overall_accumulator.records_evaluated
+
+    return result
 
 
 def _compute_eval_config_hash(eval_config: dict[str, Any]) -> str:

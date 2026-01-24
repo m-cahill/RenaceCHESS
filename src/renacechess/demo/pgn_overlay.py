@@ -9,6 +9,7 @@ import chess.pgn
 
 from renacechess.contracts.models import (
     HDI,
+    ChosenMove,
     ContextBridgeMeta,
     ContextBridgePayload,
     HDIComponents,
@@ -24,7 +25,10 @@ from renacechess.determinism import canonical_hash
 
 
 def generate_payload_from_board(
-    board: chess.Board, ply: int, generated_at: datetime | None = None
+    board: chess.Board,
+    ply: int,
+    generated_at: datetime | None = None,
+    chosen_move: ChosenMove | None = None,
 ) -> dict:
     """Generate deterministic Context Bridge payload from a chess board position.
 
@@ -32,6 +36,7 @@ def generate_payload_from_board(
         board: Chess board at the target position.
         ply: Ply number (for metadata).
         generated_at: Override generation timestamp (for testing).
+        chosen_move: Optional ground-truth move that was actually played.
 
     Returns:
         Dictionary representation of ContextBridgePayload (ready for JSON serialization).
@@ -182,6 +187,7 @@ def generate_payload_from_board(
             generated_at=generated_at,
             input_hash=input_hash,
         ),
+        chosen_move=chosen_move,
     )
 
     # Convert to dict for JSON serialization (use aliases for camelCase JSON, exclude None)

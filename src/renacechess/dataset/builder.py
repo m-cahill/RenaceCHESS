@@ -7,6 +7,7 @@ from pathlib import Path
 import chess
 import chess.pgn
 
+from renacechess.contracts.models import ChosenMove
 from renacechess.dataset.config import DatasetBuildConfig
 from renacechess.dataset.receipt_reader import compute_pgn_digest, get_pgn_path_from_receipt
 from renacechess.dataset.split import compute_split_assignment
@@ -173,19 +174,22 @@ def _process_pgn_file(
             # Process positions in this game
             board = game.board()
             ply = 0
+            node: chess.pgn.GameNode = game
 
             # Process initial position (ply 0) if within range
             if (config.start_ply is None or config.start_ply <= 0) and (
                 config.end_ply is None or 0 < config.end_ply
             ):
                 if config.max_positions is None or positions_processed < config.max_positions:
-                    # Generate payload for initial position
+                    # Generate payload for initial position (no chosenMove for initial position)
                     if generated_at is None:
                         payload_generated_at = datetime.now()
                     else:
                         payload_generated_at = generated_at
 
-                    payload = generate_payload_from_board(board, ply, payload_generated_at)
+                    payload = generate_payload_from_board(
+                        board, ply, payload_generated_at, chosen_move=None
+                    )
 
                     # Compute record key and split
                     fen = board.fen()
@@ -197,21 +201,31 @@ def _process_pgn_file(
                     split_counts[split].append(record_key)
                     positions_processed += 1
 
-            # Process positions after each move
-            for chess_move in game.mainline_moves():
+            # Process positions after each move (traverse game node tree to get SAN)
+            while node.variations:
                 if config.max_positions is not None and positions_processed >= config.max_positions:
                     break
 
-                # Advance board first
+                # Get next move node
+                next_node = node.variation(0)
+                chess_move = next_node.move
+
+                # Advance board
                 board.push(chess_move)
                 ply += 1
 
                 # Check if we should process this position
                 if config.start_ply is not None and ply < config.start_ply:
+                    node = next_node
                     continue
 
                 if config.end_ply is not None and ply >= config.end_ply:
                     break
+
+                # Create chosenMove from the move that led to this position
+                move_uci = chess_move.uci()
+                move_san = next_node.san() if next_node.san() else None
+                chosen_move = ChosenMove(uci=move_uci, san=move_san)
 
                 # Generate payload for this position
                 if generated_at is None:
@@ -219,7 +233,9 @@ def _process_pgn_file(
                 else:
                     payload_generated_at = generated_at
 
-                payload = generate_payload_from_board(board, ply, payload_generated_at)
+                payload = generate_payload_from_board(
+                    board, ply, payload_generated_at, chosen_move=chosen_move
+                )
 
                 # Compute record key and split
                 fen = board.fen()
@@ -230,6 +246,9 @@ def _process_pgn_file(
                 shard_writer.write_record(payload, split)
                 split_counts[split].append(record_key)
                 positions_processed += 1
+
+                # Move to next node
+                node = next_node
 
             if config.max_positions is not None and positions_processed >= config.max_positions:
                 break
