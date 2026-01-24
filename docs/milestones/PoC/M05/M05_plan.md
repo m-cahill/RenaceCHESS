@@ -1,8 +1,8 @@
 # 📌 M05 Plan — Ground-Truth Labeled Evaluation v1
 
 **Milestone:** M05  
-**Status:** 🔄 **IN PROGRESS**  
-**Phase:** Phase 2 Complete → Phase 3 (Implementation)
+**Status:** ✅ **CLOSED / IMMUTABLE**  
+**Phase:** Complete
 
 ---
 

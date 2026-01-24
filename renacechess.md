@@ -13,7 +13,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M02 | ✅ Closed | `m02-lichess-ingestion` → `main` | 2026-01-23 | Deterministic Lichess Ingestion |
 | M03 | ✅ Closed | `m03-dataset-assembly` → `main` | 2026-01-23 | Deterministic Multi-Shard Dataset Assembly |
 | M04 | ✅ Closed | `m04-eval-harness` → `main` | 2026-01-24 | Evaluation Harness v0: Deterministic Policy Evaluation Over Dataset Manifests |
-| M05 | ✅ Closed | `m05-labeled-evaluation` → `main` | 2026-01-24 | Ground-Truth Labeled Evaluation v1: Accuracy Metrics and Evaluation Report v2 |
+| M05 | ✅ Closed (MERGED) | `m05-labeled-evaluation` → `main` | 2026-01-24 | Ground-Truth Labeled Evaluation v1: Accuracy Metrics and Evaluation Report v2 |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
