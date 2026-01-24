@@ -277,4 +277,3 @@ class TestHDIIntegration:
         assert stratified["bySkillBucketId"]["1200_1399"].hdi is not None
         assert "1400_1599" in stratified["bySkillBucketId"]
         assert stratified["bySkillBucketId"]["1400_1599"].hdi is not None
-

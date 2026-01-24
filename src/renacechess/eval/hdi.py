@@ -169,4 +169,3 @@ def compute_hdi_v1(
         "specVersion": HDI_SPEC_VERSION,
         "components": components,
     }
-

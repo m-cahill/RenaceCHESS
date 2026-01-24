@@ -354,7 +354,7 @@ def main() -> None:
                         sys.exit(1)
 
                     # Load and validate frozen eval manifest
-                        import json
+                    import json
 
                     try:
                         frozen_manifest_dict = json.loads(
@@ -404,16 +404,16 @@ def main() -> None:
                     report: EvalReportV1 | EvalReportV2 | EvalReportV3 | EvalReportV4 = (
                         EvalReportV4(
                             schema_version="eval_report.v4",
-                        created_at=created_at or datetime.now(),
-                        dataset_digest=eval_results["dataset_digest"],
-                        assembly_config_hash=eval_results["assembly_config_hash"],
-                        policy_id=eval_results["policy_id"],
-                        eval_config_hash=eval_results["eval_config_hash"],
+                            created_at=created_at or datetime.now(),
+                            dataset_digest=eval_results["dataset_digest"],
+                            assembly_config_hash=eval_results["assembly_config_hash"],
+                            policy_id=eval_results["policy_id"],
+                            eval_config_hash=eval_results["eval_config_hash"],
                             frozen_eval_manifest_hash=frozen_eval_manifest_hash,
-                        overall=eval_results["overall"],
-                        by_skill_bucket_id=eval_results["by_skill_bucket_id"],
-                        by_time_control_class=eval_results["by_time_control_class"],
-                        by_time_pressure_bucket=eval_results["by_time_pressure_bucket"],
+                            overall=eval_results["overall"],
+                            by_skill_bucket_id=eval_results["by_skill_bucket_id"],
+                            by_time_control_class=eval_results["by_time_control_class"],
+                            by_time_pressure_bucket=eval_results["by_time_pressure_bucket"],
                         )
                     )
                 else:

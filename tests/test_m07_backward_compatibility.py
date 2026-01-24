@@ -188,4 +188,3 @@ class TestV4ExtendsV3:
         assert report_loaded.schema_version == "eval_report.v4"
         assert report_loaded.overall.hdi is not None
         assert report_loaded.overall.hdi.value == 0.73
-
