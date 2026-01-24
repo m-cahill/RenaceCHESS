@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from renacechess.dataset.config import DatasetBuildConfig
 from renacechess.dataset.builder import build_dataset
+from renacechess.dataset.config import DatasetBuildConfig
 
 
 def test_config_mutually_exclusive_inputs():

@@ -3,8 +3,6 @@
 from dataclasses import dataclass
 from pathlib import Path
 
-from renacechess.contracts.models import IngestReceiptV1
-
 
 @dataclass
 class DatasetBuildConfig:

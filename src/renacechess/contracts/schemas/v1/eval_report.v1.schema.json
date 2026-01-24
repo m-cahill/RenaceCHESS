@@ -1,0 +1,177 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Evaluation Report v1",
+  "description": "Schema for evaluation report (v1) - policy validity evaluation over dataset manifests",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "createdAt",
+    "datasetDigest",
+    "assemblyConfigHash",
+    "policyId",
+    "evalConfigHash",
+    "metrics"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "eval_report.v1",
+      "description": "Schema version"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of creation (injectable for determinism tests)"
+    },
+    "datasetDigest": {
+      "type": "string",
+      "description": "SHA-256 hash copied from dataset manifest v2 (stable dataset identity)",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "assemblyConfigHash": {
+      "type": "string",
+      "description": "SHA-256 hash copied from dataset manifest v2 (assembly configuration hash)",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "policyId": {
+      "type": "string",
+      "description": "Policy identifier (e.g., 'baseline.uniform_random', 'baseline.first_legal')"
+    },
+    "evalConfigHash": {
+      "type": "string",
+      "description": "SHA-256 hash of canonical JSON config (sorted keys, stable)",
+      "pattern": "^[a-f0-9]{64}$"
+    },
+    "metrics": {
+      "type": "object",
+      "required": [
+        "recordsEvaluated",
+        "illegalMoveRate",
+        "topKLegalCoverage",
+        "policyEntropy",
+        "uniqueMovesEmitted"
+      ],
+      "properties": {
+        "recordsEvaluated": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total number of records evaluated"
+        },
+        "illegalMoveRate": {
+          "type": "string",
+          "description": "Percentage of records where policy emits move not in legalMoves (fixed-decimal string for byte-stability, e.g., '0.0000')"
+        },
+        "topKLegalCoverage": {
+          "type": "object",
+          "required": ["top1", "top3"],
+          "properties": {
+            "top1": {
+              "type": "string",
+              "description": "Percentage of records where policy's top-1 move is in legalMoves (fixed-decimal string)"
+            },
+            "top3": {
+              "type": "string",
+              "description": "Percentage of records where policy's top-3 moves intersect legalMoves (fixed-decimal string)"
+            }
+          },
+          "description": "Top-K legal coverage metrics"
+        },
+        "policyEntropy": {
+          "type": "object",
+          "required": ["mean"],
+          "properties": {
+            "mean": {
+              "type": "string",
+              "description": "Mean Shannon entropy of policy distribution (fixed-decimal string, or 'N/A' if not applicable)"
+            },
+            "stddev": {
+              "type": "string",
+              "description": "Standard deviation of policy entropy (fixed-decimal string, optional)"
+            }
+          },
+          "description": "Policy entropy statistics (Shannon entropy of probability distribution)"
+        },
+        "uniqueMovesEmitted": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of unique moves emitted across dataset"
+        }
+      },
+      "description": "Policy validity metrics (legality, distribution, entropy)"
+    },
+    "splits": {
+      "type": "object",
+      "properties": {
+        "train": {
+          "$ref": "#/definitions/SplitMetrics"
+        },
+        "val": {
+          "$ref": "#/definitions/SplitMetrics"
+        },
+        "frozenEval": {
+          "$ref": "#/definitions/SplitMetrics"
+        }
+      },
+      "description": "Per-split metric breakdown (only includes splits that were evaluated)"
+    }
+  },
+  "definitions": {
+    "SplitMetrics": {
+      "type": "object",
+      "required": [
+        "recordsEvaluated",
+        "illegalMoveRate",
+        "topKLegalCoverage",
+        "policyEntropy",
+        "uniqueMovesEmitted"
+      ],
+      "properties": {
+        "recordsEvaluated": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of records evaluated in this split"
+        },
+        "illegalMoveRate": {
+          "type": "string",
+          "description": "Percentage of records where policy emits move not in legalMoves (fixed-decimal string)"
+        },
+        "topKLegalCoverage": {
+          "type": "object",
+          "required": ["top1", "top3"],
+          "properties": {
+            "top1": {
+              "type": "string",
+              "description": "Percentage of records where policy's top-1 move is in legalMoves (fixed-decimal string)"
+            },
+            "top3": {
+              "type": "string",
+              "description": "Percentage of records where policy's top-3 moves intersect legalMoves (fixed-decimal string)"
+            }
+          },
+          "description": "Top-K legal coverage metrics for this split"
+        },
+        "policyEntropy": {
+          "type": "object",
+          "required": ["mean"],
+          "properties": {
+            "mean": {
+              "type": "string",
+              "description": "Mean Shannon entropy of policy distribution (fixed-decimal string, or 'N/A' if not applicable)"
+            },
+            "stddev": {
+              "type": "string",
+              "description": "Standard deviation of policy entropy (fixed-decimal string, optional)"
+            }
+          },
+          "description": "Policy entropy statistics for this split"
+        },
+        "uniqueMovesEmitted": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of unique moves emitted in this split"
+        }
+      }
+    }
+  }
+}
+
