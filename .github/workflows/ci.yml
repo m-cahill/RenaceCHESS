@@ -26,6 +26,16 @@ jobs:
           pip install -e ".[dev]"
       - name: Ruff lint
         run: ruff check .
+      - name: Debug format issue
+        run: |
+          echo "=== Ruff version ==="
+          ruff --version
+          echo "=== pyproject.toml format section ==="
+          grep -A2 'tool.ruff.format' pyproject.toml || echo "No format section"
+          echo "=== File line endings ==="
+          python -c "p=open('tests/test_m06_conditioning_buckets.py','rb').read(); print('CRLF:', p.count(b'\r\n'), 'LF:', p.count(b'\n') - p.count(b'\r\n'))"
+          echo "=== First 100 bytes ==="
+          python -c "print(open('tests/test_m06_conditioning_buckets.py','rb').read()[:100])"
       - name: Ruff format check
         run: ruff format --check .
 
