@@ -85,13 +85,17 @@
 **Remaining Failure:**
 - **Job:** Lint and Format → Ruff format check
 - **File:** `tests/test_m06_conditioning_buckets.py`
-- **Classification:** CI misconfiguration / version mismatch
-  - Local ruff format reports file as already formatted
-  - CI ruff format reports file needs reformatting
-  - Likely version difference or line ending issue
+- **Classification:** Tooling version drift (formatter-only)
+  - **Root Cause:** Ruff version mismatch identified and resolved (local: 0.14.13 → 0.14.14 to match CI)
+  - **Status:** File correctly formatted locally with ruff 0.14.14 (matches CI version)
+  - **Issue:** CI still reports reformatting needed despite version alignment
+  - **Hypothesis:** Platform-specific formatting difference (Windows vs Linux) or subtle environment configuration difference
 - **Scope:** M06 - in scope
 - **Blocking:** Yes (merge-blocking check)
-- **Action Required:** Investigate CI ruff version vs local, or manually adjust formatting to match CI expectations
+- **Action Required:** 
+  - ✅ Ruff version aligned to 0.14.14 (CI version)
+  - ✅ File formatted with aligned version
+  - ⚠️ CI still failing - may require manual inspection of CI environment or platform-specific formatting rules
 
 **Resolved Failures (Iterative Fixes):**
 1. ✅ **Lint errors:** Missing imports (`EvalReportV1`, `EvalReportV2`), line length issues - Fixed
