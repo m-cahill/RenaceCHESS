@@ -49,6 +49,9 @@ fix = true
 select = ["E", "F", "I", "N", "W", "UP"]
 extend-select = ["I"]
 
+[tool.ruff.format]
+line-ending = "lf"
+
 [tool.mypy]
 python_version = "3.11"
 check_untyped_defs = true
