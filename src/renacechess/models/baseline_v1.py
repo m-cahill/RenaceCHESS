@@ -9,7 +9,7 @@ from typing import Any
 
 import torch
 import torch.nn as nn
-import torch.nn.functional as F
+from torch.nn import functional
 
 
 class BaselinePolicyV1(nn.Module):
@@ -217,7 +217,7 @@ class BaselinePolicyV1(nn.Module):
         features = torch.cat([fen_emb, skill_emb, time_emb])
 
         # Forward through network
-        x = F.relu(self.fc1(features))
+        x = functional.relu(self.fc1(features))
         logits = self.fc2(x)  # Shape: [move_vocab_size]
 
         # Map legal moves to vocabulary indices
@@ -264,7 +264,7 @@ class BaselinePolicyV1(nn.Module):
 
         if len(legal_logits) > 0:
             # Softmax over legal moves
-            probs = F.softmax(legal_logits, dim=0)
+            probs = functional.softmax(legal_logits, dim=0)
 
             for i, move in enumerate(legal_moves_filtered):
                 move_probs[move] = float(probs[i].item())

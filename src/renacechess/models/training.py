@@ -10,7 +10,7 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 
 from renacechess.contracts.models import DatasetManifestV2, FrozenEvalManifestV1
-from renacechess.dataset.receipt_reader import load_manifest
+from renacechess.eval.runner import load_manifest
 from renacechess.models.baseline_v1 import BaselinePolicyV1
 
 

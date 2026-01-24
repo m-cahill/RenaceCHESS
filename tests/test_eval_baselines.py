@@ -1,5 +1,7 @@
 """Tests for baseline policy providers."""
 
+from pathlib import Path
+
 from renacechess.eval.baselines import (
     FirstLegalPolicy,
     UniformRandomLegalPolicy,

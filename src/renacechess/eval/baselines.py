@@ -2,6 +2,7 @@
 
 import hashlib
 import random
+from pathlib import Path
 from typing import Any
 
 from renacechess.contracts.models import PolicyMove
