@@ -254,8 +254,7 @@ class ConditionedMetricsAccumulator:
         """
         return {
             "bySkillBucketId": {
-                bucket_id: acc.build_metrics()
-                for bucket_id, acc in self.by_skill_bucket_id.items()
+                bucket_id: acc.build_metrics() for bucket_id, acc in self.by_skill_bucket_id.items()
             },
             "byTimeControlClass": {
                 tc_class: acc.build_metrics()
@@ -266,4 +265,3 @@ class ConditionedMetricsAccumulator:
                 for tp_bucket, acc in self.by_time_pressure_bucket.items()
             },
         }
-

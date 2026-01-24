@@ -150,4 +150,3 @@ def assign_time_pressure_bucket(remaining_seconds: float | None) -> TimePressure
         return "normal"
     else:
         return "early"
-

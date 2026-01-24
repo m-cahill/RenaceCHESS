@@ -178,4 +178,3 @@ def test_run_conditioned_evaluation_with_frozen_manifest_hash(tmp_path: Path) ->
     )
 
     assert eval_results["frozen_eval_manifest_hash"] == frozen_hash
-

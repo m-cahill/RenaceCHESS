@@ -50,16 +50,19 @@ class PositionConditioning(BaseModel):
     )
 
     # M06-specific fields (optional, additive)
-    skill_bucket_id: Literal[
-        "lt_800",
-        "800_999",
-        "1000_1199",
-        "1200_1399",
-        "1400_1599",
-        "1600_1799",
-        "gte_1800",
-        "unknown",
-    ] | None = Field(
+    skill_bucket_id: (
+        Literal[
+            "lt_800",
+            "800_999",
+            "1000_1199",
+            "1200_1399",
+            "1400_1599",
+            "1600_1799",
+            "gte_1800",
+            "unknown",
+        ]
+        | None
+    ) = Field(
         None,
         alias="skillBucketId",
         description="M06 skill bucket ID (optional, M06 spec v1)",
@@ -852,16 +855,19 @@ class FrozenEvalManifestRecord(BaseModel):
         description="SHA-256 hash of the shard file",
         pattern="^[a-f0-9]{64}$",
     )
-    skill_bucket_id: Literal[
-        "lt_800",
-        "800_999",
-        "1000_1199",
-        "1200_1399",
-        "1400_1599",
-        "1600_1799",
-        "gte_1800",
-        "unknown",
-    ] | None = Field(
+    skill_bucket_id: (
+        Literal[
+            "lt_800",
+            "800_999",
+            "1000_1199",
+            "1200_1399",
+            "1400_1599",
+            "1600_1799",
+            "gte_1800",
+            "unknown",
+        ]
+        | None
+    ) = Field(
         None,
         alias="skillBucketId",
         description="M06 skill bucket ID for this record (if available)",
@@ -912,9 +918,7 @@ class FrozenEvalManifestV1(BaseModel):
 
     model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
 
-    schema_version: Literal[1] = Field(
-        1, alias="schemaVersion", description="Schema version"
-    )
+    schema_version: Literal[1] = Field(1, alias="schemaVersion", description="Schema version")
     created_at: datetime = Field(
         ..., alias="createdAt", description="ISO 8601 timestamp of creation"
     )
@@ -953,8 +957,7 @@ class FrozenEvalManifestV1(BaseModel):
         ...,
         alias="manifestHash",
         description=(
-            "SHA-256 hash of canonical JSON for this manifest "
-            "(computed after all other fields)"
+            "SHA-256 hash of canonical JSON for this manifest (computed after all other fields)"
         ),
         pattern="^[a-f0-9]{64}$",
     )

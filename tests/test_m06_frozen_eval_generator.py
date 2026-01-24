@@ -223,4 +223,3 @@ def test_generate_frozen_eval_manifest_insufficient_records(tmp_path: Path) -> N
             target_total_records=10000,
             min_per_skill_bucket=500,
         )
-

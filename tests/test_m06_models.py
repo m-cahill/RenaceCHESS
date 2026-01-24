@@ -211,4 +211,3 @@ class TestEvalReportV3Models:
         )
         assert len(report.by_skill_bucket_id) == 2
         assert report.by_skill_bucket_id["1200_1399"].total_records == 500
-

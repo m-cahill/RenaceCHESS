@@ -166,4 +166,3 @@ class TestTimePressureBucketAssignment:
     def test_assign_time_pressure_unknown(self) -> None:
         """Test time pressure bucket assignment for None."""
         assert assign_time_pressure_bucket(None) == "unknown"
-
