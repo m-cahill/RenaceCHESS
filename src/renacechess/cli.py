@@ -8,6 +8,8 @@ from renacechess.dataset.builder import build_dataset
 from renacechess.dataset.config import DatasetBuildConfig
 from renacechess.demo.pgn_overlay import generate_demo_payload
 from renacechess.determinism import canonical_json_dump
+from renacechess.eval.report import build_eval_report, write_eval_report
+from renacechess.eval.runner import run_evaluation
 from renacechess.ingest.ingest import ingest_from_lichess, ingest_from_url
 
 
@@ -105,6 +107,40 @@ def main() -> None:
         "--end-ply",
         type=int,
         help="Stop processing at this ply number (exclusive)",
+    )
+
+    # Eval command
+    eval_parser = subparsers.add_parser("eval", help="Evaluate policy providers over datasets")
+    eval_subparsers = eval_parser.add_subparsers(dest="eval_command")
+
+    run_parser = eval_subparsers.add_parser("run", help="Run evaluation over a dataset manifest")
+    run_parser.add_argument(
+        "--dataset-manifest",
+        type=Path,
+        required=True,
+        help="Path to dataset manifest v2 (manifest.json)",
+    )
+    run_parser.add_argument(
+        "--policy",
+        type=str,
+        required=True,
+        help="Policy identifier (e.g., 'baseline.uniform_random', 'baseline.first_legal')",
+    )
+    run_parser.add_argument(
+        "--out",
+        type=Path,
+        required=True,
+        help="Output directory (will write eval_report.json)",
+    )
+    run_parser.add_argument(
+        "--max-records",
+        type=int,
+        help="Maximum number of records to evaluate (default: no limit)",
+    )
+    run_parser.add_argument(
+        "--created-at",
+        type=str,
+        help="Override creation timestamp (ISO 8601 format, for testing only)",
     )
 
     # Ingest command
@@ -208,6 +244,44 @@ def main() -> None:
                 sys.exit(1)
         else:
             dataset_parser.print_help()
+            sys.exit(1)
+    elif args.command == "eval":
+        if args.eval_command == "run":
+            try:
+                from datetime import datetime
+
+                # Parse created_at if provided
+                created_at = None
+                if args.created_at:
+                    created_at = datetime.fromisoformat(args.created_at.replace("Z", "+00:00"))
+
+                # Build eval config
+                eval_config = {
+                    "max_records": args.max_records,
+                }
+
+                # Run evaluation
+                eval_results = run_evaluation(
+                    manifest_path=args.dataset_manifest,
+                    policy_id=args.policy,
+                    eval_config=eval_config,
+                    max_records=args.max_records,
+                )
+
+                # Build report
+                report = build_eval_report(eval_results, created_at=created_at)
+
+                # Write report
+                args.out.mkdir(parents=True, exist_ok=True)
+                report_path = args.out / "eval_report.json"
+                write_eval_report(report, report_path)
+
+                print(f"Evaluation report written to {report_path}", file=sys.stderr)
+            except Exception as e:
+                print(f"Error: {e}", file=sys.stderr)
+                sys.exit(1)
+        else:
+            eval_parser.print_help()
             sys.exit(1)
     elif args.command == "ingest":
         if args.ingest_command == "lichess":

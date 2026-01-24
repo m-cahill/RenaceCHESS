@@ -1,7 +1,6 @@
 """Test filename fallback logic in ingest_from_url."""
 
 from pathlib import Path
-from unittest.mock import Mock
 
 from renacechess.ingest.ingest import ingest_from_url
 

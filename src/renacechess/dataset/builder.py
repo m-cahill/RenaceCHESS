@@ -11,7 +11,7 @@ from renacechess.dataset.config import DatasetBuildConfig
 from renacechess.dataset.receipt_reader import compute_pgn_digest, get_pgn_path_from_receipt
 from renacechess.dataset.split import compute_split_assignment
 from renacechess.demo.pgn_overlay import generate_payload_from_board
-from renacechess.determinism import canonical_hash, canonical_json_dump, stable_hash
+from renacechess.determinism import canonical_json_dump, stable_hash
 
 
 class ShardWriter:

@@ -6,13 +6,6 @@ from pathlib import Path
 
 import pytest
 
-from renacechess.dataset.builder import build_dataset
-from renacechess.dataset.config import DatasetBuildConfig
-from renacechess.dataset.receipt_reader import (
-    compute_pgn_digest,
-    get_pgn_path_from_receipt,
-    load_receipt_from_path,
-)
 from renacechess.contracts.models import (
     ArtifactRefV1,
     DerivedArtifactRefV1,
@@ -20,7 +13,13 @@ from renacechess.contracts.models import (
     ProvenanceV1,
     SourceArtifactRefV1,
 )
-from renacechess.determinism import stable_hash
+from renacechess.dataset.builder import build_dataset
+from renacechess.dataset.config import DatasetBuildConfig
+from renacechess.dataset.receipt_reader import (
+    compute_pgn_digest,
+    get_pgn_path_from_receipt,
+    load_receipt_from_path,
+)
 
 
 def test_load_receipt_from_path(tmp_path: Path):
