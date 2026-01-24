@@ -14,6 +14,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M03 | ✅ Closed | `m03-dataset-assembly` → `main` | 2026-01-23 | Deterministic Multi-Shard Dataset Assembly |
 | M04 | ✅ Closed | `m04-eval-harness` → `main` | 2026-01-24 | Evaluation Harness v0: Deterministic Policy Evaluation Over Dataset Manifests |
 | M05 | ✅ Closed (MERGED) | `m05-labeled-evaluation` → `main` | 2026-01-24 | Ground-Truth Labeled Evaluation v1: Accuracy Metrics and Evaluation Report v2 |
+| M06 | ✅ Closed (MERGED) | `m06-conditioned-frozen-eval` → `main` | 2026-01-24 | Conditioned, Frozen Human Evaluation: Skill/Time Conditioning + Frozen Eval Manifest |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -69,10 +70,27 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 - **CI Run 2:** 21306722594 (SUCCESS - All gates passing)
 - **Final Coverage:** 92.38% (exceeds 90% threshold)
 - **Test Count:** 204 tests (up from 199)
-- **PR:** #7 (ready for merge)
+- **PR:** #7 (merged)
 - **Final Commit:** `82e9454`
 - **Audit:** `docs/milestones/PoC/M05/M05_audit.md`
 - **Summary:** `docs/milestones/PoC/M05/M05_summary.md`
+
+**M06 Details:**
+- **Objective:** Establish stratified evaluation framework with skill/time conditioning and frozen eval sets
+- **CI Run 1:** 21309261892 (FAILURE - Formatting, lint, type errors)
+- **CI Runs 2-10:** Intermediate runs (Ruff version drift, CRLF/LF normalization)
+- **Final CI Run:** 21310516834 (SUCCESS - All gates passing)
+- **Final Coverage:** Meets 90% threshold
+- **Test Count:** 241+ tests (37+ new)
+- **PR:** #8 (merged)
+- **Final Commit:** `aaf1a11`
+- **Audit:** `docs/milestones/PoC/M06/M06_audit.md`
+- **Summary:** `docs/milestones/PoC/M06/M06_summary.md`
+- **Key Files:**
+  - `src/renacechess/conditioning/buckets.py` — Bucket assignment functions
+  - `src/renacechess/frozen_eval/generator.py` — Frozen eval manifest generator
+  - `src/renacechess/eval/conditioned_metrics.py` — Conditioned metrics accumulator
+- **Notable Resolution:** CRLF/LF drift resolved via `.gitattributes` + Ruff `line-ending = "lf"`
 
 ---
 
@@ -145,10 +163,20 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 - **Pydantic Model:** `renacechess.contracts.models.EvalReportV2`
 - **Status:** ✅ Complete and validated (extends v1 with accuracy metrics)
 
+### Evaluation Report Schema (v3)
+- **Location:** `src/renacechess/contracts/schemas/v1/eval_report.v3.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.EvalReportV3`
+- **Status:** ✅ Complete and validated (extends v2 with conditioned metrics by skill/time/pressure)
+
+### Frozen Eval Manifest Schema (v1)
+- **Location:** `src/renacechess/contracts/schemas/v1/frozen_eval_manifest.v1.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.FrozenEvalManifestV1`
+- **Status:** ✅ Complete and validated (immutable evaluation set with hash verification)
+
 ### Context Bridge Schema (v1) — Extended
 - **Location:** `src/renacechess/contracts/schemas/v1/context_bridge.schema.json`
 - **Pydantic Model:** `renacechess.contracts.models.ContextBridgePayload`
-- **Status:** ✅ Complete and validated (v1-compatible extension with optional `chosenMove` field)
+- **Status:** ✅ Complete and validated (v1-compatible extension with optional `chosenMove` and M06 conditioning fields)
 
 ---
 
@@ -165,6 +193,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-01-24 (M05 closeout)
+**Last Updated:** 2026-01-24 (M06 closeout)
 
 
