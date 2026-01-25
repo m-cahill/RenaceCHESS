@@ -137,6 +137,11 @@ def main() -> None:
         help="Path to trained model file (required for 'learned.v1' policy)",
     )
     run_parser.add_argument(
+        "--outcome-head-path",
+        type=Path,
+        help="Path to trained outcome head model directory (contains outcome_head_v1.pt and outcome_head_v1_metadata.json)",
+    )
+    run_parser.add_argument(
         "--out",
         type=Path,
         required=True,
@@ -251,6 +256,52 @@ def main() -> None:
         help="Learning rate (default: 0.001)",
     )
     train_parser.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+        help="Random seed for determinism (default: 42)",
+    )
+
+    # Train outcome head command
+    train_outcome_parser = subparsers.add_parser(
+        "train-outcome-head", help="Train learned human outcome head (W/D/L) (M09)"
+    )
+    train_outcome_parser.add_argument(
+        "--dataset-manifest",
+        type=Path,
+        required=True,
+        help="Path to dataset manifest v2",
+    )
+    train_outcome_parser.add_argument(
+        "--frozen-eval-manifest",
+        type=Path,
+        help="Path to frozen eval manifest (to exclude from training)",
+    )
+    train_outcome_parser.add_argument(
+        "--out",
+        type=Path,
+        required=True,
+        help="Output directory for model and metadata",
+    )
+    train_outcome_parser.add_argument(
+        "--epochs",
+        type=int,
+        default=10,
+        help="Number of training epochs (default: 10)",
+    )
+    train_outcome_parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=32,
+        help="Batch size (default: 32)",
+    )
+    train_outcome_parser.add_argument(
+        "--learning-rate",
+        type=float,
+        default=0.001,
+        help="Learning rate (default: 0.001)",
+    )
+    train_outcome_parser.add_argument(
         "--seed",
         type=int,
         default=42,
@@ -423,7 +474,8 @@ def main() -> None:
                         )
                         sys.exit(1)
 
-                    # Run conditioned evaluation (M07)
+                    # Run conditioned evaluation (M07, M09)
+                    outcome_head_path = getattr(args, "outcome_head_path", None)
                     eval_results = run_conditioned_evaluation(
                         manifest_path=args.dataset_manifest,
                         policy_id=args.policy,
@@ -433,6 +485,7 @@ def main() -> None:
                         top_k_values=top_k_values,
                         frozen_eval_manifest_hash=frozen_eval_manifest_hash,
                         model_path=getattr(args, "model_path", None),
+                        outcome_head_path=outcome_head_path,
                     )
 
                     # Validate frozen eval manifest hash matches (if provided in results)
@@ -448,16 +501,62 @@ def main() -> None:
                         )
                         sys.exit(1)
 
-                    # Build EvalReportV4 (M07 - includes HDI)
+                    # Build EvalReportV4 or V5 (M07 - includes HDI, M09 - includes outcome metrics)
                     from renacechess.contracts.models import (
                         EvalReportV1,
                         EvalReportV2,
                         EvalReportV3,
                         EvalReportV4,
+                        EvalReportV5,
+                        OutcomeMetrics,
                     )
 
-                    report: EvalReportV1 | EvalReportV2 | EvalReportV3 | EvalReportV4 = (
-                        EvalReportV4(
+                    # Check if outcome metrics are present (M09)
+                    has_outcome_metrics = "outcome_metrics" in eval_results
+
+                    if has_outcome_metrics:
+                        # Build v5 report with outcome metrics
+                        report: (
+                            EvalReportV1 | EvalReportV2 | EvalReportV3 | EvalReportV4 | EvalReportV5
+                        ) = EvalReportV5(
+                            schema_version="eval_report.v5",
+                            created_at=created_at or datetime.now(),
+                            dataset_digest=eval_results["dataset_digest"],
+                            assembly_config_hash=eval_results["assembly_config_hash"],
+                            policy_id=eval_results["policy_id"],
+                            eval_config_hash=eval_results["eval_config_hash"],
+                            frozen_eval_manifest_hash=frozen_eval_manifest_hash,
+                            overall=eval_results["overall"],
+                            by_skill_bucket_id=eval_results["by_skill_bucket_id"],
+                            by_time_control_class=eval_results["by_time_control_class"],
+                            by_time_pressure_bucket=eval_results["by_time_pressure_bucket"],
+                            outcome_metrics=OutcomeMetrics(
+                                **eval_results["outcome_metrics"]
+                            ) if eval_results.get("outcome_metrics") else None,
+                            outcome_metrics_by_skill={
+                                k: OutcomeMetrics(**v)
+                                for k, v in eval_results.get(
+                                    "outcome_metrics_by_skill", {}
+                                ).items()
+                            } if eval_results.get("outcome_metrics_by_skill") else None,
+                            outcome_metrics_by_time_control={
+                                k: OutcomeMetrics(**v)
+                                for k, v in eval_results.get(
+                                    "outcome_metrics_by_time_control", {}
+                                ).items()
+                            } if eval_results.get("outcome_metrics_by_time_control") else None,
+                            outcome_metrics_by_time_pressure={
+                                k: OutcomeMetrics(**v)
+                                for k, v in eval_results.get(
+                                    "outcome_metrics_by_time_pressure", {}
+                                ).items()
+                            } if eval_results.get("outcome_metrics_by_time_pressure") else None,
+                        )
+                    else:
+                        # Build v4 report (no outcome metrics)
+                        report: (
+                            EvalReportV1 | EvalReportV2 | EvalReportV3 | EvalReportV4 | EvalReportV5
+                        ) = EvalReportV4(
                             schema_version="eval_report.v4",
                             created_at=created_at or datetime.now(),
                             dataset_digest=eval_results["dataset_digest"],
@@ -470,7 +569,6 @@ def main() -> None:
                             by_time_control_class=eval_results["by_time_control_class"],
                             by_time_pressure_bucket=eval_results["by_time_pressure_bucket"],
                         )
-                    )
                 else:
                     # Run standard evaluation (v1/v2)
                     eval_results = run_evaluation(
@@ -578,6 +676,31 @@ def main() -> None:
 
             print(f"Model trained and saved to {model_path}", file=sys.stderr)
             print(f"Metadata saved to {args.out / 'model_metadata.json'}", file=sys.stderr)
+        except Exception as e:
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
+    elif args.command == "train-outcome-head":
+        try:
+            from renacechess.models.training_outcome import train_outcome_head
+
+            frozen_eval_path = None
+            if args.frozen_eval_manifest:
+                frozen_eval_path = args.frozen_eval_manifest
+
+            model_path = train_outcome_head(
+                manifest_path=args.dataset_manifest,
+                frozen_eval_manifest_path=frozen_eval_path,
+                output_dir=args.out,
+                epochs=args.epochs,
+                batch_size=args.batch_size,
+                learning_rate=args.learning_rate,
+                seed=args.seed,
+            )
+
+            print(f"Outcome head trained and saved to {model_path}", file=sys.stderr)
+            print(
+                f"Metadata saved to {args.out / 'outcome_head_v1_metadata.json'}", file=sys.stderr
+            )
         except Exception as e:
             print(f"Error: {e}", file=sys.stderr)
             sys.exit(1)

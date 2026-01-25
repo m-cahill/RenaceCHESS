@@ -881,6 +881,82 @@ class EvalReportV4(BaseModel):
     )
 
 
+class EvalReportV5(BaseModel):
+    """Evaluation report (v5) - extends v4 with outcome metrics (M09)."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    schema_version: Literal["eval_report.v5"] = Field(
+        "eval_report.v5", alias="schemaVersion", description="Schema version"
+    )
+    created_at: datetime = Field(
+        ..., alias="createdAt", description="ISO 8601 timestamp of creation"
+    )
+    dataset_digest: str = Field(
+        ...,
+        alias="datasetDigest",
+        description="SHA-256 hash from dataset manifest v2 (stable dataset identity)",
+        pattern="^[a-f0-9]{64}$",
+    )
+    assembly_config_hash: str = Field(
+        ...,
+        alias="assemblyConfigHash",
+        description="SHA-256 hash from dataset manifest v2 (assembly configuration hash)",
+        pattern="^[a-f0-9]{64}$",
+    )
+    policy_id: str = Field(
+        ..., alias="policyId", description="Policy identifier (e.g., 'baseline.uniform_random')"
+    )
+    eval_config_hash: str = Field(
+        ...,
+        alias="evalConfigHash",
+        description="SHA-256 hash of canonical JSON config",
+        pattern="^[a-f0-9]{64}$",
+    )
+    frozen_eval_manifest_hash: str | None = Field(
+        None,
+        alias="frozenEvalManifestHash",
+        description="SHA-256 hash of frozen eval manifest (if frozen eval was used)",
+        pattern="^[a-f0-9]{64}$",
+    )
+    overall: ConditionedMetrics = Field(..., description="Overall metrics (all records)")
+    by_skill_bucket_id: dict[str, ConditionedMetrics] = Field(
+        default_factory=dict,
+        alias="bySkillBucketId",
+        description="Metrics stratified by M06 skill bucket ID",
+    )
+    by_time_control_class: dict[str, ConditionedMetrics] = Field(
+        default_factory=dict,
+        alias="byTimeControlClass",
+        description="Metrics stratified by time control class",
+    )
+    by_time_pressure_bucket: dict[str, ConditionedMetrics] = Field(
+        default_factory=dict,
+        alias="byTimePressureBucket",
+        description="Metrics stratified by time pressure bucket",
+    )
+    outcome_metrics: OutcomeMetrics | None = Field(
+        None,
+        alias="outcomeMetrics",
+        description="Outcome head metrics (present only if outcome head was used)",
+    )
+    outcome_metrics_by_skill: dict[str, OutcomeMetrics] | None = Field(
+        None,
+        alias="outcomeMetricsBySkill",
+        description="Outcome metrics stratified by skill bucket (present only if outcome head was used)",
+    )
+    outcome_metrics_by_time_control: dict[str, OutcomeMetrics] | None = Field(
+        None,
+        alias="outcomeMetricsByTimeControl",
+        description="Outcome metrics stratified by time control class (present only if outcome head was used)",
+    )
+    outcome_metrics_by_time_pressure: dict[str, OutcomeMetrics] | None = Field(
+        None,
+        alias="outcomeMetricsByTimePressure",
+        description="Outcome metrics stratified by time pressure bucket (present only if outcome head was used)",
+    )
+
+
 # HDI Models (M07) - for Evaluation Reports
 
 
@@ -948,6 +1024,35 @@ class HDIMetrics(BaseModel):
         ..., alias="specVersion", description="HDI specification version (1 for M07)"
     )
     components: HDIMetricsComponents = Field(..., description="HDI component values")
+
+
+# Outcome Metrics Models (M09)
+
+
+class OutcomeMetrics(BaseModel):
+    """Outcome metrics for human W/D/L evaluation (M09)."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    total_predictions: int = Field(
+        ..., alias="totalPredictions", ge=0, description="Total number of outcome predictions"
+    )
+    cross_entropy: float | None = Field(
+        None,
+        alias="crossEntropy",
+        ge=0.0,
+        description="Average cross-entropy (log loss) - lower is better",
+    )
+    brier_score: float | None = Field(
+        None, alias="brierScore", ge=0.0, description="Average Brier score - lower is better"
+    )
+    ece: float | None = Field(
+        None,
+        alias="ece",
+        ge=0.0,
+        le=1.0,
+        description="Expected Calibration Error (10-bin equal-width) - lower is better",
+    )
 
 
 # Frozen Eval Manifest Models

@@ -9,6 +9,7 @@ from renacechess.dataset.split import compute_split_assignment
 from renacechess.eval.baselines import compute_policy_seed, create_policy_provider
 from renacechess.eval.conditioned_metrics import ConditionedMetricsAccumulator
 from renacechess.eval.metrics import MetricsAccumulator, format_fixed_decimal
+from renacechess.eval.outcome_metrics import OutcomeMetricsAccumulator
 
 
 def load_manifest(manifest_path: Path) -> DatasetManifestV2:
@@ -202,8 +203,9 @@ def run_conditioned_evaluation(
     top_k_values: list[int] | None = None,
     frozen_eval_manifest_hash: str | None = None,
     model_path: Path | None = None,
+    outcome_head_path: Path | None = None,
 ) -> dict[str, Any]:
-    """Run evaluation with conditioned metrics (M06).
+    """Run evaluation with conditioned metrics (M06) and optional outcome head (M09).
 
     Args:
         manifest_path: Path to dataset manifest v2.
@@ -213,9 +215,11 @@ def run_conditioned_evaluation(
         compute_accuracy: Whether to compute accuracy metrics (requires chosenMove labels).
         top_k_values: List of K values for top-K accuracy (e.g., [1, 3, 5]). Defaults to [1].
         frozen_eval_manifest_hash: SHA-256 hash of frozen eval manifest (if frozen eval).
+        model_path: Path to trained policy model (for learned.v1).
+        outcome_head_path: Path to outcome head model directory (M09, optional).
 
     Returns:
-        Dictionary with evaluation results (ready for EvalReportV3 construction).
+        Dictionary with evaluation results (ready for EvalReportV3/V4/V5 construction).
     """
     # Load manifest
     manifest = load_manifest(manifest_path)
@@ -228,11 +232,31 @@ def run_conditioned_evaluation(
     # Create policy provider
     policy = create_policy_provider(policy_id, seed=policy_seed, model_path=model_path)
 
+    # Load outcome head if provided (M09)
+    outcome_head = None
+    if outcome_head_path is not None:
+        from renacechess.eval.outcome_head import LearnedOutcomeHeadV1
+
+        model_file = outcome_head_path / "outcome_head_v1.pt"
+        metadata_file = outcome_head_path / "outcome_head_v1_metadata.json"
+        if not model_file.exists() or not metadata_file.exists():
+            raise FileNotFoundError(
+                f"Outcome head files not found in {outcome_head_path}. "
+                "Expected: outcome_head_v1.pt and outcome_head_v1_metadata.json"
+            )
+        outcome_head = LearnedOutcomeHeadV1(model_file, metadata_file)
+
     # Initialize conditioned metrics accumulator
     top_k_vals = top_k_values if top_k_values is not None else [1]
     accumulator = ConditionedMetricsAccumulator(
         compute_accuracy=compute_accuracy, top_k_values=top_k_vals
     )
+
+    # Initialize outcome metrics accumulators (M09)
+    outcome_accumulator = OutcomeMetricsAccumulator() if outcome_head else None
+    outcome_accumulators_by_skill: dict[str, OutcomeMetricsAccumulator] = {}
+    outcome_accumulators_by_time_control: dict[str, OutcomeMetricsAccumulator] = {}
+    outcome_accumulators_by_time_pressure: dict[str, OutcomeMetricsAccumulator] = {}
 
     # Process shards in order
     records_processed = 0
@@ -291,6 +315,45 @@ def run_conditioned_evaluation(
                     time_pressure_bucket=time_pressure_bucket,
                 )
 
+                # Compute outcome metrics if outcome head is provided (M09)
+                if outcome_head is not None:
+                    # Get game result from record (from mover's perspective)
+                    game_result = _get_game_result_from_record(record)
+                    if game_result is not None:
+                        # Predict W/D/L
+                        predicted_wdl = outcome_head.predict(record)
+
+                        # Add to overall accumulator
+                        outcome_accumulator.add_prediction(predicted_wdl, game_result)
+
+                        # Add to stratified accumulators
+                        if skill_bucket_id:
+                            if skill_bucket_id not in outcome_accumulators_by_skill:
+                                outcome_accumulators_by_skill[skill_bucket_id] = (
+                                    OutcomeMetricsAccumulator()
+                                )
+                            outcome_accumulators_by_skill[skill_bucket_id].add_prediction(
+                                predicted_wdl, game_result
+                            )
+
+                        if time_control_class:
+                            if time_control_class not in outcome_accumulators_by_time_control:
+                                outcome_accumulators_by_time_control[time_control_class] = (
+                                    OutcomeMetricsAccumulator()
+                                )
+                            outcome_accumulators_by_time_control[
+                                time_control_class
+                            ].add_prediction(predicted_wdl, game_result)
+
+                        if time_pressure_bucket:
+                            if time_pressure_bucket not in outcome_accumulators_by_time_pressure:
+                                outcome_accumulators_by_time_pressure[time_pressure_bucket] = (
+                                    OutcomeMetricsAccumulator()
+                                )
+                            outcome_accumulators_by_time_pressure[
+                                time_pressure_bucket
+                            ].add_prediction(predicted_wdl, game_result)
+
                 records_processed += 1
 
     # Build metrics
@@ -309,7 +372,49 @@ def run_conditioned_evaluation(
         "by_time_pressure_bucket": stratified_metrics["byTimePressureBucket"],
     }
 
+    # Add outcome metrics if outcome head was used (M09)
+    if outcome_accumulator is not None:
+        outcome_metrics = outcome_accumulator.compute_metrics()
+        result["outcome_metrics"] = outcome_metrics
+
+        # Stratified outcome metrics
+        result["outcome_metrics_by_skill"] = {
+            skill: acc.compute_metrics()
+            for skill, acc in outcome_accumulators_by_skill.items()
+        }
+        result["outcome_metrics_by_time_control"] = {
+            tc: acc.compute_metrics()
+            for tc, acc in outcome_accumulators_by_time_control.items()
+        }
+        result["outcome_metrics_by_time_pressure"] = {
+            tp: acc.compute_metrics()
+            for tp, acc in outcome_accumulators_by_time_pressure.items()
+        }
+
     return result
+
+
+def _get_game_result_from_record(record: dict[str, Any]) -> str | None:
+    """Extract game result from record (from mover's perspective).
+
+    Args:
+        record: Dataset record
+
+    Returns:
+        'win', 'draw', 'loss', or None if not available
+    """
+    # Check if game result is stored in meta
+    meta = record.get("meta", {})
+    game_result = meta.get("gameResult")
+    if game_result:
+        return game_result
+
+    # Check if game result is at top level
+    game_result = record.get("gameResult")
+    if game_result:
+        return game_result
+
+    return None
 
 
 def _compute_eval_config_hash(eval_config: dict[str, Any]) -> str:
