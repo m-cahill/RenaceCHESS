@@ -94,10 +94,22 @@ def test_outcome_dataset_excludes_frozen_eval() -> None:
     }
 
     frozen_manifest_data = {
-        "schemaVersion": "v1",
+        "schemaVersion": 1,
         "createdAt": "2024-01-01T00:00:00",
-        "manifestHash": "d" * 64,
-        "records": [{"recordKey": "test123:0", "shardId": "shard_001", "shardHash": "c" * 64}],
+        "sourceManifestRef": {
+            "datasetDigest": "a" * 64,
+            "manifestPath": "/path/to/manifest.json",
+        },
+        "records": [
+            {
+                "recordKey": "test123:0",
+                "shardId": "shard_001",
+                "shardHash": "c" * 64,
+                "skillBucketId": "1200_1399",
+                "timeControlClass": "blitz",
+                "timePressureBucket": "normal",
+            }
+        ],
     }
 
     with tempfile.TemporaryDirectory() as tmpdir:
