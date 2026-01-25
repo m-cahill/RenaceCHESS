@@ -267,6 +267,38 @@ def test_outcome_head_skill_bucket_encoding_value_error() -> None:
     assert 0.0 <= wdl["l"] <= 1.0
 
 
+def test_outcome_head_skill_bucket_no_dash() -> None:
+    """Test outcome head skill bucket encoding when no dash present (line 94->116)."""
+    model = OutcomeHeadV1()
+    model.eval()
+
+    fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+
+    # Test skill bucket without "-" (should fall through to unknown)
+    skill_bucket = "nodashformat"
+    wdl = model.forward(fen, skill_bucket, "blitz")
+    # Should fall back to unknown bucket (7) and still return valid probabilities
+    assert 0.0 <= wdl["w"] <= 1.0
+    assert 0.0 <= wdl["d"] <= 1.0
+    assert 0.0 <= wdl["l"] <= 1.0
+
+
+def test_outcome_head_skill_bucket_wrong_parts() -> None:
+    """Test outcome head skill bucket encoding with wrong number of parts (line 96->116)."""
+    model = OutcomeHeadV1()
+    model.eval()
+
+    fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+
+    # Test skill bucket with "-" but not exactly 2 parts (e.g., "1200-1400-1600")
+    skill_bucket = "1200-1400-1600"
+    wdl = model.forward(fen, skill_bucket, "blitz")
+    # Should fall back to unknown bucket (7) and still return valid probabilities
+    assert 0.0 <= wdl["w"] <= 1.0
+    assert 0.0 <= wdl["d"] <= 1.0
+    assert 0.0 <= wdl["l"] <= 1.0
+
+
 def test_outcome_head_renormalization() -> None:
     """Test outcome head renormalization path (lines 202->207)."""
     model = OutcomeHeadV1()
@@ -282,12 +314,12 @@ def test_outcome_head_renormalization() -> None:
     # Verify probabilities sum to 1.0 (renormalization should ensure this)
     total = wdl["w"] + wdl["d"] + wdl["l"]
     assert abs(total - 1.0) < 1e-6, f"Probabilities sum to {total}, expected 1.0"
-    
+
     # Verify all probabilities are in [0, 1]
     assert 0.0 <= wdl["w"] <= 1.0
     assert 0.0 <= wdl["d"] <= 1.0
     assert 0.0 <= wdl["l"] <= 1.0
-    
+
     # Call multiple times to ensure renormalization path is consistently executed
     for _ in range(5):
         wdl2 = model.forward(fen, "1200_1399", "blitz")
