@@ -313,16 +313,19 @@ def test_outcome_head_renormalization_needed() -> None:
 
     fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
-    # Patch forward_logits to return logits that, after softmax and clamping,
-    # produce values that sum to something significantly different from 1.0
-    # This forces the renormalization branch (abs(total - 1.0) > epsilon)
-    # Use logits that produce probabilities summing to ~0.9 after clamping
-    with patch.object(
-        model, "forward_logits", return_value=torch.tensor([10.0, 5.0, -5.0])
-    ):
-        # These logits will produce softmax probabilities that, after clamping,
-        # may need renormalization if clamping affects the sum
-        # Force a scenario where sum != 1.0 by using extreme logits
+    # To force the renormalization branch, we need values that sum to something
+    # not within epsilon of 1.0 after clamping. We'll patch functional.softmax
+    # to return values that, after clamping, sum to 0.9 (not within epsilon).
+    from torch.nn import functional
+
+    original_softmax = functional.softmax
+
+    def patched_softmax(input_tensor: torch.Tensor, dim: int = 0) -> torch.Tensor:
+        # Return values that sum to 0.9 after clamping (forcing renormalization)
+        # Use values that are all 0.3, which sum to 0.9
+        return torch.tensor([0.3, 0.3, 0.3])
+
+    with patch.object(functional, "softmax", side_effect=patched_softmax):
         wdl = model.forward(fen, "1200_1399", "blitz")
 
         # Verify probabilities sum to 1.0 (renormalization ensures this)
@@ -353,9 +356,7 @@ def test_outcome_head_renormalization_skipped() -> None:
     # Patch forward_logits to return logits that produce probabilities
     # summing to exactly 1.0 after softmax (no clamping needed)
     # This forces the skip renormalization branch (abs(total - 1.0) <= epsilon)
-    with patch.object(
-        model, "forward_logits", return_value=torch.tensor([0.0, 0.0, 0.0])
-    ):
+    with patch.object(model, "forward_logits", return_value=torch.tensor([0.0, 0.0, 0.0])):
         # Logits of [0, 0, 0] produce softmax of [1/3, 1/3, 1/3]
         # After clamping (no change), sum = 1.0 exactly (within epsilon)
         # This should skip renormalization branch
