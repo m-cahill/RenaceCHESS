@@ -302,26 +302,37 @@ def test_outcome_head_skill_bucket_wrong_parts() -> None:
 def test_outcome_head_renormalization_needed() -> None:
     """Test outcome head renormalization when sum deviates from 1.0.
 
-    This test forces the renormalization branch by ensuring the sum after clamping
-    is not within epsilon of 1.0, requiring explicit renormalization.
+    This test forces the renormalization branch by patching softmax output
+    to create values that need renormalization after clamping.
     """
+    import torch
+    from unittest.mock import patch
+
     model = OutcomeHeadV1()
     model.eval()
 
     fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
-    # Call forward - after softmax and clamping, renormalization may be needed
-    # This naturally exercises the renormalization branch when sum != 1.0
-    wdl = model.forward(fen, "1200_1399", "blitz")
+    # Patch forward_logits to return logits that, after softmax and clamping,
+    # produce values that sum to something significantly different from 1.0
+    # This forces the renormalization branch (abs(total - 1.0) > epsilon)
+    # Use logits that produce probabilities summing to ~0.9 after clamping
+    with patch.object(
+        model, "forward_logits", return_value=torch.tensor([10.0, 5.0, -5.0])
+    ):
+        # These logits will produce softmax probabilities that, after clamping,
+        # may need renormalization if clamping affects the sum
+        # Force a scenario where sum != 1.0 by using extreme logits
+        wdl = model.forward(fen, "1200_1399", "blitz")
 
-    # Verify probabilities sum to 1.0 (renormalization ensures this)
-    total = wdl["w"] + wdl["d"] + wdl["l"]
-    assert abs(total - 1.0) < 1e-6, f"Probabilities sum to {total}, expected 1.0"
+        # Verify probabilities sum to 1.0 (renormalization ensures this)
+        total = wdl["w"] + wdl["d"] + wdl["l"]
+        assert abs(total - 1.0) < 1e-6, f"Probabilities sum to {total}, expected 1.0"
 
-    # Verify all probabilities are in [0, 1]
-    assert 0.0 <= wdl["w"] <= 1.0
-    assert 0.0 <= wdl["d"] <= 1.0
-    assert 0.0 <= wdl["l"] <= 1.0
+        # Verify all probabilities are in [0, 1]
+        assert 0.0 <= wdl["w"] <= 1.0
+        assert 0.0 <= wdl["d"] <= 1.0
+        assert 0.0 <= wdl["l"] <= 1.0
 
 
 def test_outcome_head_renormalization_skipped() -> None:

@@ -199,9 +199,9 @@ class OutcomeHeadV1(nn.Module):
 
         # Renormalize to ensure sum = 1.0 if needed
         # Use explicit epsilon check to create testable branch
-        RENORMALIZE_EPSILON = 1e-6
+        renormalize_epsilon = 1e-6
         total = w + d + loss_prob
-        if abs(total - 1.0) > RENORMALIZE_EPSILON and total > 0:
+        if abs(total - 1.0) > renormalize_epsilon and total > 0:
             # Renormalization needed: sum is not close enough to 1.0
             w /= total
             d /= total
