@@ -139,7 +139,10 @@ def main() -> None:
     run_parser.add_argument(
         "--outcome-head-path",
         type=Path,
-        help="Path to trained outcome head model directory (contains outcome_head_v1.pt and outcome_head_v1_metadata.json)",
+        help=(
+            "Path to trained outcome head model directory "
+            "(contains outcome_head_v1.pt and outcome_head_v1_metadata.json)"
+        ),
     )
     run_parser.add_argument(
         "--out",
@@ -516,7 +519,7 @@ def main() -> None:
 
                     if has_outcome_metrics:
                         # Build v5 report with outcome metrics
-                        report: (
+                        report_v5: (
                             EvalReportV1 | EvalReportV2 | EvalReportV3 | EvalReportV4 | EvalReportV5
                         ) = EvalReportV5(
                             schema_version="eval_report.v5",
@@ -552,9 +555,10 @@ def main() -> None:
                                 ).items()
                             } if eval_results.get("outcome_metrics_by_time_pressure") else None,
                         )
+                        report = report_v5
                     else:
                         # Build v4 report (no outcome metrics)
-                        report: (
+                        report_v4: (
                             EvalReportV1 | EvalReportV2 | EvalReportV3 | EvalReportV4 | EvalReportV5
                         ) = EvalReportV4(
                             schema_version="eval_report.v4",
@@ -569,6 +573,7 @@ def main() -> None:
                             by_time_control_class=eval_results["by_time_control_class"],
                             by_time_pressure_bucket=eval_results["by_time_pressure_bucket"],
                         )
+                        report = report_v4
                 else:
                     # Run standard evaluation (v1/v2)
                     eval_results = run_evaluation(

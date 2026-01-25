@@ -943,17 +943,26 @@ class EvalReportV5(BaseModel):
     outcome_metrics_by_skill: dict[str, OutcomeMetrics] | None = Field(
         None,
         alias="outcomeMetricsBySkill",
-        description="Outcome metrics stratified by skill bucket (present only if outcome head was used)",
+        description=(
+            "Outcome metrics stratified by skill bucket "
+            "(present only if outcome head was used)"
+        ),
     )
     outcome_metrics_by_time_control: dict[str, OutcomeMetrics] | None = Field(
         None,
         alias="outcomeMetricsByTimeControl",
-        description="Outcome metrics stratified by time control class (present only if outcome head was used)",
+        description=(
+            "Outcome metrics stratified by time control class "
+            "(present only if outcome head was used)"
+        ),
     )
     outcome_metrics_by_time_pressure: dict[str, OutcomeMetrics] | None = Field(
         None,
         alias="outcomeMetricsByTimePressure",
-        description="Outcome metrics stratified by time pressure bucket (present only if outcome head was used)",
+        description=(
+            "Outcome metrics stratified by time pressure bucket "
+            "(present only if outcome head was used)"
+        ),
     )
 
 

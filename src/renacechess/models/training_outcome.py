@@ -14,7 +14,9 @@ from renacechess.eval.runner import load_manifest
 from renacechess.models.outcome_head_v1 import OutcomeHeadV1
 
 
-def _get_game_result_from_record(record: dict[str, Any]) -> Literal["win", "draw", "loss"] | None:
+def _get_game_result_from_record(
+    record: dict[str, Any],
+) -> Literal["win", "draw", "loss"] | None:
     """Extract game result from record (from mover's perspective).
 
     Args:
@@ -25,21 +27,15 @@ def _get_game_result_from_record(record: dict[str, Any]) -> Literal["win", "draw
     """
     # Check if game result is stored in meta
     meta = record.get("meta", {})
-    game_result = meta.get("gameResult")
-    if game_result:
-        return game_result
+    if isinstance(meta, dict):
+        game_result = meta.get("gameResult")
+        if isinstance(game_result, str) and game_result in ("win", "draw", "loss"):
+            return game_result
 
     # Check if game result is at top level
     game_result = record.get("gameResult")
-    if game_result:
+    if isinstance(game_result, str) and game_result in ("win", "draw", "loss"):
         return game_result
-
-    # Check if we can derive from humanWDL (if present, use as ground truth proxy)
-    # This is a fallback for M09 - in production, game results should be in records
-    human_wdl = record.get("humanWDL", {})
-    if human_wdl:
-        # If we have pre-WDL, we could use it, but for training we need actual game result
-        pass
 
     return None
 

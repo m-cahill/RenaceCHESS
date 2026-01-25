@@ -6,9 +6,8 @@ This module provides metrics for evaluating outcome head predictions:
 - Expected Calibration Error (ECE) with 10-bin equal-width calibration
 """
 
+import math
 from typing import Any
-
-import numpy as np
 
 
 def compute_cross_entropy(
@@ -37,7 +36,7 @@ def compute_cross_entropy(
     true_prob = max(1e-10, min(1.0 - 1e-10, true_prob))
 
     # Cross-entropy: -log(p_true)
-    return -np.log(true_prob)
+    return float(-math.log(true_prob))
 
 
 def compute_brier_score(
@@ -117,8 +116,14 @@ class OutcomeMetricsAccumulator:
             }
 
         # Aggregate metrics
-        avg_ce = np.mean(self.cross_entropies) if self.cross_entropies else None
-        avg_brier = np.mean(self.brier_scores) if self.brier_scores else None
+        avg_ce = (
+            sum(self.cross_entropies) / len(self.cross_entropies)
+            if self.cross_entropies
+            else None
+        )
+        avg_brier = (
+            sum(self.brier_scores) / len(self.brier_scores) if self.brier_scores else None
+        )
 
         # Compute ECE (10-bin equal-width)
         ece = compute_ece(self.predictions, self.true_outcomes)
@@ -168,26 +173,32 @@ def compute_ece(
 
     # Create equal-width bins [0.0, 0.1), [0.1, 0.2), ..., [0.9, 1.0]
     # Edge case: 1.0 goes in last bin
-    bin_edges = np.linspace(0.0, 1.0, n_bins + 1)
+    bin_edges = [i / n_bins for i in range(n_bins + 1)]
     bin_edges[-1] = 1.01  # Ensure 1.0 is included in last bin
 
     # Assign predictions to bins
-    bin_indices = np.digitize(confidences, bin_edges) - 1
-    bin_indices = np.clip(bin_indices, 0, n_bins - 1)
+    bin_indices: list[int] = []
+    for conf in confidences:
+        bin_idx = 0
+        for i in range(len(bin_edges) - 1):
+            if bin_edges[i] <= conf < bin_edges[i + 1]:
+                bin_idx = i
+                break
+        bin_indices.append(min(max(bin_idx, 0), n_bins - 1))
 
     # Compute ECE: weighted average of |accuracy - confidence| per bin
     ece = 0.0
     total_samples = len(confidences)
 
     for bin_idx in range(n_bins):
-        mask = bin_indices == bin_idx
-        bin_size = np.sum(mask)
+        bin_items = [i for i in range(len(bin_indices)) if bin_indices[i] == bin_idx]
+        bin_size = len(bin_items)
 
         if bin_size == 0:
             continue
 
-        bin_accuracy = np.mean([accuracies[i] for i in range(len(accuracies)) if mask[i]])
-        bin_confidence = np.mean([confidences[i] for i in range(len(confidences)) if mask[i]])
+        bin_accuracy = sum(accuracies[i] for i in bin_items) / bin_size
+        bin_confidence = sum(confidences[i] for i in bin_items) / bin_size
 
         # Weight by bin size
         weight = bin_size / total_samples

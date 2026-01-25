@@ -142,7 +142,7 @@ class OutcomeHeadV1(nn.Module):
         fen: str,
         skill_bucket: str,
         time_control: str | None,
-    ) -> torch.Tensor:
+    ) -> torch.Tensor:  # type: ignore[type-arg]
         """Forward pass returning logits (for training).
 
         Args:
@@ -167,7 +167,7 @@ class OutcomeHeadV1(nn.Module):
         features = torch.cat([fen_emb, skill_emb, time_emb])
 
         # Single linear layer -> 3 logits (W/D/L)
-        logits = self.fc_outcome(features)  # Shape: [3]
+        logits: torch.Tensor = self.fc_outcome(features)  # Shape: [3]
 
         return logits
 
@@ -195,14 +195,14 @@ class OutcomeHeadV1(nn.Module):
         # Clamp to [0, 1] to handle floating-point precision
         w = max(0.0, min(1.0, float(probs[0].item())))
         d = max(0.0, min(1.0, float(probs[1].item())))
-        l = max(0.0, min(1.0, float(probs[2].item())))
+        loss_prob = max(0.0, min(1.0, float(probs[2].item())))
 
         # Renormalize to ensure sum = 1.0
-        total = w + d + l
+        total = w + d + loss_prob
         if total > 0:
             w /= total
             d /= total
-            l /= total
+            loss_prob /= total
 
-        return {"w": w, "d": d, "l": l}
+        return {"w": w, "d": d, "l": loss_prob}
 

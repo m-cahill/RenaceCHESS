@@ -316,7 +316,7 @@ def run_conditioned_evaluation(
                 )
 
                 # Compute outcome metrics if outcome head is provided (M09)
-                if outcome_head is not None:
+                if outcome_head is not None and outcome_accumulator is not None:
                     # Get game result from record (from mover's perspective)
                     game_result = _get_game_result_from_record(record)
                     if game_result is not None:
@@ -405,13 +405,14 @@ def _get_game_result_from_record(record: dict[str, Any]) -> str | None:
     """
     # Check if game result is stored in meta
     meta = record.get("meta", {})
-    game_result = meta.get("gameResult")
-    if game_result:
-        return game_result
+    if isinstance(meta, dict):
+        game_result = meta.get("gameResult")
+        if isinstance(game_result, str):
+            return game_result
 
     # Check if game result is at top level
     game_result = record.get("gameResult")
-    if game_result:
+    if isinstance(game_result, str):
         return game_result
 
     return None

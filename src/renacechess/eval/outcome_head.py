@@ -36,7 +36,7 @@ class LearnedOutcomeHeadV1:
         self.model.load_state_dict(torch.load(model_path, map_location="cpu"))
         self.model.eval()
 
-    def predict(self, record: dict) -> dict[str, float]:
+    def predict(self, record: dict[str, Any]) -> dict[str, float]:
         """Predict W/D/L probabilities for a given position record.
 
         Args:
@@ -54,7 +54,7 @@ class LearnedOutcomeHeadV1:
 
         # Get predictions
         with torch.no_grad():
-            wdl_probs = self.model(fen, skill_bucket, time_control)
+            wdl_probs: dict[str, float] = self.model(fen, skill_bucket, time_control)
 
         return wdl_probs
 
