@@ -197,11 +197,15 @@ class OutcomeHeadV1(nn.Module):
         d = max(0.0, min(1.0, float(probs[1].item())))
         loss_prob = max(0.0, min(1.0, float(probs[2].item())))
 
-        # Renormalize to ensure sum = 1.0
+        # Renormalize to ensure sum = 1.0 if needed
+        # Use explicit epsilon check to create testable branch
+        RENORMALIZE_EPSILON = 1e-6
         total = w + d + loss_prob
-        if total > 0:
+        if abs(total - 1.0) > RENORMALIZE_EPSILON and total > 0:
+            # Renormalization needed: sum is not close enough to 1.0
             w /= total
             d /= total
             loss_prob /= total
+        # else: already normalized (within epsilon), no renormalization needed
 
         return {"w": w, "d": d, "l": loss_prob}
