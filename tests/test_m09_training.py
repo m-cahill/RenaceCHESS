@@ -38,6 +38,7 @@ def test_outcome_dataset_loads_records() -> None:
         "schemaVersion": "v2",
         "createdAt": "2024-01-01T00:00:00",
         "datasetDigest": "a" * 64,
+        "assemblyConfig": {"shardSize": 10000},
         "assemblyConfigHash": "b" * 64,
         "shardRefs": [
             {
@@ -79,6 +80,7 @@ def test_outcome_dataset_excludes_frozen_eval() -> None:
         "schemaVersion": "v2",
         "createdAt": "2024-01-01T00:00:00",
         "datasetDigest": "a" * 64,
+        "assemblyConfig": {"shardSize": 10000},
         "assemblyConfigHash": "b" * 64,
         "shardRefs": [
             {
