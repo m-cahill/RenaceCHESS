@@ -103,7 +103,7 @@ def test_outcome_dataset_excludes_frozen_eval() -> None:
         },
         "records": [
             {
-                "recordKey": "test123:0",
+                "recordKey": "test123",  # Match inputHash format (no ply suffix)
                 "shardId": "shard_001",
                 "shardHash": "c" * 64,
                 "skillBucketId": "1200_1399",
