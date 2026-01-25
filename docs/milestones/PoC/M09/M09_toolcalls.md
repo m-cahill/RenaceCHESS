@@ -53,7 +53,11 @@
 
 **CI Run 1:** 21325099361 (FAILED - numpy missing, type errors, lint errors)
 **CI Fixes Applied:** Removed numpy, fixed type annotations, fixed lint errors
-**CI Run 2:** Waiting for new run after fixes
+**CI Run 2:** 21325146892 (FAILED - MyPy errors, format issues, test manifest structure)
+**CI Fixes Applied:** Fixed MyPy type ignores, formatted code, added assemblyConfig to test manifests
+**CI Run 3:** 21325194409 (FAILED - frozen eval manifest structure)
+**CI Run 4:** 21325242370 (FAILED - missing manifestHash, coverage gap)
+**CI Analysis:** M09_run1.md generated
 
 *Tool calls will be logged here as M09 implementation progresses.*
 
