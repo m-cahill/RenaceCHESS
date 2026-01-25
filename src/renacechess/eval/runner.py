@@ -47,6 +47,7 @@ def run_evaluation(
     max_records: int | None = None,
     compute_accuracy: bool = False,
     top_k_values: list[int] | None = None,
+    model_path: Path | None = None,
 ) -> dict[str, Any]:
     """Run evaluation over dataset manifest.
 
@@ -70,7 +71,7 @@ def run_evaluation(
     policy_seed = compute_policy_seed(manifest.dataset_digest, policy_id, eval_config_hash)
 
     # Create policy provider
-    policy = create_policy_provider(policy_id, seed=policy_seed)
+    policy = create_policy_provider(policy_id, seed=policy_seed, model_path=model_path)
 
     # Initialize accumulators with accuracy config
     top_k_vals = top_k_values if top_k_values is not None else [1]
@@ -200,6 +201,7 @@ def run_conditioned_evaluation(
     compute_accuracy: bool = False,
     top_k_values: list[int] | None = None,
     frozen_eval_manifest_hash: str | None = None,
+    model_path: Path | None = None,
 ) -> dict[str, Any]:
     """Run evaluation with conditioned metrics (M06).
 
@@ -224,7 +226,7 @@ def run_conditioned_evaluation(
     policy_seed = compute_policy_seed(manifest.dataset_digest, policy_id, eval_config_hash)
 
     # Create policy provider
-    policy = create_policy_provider(policy_id, seed=policy_seed)
+    policy = create_policy_provider(policy_id, seed=policy_seed, model_path=model_path)
 
     # Initialize conditioned metrics accumulator
     top_k_vals = top_k_values if top_k_values is not None else [1]

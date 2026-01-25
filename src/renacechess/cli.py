@@ -126,7 +126,15 @@ def main() -> None:
         "--policy",
         type=str,
         required=True,
-        help="Policy identifier (e.g., 'baseline.uniform_random', 'baseline.first_legal')",
+        help=(
+            "Policy identifier (e.g., 'baseline.uniform_random', 'baseline.first_legal', "
+            "'learned.v1')"
+        ),
+    )
+    run_parser.add_argument(
+        "--model-path",
+        type=Path,
+        help="Path to trained model file (required for 'learned.v1' policy)",
     )
     run_parser.add_argument(
         "--out",
@@ -201,6 +209,52 @@ def main() -> None:
         "--created-at",
         type=str,
         help="Override creation timestamp (ISO 8601 format, for testing only)",
+    )
+
+    # Train policy command
+    train_parser = subparsers.add_parser(
+        "train-policy", help="Train learned human policy baseline (M08)"
+    )
+    train_parser.add_argument(
+        "--dataset-manifest",
+        type=Path,
+        required=True,
+        help="Path to dataset manifest v2",
+    )
+    train_parser.add_argument(
+        "--frozen-eval-manifest",
+        type=Path,
+        help="Path to frozen eval manifest (to exclude from training)",
+    )
+    train_parser.add_argument(
+        "--out",
+        type=Path,
+        required=True,
+        help="Output directory for model and metadata",
+    )
+    train_parser.add_argument(
+        "--epochs",
+        type=int,
+        default=10,
+        help="Number of training epochs (default: 10)",
+    )
+    train_parser.add_argument(
+        "--batch-size",
+        type=int,
+        default=32,
+        help="Batch size (default: 32)",
+    )
+    train_parser.add_argument(
+        "--learning-rate",
+        type=float,
+        default=0.001,
+        help="Learning rate (default: 0.001)",
+    )
+    train_parser.add_argument(
+        "--seed",
+        type=int,
+        default=42,
+        help="Random seed for determinism (default: 42)",
     )
 
     # Ingest command
@@ -378,6 +432,7 @@ def main() -> None:
                         compute_accuracy=args.compute_accuracy,
                         top_k_values=top_k_values,
                         frozen_eval_manifest_hash=frozen_eval_manifest_hash,
+                        model_path=getattr(args, "model_path", None),
                     )
 
                     # Validate frozen eval manifest hash matches (if provided in results)
@@ -425,6 +480,7 @@ def main() -> None:
                         max_records=args.max_records,
                         compute_accuracy=args.compute_accuracy,
                         top_k_values=top_k_values,
+                        model_path=getattr(args, "model_path", None),
                     )
 
                     # Build report (v2 if accuracy enabled, v1 otherwise)
@@ -501,6 +557,29 @@ def main() -> None:
                 sys.exit(1)
         else:
             eval_parser.print_help()
+            sys.exit(1)
+    elif args.command == "train-policy":
+        try:
+            from renacechess.models.training import train_baseline_policy
+
+            frozen_eval_path = None
+            if args.frozen_eval_manifest:
+                frozen_eval_path = args.frozen_eval_manifest
+
+            model_path = train_baseline_policy(
+                manifest_path=args.dataset_manifest,
+                frozen_eval_manifest_path=frozen_eval_path,
+                output_dir=args.out,
+                epochs=args.epochs,
+                batch_size=args.batch_size,
+                learning_rate=args.learning_rate,
+                seed=args.seed,
+            )
+
+            print(f"Model trained and saved to {model_path}", file=sys.stderr)
+            print(f"Metadata saved to {args.out / 'model_metadata.json'}", file=sys.stderr)
+        except Exception as e:
+            print(f"Error: {e}", file=sys.stderr)
             sys.exit(1)
     elif args.command == "ingest":
         if args.ingest_command == "lichess":
