@@ -318,8 +318,6 @@ def test_outcome_head_renormalization_needed() -> None:
     # to return values that, after clamping, sum to 0.9 (not within epsilon).
     from torch.nn import functional
 
-    original_softmax = functional.softmax
-
     def patched_softmax(input_tensor: torch.Tensor, dim: int = 0) -> torch.Tensor:
         # Return values that sum to 0.9 after clamping (forcing renormalization)
         # Use values that are all 0.3, which sum to 0.9

@@ -280,10 +280,13 @@ All 3 required checks are merge-blocking. No checks use `continue-on-error`. No 
 | 8 | 21326709371 | ❌ failure | Coverage gap, format issue | Added coverage tests, formatted |
 | 9 | 21326752613 | ❌ failure | Coverage gap (branch coverage) | Added branch coverage tests |
 | 10 | 21326871502 | ❌ failure | Coverage gap (branch coverage) | — |
+| 11 | 21326984434 | ❌ failure | Coverage gap, format issue | Refactored renormalization logic, formatted |
+| 12 | 21327167578 | ❌ failure | Coverage gap (lines 206-208), format | Fixed lint, improved renormalization test |
+| 13 | 21327303742 | ⏳ in_progress | — | Patched softmax to force renormalization branch |
 
 **Current Status:** ❌ RED — Two issues blocking merge:
 1. Pre-existing M08 test failure (not M09-related, but blocks CI)
-2. Coverage below threshold (88.93%, needs 90%) — requires 1.07% more coverage
+2. Coverage below threshold (88.84%, needs 90%) — requires 1.16% more coverage
 
 **Coverage Progress:**
 - Run 4: 84.66%
@@ -293,15 +296,22 @@ All 3 required checks are merge-blocking. No checks use `continue-on-error`. No 
 - Run 8: 88.86% (+0.83%)
 - Run 9: 88.86% (+0.00%)
 - Run 10: 88.93% (+0.07%)
-- **Gap remaining:** 1.07% to reach 90%
+- Run 11: 88.84% (-0.09%) - Refactored renormalization logic
+- Run 12: 88.84% (+0.00%) - Fixed lint, improved test
+- **Gap remaining:** 1.16% to reach 90%
 
 **Coverage Status by File:**
 - `training_outcome.py`: 100.00% ✅
-- `outcome_head_v1.py`: 98.90% (missing branch: 202->207)
+- `outcome_head_v1.py`: 95.65% (missing lines: 206-208 - renormalization code)
 - `outcome_head.py`: 100.00% ✅
 - `outcome_metrics.py`: 95.54% ✅
 
+**Recent Changes:**
+- **Run 11:** Refactored renormalization logic to use explicit epsilon check (`abs(total - 1.0) > renormalize_epsilon`) creating testable branch
+- **Run 12:** Fixed lint error (renamed `RENORMALIZE_EPSILON` to lowercase), improved renormalization test
+- **Run 13:** Patched `functional.softmax` to return values summing to 0.9, forcing renormalization branch execution
+
 **Estimated Fix Effort:** 
 - M08 test fix: Out of scope for M09 (pre-existing issue)
-- Coverage improvement: Need to cover renormalization branch (202->207) in `outcome_head_v1.py`
+- Coverage improvement: Need to cover renormalization branch (lines 206-208) in `outcome_head_v1.py` - actively working on this
 
