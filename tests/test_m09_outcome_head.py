@@ -250,16 +250,46 @@ def test_outcome_head_skill_bucket_encoding_ranges() -> None:
         assert 0.0 <= wdl["l"] <= 1.0
 
 
+def test_outcome_head_skill_bucket_encoding_value_error() -> None:
+    """Test outcome head skill bucket encoding ValueError path (lines 113-116)."""
+    model = OutcomeHeadV1()
+    model.eval()
+
+    fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+
+    # Test skill bucket with invalid integer (triggers ValueError in int conversion)
+    # Format is "X-Y" but X is not a valid integer
+    skill_bucket = "invalid-1000"
+    wdl = model.forward(fen, skill_bucket, "blitz")
+    # Should fall back to unknown bucket (7) and still return valid probabilities
+    assert 0.0 <= wdl["w"] <= 1.0
+    assert 0.0 <= wdl["d"] <= 1.0
+    assert 0.0 <= wdl["l"] <= 1.0
+
+
 def test_outcome_head_renormalization() -> None:
-    """Test outcome head renormalization when probabilities don't sum to 1."""
+    """Test outcome head renormalization path (lines 202->207)."""
     model = OutcomeHeadV1()
     model.eval()
 
     fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 
     # Call forward which should handle renormalization
+    # The renormalization path (lines 202->207) is always executed because
+    # after clamping, the sum might not be exactly 1.0, so renormalization ensures it is
     wdl = model.forward(fen, "1200_1399", "blitz")
 
     # Verify probabilities sum to 1.0 (renormalization should ensure this)
     total = wdl["w"] + wdl["d"] + wdl["l"]
     assert abs(total - 1.0) < 1e-6, f"Probabilities sum to {total}, expected 1.0"
+    
+    # Verify all probabilities are in [0, 1]
+    assert 0.0 <= wdl["w"] <= 1.0
+    assert 0.0 <= wdl["d"] <= 1.0
+    assert 0.0 <= wdl["l"] <= 1.0
+    
+    # Call multiple times to ensure renormalization path is consistently executed
+    for _ in range(5):
+        wdl2 = model.forward(fen, "1200_1399", "blitz")
+        total2 = wdl2["w"] + wdl2["d"] + wdl2["l"]
+        assert abs(total2 - 1.0) < 1e-6

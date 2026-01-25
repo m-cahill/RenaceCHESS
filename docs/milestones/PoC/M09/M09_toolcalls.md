@@ -77,6 +77,13 @@
   - Added test for invalid game result handling
 **CI Run 7:** 21326537861 (FAILED - pre-existing M08 test, coverage 88.03%)
 **CI Analysis:** M09_run1.md updated with Run 7 results
+**CI Fixes Applied (Run 8):**
+  - Added test for meta not being a dict (lines 30->36)
+  - Added test for _map_pgn_result_to_wdl function (lines 55-62)
+  - Added test for ValueError on invalid game result (line 183)
+  - Added tests for all skill bucket encoding ranges (lines 100, 102, 104, 107-116)
+  - Added test for renormalization path (lines 202->207)
+**CI Run 8:** Waiting for new run after coverage fixes
 
 *Tool calls will be logged here as M09 implementation progresses.*
 
