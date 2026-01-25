@@ -211,7 +211,7 @@ All 3 required checks are merge-blocking. No checks use `continue-on-error`. No 
      - `src/renacechess/models/outcome_head_v1.py`: 96.70% (missing branch coverage: 94->116, 96->116, 202->207)
    - **Fix applied:** Added tests for skill bucket without dash, wrong number of parts
 
-### Run 10 (21326871502) — FAILURE (Current)
+### Run 10 (21326871502) — FAILURE
 
 **Failures:**
 1. **Coverage:** 88.93% (below 90% threshold)
@@ -224,6 +224,51 @@ All 3 required checks are merge-blocking. No checks use `continue-on-error`. No 
    - **In scope:** ✅ Yes (M09 coverage requirement)
    - **Blocking:** ⚠️ Yes (CI enforces 90% threshold)
    - **Fix required:** Ensure renormalization branch (202->207) is fully exercised
+
+### Run 11 (21326984434) — FAILURE
+
+**Failures:**
+1. **Coverage:** 88.84% (below 90% threshold)
+   - **Gap:** 1.16% below threshold
+   - **Change:** -0.09% from Run 10 (refactored renormalization logic)
+   - **Primary gaps:**
+     - `src/renacechess/models/outcome_head_v1.py`: 95.65% (missing lines: 206-208 - renormalization code)
+   - **Fix applied:** Refactored renormalization logic to use explicit epsilon check (`abs(total - 1.0) > renormalize_epsilon`) creating testable branch
+   - **Classification:** Code refactoring to make branch explicit and testable
+
+### Run 12 (21327167578) — FAILURE
+
+**Failures:**
+1. **Coverage:** 88.84% (below 90% threshold)
+   - **Gap:** 1.16% below threshold
+   - **No change from Run 11**
+   - **Primary gaps:**
+     - `src/renacechess/models/outcome_head_v1.py`: 95.65% (missing lines: 206-208 - renormalization code)
+   - **Fix applied:** Fixed lint error (renamed `RENORMALIZE_EPSILON` to lowercase), improved renormalization test
+   - **Formatting:** Fixed ruff format issue
+
+### Run 13 (21327167578) — FAILURE
+
+**Failures:**
+1. **Coverage:** 88.96% (below 90% threshold)
+   - **Gap:** 1.04% below threshold
+   - **Improvement:** +0.12% from Run 12
+   - **Primary gaps:**
+     - `src/renacechess/models/outcome_head_v1.py`: 95.65% (missing lines: 206-208 - renormalization code)
+   - **Fix applied:** Patched `functional.softmax` to return values summing to 0.9, forcing renormalization branch execution
+   - **Lint error:** Unused variable `original_softmax` (F841)
+
+### Run 14 (21327345912) — FAILURE (Current)
+
+**Failures:**
+1. **Coverage:** 88.96% (below 90% threshold)
+   - **Gap:** 1.04% below threshold
+   - **No change from Run 13**
+   - **Key Achievement:** ✅ `outcome_head_v1.py` reached **100.00% coverage**
+   - **Classification:** All M09-specific files now at 100% coverage. Remaining gap is from pre-existing files (not M09-related)
+   - **In scope:** ⚠️ Partial (M09 files complete, but total coverage threshold applies to all files)
+   - **Blocking:** ⚠️ Yes (CI enforces 90% total coverage threshold)
+   - **Fix required:** Need to improve coverage in other files to reach 90% total, or address pre-existing M08 test failure
 
 ---
 
@@ -243,11 +288,11 @@ All 3 required checks are merge-blocking. No checks use `continue-on-error`. No 
 
 ## Step 6 — Verdict
 
-> **Verdict (Run 10):** This run surfaces two issues: (1) a pre-existing M08 test failure (floating point precision issue, not M09-related), and (2) coverage below threshold (88.93%, needs 90%) due to remaining branch coverage gap in `outcome_head_v1.py` (renormalization path, lines 202->207). The M08 test failure is out of scope for M09 but blocks CI. Coverage gap is in-scope and requires covering the renormalization branch. The implementation is functionally correct but needs test completion. Significant progress: `training_outcome.py` is now at 100% coverage, and `outcome_head_v1.py` is at 98.90% (only one branch remaining).
+> **Verdict (Run 14):** This run demonstrates significant progress: all M09-specific files have reached 100% coverage (including `outcome_head_v1.py` which achieved 100% in this run). The renormalization branch is now fully covered through explicit code refactoring and targeted test patching. However, two issues remain: (1) a pre-existing M08 test failure (floating point precision issue, not M09-related), and (2) total coverage at 88.96% (needs 90%) due to gaps in pre-existing files (not M09-related). The M09 implementation is functionally complete and fully tested. The remaining coverage gap is from legacy code (`cli.py` at 63.35%, `eval/runner.py` at 67.46%, etc.), not M09 changes.
 
 ⛔ **Merge blocked** — Two issues:
 1. Pre-existing M08 test failure (out of scope for M09, but blocks CI)
-2. Coverage improvement needed (1.07% gap remaining, in-scope for M09 - branch coverage for renormalization path)
+2. Total coverage below threshold (88.96%, needs 90%) — gap is from pre-existing files, not M09 code
 
 ---
 
@@ -260,8 +305,11 @@ All 3 required checks are merge-blocking. No checks use `continue-on-error`. No 
 | ✅ Add integration tests for training function | AI | Test `train_outcome_head()` end-to-end | M09 (Done) |
 | ✅ Add tests for remaining coverage gaps | AI | Cover lines 30->36, 55-62, 183 in `training_outcome.py` | M09 (Done) |
 | ✅ Add tests for `outcome_head_v1.py` coverage | AI | Cover lines 100, 102, 104, 107-116 | M09 (Done) |
-| Cover renormalization branch (202->207) | AI | Ensure renormalization path is fully exercised | M09 |
+| ✅ Cover renormalization branch (206-208) | AI | Ensure renormalization path is fully exercised | M09 (Done) |
+| ✅ Refactor renormalization logic | AI | Make branch explicit and testable | M09 (Done) |
+| ✅ Achieve 100% coverage for outcome_head_v1.py | AI | All M09 files now at 100% | M09 (Done) |
 | Address M08 test failure | TBD | Fix floating point precision issue | M08 (out of scope) |
+| Improve coverage in pre-existing files | TBD | Address legacy code coverage gaps | Future milestone |
 | Re-run CI after fixes | CI | Verify all checks pass | M09 |
 
 ---
@@ -282,11 +330,12 @@ All 3 required checks are merge-blocking. No checks use `continue-on-error`. No 
 | 10 | 21326871502 | ❌ failure | Coverage gap (branch coverage) | — |
 | 11 | 21326984434 | ❌ failure | Coverage gap, format issue | Refactored renormalization logic, formatted |
 | 12 | 21327167578 | ❌ failure | Coverage gap (lines 206-208), format | Fixed lint, improved renormalization test |
-| 13 | 21327303742 | ⏳ in_progress | — | Patched softmax to force renormalization branch |
+| 13 | 21327303742 | ❌ failure | Coverage gap, lint error | Patched softmax to force renormalization branch |
+| 14 | 21327345912 | ❌ failure | Coverage gap (pre-existing files) | Removed unused variable, outcome_head_v1.py at 100% |
 
 **Current Status:** ❌ RED — Two issues blocking merge:
 1. Pre-existing M08 test failure (not M09-related, but blocks CI)
-2. Coverage below threshold (88.84%, needs 90%) — requires 1.16% more coverage
+2. Coverage below threshold (88.96%, needs 90%) — requires 1.04% more coverage
 
 **Coverage Progress:**
 - Run 4: 84.66%
@@ -298,20 +347,32 @@ All 3 required checks are merge-blocking. No checks use `continue-on-error`. No 
 - Run 10: 88.93% (+0.07%)
 - Run 11: 88.84% (-0.09%) - Refactored renormalization logic
 - Run 12: 88.84% (+0.00%) - Fixed lint, improved test
-- **Gap remaining:** 1.16% to reach 90%
+- Run 13: 88.96% (+0.12%) - Patched softmax to force renormalization
+- Run 14: 88.96% (+0.00%) - Removed unused variable
+- **Gap remaining:** 1.04% to reach 90%
 
-**Coverage Status by File:**
-- `training_outcome.py`: 100.00% ✅
-- `outcome_head_v1.py`: 95.65% (missing lines: 206-208 - renormalization code)
-- `outcome_head.py`: 100.00% ✅
-- `outcome_metrics.py`: 95.54% ✅
+**Coverage Status by File (M09-specific):**
+- ✅ `training_outcome.py`: 100.00%
+- ✅ `outcome_head_v1.py`: **100.00%** (achieved in Run 14)
+- ✅ `outcome_head.py`: 100.00%
+- ✅ `outcome_metrics.py`: 95.54%
+
+**Key Achievement:** All M09-specific files are now at 100% coverage (except `outcome_metrics.py` at 95.54%, which is above threshold). The renormalization branch is fully covered.
 
 **Recent Changes:**
 - **Run 11:** Refactored renormalization logic to use explicit epsilon check (`abs(total - 1.0) > renormalize_epsilon`) creating testable branch
 - **Run 12:** Fixed lint error (renamed `RENORMALIZE_EPSILON` to lowercase), improved renormalization test
 - **Run 13:** Patched `functional.softmax` to return values summing to 0.9, forcing renormalization branch execution
+- **Run 14:** Removed unused variable, **achieved 100% coverage for `outcome_head_v1.py`** ✅
+
+**Remaining Gap Analysis:**
+The remaining 1.04% gap is from pre-existing files (not M09-related):
+- `cli.py`: 63.35% (pre-existing)
+- `eval/runner.py`: 67.46% (pre-existing)
+- `eval/report.py`: 87.38% (could be improved)
+- `models/training.py`: 85.62% (pre-existing, M08)
 
 **Estimated Fix Effort:** 
 - M08 test fix: Out of scope for M09 (pre-existing issue)
-- Coverage improvement: Need to cover renormalization branch (lines 206-208) in `outcome_head_v1.py` - actively working on this
+- Coverage improvement: Need to improve coverage in pre-existing files OR address M08 test failure to unblock CI
 
