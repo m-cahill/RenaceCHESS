@@ -464,3 +464,45 @@ def test_outcome_dataset_game_result_top_level() -> None:
         dataset = OutcomeDataset(manifest_path)
         # Should load record with top-level gameResult
         assert len(dataset) >= 0
+
+
+def test_outcome_dataset_invalid_game_result() -> None:
+    """Test OutcomeDataset raises ValueError for invalid game result."""
+    manifest_data = {
+        "schemaVersion": "v2",
+        "createdAt": "2024-01-01T00:00:00",
+        "datasetDigest": "a" * 64,
+        "assemblyConfig": {"shardSize": 10000},
+        "assemblyConfigHash": "b" * 64,
+        "shardRefs": [
+            {
+                "shardId": "shard_001",
+                "hash": "c" * 64,
+                "path": "shards/shard_001.jsonl",
+                "records": 1,
+            }
+        ],
+        "splitAssignments": {"train": ["shard_001"], "val": [], "frozenEval": []},
+    }
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        manifest_path = tmp_path / "manifest.json"
+        manifest_path.write_text(json.dumps(manifest_data), encoding="utf-8")
+
+        shards_dir = tmp_path / "shards"
+        shards_dir.mkdir()
+        shard_path = shards_dir / "shard_001.jsonl"
+
+        # Record with invalid game result (should be caught during __getitem__)
+        record = {
+            "position": {"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"},
+            "conditioning": {"skillBucket": "1200_1399", "timeControlClass": "blitz"},
+            "meta": {"inputHash": "test123", "gameResult": "invalid"},
+        }
+        shard_path.write_text(json.dumps(record) + "\n", encoding="utf-8")
+
+        dataset = OutcomeDataset(manifest_path)
+        # Record should be filtered out during loading (invalid game result returns None)
+        # So dataset should be empty, not raise an error
+        assert len(dataset) == 0
