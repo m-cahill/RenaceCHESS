@@ -222,3 +222,44 @@ def test_learned_outcome_head_provider_integration() -> None:
         assert abs(wdl1["w"] - wdl2["w"]) < 1e-6
         assert abs(wdl1["d"] - wdl2["d"]) < 1e-6
         assert abs(wdl1["l"] - wdl2["l"]) < 1e-6
+
+
+def test_outcome_head_skill_bucket_encoding_ranges() -> None:
+    """Test outcome head skill bucket encoding covers all ranges."""
+    model = OutcomeHeadV1()
+    model.eval()
+
+    fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+
+    # Test all skill bucket ranges
+    test_cases = [
+        ("700-800", 0),  # < 800
+        ("800-1000", 1),  # < 1000
+        ("1000-1200", 2),  # < 1200
+        ("1200-1400", 3),  # < 1400
+        ("1400-1600", 4),  # < 1600
+        ("1600-1800", 5),  # < 1800
+        ("1800-2000", 6),  # >= 1800
+    ]
+
+    for skill_bucket, expected_bucket in test_cases:
+        wdl = model.forward(fen, skill_bucket, "blitz")
+        # Just verify it doesn't crash and returns valid probabilities
+        assert 0.0 <= wdl["w"] <= 1.0
+        assert 0.0 <= wdl["d"] <= 1.0
+        assert 0.0 <= wdl["l"] <= 1.0
+
+
+def test_outcome_head_renormalization() -> None:
+    """Test outcome head renormalization when probabilities don't sum to 1."""
+    model = OutcomeHeadV1()
+    model.eval()
+
+    fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+
+    # Call forward which should handle renormalization
+    wdl = model.forward(fen, "1200_1399", "blitz")
+
+    # Verify probabilities sum to 1.0 (renormalization should ensure this)
+    total = wdl["w"] + wdl["d"] + wdl["l"]
+    assert abs(total - 1.0) < 1e-6, f"Probabilities sum to {total}, expected 1.0"

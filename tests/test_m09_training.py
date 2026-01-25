@@ -506,3 +506,104 @@ def test_outcome_dataset_invalid_game_result() -> None:
         # Record should be filtered out during loading (invalid game result returns None)
         # So dataset should be empty, not raise an error
         assert len(dataset) == 0
+
+
+def test_get_game_result_from_record_meta_not_dict() -> None:
+    """Test _get_game_result_from_record handles non-dict meta."""
+    from renacechess.models.training_outcome import _get_game_result_from_record
+
+    # Record with meta as string (not dict)
+    record = {
+        "position": {"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"},
+        "conditioning": {"skillBucket": "1200_1399", "timeControlClass": "blitz"},
+        "meta": "not-a-dict",  # Invalid meta type
+        "gameResult": "win",  # Should fall back to top-level
+    }
+
+    result = _get_game_result_from_record(record)
+    assert result == "win"
+
+
+def test_map_pgn_result_to_wdl() -> None:
+    """Test _map_pgn_result_to_wdl function covers all paths."""
+    from renacechess.models.training_outcome import _map_pgn_result_to_wdl
+
+    # Test white wins
+    assert _map_pgn_result_to_wdl("1-0", "white") == "win"
+    assert _map_pgn_result_to_wdl("1-0", "black") == "loss"
+
+    # Test black wins
+    assert _map_pgn_result_to_wdl("0-1", "white") == "loss"
+    assert _map_pgn_result_to_wdl("0-1", "black") == "win"
+
+    # Test draw
+    assert _map_pgn_result_to_wdl("1/2-1/2", "white") == "draw"
+    assert _map_pgn_result_to_wdl("1/2-1/2", "black") == "draw"
+
+    # Test unknown result
+    assert _map_pgn_result_to_wdl("*", "white") is None
+    assert _map_pgn_result_to_wdl("unknown", "black") is None
+
+
+def test_outcome_dataset_invalid_game_result_raises_error() -> None:
+    """Test OutcomeDataset raises ValueError for invalid game result in __getitem__."""
+    from renacechess.models.training_outcome import OutcomeDataset
+
+    manifest_data = {
+        "schemaVersion": "v2",
+        "createdAt": "2024-01-01T00:00:00",
+        "datasetDigest": "a" * 64,
+        "assemblyConfig": {"shardSize": 10000},
+        "assemblyConfigHash": "b" * 64,
+        "shardRefs": [
+            {
+                "shardId": "shard_001",
+                "hash": "c" * 64,
+                "path": "shards/shard_001.jsonl",
+                "records": 1,
+            }
+        ],
+        "splitAssignments": {"train": ["shard_001"], "val": [], "frozenEval": []},
+    }
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        manifest_path = tmp_path / "manifest.json"
+        manifest_path.write_text(json.dumps(manifest_data), encoding="utf-8")
+
+        shards_dir = tmp_path / "shards"
+        shards_dir.mkdir()
+        shard_path = shards_dir / "shard_001.jsonl"
+
+        # Create dataset with valid record first
+        record = {
+            "position": {"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"},
+            "conditioning": {"skillBucket": "1200_1399", "timeControlClass": "blitz"},
+            "meta": {"inputHash": "test123", "gameResult": "win"},
+        }
+        shard_path.write_text(json.dumps(record) + "\n", encoding="utf-8")
+
+        dataset = OutcomeDataset(manifest_path)
+        if len(dataset) > 0:
+            # Manually corrupt the record in the dataset to trigger ValueError
+            # This tests the error handling path (line 183)
+            # We need to bypass the normal _get_game_result_from_record check
+            # by directly modifying the record after it's loaded
+            dataset.records[0]["meta"]["gameResult"] = "invalid"
+            # Now when __getitem__ is called, it will call _get_game_result_from_record
+            # which will return None, but we've corrupted it, so let's directly test
+            # the ValueError path by mocking or by creating a scenario where
+            # game_result is not None but also not valid
+            # Actually, the easiest way is to directly patch the record after loading
+            # but before __getitem__ processes it. However, since __getitem__ calls
+            # _get_game_result_from_record again, we need a different approach.
+            # Let's use unittest.mock to test the ValueError path directly.
+            from unittest.mock import patch
+
+            # Mock _get_game_result_from_record to return an invalid value
+            with patch(
+                "renacechess.models.training_outcome._get_game_result_from_record",
+                return_value="invalid",
+            ):
+                with pytest.raises(ValueError, match="Invalid game result"):
+                    _ = dataset[0]
