@@ -155,3 +155,70 @@ def test_outcome_head_same_features_as_policy() -> None:
     # Check feature dimension calculation
     feature_dim = 128 // 2 + 128 // 4 + 128 // 4  # 64 + 32 + 32 = 128
     assert model.fc_outcome.in_features == feature_dim
+
+
+def test_learned_outcome_head_provider_integration() -> None:
+    """Integration test for LearnedOutcomeHeadV1 provider predict path."""
+    import json
+    import tempfile
+    from pathlib import Path
+
+    from renacechess.eval.outcome_head import LearnedOutcomeHeadV1
+    from renacechess.models.outcome_head_v1 import OutcomeHeadV1
+
+    # Create a minimal deterministic model
+    model = OutcomeHeadV1()
+    model.eval()
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+
+        # Save model weights
+        model_path = tmp_path / "outcome_head_v1.pt"
+        torch.save(model.state_dict(), model_path)
+
+        # Save metadata
+        metadata = {
+            "model_type": "OutcomeHeadV1",
+            "epochs": 1,
+            "batch_size": 1,
+            "learning_rate": 0.001,
+            "seed": 42,
+            "loss_function": "CrossEntropyLoss",
+        }
+        metadata_path = tmp_path / "outcome_head_v1_metadata.json"
+        with metadata_path.open("w", encoding="utf-8") as f:
+            json.dump(metadata, f, indent=2)
+
+        # Instantiate provider
+        provider = LearnedOutcomeHeadV1(model_path, metadata_path)
+
+        # Create test record
+        record = {
+            "position": {"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"},
+            "conditioning": {"skillBucket": "1200_1399", "timeControlClass": "blitz"},
+        }
+
+        # Call predict
+        wdl1 = provider.predict(record)
+        wdl2 = provider.predict(record)  # Second call for determinism check
+
+        # Assert output shape is (3,) via keys
+        assert len(wdl1) == 3
+        assert "w" in wdl1
+        assert "d" in wdl1
+        assert "l" in wdl1
+
+        # Assert probabilities sum to 1
+        total = wdl1["w"] + wdl1["d"] + wdl1["l"]
+        assert abs(total - 1.0) < 1e-6, f"Probabilities sum to {total}, expected 1.0"
+
+        # Assert all values in [0, 1]
+        assert 0.0 <= wdl1["w"] <= 1.0
+        assert 0.0 <= wdl1["d"] <= 1.0
+        assert 0.0 <= wdl1["l"] <= 1.0
+
+        # Assert deterministic output across runs
+        assert abs(wdl1["w"] - wdl2["w"]) < 1e-6
+        assert abs(wdl1["d"] - wdl2["d"]) < 1e-6
+        assert abs(wdl1["l"] - wdl2["l"]) < 1e-6

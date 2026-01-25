@@ -96,6 +96,7 @@ def test_outcome_dataset_excludes_frozen_eval() -> None:
     frozen_manifest_data = {
         "schemaVersion": 1,
         "createdAt": "2024-01-01T00:00:00",
+        "manifestHash": "test-manifest-hash",
         "sourceManifestRef": {
             "datasetDigest": "a" * 64,
             "manifestPath": "/path/to/manifest.json",
@@ -189,3 +190,76 @@ def test_train_outcome_head_requires_records() -> None:
                 output_dir=output_dir,
                 epochs=1,
             )
+
+
+def test_train_outcome_head_end_to_end() -> None:
+    """Integration test for train_outcome_head end-to-end artifact generation."""
+    # Create minimal synthetic dataset (10 records)
+    manifest_data = {
+        "schemaVersion": "v2",
+        "createdAt": "2024-01-01T00:00:00",
+        "datasetDigest": "a" * 64,
+        "assemblyConfig": {"shardSize": 10000},
+        "assemblyConfigHash": "b" * 64,
+        "shardRefs": [
+            {
+                "shardId": "shard_001",
+                "hash": "c" * 64,
+                "path": "shards/shard_001.jsonl",
+                "records": 10,
+            }
+        ],
+        "splitAssignments": {"train": ["shard_001"], "val": [], "frozenEval": []},
+    }
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        manifest_path = tmp_path / "manifest.json"
+        manifest_path.write_text(json.dumps(manifest_data), encoding="utf-8")
+
+        # Create shard with 10 records (alternating win/draw/loss)
+        shards_dir = tmp_path / "shards"
+        shards_dir.mkdir()
+        shard_path = shards_dir / "shard_001.jsonl"
+
+        outcomes = ["win", "draw", "loss"]
+        records = []
+        for i in range(10):
+            record = {
+                "position": {"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"},
+                "conditioning": {"skillBucket": "1200_1399", "timeControlClass": "blitz"},
+                "meta": {"inputHash": f"test{i}", "gameResult": outcomes[i % 3]},
+            }
+            records.append(json.dumps(record))
+
+        shard_path.write_text("\n".join(records), encoding="utf-8")
+
+        # Train model
+        output_dir = tmp_path / "output"
+        model_path = train_outcome_head(
+            manifest_path=manifest_path,
+            frozen_eval_manifest_path=None,
+            output_dir=output_dir,
+            epochs=1,
+            seed=42,
+        )
+
+        # Assert model artifact is written
+        assert model_path.exists(), "Model file should be created"
+        assert model_path.name == "outcome_head_v1.pt"
+
+        # Assert metadata artifact is written
+        metadata_path = output_dir / "outcome_head_v1_metadata.json"
+        assert metadata_path.exists(), "Metadata file should be created"
+
+        # Load and validate metadata
+        with metadata_path.open(encoding="utf-8") as f:
+            metadata = json.load(f)
+
+        # Assert metadata includes required fields
+        assert metadata["model_type"] == "OutcomeHeadV1"
+        assert metadata["epochs"] == 1
+        assert metadata["seed"] == 42
+        assert metadata["loss_function"] == "CrossEntropyLoss"
+        assert "manifest_path" in metadata
+        assert metadata["frozen_eval_manifest_path"] is None
