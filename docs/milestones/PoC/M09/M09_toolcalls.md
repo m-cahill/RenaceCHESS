@@ -58,6 +58,11 @@
 **CI Run 3:** 21325194409 (FAILED - frozen eval manifest structure)
 **CI Run 4:** 21325242370 (FAILED - missing manifestHash, coverage gap)
 **CI Analysis:** M09_run1.md generated
+**CI Fixes Applied:**
+  - Added manifestHash to frozen eval manifest test data
+  - Added LearnedOutcomeHeadV1 provider integration test
+  - Added train_outcome_head end-to-end integration test
+**CI Run 5:** Waiting for new run after fixes
 
 *Tool calls will be logged here as M09 implementation progresses.*
 

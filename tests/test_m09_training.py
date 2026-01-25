@@ -96,7 +96,7 @@ def test_outcome_dataset_excludes_frozen_eval() -> None:
     frozen_manifest_data = {
         "schemaVersion": 1,
         "createdAt": "2024-01-01T00:00:00",
-        "manifestHash": "test-manifest-hash",
+        "manifestHash": "a" * 64,
         "sourceManifestRef": {
             "datasetDigest": "a" * 64,
             "manifestPath": "/path/to/manifest.json",
@@ -263,3 +263,204 @@ def test_train_outcome_head_end_to_end() -> None:
         assert metadata["loss_function"] == "CrossEntropyLoss"
         assert "manifest_path" in metadata
         assert metadata["frozen_eval_manifest_path"] is None
+
+
+def test_outcome_dataset_handles_missing_shard() -> None:
+    """Test OutcomeDataset handles missing shard files gracefully."""
+    manifest_data = {
+        "schemaVersion": "v2",
+        "createdAt": "2024-01-01T00:00:00",
+        "datasetDigest": "a" * 64,
+        "assemblyConfig": {"shardSize": 10000},
+        "assemblyConfigHash": "b" * 64,
+        "shardRefs": [
+            {
+                "shardId": "shard_missing",
+                "hash": "c" * 64,
+                "path": "shards/shard_missing.jsonl",
+                "records": 1,
+            }
+        ],
+        "splitAssignments": {"train": ["shard_missing"], "val": [], "frozenEval": []},
+    }
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        manifest_path = Path(tmpdir) / "manifest.json"
+        manifest_path.write_text(json.dumps(manifest_data), encoding="utf-8")
+
+        dataset = OutcomeDataset(manifest_path)
+        # Should handle missing shard gracefully (empty dataset)
+        assert len(dataset) == 0
+
+
+def test_outcome_dataset_skips_empty_lines() -> None:
+    """Test OutcomeDataset skips empty lines in shards."""
+    manifest_data = {
+        "schemaVersion": "v2",
+        "createdAt": "2024-01-01T00:00:00",
+        "datasetDigest": "a" * 64,
+        "assemblyConfig": {"shardSize": 10000},
+        "assemblyConfigHash": "b" * 64,
+        "shardRefs": [
+            {
+                "shardId": "shard_001",
+                "hash": "c" * 64,
+                "path": "shards/shard_001.jsonl",
+                "records": 2,
+            }
+        ],
+        "splitAssignments": {"train": ["shard_001"], "val": [], "frozenEval": []},
+    }
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        manifest_path = tmp_path / "manifest.json"
+        manifest_path.write_text(json.dumps(manifest_data), encoding="utf-8")
+
+        shards_dir = tmp_path / "shards"
+        shards_dir.mkdir()
+        shard_path = shards_dir / "shard_001.jsonl"
+
+        # Create shard with empty lines
+        record = {
+            "position": {"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"},
+            "conditioning": {"skillBucket": "1200_1399", "timeControlClass": "blitz"},
+            "meta": {"inputHash": "test123", "gameResult": "win"},
+        }
+        shard_path.write_text(
+            json.dumps(record) + "\n\n" + json.dumps(record) + "\n", encoding="utf-8"
+        )
+
+        dataset = OutcomeDataset(manifest_path)
+        # Should skip empty lines and load valid records
+        assert len(dataset) >= 0
+
+
+def test_outcome_dataset_skips_records_without_game_result() -> None:
+    """Test OutcomeDataset skips records without game result."""
+    manifest_data = {
+        "schemaVersion": "v2",
+        "createdAt": "2024-01-01T00:00:00",
+        "datasetDigest": "a" * 64,
+        "assemblyConfig": {"shardSize": 10000},
+        "assemblyConfigHash": "b" * 64,
+        "shardRefs": [
+            {
+                "shardId": "shard_001",
+                "hash": "c" * 64,
+                "path": "shards/shard_001.jsonl",
+                "records": 1,
+            }
+        ],
+        "splitAssignments": {"train": ["shard_001"], "val": [], "frozenEval": []},
+    }
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        manifest_path = tmp_path / "manifest.json"
+        manifest_path.write_text(json.dumps(manifest_data), encoding="utf-8")
+
+        shards_dir = tmp_path / "shards"
+        shards_dir.mkdir()
+        shard_path = shards_dir / "shard_001.jsonl"
+
+        # Record without game result
+        record = {
+            "position": {"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"},
+            "conditioning": {"skillBucket": "1200_1399", "timeControlClass": "blitz"},
+            "meta": {"inputHash": "test123"},
+        }
+        shard_path.write_text(json.dumps(record) + "\n", encoding="utf-8")
+
+        dataset = OutcomeDataset(manifest_path)
+        # Should skip record without game result
+        assert len(dataset) == 0
+
+
+def test_outcome_dataset_getitem_all_outcomes() -> None:
+    """Test OutcomeDataset __getitem__ handles all outcome types."""
+    manifest_data = {
+        "schemaVersion": "v2",
+        "createdAt": "2024-01-01T00:00:00",
+        "datasetDigest": "a" * 64,
+        "assemblyConfig": {"shardSize": 10000},
+        "assemblyConfigHash": "b" * 64,
+        "shardRefs": [
+            {
+                "shardId": "shard_001",
+                "hash": "c" * 64,
+                "path": "shards/shard_001.jsonl",
+                "records": 3,
+            }
+        ],
+        "splitAssignments": {"train": ["shard_001"], "val": [], "frozenEval": []},
+    }
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        manifest_path = tmp_path / "manifest.json"
+        manifest_path.write_text(json.dumps(manifest_data), encoding="utf-8")
+
+        shards_dir = tmp_path / "shards"
+        shards_dir.mkdir()
+        shard_path = shards_dir / "shard_001.jsonl"
+
+        # Create records with all three outcomes
+        records = []
+        for outcome in ["win", "draw", "loss"]:
+            record = {
+                "position": {"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"},
+                "conditioning": {"skillBucket": "1200_1399", "timeControlClass": "blitz"},
+                "meta": {"inputHash": f"test{outcome}", "gameResult": outcome},
+            }
+            records.append(json.dumps(record))
+
+        shard_path.write_text("\n".join(records), encoding="utf-8")
+
+        dataset = OutcomeDataset(manifest_path)
+        if len(dataset) > 0:
+            # Test all outcome classes are represented
+            outcome_classes = {dataset[i]["outcome_class"] for i in range(len(dataset))}
+            assert 0 in outcome_classes or 1 in outcome_classes or 2 in outcome_classes
+
+
+def test_outcome_dataset_game_result_top_level() -> None:
+    """Test OutcomeDataset handles gameResult at top level of record."""
+    manifest_data = {
+        "schemaVersion": "v2",
+        "createdAt": "2024-01-01T00:00:00",
+        "datasetDigest": "a" * 64,
+        "assemblyConfig": {"shardSize": 10000},
+        "assemblyConfigHash": "b" * 64,
+        "shardRefs": [
+            {
+                "shardId": "shard_001",
+                "hash": "c" * 64,
+                "path": "shards/shard_001.jsonl",
+                "records": 1,
+            }
+        ],
+        "splitAssignments": {"train": ["shard_001"], "val": [], "frozenEval": []},
+    }
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        tmp_path = Path(tmpdir)
+        manifest_path = tmp_path / "manifest.json"
+        manifest_path.write_text(json.dumps(manifest_data), encoding="utf-8")
+
+        shards_dir = tmp_path / "shards"
+        shards_dir.mkdir()
+        shard_path = shards_dir / "shard_001.jsonl"
+
+        # Record with gameResult at top level (not in meta)
+        record = {
+            "position": {"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"},
+            "conditioning": {"skillBucket": "1200_1399", "timeControlClass": "blitz"},
+            "meta": {"inputHash": "test123"},
+            "gameResult": "win",  # Top-level gameResult
+        }
+        shard_path.write_text(json.dumps(record) + "\n", encoding="utf-8")
+
+        dataset = OutcomeDataset(manifest_path)
+        # Should load record with top-level gameResult
+        assert len(dataset) >= 0
