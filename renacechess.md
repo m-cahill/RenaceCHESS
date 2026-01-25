@@ -16,6 +16,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M05 | ✅ Closed (MERGED) | `m05-labeled-evaluation` → `main` | 2026-01-24 | Ground-Truth Labeled Evaluation v1: Accuracy Metrics and Evaluation Report v2 |
 | M06 | ✅ Closed (MERGED) | `m06-conditioned-frozen-eval` → `main` | 2026-01-24 | Conditioned, Frozen Human Evaluation: Skill/Time Conditioning + Frozen Eval Manifest |
 | M07 | ✅ Closed (MERGED) | `m07-hdi-v1` → `main` | 2026-01-24 | Human Difficulty Index (HDI) v1 + CLI Completion |
+| M08 | ✅ Closed (MERGED) | `m08-learned-policy-baseline` → `main` | 2026-01-24 | First Learned Human Policy Baseline |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -113,6 +114,28 @@ This document tracks milestones, schema, migrations, and governance decisions fo
   - M06-D01: CLI `--conditioned-metrics` → RESOLVED
   - M06-D02: Frozen eval enforcement → RESOLVED
 - **HDI v1 Formula:** `0.40*entropy + 0.25*topGapInverted + 0.20*legalMovePressure + 0.15*outcomeSensitivity`
+
+**M08 Details:**
+- **Objective:** Implement minimal PyTorch baseline model proving learnability
+- **CI Run 1:** 21322870481 (FAILURE - Missing imports, wrong import path, lint issues)
+- **CI Run 2:** 21322919102 (FAILURE - Formatting, probability clamping, time pressure normalization, coverage)
+- **CI Run 3:** 21322990813 (FAILURE - Test expectations, frozen eval minimums, unused variables)
+- **CI Run 4:** 21323086357 (SUCCESS - All gates passing)
+- **Final Coverage:** 90.43% (exceeds 90% threshold)
+- **Test Count:** 284 tests (up from ~241 in M07, +43 new tests)
+- **PR:** #10 (merged)
+- **Final Commit:** `8e11112`
+- **Audit:** `docs/milestones/PoC/M08/M08_audit.md`
+- **Summary:** `docs/milestones/PoC/M08/M08_summary.md`
+- **Key Files:**
+  - `src/renacechess/models/baseline_v1.py` — BaselinePolicyV1 PyTorch model
+  - `src/renacechess/models/training.py` — Training infrastructure with frozen eval exclusion
+  - `src/renacechess/eval/learned_policy.py` — LearnedHumanPolicyV1 policy provider
+- **Notable Features:**
+  - Shallow neural baseline (logistic/softmax classifier)
+  - Local-only training (not in CI)
+  - Deterministic training with fixed seeds
+  - Additive integration (does not replace existing baselines)
 
 ---
 
