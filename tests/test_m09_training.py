@@ -17,6 +17,7 @@ def test_outcome_dataset_initialization() -> None:
         "schemaVersion": "v2",
         "createdAt": "2024-01-01T00:00:00",
         "datasetDigest": "a" * 64,
+        "assemblyConfig": {"shardSize": 10000},
         "assemblyConfigHash": "b" * 64,
         "shardRefs": [],
         "splitAssignments": {"train": [], "val": [], "frozenEval": []},
@@ -127,6 +128,7 @@ def test_outcome_dataset_getitem() -> None:
         "schemaVersion": "v2",
         "createdAt": "2024-01-01T00:00:00",
         "datasetDigest": "a" * 64,
+        "assemblyConfig": {"shardSize": 10000},
         "assemblyConfigHash": "b" * 64,
         "shardRefs": [],
         "splitAssignments": {"train": [], "val": [], "frozenEval": []},
@@ -153,6 +155,7 @@ def test_train_outcome_head_requires_records() -> None:
         "schemaVersion": "v2",
         "createdAt": "2024-01-01T00:00:00",
         "datasetDigest": "a" * 64,
+        "assemblyConfig": {"shardSize": 10000},
         "assemblyConfigHash": "b" * 64,
         "shardRefs": [],
         "splitAssignments": {"train": [], "val": [], "frozenEval": []},
@@ -172,4 +175,3 @@ def test_train_outcome_head_requires_records() -> None:
                 output_dir=output_dir,
                 epochs=1,
             )
-

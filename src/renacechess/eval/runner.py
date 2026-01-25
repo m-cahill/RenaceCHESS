@@ -341,9 +341,9 @@ def run_conditioned_evaluation(
                                 outcome_accumulators_by_time_control[time_control_class] = (
                                     OutcomeMetricsAccumulator()
                                 )
-                            outcome_accumulators_by_time_control[
-                                time_control_class
-                            ].add_prediction(predicted_wdl, game_result)
+                            outcome_accumulators_by_time_control[time_control_class].add_prediction(
+                                predicted_wdl, game_result
+                            )
 
                         if time_pressure_bucket:
                             if time_pressure_bucket not in outcome_accumulators_by_time_pressure:
@@ -379,16 +379,13 @@ def run_conditioned_evaluation(
 
         # Stratified outcome metrics
         result["outcome_metrics_by_skill"] = {
-            skill: acc.compute_metrics()
-            for skill, acc in outcome_accumulators_by_skill.items()
+            skill: acc.compute_metrics() for skill, acc in outcome_accumulators_by_skill.items()
         }
         result["outcome_metrics_by_time_control"] = {
-            tc: acc.compute_metrics()
-            for tc, acc in outcome_accumulators_by_time_control.items()
+            tc: acc.compute_metrics() for tc, acc in outcome_accumulators_by_time_control.items()
         }
         result["outcome_metrics_by_time_pressure"] = {
-            tp: acc.compute_metrics()
-            for tp, acc in outcome_accumulators_by_time_pressure.items()
+            tp: acc.compute_metrics() for tp, acc in outcome_accumulators_by_time_pressure.items()
         }
 
     return result

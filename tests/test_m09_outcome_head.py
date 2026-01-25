@@ -155,4 +155,3 @@ def test_outcome_head_same_features_as_policy() -> None:
     # Check feature dimension calculation
     feature_dim = 128 // 2 + 128 // 4 + 128 // 4  # 64 + 32 + 32 = 128
     assert model.fc_outcome.in_features == feature_dim
-

@@ -112,4 +112,3 @@ def test_eval_report_v3_still_works() -> None:
 
     report = EvalReportV3.model_validate(report_data)
     assert report.schema_version == "eval_report.v3"
-

@@ -161,4 +161,3 @@ def test_outcome_metrics_accumulator_stratified() -> None:
     assert metrics["cross_entropy"] is not None
     assert metrics["brier_score"] is not None
     assert metrics["ece"] is not None
-

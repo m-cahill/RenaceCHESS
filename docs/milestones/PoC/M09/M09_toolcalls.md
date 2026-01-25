@@ -40,10 +40,20 @@
 | 2026-01-25T02:32:00Z | run_terminal_cmd | Commit M09 implementation | git commit | completed |
 | 2026-01-25T02:33:00Z | run_terminal_cmd | Push branch to remote | git push -u origin m09-outcome-head-v1 | completed |
 | 2026-01-25T02:34:00Z | run_terminal_cmd | Create PR to main | gh pr create | completed |
+| 2026-01-25T02:40:00Z | run_terminal_cmd | Monitor CI Run 1 | gh run watch 21325099361 | completed |
+| 2026-01-25T02:45:00Z | search_replace | Fix numpy dependency | src/renacechess/eval/outcome_metrics.py | completed |
+| 2026-01-25T02:46:00Z | search_replace | Fix type annotations | Multiple files | completed |
+| 2026-01-25T02:47:00Z | search_replace | Fix lint errors | Multiple files | completed |
+| 2026-01-25T02:48:00Z | run_terminal_cmd | Commit CI fixes | git commit | completed |
+| 2026-01-25T02:49:00Z | run_terminal_cmd | Push fixes | git push | completed |
 
 ---
 
 **PR Created:** #11 - https://github.com/m-cahill/RenaceCHESS/pull/11
+
+**CI Run 1:** 21325099361 (FAILED - numpy missing, type errors, lint errors)
+**CI Fixes Applied:** Removed numpy, fixed type annotations, fixed lint errors
+**CI Run 2:** Waiting for new run after fixes
 
 *Tool calls will be logged here as M09 implementation progresses.*
 

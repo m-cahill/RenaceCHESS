@@ -30,12 +30,12 @@ def _get_game_result_from_record(
     if isinstance(meta, dict):
         game_result = meta.get("gameResult")
         if isinstance(game_result, str) and game_result in ("win", "draw", "loss"):
-            return game_result
+            return game_result  # type: ignore[return-value]
 
     # Check if game result is at top level
     game_result = record.get("gameResult")
     if isinstance(game_result, str) and game_result in ("win", "draw", "loss"):
-        return game_result
+        return game_result  # type: ignore[return-value]
 
     return None
 
@@ -290,4 +290,3 @@ def train_outcome_head(
         json.dump(metadata, f, indent=2, sort_keys=True)
 
     return model_path
-

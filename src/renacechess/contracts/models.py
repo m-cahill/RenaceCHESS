@@ -944,8 +944,7 @@ class EvalReportV5(BaseModel):
         None,
         alias="outcomeMetricsBySkill",
         description=(
-            "Outcome metrics stratified by skill bucket "
-            "(present only if outcome head was used)"
+            "Outcome metrics stratified by skill bucket (present only if outcome head was used)"
         ),
     )
     outcome_metrics_by_time_control: dict[str, OutcomeMetrics] | None = Field(

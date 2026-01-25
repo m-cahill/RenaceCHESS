@@ -533,27 +533,31 @@ def main() -> None:
                             by_skill_bucket_id=eval_results["by_skill_bucket_id"],
                             by_time_control_class=eval_results["by_time_control_class"],
                             by_time_pressure_bucket=eval_results["by_time_pressure_bucket"],
-                            outcome_metrics=OutcomeMetrics(
-                                **eval_results["outcome_metrics"]
-                            ) if eval_results.get("outcome_metrics") else None,
+                            outcome_metrics=OutcomeMetrics(**eval_results["outcome_metrics"])
+                            if eval_results.get("outcome_metrics")
+                            else None,
                             outcome_metrics_by_skill={
                                 k: OutcomeMetrics(**v)
-                                for k, v in eval_results.get(
-                                    "outcome_metrics_by_skill", {}
-                                ).items()
-                            } if eval_results.get("outcome_metrics_by_skill") else None,
+                                for k, v in eval_results.get("outcome_metrics_by_skill", {}).items()
+                            }
+                            if eval_results.get("outcome_metrics_by_skill")
+                            else None,
                             outcome_metrics_by_time_control={
                                 k: OutcomeMetrics(**v)
                                 for k, v in eval_results.get(
                                     "outcome_metrics_by_time_control", {}
                                 ).items()
-                            } if eval_results.get("outcome_metrics_by_time_control") else None,
+                            }
+                            if eval_results.get("outcome_metrics_by_time_control")
+                            else None,
                             outcome_metrics_by_time_pressure={
                                 k: OutcomeMetrics(**v)
                                 for k, v in eval_results.get(
                                     "outcome_metrics_by_time_pressure", {}
                                 ).items()
-                            } if eval_results.get("outcome_metrics_by_time_pressure") else None,
+                            }
+                            if eval_results.get("outcome_metrics_by_time_pressure")
+                            else None,
                         )
                         report = report_v5
                     else:

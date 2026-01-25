@@ -142,7 +142,7 @@ class OutcomeHeadV1(nn.Module):
         fen: str,
         skill_bucket: str,
         time_control: str | None,
-    ) -> torch.Tensor:  # type: ignore[type-arg]
+    ) -> torch.Tensor:
         """Forward pass returning logits (for training).
 
         Args:
@@ -205,4 +205,3 @@ class OutcomeHeadV1(nn.Module):
             loss_prob /= total
 
         return {"w": w, "d": d, "l": loss_prob}
-

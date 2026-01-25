@@ -10,9 +10,7 @@ import math
 from typing import Any
 
 
-def compute_cross_entropy(
-    predicted_probs: dict[str, float], true_outcome: str
-) -> float:
+def compute_cross_entropy(predicted_probs: dict[str, float], true_outcome: str) -> float:
     """Compute cross-entropy (log loss) for a single prediction.
 
     Args:
@@ -39,9 +37,7 @@ def compute_cross_entropy(
     return float(-math.log(true_prob))
 
 
-def compute_brier_score(
-    predicted_probs: dict[str, float], true_outcome: str
-) -> float:
+def compute_brier_score(predicted_probs: dict[str, float], true_outcome: str) -> float:
     """Compute Brier score for a single prediction.
 
     Args:
@@ -82,9 +78,7 @@ class OutcomeMetricsAccumulator:
         self.cross_entropies: list[float] = []
         self.brier_scores: list[float] = []
 
-    def add_prediction(
-        self, predicted_probs: dict[str, float], true_outcome: str
-    ) -> None:
+    def add_prediction(self, predicted_probs: dict[str, float], true_outcome: str) -> None:
         """Add a single prediction and true outcome.
 
         Args:
@@ -117,13 +111,9 @@ class OutcomeMetricsAccumulator:
 
         # Aggregate metrics
         avg_ce = (
-            sum(self.cross_entropies) / len(self.cross_entropies)
-            if self.cross_entropies
-            else None
+            sum(self.cross_entropies) / len(self.cross_entropies) if self.cross_entropies else None
         )
-        avg_brier = (
-            sum(self.brier_scores) / len(self.brier_scores) if self.brier_scores else None
-        )
+        avg_brier = sum(self.brier_scores) / len(self.brier_scores) if self.brier_scores else None
 
         # Compute ECE (10-bin equal-width)
         ece = compute_ece(self.predictions, self.true_outcomes)
@@ -205,4 +195,3 @@ def compute_ece(
         ece += weight * abs(bin_accuracy - bin_confidence)
 
     return float(ece)
-

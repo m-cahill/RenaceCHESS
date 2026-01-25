@@ -57,4 +57,3 @@ class LearnedOutcomeHeadV1:
             wdl_probs: dict[str, float] = self.model(fen, skill_bucket, time_control)
 
         return wdl_probs
-
