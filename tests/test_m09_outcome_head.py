@@ -300,7 +300,12 @@ def test_outcome_head_skill_bucket_wrong_parts() -> None:
 
 
 def test_outcome_head_renormalization() -> None:
-    """Test outcome head renormalization path (lines 202->207)."""
+    """Test outcome head renormalization path (lines 202->207).
+
+    This test ensures the renormalization branch (if total > 0) is fully exercised.
+    After softmax and clamping, the sum might not be exactly 1.0, so renormalization
+    ensures it is. The branch coverage tool needs to see this code path executed.
+    """
     model = OutcomeHeadV1()
     model.eval()
 
@@ -320,8 +325,19 @@ def test_outcome_head_renormalization() -> None:
     assert 0.0 <= wdl["d"] <= 1.0
     assert 0.0 <= wdl["l"] <= 1.0
 
-    # Call multiple times to ensure renormalization path is consistently executed
-    for _ in range(5):
-        wdl2 = model.forward(fen, "1200_1399", "blitz")
+    # Call multiple times with different inputs to ensure renormalization path
+    # is consistently executed across different model states
+    test_cases = [
+        ("800_999", "blitz"),
+        ("1000_1199", "rapid"),
+        ("1400_1599", "classical"),
+        ("1800_1999", "blitz"),
+        ("2000_2199", "rapid"),
+    ]
+    for skill_bucket, time_control in test_cases:
+        wdl2 = model.forward(fen, skill_bucket, time_control)
         total2 = wdl2["w"] + wdl2["d"] + wdl2["l"]
-        assert abs(total2 - 1.0) < 1e-6
+        assert abs(total2 - 1.0) < 1e-6, f"Probabilities sum to {total2}, expected 1.0"
+        assert 0.0 <= wdl2["w"] <= 1.0
+        assert 0.0 <= wdl2["d"] <= 1.0
+        assert 0.0 <= wdl2["l"] <= 1.0
