@@ -166,7 +166,7 @@ All 3 required checks are merge-blocking. No checks use `continue-on-error`. No 
    - **Gap:** 2.32% below threshold
    - **Improvement:** +2.73% from Run 5 (integration tests added)
 
-### Run 7 (21326537861) — FAILURE (Current)
+### Run 7 (21326537861) — FAILURE
 
 **Failures:**
 1. **Test:** `test_baseline_policy_v1_forward` — Pre-existing M08 test failure
@@ -187,6 +187,44 @@ All 3 required checks are merge-blocking. No checks use `continue-on-error`. No 
    - **Blocking:** ⚠️ Yes (CI enforces 90% threshold)
    - **Fix required:** Add tests to cover remaining missing lines in `training_outcome.py` and `outcome_head_v1.py`
 
+### Run 8 (21326709371) — FAILURE
+
+**Failures:**
+1. **Coverage:** 88.86% (below 90% threshold)
+   - **Gap:** 1.14% below threshold
+   - **Improvement:** +0.83% from Run 7
+   - **Primary gaps:**
+     - `src/renacechess/models/outcome_head_v1.py`: 96.70% (missing branch coverage: 94->116, 96->116, 202->207)
+   - **Note:** `training_outcome.py` reached 100% coverage ✅
+   - **Fix applied:** Added tests for meta not being dict, `_map_pgn_result_to_wdl`, ValueError path, skill bucket ranges, ValueError in encoding
+
+2. **Ruff format:** `tests/test_m09_outcome_head.py` needs reformatting
+   - **Fix applied:** Formatted file
+
+### Run 9 (21326752613) — FAILURE
+
+**Failures:**
+1. **Coverage:** 88.86% (below 90% threshold)
+   - **Gap:** 1.14% below threshold
+   - **No change from Run 8**
+   - **Primary gaps:**
+     - `src/renacechess/models/outcome_head_v1.py`: 96.70% (missing branch coverage: 94->116, 96->116, 202->207)
+   - **Fix applied:** Added tests for skill bucket without dash, wrong number of parts
+
+### Run 10 (21326871502) — FAILURE (Current)
+
+**Failures:**
+1. **Coverage:** 88.93% (below 90% threshold)
+   - **Gap:** 1.07% below threshold
+   - **Improvement:** +0.07% from Run 9
+   - **Primary gaps:**
+     - `src/renacechess/models/outcome_head_v1.py`: 98.90% (missing branch coverage: 202->207 only)
+   - **Note:** `training_outcome.py` remains at 100% coverage ✅
+   - **Classification:** Branch coverage issue - renormalization path (lines 202->207) not fully covered
+   - **In scope:** ✅ Yes (M09 coverage requirement)
+   - **Blocking:** ⚠️ Yes (CI enforces 90% threshold)
+   - **Fix required:** Ensure renormalization branch (202->207) is fully exercised
+
 ---
 
 ## Step 5 — Invariants & Guardrails Check
@@ -205,11 +243,11 @@ All 3 required checks are merge-blocking. No checks use `continue-on-error`. No 
 
 ## Step 6 — Verdict
 
-> **Verdict (Run 7):** This run surfaces two issues: (1) a pre-existing M08 test failure (floating point precision issue, not M09-related), and (2) coverage below threshold (88.03%, needs 90%) due to remaining uncovered lines in `training_outcome.py` and `outcome_head_v1.py`. The M08 test failure is out of scope for M09 but blocks CI. Coverage gap is in-scope and requires additional tests. The implementation is functionally correct but needs test completion.
+> **Verdict (Run 10):** This run surfaces two issues: (1) a pre-existing M08 test failure (floating point precision issue, not M09-related), and (2) coverage below threshold (88.93%, needs 90%) due to remaining branch coverage gap in `outcome_head_v1.py` (renormalization path, lines 202->207). The M08 test failure is out of scope for M09 but blocks CI. Coverage gap is in-scope and requires covering the renormalization branch. The implementation is functionally correct but needs test completion. Significant progress: `training_outcome.py` is now at 100% coverage, and `outcome_head_v1.py` is at 98.90% (only one branch remaining).
 
 ⛔ **Merge blocked** — Two issues:
 1. Pre-existing M08 test failure (out of scope for M09, but blocks CI)
-2. Coverage improvement needed (1.97% gap remaining, in-scope for M09)
+2. Coverage improvement needed (1.07% gap remaining, in-scope for M09 - branch coverage for renormalization path)
 
 ---
 
@@ -220,8 +258,9 @@ All 3 required checks are merge-blocking. No checks use `continue-on-error`. No 
 | ✅ Fix frozen eval manifest test data | AI | Add `manifestHash` field | M09 (Done) |
 | ✅ Add integration tests for outcome head provider | AI | Test `LearnedOutcomeHeadV1.predict()` | M09 (Done) |
 | ✅ Add integration tests for training function | AI | Test `train_outcome_head()` end-to-end | M09 (Done) |
-| Add tests for remaining coverage gaps | AI | Cover lines 30->36, 55-62, 183 in `training_outcome.py` | M09 |
-| Add tests for `outcome_head_v1.py` coverage | AI | Cover lines 100, 102, 104, 107-116, 202->207 | M09 |
+| ✅ Add tests for remaining coverage gaps | AI | Cover lines 30->36, 55-62, 183 in `training_outcome.py` | M09 (Done) |
+| ✅ Add tests for `outcome_head_v1.py` coverage | AI | Cover lines 100, 102, 104, 107-116 | M09 (Done) |
+| Cover renormalization branch (202->207) | AI | Ensure renormalization path is fully exercised | M09 |
 | Address M08 test failure | TBD | Fix floating point precision issue | M08 (out of scope) |
 | Re-run CI after fixes | CI | Verify all checks pass | M09 |
 
@@ -238,19 +277,31 @@ All 3 required checks are merge-blocking. No checks use `continue-on-error`. No 
 | 5 | 21325194409 | ❌ failure | manifestHash pattern, coverage gap | Fixed manifestHash pattern |
 | 6 | 21326451248 | ❌ failure | Record key format, coverage gap | Fixed record key format |
 | 7 | 21326537861 | ❌ failure | Pre-existing M08 test, coverage gap | — |
+| 8 | 21326709371 | ❌ failure | Coverage gap, format issue | Added coverage tests, formatted |
+| 9 | 21326752613 | ❌ failure | Coverage gap (branch coverage) | Added branch coverage tests |
+| 10 | 21326871502 | ❌ failure | Coverage gap (branch coverage) | — |
 
 **Current Status:** ❌ RED — Two issues blocking merge:
 1. Pre-existing M08 test failure (not M09-related, but blocks CI)
-2. Coverage below threshold (88.03%, needs 90%) — requires additional test coverage
+2. Coverage below threshold (88.93%, needs 90%) — requires 1.07% more coverage
 
 **Coverage Progress:**
 - Run 4: 84.66%
 - Run 5: 84.95% (+0.29%)
 - Run 6: 87.68% (+2.73%)
 - Run 7: 88.03% (+0.35%)
-- **Gap remaining:** 1.97% to reach 90%
+- Run 8: 88.86% (+0.83%)
+- Run 9: 88.86% (+0.00%)
+- Run 10: 88.93% (+0.07%)
+- **Gap remaining:** 1.07% to reach 90%
+
+**Coverage Status by File:**
+- `training_outcome.py`: 100.00% ✅
+- `outcome_head_v1.py`: 98.90% (missing branch: 202->207)
+- `outcome_head.py`: 100.00% ✅
+- `outcome_metrics.py`: 95.54% ✅
 
 **Estimated Fix Effort:** 
 - M08 test fix: Out of scope for M09 (pre-existing issue)
-- Coverage improvement: ~30-60 minutes (additional tests for missing lines)
+- Coverage improvement: Need to cover renormalization branch (202->207) in `outcome_head_v1.py`
 
