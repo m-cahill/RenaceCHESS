@@ -62,7 +62,21 @@
   - Added manifestHash to frozen eval manifest test data
   - Added LearnedOutcomeHeadV1 provider integration test
   - Added train_outcome_head end-to-end integration test
-**CI Run 5:** Waiting for new run after fixes
+**CI Run 5:** 21326451248 (FAILED - manifestHash pattern, coverage 87.23%)
+**CI Fixes Applied:**
+  - Fixed manifestHash to use 64-char hex pattern
+  - Added tests for missing shard, empty lines, records without game result
+  - Added test for top-level gameResult field
+  - Added test for all outcome types
+**CI Run 6:** 21326451248 (FAILED - record key format, coverage 87.68%)
+**CI Fixes Applied:**
+  - Fixed frozen eval record key format (test123:0 → test123)
+  - Added tests for missing shard, empty lines, records without game result
+  - Added test for top-level gameResult field
+  - Added test for all outcome types
+  - Added test for invalid game result handling
+**CI Run 7:** 21326537861 (FAILED - pre-existing M08 test, coverage 88.03%)
+**CI Analysis:** M09_run1.md updated with Run 7 results
 
 *Tool calls will be logged here as M09 implementation progresses.*
 
