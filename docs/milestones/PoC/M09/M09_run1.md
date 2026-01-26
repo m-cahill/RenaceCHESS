@@ -501,9 +501,24 @@ The remaining 1.04% gap is from pre-existing files (not M09-related):
 - **Commit:** `9b7f144` — "fix(m09): Use more specific TOTAL line pattern with head -1"
 
 ### Run 23 (21343889317) — AWK Pattern Matching
-- **Status:** ⏳ IN PROGRESS
-- **Changes:** Use awk pattern matching instead of grep for TOTAL line extraction
+- **Status:** ❌ FAILURE
+- **Issue:** PR_COV extraction still failing — text parsing approach too fragile
+- **Coverage:** 88.96% (baseline: 90.12%)
+- **Fix Applied:** Use awk pattern matching instead of grep
 - **Commit:** `178fe04` — "fix(m09): Use awk pattern matching for TOTAL line extraction"
+
+### Run 24 (21344614012) — XML-Based Overlap-Set Comparison
+- **Status:** ❌ FAILURE (Real Regression Detected)
+- **Implementation:** Replaced fragile text parsing with XML-based overlap-set comparison
+- **Result:** XML parsing working correctly, detected actual coverage regressions:
+  - `cli.py`: 70.00% → 66.08% (delta: -3.92%)
+  - `eval/runner.py`: 92.86% → 73.84% (delta: -19.02%)
+- **Files compared:** 28 overlap files (base: 28, head: 32)
+- **Commits:**
+  - `e2c6ed5` — "refactor(m09): Replace fragile text parsing with XML-based overlap-set comparison"
+  - `3965d72` — "fix(m09): Aggregate coverage per file in XML parsing"
+
+**Analysis:** The XML-based comparison is working correctly and has identified real coverage regressions in existing files. These regressions are likely due to new code paths added in M09 (CLI and eval runner extensions) that are not yet fully tested.
 
 ---
 
@@ -529,15 +544,27 @@ The remaining 1.04% gap is from pre-existing files (not M09-related):
 - Applied only to `m09-*` PR branches
 - Absolute 90% threshold preserved on `main`
 
-**Remaining Issue:**
-- PR_COV extraction from coverage report needs refinement
-- Multiple attempts to fix grep/awk pattern matching
-- Current approach: Using awk pattern matching for TOTAL line
+**Implementation Complete:**
+- ✅ XML-based overlap-set comparison implemented
+- ✅ Robust Python XML parsing (no fragile text parsing)
+- ✅ Compares only files present in both base and head
+- ✅ Fails CI only if existing file loses coverage
 
-**Expected Final Outcome:**
-Once extraction works:
-- PR coverage: 88.96%
-- Baseline coverage: 90.12%
-- **Result:** Regression detected (88.96% < 90.12%)
-- **Governance Decision:** This is expected and acceptable due to denominator expansion from new M09 files. All M09-specific files are at 100% coverage.
+**Current Status (Run 24):**
+- **Files in base:** 28
+- **Files in head:** 32 (4 new M09 files)
+- **Overlap files compared:** 28
+- **Regressions detected:**
+  - `cli.py`: 70.00% → 66.08% (-3.92%)
+  - `eval/runner.py`: 92.86% → 73.84% (-19.02%)
+
+**Analysis:**
+The XML-based comparison is working correctly and has identified real coverage regressions in existing files. These regressions are likely due to:
+1. New code paths added in M09 (CLI extensions for outcome head, eval runner extensions)
+2. These paths are not yet fully tested
+
+**Next Steps:**
+1. Add tests for new CLI code paths (outcome head commands)
+2. Add tests for new eval runner code paths (outcome head evaluation)
+3. Re-run CI to validate regressions are fixed
 
