@@ -60,26 +60,69 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
-      - name: Determine coverage threshold
-        id: coverage_threshold
+      - name: Determine coverage mode and baseline
+        id: coverage_check
         shell: bash
         run: |
-          # M08 baseline coverage: 90.16%
-          # For M09 PR (m09-* branches), use non-regression rule
-          # For main and other PRs, use absolute 90% threshold
           BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
-          if [[ "$BRANCH_NAME" == m09-* ]]; then
-            echo "threshold=90.16" >> $GITHUB_OUTPUT
+          
+          # For M09 PR branches, use non-regression rule (compare against PR base)
+          # For main and other PRs, use absolute 90% threshold
+          if [[ "$BRANCH_NAME" == m09-* ]] && [[ "${{ github.event_name }}" == "pull_request" ]]; then
             echo "mode=non-regression" >> $GITHUB_OUTPUT
-            echo "Using non-regression threshold: 90.16% (M08 baseline) for branch: $BRANCH_NAME"
+            echo "Using non-regression mode: compare PR HEAD vs PR BASE for branch: $BRANCH_NAME"
+            
+            # Get PR base commit SHA
+            BASE_SHA="${{ github.event.pull_request.base.sha }}"
+            echo "PR base SHA: $BASE_SHA"
+            
+            # Fetch base commit and compute baseline coverage
+            git fetch origin "$BASE_SHA" --depth=1
+            git checkout "$BASE_SHA"
+            
+            # Install dependencies for base commit (in case they differ)
+            python -m pip install --upgrade pip --quiet
+            pip install -e ".[dev]" --quiet
+            
+            # Run coverage on base commit
+            python -m pytest --cov=src/renacechess --cov-report=term --cov-report=xml -q > /dev/null 2>&1 || true
+            BASELINE_COV=$(python -m coverage report --format=total --precision=2 | tail -1 | awk '{print $NF}' | sed 's/%//')
+            echo "Baseline coverage: ${BASELINE_COV}%"
+            echo "baseline=${BASELINE_COV}" >> $GITHUB_OUTPUT
+            
+            # Return to PR HEAD and reinstall dependencies
+            git checkout "${{ github.sha }}"
+            python -m pip install --upgrade pip --quiet
+            pip install -e ".[dev]" --quiet
+            
           else
-            echo "threshold=90" >> $GITHUB_OUTPUT
             echo "mode=absolute" >> $GITHUB_OUTPUT
+            echo "threshold=90" >> $GITHUB_OUTPUT
             echo "Using absolute threshold: 90% for branch: $BRANCH_NAME"
           fi
-      - name: Run tests
+      - name: Run tests and check coverage
+        shell: bash
         run: |
-          pytest --cov-fail-under=${{ steps.coverage_threshold.outputs.threshold }}
+          if [[ "${{ steps.coverage_check.outputs.mode }}" == "non-regression" ]]; then
+            # Run tests and get PR coverage
+            python -m pytest --cov=src/renacechess --cov-report=term --cov-report=xml -q
+            PR_COV=$(python -m coverage report --format=total --precision=2 | tail -1 | awk '{print $NF}' | sed 's/%//')
+            BASELINE_COV="${{ steps.coverage_check.outputs.baseline }}"
+            
+            echo "PR coverage: ${PR_COV}%"
+            echo "Baseline coverage: ${BASELINE_COV}%"
+            
+            # Compare coverage using Python for floating point comparison
+            if python -c "exit(0 if float('${PR_COV}') >= float('${BASELINE_COV}') else 1)"; then
+              echo "✅ Coverage non-regression: ${PR_COV}% >= ${BASELINE_COV}%"
+            else
+              echo "❌ Coverage regression: ${PR_COV}% < ${BASELINE_COV}%"
+              exit 1
+            fi
+          else
+            # Use absolute threshold
+            python -m pytest --cov-fail-under=${{ steps.coverage_check.outputs.threshold }}
+          fi
       - name: Upload coverage
         uses: actions/upload-artifact@v4
         if: always()
