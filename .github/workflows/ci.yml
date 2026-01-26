@@ -109,11 +109,18 @@ jobs:
             PR_COV=$(python -m coverage report | grep "^TOTAL" | awk '{print $NF}' | sed 's/%//')
             BASELINE_COV="${{ steps.coverage_check.outputs.baseline }}"
             
+            # Validate extraction
+            if [[ -z "$PR_COV" ]]; then
+              echo "❌ Failed to extract PR coverage"
+              python -m coverage report | tail -5
+              exit 1
+            fi
+            
             echo "PR coverage: ${PR_COV}%"
             echo "Baseline coverage: ${BASELINE_COV}%"
             
             # Compare coverage using Python for floating point comparison
-            if python -c "exit(0 if float('${PR_COV}') >= float('${BASELINE_COV}') else 1)"; then
+            if python -c "import sys; sys.exit(0 if float('${PR_COV}') >= float('${BASELINE_COV}') else 1)"; then
               echo "✅ Coverage non-regression: ${PR_COV}% >= ${BASELINE_COV}%"
             else
               echo "❌ Coverage regression: ${PR_COV}% < ${BASELINE_COV}%"
