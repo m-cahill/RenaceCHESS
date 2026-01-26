@@ -85,8 +85,8 @@ jobs:
             pip install -e ".[dev]" --quiet
             
             # Run coverage on base commit
-            python -m pytest --cov=src/renacechess --cov-report=term --cov-report=xml -q > /dev/null 2>&1 || true
-            BASELINE_COV=$(python -m coverage report | grep "^TOTAL" | awk '{print $NF}' | sed 's/%//')
+            python -m pytest --cov=src/renacechess --cov-report=term --cov-report=xml --cov-fail-under=0 -q > /dev/null 2>&1 || true
+            BASELINE_COV=$(python -m coverage report | grep -E "^TOTAL|^[[:space:]]*TOTAL" | awk '{print $NF}' | sed 's/%//')
             echo "Baseline coverage: ${BASELINE_COV}%"
             echo "baseline=${BASELINE_COV}" >> $GITHUB_OUTPUT
             
@@ -106,7 +106,7 @@ jobs:
           if [[ "${{ steps.coverage_check.outputs.mode }}" == "non-regression" ]]; then
             # Run tests with coverage (disable fail-under to allow extraction)
             python -m pytest --cov=src/renacechess --cov-report=term --cov-report=xml --cov-fail-under=0 -q
-            PR_COV=$(python -m coverage report | grep "^TOTAL" | awk '{print $NF}' | sed 's/%//')
+            PR_COV=$(python -m coverage report | grep -E "^TOTAL|^[[:space:]]*TOTAL" | awk '{print $NF}' | sed 's/%//')
             BASELINE_COV="${{ steps.coverage_check.outputs.baseline }}"
             
             # Validate extraction
