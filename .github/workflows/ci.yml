@@ -60,87 +60,136 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
-      - name: Determine coverage mode and baseline
+      - name: Determine coverage mode
         id: coverage_check
         shell: bash
         run: |
           BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
           
-          # For M09 PR branches, use non-regression rule (compare against PR base)
+          # For M09 PR branches, use non-regression rule (overlap-set XML comparison)
           # For main and other PRs, use absolute 90% threshold
           if [[ "$BRANCH_NAME" == m09-* ]] && [[ "${{ github.event_name }}" == "pull_request" ]]; then
             echo "mode=non-regression" >> $GITHUB_OUTPUT
-            echo "Using non-regression mode: compare PR HEAD vs PR BASE for branch: $BRANCH_NAME"
-            
-            # Get PR base commit SHA
-            BASE_SHA="${{ github.event.pull_request.base.sha }}"
-            echo "PR base SHA: $BASE_SHA"
-            
-            # Fetch base commit and compute baseline coverage
-            git fetch origin "$BASE_SHA" --depth=1
-            git checkout "$BASE_SHA"
-            
-            # Install dependencies for base commit (in case they differ)
-            python -m pip install --upgrade pip --quiet
-            pip install -e ".[dev]" --quiet
-            
-            # Run coverage on base commit
-            python -m pytest --cov=src/renacechess --cov-report=term --cov-report=xml --cov-fail-under=0 -q > /dev/null 2>&1 || true
-            # Extract baseline coverage - find line with TOTAL and percentage, extract the percentage
-            BASELINE_COV=$(python -m coverage report | awk '/^TOTAL/ || /^[[:space:]]+TOTAL/ {print $NF}' | sed 's/%//' | head -1)
-            echo "Baseline coverage: ${BASELINE_COV}%"
-            echo "baseline=${BASELINE_COV}" >> $GITHUB_OUTPUT
-            
-            # Return to PR HEAD and reinstall dependencies
-            git checkout "${{ github.sha }}"
-            python -m pip install --upgrade pip --quiet
-            pip install -e ".[dev]" --quiet
-            
+            echo "Using non-regression mode: overlap-set XML comparison for branch: $BRANCH_NAME"
           else
             echo "mode=absolute" >> $GITHUB_OUTPUT
             echo "threshold=90" >> $GITHUB_OUTPUT
             echo "Using absolute threshold: 90% for branch: $BRANCH_NAME"
           fi
-      - name: Run tests and check coverage
+      - name: Generate baseline coverage XML
+        if: steps.coverage_check.outputs.mode == 'non-regression'
         shell: bash
         run: |
-          if [[ "${{ steps.coverage_check.outputs.mode }}" == "non-regression" ]]; then
-            # Run tests with coverage (disable fail-under to allow extraction)
-            python -m pytest --cov=src/renacechess --cov-report=term --cov-report=xml --cov-fail-under=0 -q
-            # Extract PR coverage - find line with TOTAL and percentage, extract the percentage
-            PR_COV=$(python -m coverage report | awk '/^TOTAL/ || /^[[:space:]]+TOTAL/ {print $NF}' | sed 's/%//' | head -1)
-            BASELINE_COV="${{ steps.coverage_check.outputs.baseline }}"
-            
-            # Validate extraction
-            if [[ -z "$PR_COV" ]] || [[ "$PR_COV" == "" ]]; then
-              echo "❌ Failed to extract PR coverage"
-              echo "Debug: Coverage report output:"
-              python -m coverage report | tail -10
-              echo "Debug: Looking for TOTAL line:"
-              python -m coverage report | grep -i "total" || echo "No TOTAL line found"
-              exit 1
-            fi
-            
-            # Validate baseline extraction
-            if [[ -z "$BASELINE_COV" ]] || [[ "$BASELINE_COV" == "" ]]; then
-              echo "❌ Failed to extract baseline coverage"
-              exit 1
-            fi
-            
-            echo "PR coverage: ${PR_COV}%"
-            echo "Baseline coverage: ${BASELINE_COV}%"
-            
-            # Compare coverage using Python for floating point comparison
-            if python -c "import sys; sys.exit(0 if float('${PR_COV}') >= float('${BASELINE_COV}') else 1)"; then
-              echo "✅ Coverage non-regression: ${PR_COV}% >= ${BASELINE_COV}%"
-            else
-              echo "❌ Coverage regression: ${PR_COV}% < ${BASELINE_COV}%"
-              exit 1
-            fi
-          else
-            # Use absolute threshold
-            python -m pytest --cov-fail-under=${{ steps.coverage_check.outputs.threshold }}
-          fi
+          # Get PR base commit SHA
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          echo "PR base SHA: $BASE_SHA"
+          
+          # Fetch and checkout base commit
+          git fetch origin "$BASE_SHA" --depth=1
+          git checkout "$BASE_SHA"
+          
+          # Install dependencies for base commit (in case they differ)
+          python -m pip install --upgrade pip --quiet
+          pip install -e ".[dev]" --quiet
+          
+          # Generate coverage XML at PR base
+          python -m pytest --cov=src/renacechess --cov-report=xml --cov-fail-under=0 -q
+          mv coverage.xml coverage-base.xml
+          echo "✅ Baseline coverage XML generated"
+          
+          # Return to PR HEAD
+          git checkout "${{ github.sha }}"
+          python -m pip install --upgrade pip --quiet
+          pip install -e ".[dev]" --quiet
+      - name: Run tests and generate PR coverage XML
+        if: steps.coverage_check.outputs.mode == 'non-regression'
+        shell: bash
+        run: |
+          # Generate coverage XML at PR head
+          python -m pytest --cov=src/renacechess --cov-report=xml --cov-fail-under=0 -q
+          mv coverage.xml coverage-head.xml
+          echo "✅ PR head coverage XML generated"
+      - name: Compare overlap-set coverage
+        if: steps.coverage_check.outputs.mode == 'non-regression'
+        shell: bash
+        run: |
+          python << 'EOF'
+          import sys
+          import xml.etree.ElementTree as ET
+
+          def load_coverage(path):
+              """Load coverage data from XML file, returning dict of filename -> coverage ratio."""
+              try:
+                  tree = ET.parse(path)
+              except FileNotFoundError:
+                  print(f"❌ Coverage file not found: {path}")
+                  sys.exit(1)
+              except ET.ParseError as e:
+                  print(f"❌ Failed to parse coverage XML: {e}")
+                  sys.exit(1)
+              
+              root = tree.getroot()
+              coverage = {}
+              
+              for cls in root.findall(".//class"):
+                  filename = cls.attrib.get("filename", "")
+                  if not filename:
+                      continue
+                  
+                  lines = cls.find("lines")
+                  if lines is None:
+                      continue
+                  
+                  total = 0
+                  covered = 0
+                  for line in lines.findall("line"):
+                      total += 1
+                      if int(line.attrib.get("hits", 0)) > 0:
+                          covered += 1
+                  
+                  if total > 0:
+                      coverage[filename] = covered / total
+              
+              return coverage
+
+          # Load coverage from both XML files
+          base = load_coverage("coverage-base.xml")
+          head = load_coverage("coverage-head.xml")
+
+          print(f"Files in base: {len(base)}")
+          print(f"Files in head: {len(head)}")
+
+          # Find regressions (files that existed in base and lost coverage in head)
+          regressions = []
+          overlap_count = 0
+
+          for file, base_cov in base.items():
+              if file not in head:
+                  continue  # Deleted files are not regressions
+              
+              overlap_count += 1
+              head_cov = head[file]
+              
+              # Use small epsilon for floating point comparison
+              if head_cov + 1e-9 < base_cov:
+                  regressions.append((file, base_cov, head_cov))
+
+          print(f"Overlap files compared: {overlap_count}")
+
+          if regressions:
+              print("\n❌ Coverage regression detected:")
+              for f, b, h in regressions:
+                  print(f"  {f}: {b:.2%} → {h:.2%} (delta: {h-b:.2%})")
+              sys.exit(1)
+
+          print("\n✅ Coverage non-regression satisfied for existing files")
+          print("   (New files are evaluated independently under milestone rules)")
+          EOF
+      - name: Run tests with absolute threshold
+        if: steps.coverage_check.outputs.mode == 'absolute'
+        shell: bash
+        run: |
+          python -m pytest --cov-fail-under=${{ steps.coverage_check.outputs.threshold }}
       - name: Upload coverage
         uses: actions/upload-artifact@v4
         if: always()
