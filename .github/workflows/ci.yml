@@ -129,7 +129,8 @@ jobs:
                   sys.exit(1)
               
               root = tree.getroot()
-              coverage = {}
+              # Aggregate coverage per file (a file can have multiple classes)
+              file_stats = {}  # filename -> (total_lines, covered_lines)
               
               for cls in root.findall(".//class"):
                   filename = cls.attrib.get("filename", "")
@@ -140,13 +141,17 @@ jobs:
                   if lines is None:
                       continue
                   
-                  total = 0
-                  covered = 0
-                  for line in lines.findall("line"):
-                      total += 1
-                      if int(line.attrib.get("hits", 0)) > 0:
-                          covered += 1
+                  if filename not in file_stats:
+                      file_stats[filename] = [0, 0]
                   
+                  for line in lines.findall("line"):
+                      file_stats[filename][0] += 1  # total
+                      if int(line.attrib.get("hits", 0)) > 0:
+                          file_stats[filename][1] += 1  # covered
+              
+              # Convert to coverage ratios
+              coverage = {}
+              for filename, (total, covered) in file_stats.items():
                   if total > 0:
                       coverage[filename] = covered / total
               
