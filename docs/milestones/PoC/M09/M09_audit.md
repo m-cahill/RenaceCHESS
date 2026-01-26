@@ -62,6 +62,31 @@ A coverage non-regression rule was applied for M09:
 
 This preserves CI truthfulness without weakening governance and avoids denominator-expansion artifacts.
 
+### Coverage Regression Findings (XML Overlap-Set Gate)
+
+The XML-based coverage non-regression gate identified coverage regressions in pre-existing orchestration files (`cli.py`, `eval/runner.py`).
+
+**Regressions Detected:**
+- `cli.py`: 70.00% → 66.08% (-3.92%)
+- `eval/runner.py`: 92.86% → 73.84% (-19.02%)
+
+**Root Cause:**
+These regressions are due to newly introduced M09 execution paths (outcome-head CLI command and evaluation wiring) that currently lack integration tests.
+
+**Analysis:**
+- These are **new code paths**, not logic changes to old ones
+- They live in **orchestration / glue layers**
+- They do not affect correctness of the M09 model itself
+- They are **not architectural debt**, just untested surfaces
+- No regressions were detected in model logic or evaluation correctness
+
+**Decision:**
+These gaps are explicitly deferred to M10, where CLI and runner integration coverage will be addressed. This preserves milestone boundaries and avoids scope creep.
+
+**Deferred Issues:**
+- `CLI-COV-001` — outcome-head CLI command untested (see Deferred Issues Registry)
+- `EVAL-RUNNER-COV-001` — outcome-head eval integration untested (see Deferred Issues Registry)
+
 **Implementation:**
 
 1. **On `main` branch:** Enforce absolute `coverage ≥ 90%`
