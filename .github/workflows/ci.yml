@@ -110,9 +110,18 @@ jobs:
             BASELINE_COV="${{ steps.coverage_check.outputs.baseline }}"
             
             # Validate extraction
-            if [[ -z "$PR_COV" ]]; then
+            if [[ -z "$PR_COV" ]] || [[ "$PR_COV" == "" ]]; then
               echo "❌ Failed to extract PR coverage"
-              python -m coverage report | tail -5
+              echo "Debug: Coverage report output:"
+              python -m coverage report | tail -10
+              echo "Debug: Looking for TOTAL line:"
+              python -m coverage report | grep -i "total" || echo "No TOTAL line found"
+              exit 1
+            fi
+            
+            # Validate baseline extraction
+            if [[ -z "$BASELINE_COV" ]] || [[ "$BASELINE_COV" == "" ]]; then
+              echo "❌ Failed to extract baseline coverage"
               exit 1
             fi
             
