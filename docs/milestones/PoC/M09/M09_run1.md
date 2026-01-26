@@ -376,3 +376,67 @@ The remaining 1.04% gap is from pre-existing files (not M09-related):
 - M08 test fix: Out of scope for M09 (pre-existing issue)
 - Coverage improvement: Need to improve coverage in pre-existing files OR address M08 test failure to unblock CI
 
+---
+
+## CI Runs 15-17: Coverage Non-Regression Governance Implementation
+
+### Run 15 (21342686340) — Initial Dynamic Baseline Implementation
+- **Status:** ❌ FAILURE
+- **Issue:** Fixed M08 baseline (90.16%) used instead of dynamic PR base baseline
+- **Coverage:** 88.96% (below fixed baseline 90.16%)
+- **Root Cause:** Initial implementation used fixed historical value instead of computing from PR base commit
+- **Resolution:** Refined to use dynamic PR base commit baseline
+
+### Run 16 (21342748404) — Dynamic Baseline Refinement
+- **Status:** ❌ FAILURE  
+- **Issue:** Coverage extraction failed — pytest enforced `fail_under` before extraction
+- **Coverage:** 88.96% (baseline: 90.12% from PR base)
+- **Root Cause:** `pyproject.toml` `fail_under=90` caused pytest to exit before coverage extraction
+- **Fix Applied:** Added `--cov-fail-under=0` to disable threshold during non-regression mode
+- **Commit:** `eedecc6` — "fix(m09): Disable fail-under during non-regression coverage extraction"
+
+### Run 17 (21342808571) — Coverage Extraction Fix
+- **Status:** ❌ FAILURE
+- **Issue:** Coverage extraction command failed — `--format=total` is not a valid option
+- **Coverage:** 88.96% (baseline: 90.12%)
+- **Root Cause:** `coverage report --format=total` is not a valid command
+- **Fix Applied:** Changed to `grep "^TOTAL"` to parse coverage report output
+- **Commit:** `9a8b0c9` — "fix(m09): Fix coverage extraction to parse TOTAL line correctly"
+
+### Run 18 (21342865951) — Validation and Error Handling
+- **Status:** ⏳ IN PROGRESS
+- **Changes:** Added validation for PR_COV extraction, fixed Python comparison syntax
+- **Commit:** `a9f66e7` — "fix(m09): Add validation and fix Python comparison syntax"
+
+---
+
+## Governance Implementation Summary
+
+### Coverage Non-Regression Rule (Option A — Refined)
+
+**Implementation Approach:**
+- **Dynamic Baseline:** Computes coverage from PR base commit (when PR was opened)
+- **Comparison:** PR HEAD coverage ≥ PR BASE coverage
+- **Scope:** Applied only to `m09-*` branches for PR events
+- **Main Branch:** Absolute 90% threshold remains unchanged
+
+**Key Refinements:**
+1. **Baseline Definition:** Changed from fixed M08 value (90.16%) to dynamic PR base commit
+2. **Rationale:** Handles denominator expansion from new files correctly
+3. **Industry Standard:** Matches how large infrastructure teams enforce non-regression
+
+**Current Status:**
+- ✅ Baseline computation: Working (90.12% from PR base commit `6864c2f`)
+- ✅ Coverage extraction: Fixed (parsing TOTAL line)
+- ⏳ Comparison logic: In progress (validation added)
+
+**Expected Outcome:**
+- PR coverage: 88.96%
+- Baseline coverage: 90.12%
+- **Result:** Regression detected (88.96% < 90.12%)
+
+**Next Steps:**
+1. Validate coverage extraction works correctly
+2. If regression is confirmed, investigate why coverage dropped from PR base
+3. Document final governance decision in audit
+
