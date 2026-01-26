@@ -86,8 +86,8 @@ jobs:
             
             # Run coverage on base commit
             python -m pytest --cov=src/renacechess --cov-report=term --cov-report=xml --cov-fail-under=0 -q > /dev/null 2>&1 || true
-            # Extract baseline coverage - find TOTAL line and extract percentage
-            BASELINE_COV=$(python -m coverage report | grep -i "total" | tail -1 | awk '{print $NF}' | sed 's/%//')
+            # Extract baseline coverage - match TOTAL line that contains percentage (ends with %)
+            BASELINE_COV=$(python -m coverage report | grep -E "^TOTAL|^[[:space:]]+TOTAL" | awk '{print $NF}' | sed 's/%//' | head -1)
             echo "Baseline coverage: ${BASELINE_COV}%"
             echo "baseline=${BASELINE_COV}" >> $GITHUB_OUTPUT
             
@@ -107,8 +107,8 @@ jobs:
           if [[ "${{ steps.coverage_check.outputs.mode }}" == "non-regression" ]]; then
             # Run tests with coverage (disable fail-under to allow extraction)
             python -m pytest --cov=src/renacechess --cov-report=term --cov-report=xml --cov-fail-under=0 -q
-            # Extract PR coverage - find TOTAL line and extract percentage
-            PR_COV=$(python -m coverage report | grep -i "total" | tail -1 | awk '{print $NF}' | sed 's/%//')
+            # Extract PR coverage - match TOTAL line that contains percentage (ends with %)
+            PR_COV=$(python -m coverage report | grep -E "^TOTAL|^[[:space:]]+TOTAL" | awk '{print $NF}' | sed 's/%//' | head -1)
             BASELINE_COV="${{ steps.coverage_check.outputs.baseline }}"
             
             # Validate extraction
