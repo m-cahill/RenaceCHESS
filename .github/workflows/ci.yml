@@ -104,8 +104,8 @@ jobs:
         shell: bash
         run: |
           if [[ "${{ steps.coverage_check.outputs.mode }}" == "non-regression" ]]; then
-            # Run tests and get PR coverage
-            python -m pytest --cov=src/renacechess --cov-report=term --cov-report=xml -q
+            # Run tests with coverage (disable fail-under to allow extraction)
+            python -m pytest --cov=src/renacechess --cov-report=term --cov-report=xml --cov-fail-under=0 -q
             PR_COV=$(python -m coverage report --format=total --precision=2 | tail -1 | awk '{print $NF}' | sed 's/%//')
             BASELINE_COV="${{ steps.coverage_check.outputs.baseline }}"
             
