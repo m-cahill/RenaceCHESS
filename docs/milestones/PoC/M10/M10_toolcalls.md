@@ -81,6 +81,20 @@
   - Accepted main's version of M09 documents (audit, plan, toolcalls)
 - **Commit:** 5ddafb9
 
+### 2026-01-27 - CI Analysis and Fixes
+- **Tool:** read_file, write, run_terminal_cmd, search_replace
+- **Purpose:** Analyze CI run #21386015512 and fix blocking issues
+- **Files:** docs/milestones/PoC/M10/M10_run1.md, tests/test_m10_runner_outcome_head.py, .github/workflows/ci.yml
+- **Status:** ✅ Complete
+- **Issues Identified:**
+  1. Formatting violation in test_m10_runner_outcome_head.py (fixed)
+  2. CI workflow bug: untracked files prevent PR HEAD checkout in baseline generation (fixed)
+- **Fixes Applied:**
+  - Formatted test file with `ruff format`
+  - Added `git clean -fd` before PR HEAD checkout in baseline generation step
+- **Commits:** 860981c (formatting), 6b323d1 (CI workflow fix + CI analysis report)
+- **Next:** Monitor CI re-run for all checks to pass
+
 ### 2026-01-26 - PR Creation
 - **Tool:** run_terminal_cmd (git commit, git push, gh pr create)
 - **Purpose:** Commit all M10 changes and create PR to main
