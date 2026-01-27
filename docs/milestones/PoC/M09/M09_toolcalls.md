@@ -84,6 +84,13 @@
   - Added tests for all skill bucket encoding ranges (lines 100, 102, 104, 107-116)
   - Added test for renormalization path (lines 202->207)
 **CI Run 8:** Waiting for new run after coverage fixes
+**CI Run 15:** 21342281877 (FAILED - coverage 88.96% < fixed baseline 90.16%)
+**Governance Refinement:**
+  - Initial implementation used fixed M08 baseline (90.16%)
+  - Refined to use dynamic PR base commit baseline
+  - Updated CI workflow to compute baseline from PR base SHA
+  - Updated audit documentation to reflect correct interpretation
+**CI Run 16:** Pending validation of dynamic baseline approach
 
 *Tool calls will be logged here as M09 implementation progresses.*
 

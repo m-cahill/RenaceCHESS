@@ -66,18 +66,19 @@ jobs:
         run: |
           BRANCH_NAME="${{ github.head_ref || github.ref_name }}"
           
-          # For M09 PR branches, use non-regression rule (overlap-set XML comparison)
-          # For main and other PRs, use absolute 90% threshold
-          if [[ "$BRANCH_NAME" == m09-* ]] && [[ "${{ github.event_name }}" == "pull_request" ]]; then
-            echo "mode=non-regression" >> $GITHUB_OUTPUT
-            echo "Using non-regression mode: overlap-set XML comparison for branch: $BRANCH_NAME"
+          # For PRs: use both absolute threshold AND overlap-set non-regression
+          # For main: use absolute 90% threshold only
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "mode=both" >> $GITHUB_OUTPUT
+            echo "threshold=90" >> $GITHUB_OUTPUT
+            echo "Using both absolute threshold (90%) and overlap-set non-regression for PR: $BRANCH_NAME"
           else
             echo "mode=absolute" >> $GITHUB_OUTPUT
             echo "threshold=90" >> $GITHUB_OUTPUT
             echo "Using absolute threshold: 90% for branch: $BRANCH_NAME"
           fi
       - name: Generate baseline coverage XML
-        if: steps.coverage_check.outputs.mode == 'non-regression'
+        if: steps.coverage_check.outputs.mode == 'both'
         shell: bash
         run: |
           # Get PR base commit SHA
@@ -102,7 +103,7 @@ jobs:
           python -m pip install --upgrade pip --quiet
           pip install -e ".[dev]" --quiet
       - name: Run tests and generate PR coverage XML
-        if: steps.coverage_check.outputs.mode == 'non-regression'
+        if: steps.coverage_check.outputs.mode == 'both'
         shell: bash
         run: |
           # Generate coverage XML at PR head
@@ -110,7 +111,7 @@ jobs:
           mv coverage.xml coverage-head.xml
           echo "✅ PR head coverage XML generated"
       - name: Compare overlap-set coverage
-        if: steps.coverage_check.outputs.mode == 'non-regression'
+        if: steps.coverage_check.outputs.mode == 'both'
         shell: bash
         run: |
           python << 'EOF'
@@ -192,6 +193,11 @@ jobs:
           EOF
       - name: Run tests with absolute threshold
         if: steps.coverage_check.outputs.mode == 'absolute'
+        shell: bash
+        run: |
+          python -m pytest --cov-fail-under=${{ steps.coverage_check.outputs.threshold }}
+      - name: Run tests with absolute threshold (PR mode)
+        if: steps.coverage_check.outputs.mode == 'both'
         shell: bash
         run: |
           python -m pytest --cov-fail-under=${{ steps.coverage_check.outputs.threshold }}

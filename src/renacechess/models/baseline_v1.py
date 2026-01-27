@@ -265,12 +265,16 @@ class BaselinePolicyV1(nn.Module):
             probs = functional.softmax(legal_logits, dim=0)
 
             for i, move in enumerate(legal_moves_filtered):
-                move_probs[move] = float(probs[i].item())
+                # Clamp to [0, 1] to prevent tiny negative values from floating point precision
+                prob_value = float(probs[i].item())
+                move_probs[move] = max(0.0, min(1.0, prob_value))
 
             # Handle moves not in vocabulary: assign uniform probability
             remaining_moves = [m for m in legal_moves if m not in move_probs]
             if remaining_moves:
                 uniform_prob = (1.0 - sum(move_probs.values())) / len(remaining_moves)
+                # Clamp uniform probability to [0, 1]
+                uniform_prob = max(0.0, min(1.0, uniform_prob))
                 for move in remaining_moves:
                     move_probs[move] = uniform_prob
 
@@ -279,6 +283,14 @@ class BaselinePolicyV1(nn.Module):
             if total > 0:
                 for move in move_probs:
                     move_probs[move] /= total
+                # Final clamp after renormalization to handle any remaining precision issues
+                for move in move_probs:
+                    move_probs[move] = max(0.0, min(1.0, move_probs[move]))
+                # Final renormalization if clamping changed sum
+                final_total = sum(move_probs.values())
+                if final_total > 0:
+                    for move in move_probs:
+                        move_probs[move] /= final_total
         else:
             # No legal moves in vocabulary: uniform distribution
             move_probs = {
