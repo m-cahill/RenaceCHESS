@@ -211,7 +211,38 @@ The milestone objectives are met:
 
 ---
 
-**Analysis Date:** 2026-01-27  
+---
+
+## Update: Run #21388511020 — Final Success
+
+**Status:** ✅ **ALL CHECKS PASSING** — Ready for merge
+
+### Final Results
+
+- ✅ **Lint and Format:** PASS (formatting issue resolved)
+- ✅ **Type Check:** PASS
+- ✅ **Test:** PASS (coverage ≥90%, overlap-set non-regression satisfied)
+
+### Coverage Verification
+
+- **Total Coverage:** 90.32% (above 90% threshold) ✅
+- **Overlap-Set Comparison:** ✅ PASSED — No regressions detected
+- **All Tests:** 336 passed, 1 skipped
+
+### Milestone Status
+
+**M10 is complete and ready for closeout.**
+
+All objectives achieved:
+- ✅ Coverage restored in CLI and eval runner
+- ✅ Float precision issue fixed deterministically
+- ✅ CI gates remain truthful and robust
+- ✅ Overlap-set non-regression rule permanently enabled
+- ✅ Real coverage regression detected and fixed
+
+---
+
+**Analysis Date:** 2026-01-27 (Final Update)  
 **Analyst:** AI (Cursor)  
-**Status:** ✅ Ready for merge (formatting fix applied)
+**Status:** ✅ **ALL CHECKS PASSING** — Ready for merge and milestone closeout
 
