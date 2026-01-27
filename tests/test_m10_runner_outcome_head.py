@@ -78,13 +78,13 @@ def test_runner_outcome_head_integration(tmp_path: Path, monkeypatch) -> None:
     # Verify outcome metrics are present in result
     assert "outcome_metrics" in result
     outcome_metrics = result["outcome_metrics"]
-    
+
     # Outcome metrics structure: direct fields, not nested "overall"
     assert "total_predictions" in outcome_metrics
     assert "cross_entropy" in outcome_metrics
     assert "brier_score" in outcome_metrics
     assert "ece" in outcome_metrics
-    
+
     # If we have predictions, metrics should be numeric
     if outcome_metrics["total_predictions"] > 0:
         assert outcome_metrics["cross_entropy"] is not None
@@ -165,4 +165,3 @@ def test_runner_outcome_head_without_path(tmp_path: Path) -> None:
     assert "dataset_digest" in result
     assert "by_skill_bucket_id" in result
     assert "by_time_control_class" in result
-
