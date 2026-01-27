@@ -70,6 +70,17 @@
 - **Result:** PR #12 created at https://github.com/m-cahill/RenaceCHESS/pull/12
 - **Next:** Monitor CI runs and wait for checks to complete
 
+### 2026-01-26 - Merge Conflict Resolution
+- **Tool:** search_replace, run_terminal_cmd
+- **Purpose:** Resolve merge conflicts with main branch
+- **Files:** .github/workflows/ci.yml, docs/audit/DeferredIssuesRegistry.md, docs/milestones/PoC/M09/*
+- **Status:** ✅ Complete
+- **Resolution:**
+  - Kept M10 CI workflow changes (permanent overlap-set comparison for all PRs)
+  - Kept M10 Deferred Issues Registry updates (M09 deferrals resolved)
+  - Accepted main's version of M09 documents (audit, plan, toolcalls)
+- **Commit:** 5ddafb9
+
 ### 2026-01-26 - PR Creation
 - **Tool:** run_terminal_cmd (git commit, git push, gh pr create)
 - **Purpose:** Commit all M10 changes and create PR to main
