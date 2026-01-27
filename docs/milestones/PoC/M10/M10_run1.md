@@ -275,7 +275,39 @@ Once these are resolved and CI re-runs green, the run will be safe to merge. The
 
 ---
 
+## Update: Run #21386582390 Analysis
+
+**Status:** Baseline file preservation working. Real coverage regression identified.
+
+### Progress Made
+- ✅ **Lint and Format:** Still passing
+- ✅ **Type Check:** Still passing
+- ✅ **Baseline File Preservation:** Working correctly (file preserved via `/tmp`)
+- ❌ **Test:** Failing due to legitimate coverage regression
+
+### Real Coverage Regression Detected
+
+**Classification:** Code coverage / test coverage gap
+
+**Details:**
+- Step: `Compare overlap-set coverage`
+- Regression: `models/baseline_v1.py: 94.39% → 93.91% (delta: -0.48%)`
+- Root Cause: The float precision fix added renormalization logic (lines 281-293) that is not fully covered by tests. The new code paths include:
+  - First renormalization (lines 283-285)
+  - Clamp after renormalization (lines 287-288)
+  - Second renormalization if clamping changed sum (lines 290-293)
+  - The `remaining_moves` path (lines 273-279) may also need additional coverage
+
+**Resolution Applied:**
+- Enhanced `test_baseline_policy_v1_probability_precision` to include test case with moves not in vocabulary
+- This exercises the `remaining_moves` path and ensures renormalization branches are covered
+- Commit: `91ebaec`
+
+**Next Action:** Monitor CI re-run to verify coverage regression is resolved.
+
+---
+
 **Analysis Date:** 2026-01-27 (Updated)  
 **Analyst:** AI (Cursor)  
-**Status:** ⛔ Blocking issues identified; fixes applied, awaiting CI re-run verification
+**Status:** ⛔ Blocking issues identified; coverage regression fix applied, awaiting CI re-run verification
 
