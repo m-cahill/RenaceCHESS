@@ -2,8 +2,8 @@
 
 **Milestone:** M09  
 **Mode:** DELTA AUDIT  
-**Range:** `8e11112...<TBD>` (PR #11)  
-**CI Status:** ⏳ Pending (coverage non-regression gate validated, regressions deferred)  
+**Range:** `8e11112...b7f9a63` (PR #11)  
+**CI Status:** 🟡 Coverage non-regression gate validated, regressions deferred to M10  
 **Audit Verdict:** ✅ FUNCTIONALLY COMPLETE — Model correctness achieved, governance upgraded, orchestration coverage gaps explicitly deferred to M10
 
 ---
@@ -334,11 +334,11 @@ See `docs/audit/deferredissuesregistry.md` for:
 ## 11. Canonical References
 
 - **PR:** #11 (`m09-outcome-head-v1` → `main`)
-- **Final Commit:** `<TBD>` (pending merge)
-- **CI Run (Latest):** `<TBD>` (pending validation)
+- **Final Commit:** `b7f9a63` (docs: Update audit verdict to functionally complete)
+- **CI Run (Latest):** Run 24 (XML-based overlap-set comparison validated, regressions detected and deferred)
 - **Plan:** `docs/milestones/PoC/M09/M09_plan.md`
 - **Audit:** `docs/milestones/PoC/M09/M09_audit.md` (this file)
-- **Summary:** `docs/milestones/PoC/M09/M09_summary.md` (pending)
+- **Summary:** `docs/milestones/PoC/M09/M09_summary.md`
 - **CI Analysis:** `docs/milestones/PoC/M09/M09_run1.md`
 - **Tool Calls Log:** `docs/milestones/PoC/M09/M09_toolcalls.md`
 
