@@ -100,8 +100,12 @@ jobs:
           
           # Return to PR HEAD
           # Clean untracked files that may have been generated during baseline test run
+          # But preserve coverage-base.xml by moving it to a safe location first
+          mv coverage-base.xml /tmp/coverage-base.xml
           git clean -fd
           git checkout "${{ github.sha }}"
+          # Restore coverage-base.xml
+          mv /tmp/coverage-base.xml coverage-base.xml
           python -m pip install --upgrade pip --quiet
           pip install -e ".[dev]" --quiet
       - name: Run tests and generate PR coverage XML
