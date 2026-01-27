@@ -252,8 +252,3 @@ If you want, next I can:
 * Generate a **Cursor-ready implementation prompt**, or
 * Help you define **M10** (likely correlation analysis + narrative grounding), or
 * Draft the **Deferred Issues Registry bootstrap** you mentioned earlier so it’s ready when needed.
-
-
-
-
-
