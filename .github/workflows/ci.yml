@@ -99,6 +99,8 @@ jobs:
           echo "✅ Baseline coverage XML generated"
           
           # Return to PR HEAD
+          # Clean untracked files that may have been generated during baseline test run
+          git clean -fd
           git checkout "${{ github.sha }}"
           python -m pip install --upgrade pip --quiet
           pip install -e ".[dev]" --quiet
