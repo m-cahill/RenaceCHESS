@@ -180,6 +180,25 @@ def test_baseline_policy_v1_probability_precision() -> None:
         total = sum(move_probs.values())
         assert abs(total - 1.0) < 1e-6, f"Probabilities sum to {total}, expected 1.0"
 
+    # Test case: legal moves include moves not in vocabulary (covers remaining_moves path)
+    test_model2 = BaselinePolicyV1(move_vocab_size=5)
+    test_model2.eval()
+    test_model2.add_move_to_vocab("e2e4")
+    test_model2.add_move_to_vocab("d2d4")
+    # Add moves not in vocabulary to trigger remaining_moves path
+    legal_moves_with_unknown = ["e2e4", "d2d4", "g1f3", "b1c3", "f1c4"]
+    move_probs2 = test_model2(fen, "1200_1399", "blitz", legal_moves_with_unknown)
+    
+    # Verify all moves have probabilities
+    assert len(move_probs2) == len(legal_moves_with_unknown)
+    # Verify probabilities are valid
+    for move, prob in move_probs2.items():
+        assert prob >= 0.0, f"Probability for {move} is negative: {prob}"
+        assert prob <= 1.0, f"Probability for {move} exceeds 1.0: {prob}"
+    # Verify sum is 1.0
+    total2 = sum(move_probs2.values())
+    assert abs(total2 - 1.0) < 1e-6, f"Probabilities sum to {total2}, expected 1.0"
+
 
 def test_baseline_policy_v1_skill_bucket_legacy_formats() -> None:
     """Test skill bucket encoding with various legacy formats."""
