@@ -225,9 +225,13 @@ The milestone objectives are met:
 
 ### Coverage Verification
 
-- **Total Coverage:** 90.32% (above 90% threshold) ✅
+- **Total Coverage:** 90.64% (above 90% threshold) ✅
 - **Overlap-Set Comparison:** ✅ PASSED — No regressions detected
 - **All Tests:** 336 passed, 1 skipped
+- **Key File Improvements:**
+  - `baseline_v1.py`: 95.81% (improved from 94.39% baseline, regression fixed)
+  - `cli.py`: 68.33% (improved from 63.35% baseline)
+  - `eval/runner.py`: 78.97% (improved from 67.46% baseline)
 
 ### Milestone Status
 
