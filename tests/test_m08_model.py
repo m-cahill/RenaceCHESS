@@ -188,7 +188,7 @@ def test_baseline_policy_v1_probability_precision() -> None:
     # Add moves not in vocabulary to trigger remaining_moves path
     legal_moves_with_unknown = ["e2e4", "d2d4", "g1f3", "b1c3", "f1c4"]
     move_probs2 = test_model2(fen, "1200_1399", "blitz", legal_moves_with_unknown)
-    
+
     # Verify all moves have probabilities
     assert len(move_probs2) == len(legal_moves_with_unknown)
     # Verify probabilities are valid
