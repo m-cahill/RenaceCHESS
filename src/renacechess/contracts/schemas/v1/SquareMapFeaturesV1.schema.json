@@ -1,0 +1,113 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Square Map Features V1",
+  "description": "Square-level structural maps for weak/strong/hole analysis (Structural Cognition Contract v1)",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "weakForWhite",
+    "strongForWhite",
+    "weakForBlack",
+    "strongForBlack",
+    "isHoleForWhite",
+    "isHoleForBlack"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "square_map.v1",
+      "description": "Schema version identifier"
+    },
+    "weakForWhite": {
+      "type": "array",
+      "minItems": 64,
+      "maxItems": 64,
+      "items": {
+        "type": "boolean"
+      },
+      "description": "Squares that are weak for White (indexed a1=0 to h8=63)"
+    },
+    "strongForWhite": {
+      "type": "array",
+      "minItems": 64,
+      "maxItems": 64,
+      "items": {
+        "type": "boolean"
+      },
+      "description": "Squares that are strong for White (indexed a1=0 to h8=63)"
+    },
+    "weakForBlack": {
+      "type": "array",
+      "minItems": 64,
+      "maxItems": 64,
+      "items": {
+        "type": "boolean"
+      },
+      "description": "Squares that are weak for Black (indexed a1=0 to h8=63)"
+    },
+    "strongForBlack": {
+      "type": "array",
+      "minItems": 64,
+      "maxItems": 64,
+      "items": {
+        "type": "boolean"
+      },
+      "description": "Squares that are strong for Black (indexed a1=0 to h8=63)"
+    },
+    "isHoleForWhite": {
+      "type": "array",
+      "minItems": 64,
+      "maxItems": 64,
+      "items": {
+        "type": "boolean"
+      },
+      "description": "Holes (permanent weaknesses) for White (indexed a1=0 to h8=63)"
+    },
+    "isHoleForBlack": {
+      "type": "array",
+      "minItems": 64,
+      "maxItems": 64,
+      "items": {
+        "type": "boolean"
+      },
+      "description": "Holes (permanent weaknesses) for Black (indexed a1=0 to h8=63)"
+    },
+    "controlDiffWhite": {
+      "type": "array",
+      "minItems": 64,
+      "maxItems": 64,
+      "items": {
+        "type": "integer"
+      },
+      "description": "Control differential for White (attackers_white - attackers_black) per square"
+    },
+    "controlDiffBlack": {
+      "type": "array",
+      "minItems": 64,
+      "maxItems": 64,
+      "items": {
+        "type": "integer"
+      },
+      "description": "Control differential for Black (attackers_black - attackers_white) per square"
+    },
+    "pawnContestableWhite": {
+      "type": "array",
+      "minItems": 64,
+      "maxItems": 64,
+      "items": {
+        "type": "boolean"
+      },
+      "description": "Squares that can be contested by White pawns"
+    },
+    "pawnContestableBlack": {
+      "type": "array",
+      "minItems": 64,
+      "maxItems": 64,
+      "items": {
+        "type": "boolean"
+      },
+      "description": "Squares that can be contested by Black pawns"
+    }
+  }
+}
+

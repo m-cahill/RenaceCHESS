@@ -1,0 +1,138 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Per-Piece Features V1",
+  "description": "Piece-indexed structural tensor with 32 fixed slots (Structural Cognition Contract v1)",
+  "type": "object",
+  "required": ["schemaVersion", "pieces"],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "per_piece.v1",
+      "description": "Schema version identifier"
+    },
+    "pieces": {
+      "type": "array",
+      "minItems": 32,
+      "maxItems": 32,
+      "description": "Fixed 32-slot array of piece features (slots 0-15: White, slots 16-31: Black)",
+      "items": {
+        "$ref": "#/definitions/PieceFeatures"
+      }
+    }
+  },
+  "definitions": {
+    "PieceFeatures": {
+      "type": "object",
+      "required": [
+        "slotId",
+        "color",
+        "pieceType",
+        "startingFile",
+        "alive",
+        "square",
+        "mobilityLegal",
+        "mobilitySafe",
+        "attackedBy",
+        "defendedBy",
+        "netDefense",
+        "isHanging",
+        "isPinned",
+        "isRestricted",
+        "isDominated",
+        "isAttacker",
+        "isDefenderOfKing"
+      ],
+      "properties": {
+        "slotId": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 31,
+          "description": "Fixed slot index (0-31)"
+        },
+        "color": {
+          "type": "string",
+          "enum": ["white", "black"],
+          "description": "Piece color"
+        },
+        "pieceType": {
+          "type": "string",
+          "enum": ["K", "Q", "R", "B", "N", "P"],
+          "description": "Original piece type"
+        },
+        "startingFile": {
+          "type": "string",
+          "enum": ["a", "b", "c", "d", "e", "f", "g", "h"],
+          "description": "Starting file for piece identity"
+        },
+        "alive": {
+          "type": "boolean",
+          "description": "Is the piece still on the board?"
+        },
+        "square": {
+          "type": ["string", "null"],
+          "pattern": "^[a-h][1-8]$",
+          "description": "Current square (e.g., 'e4') or null if captured"
+        },
+        "isPromoted": {
+          "type": "boolean",
+          "default": false,
+          "description": "Has this pawn promoted? (only meaningful for P slots)"
+        },
+        "promotedTo": {
+          "type": ["string", "null"],
+          "enum": ["Q", "R", "B", "N", null],
+          "description": "Promotion target (only if isPromoted is true)"
+        },
+        "mobilityLegal": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of legal moves for this piece"
+        },
+        "mobilitySafe": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of 'safe' moves (not attacked or defended by equal/lower value)"
+        },
+        "attackedBy": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of enemy pieces attacking this piece"
+        },
+        "defendedBy": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Count of friendly pieces defending this piece"
+        },
+        "netDefense": {
+          "type": "integer",
+          "description": "defendedBy - attackedBy"
+        },
+        "isHanging": {
+          "type": "boolean",
+          "description": "attackedBy > 0 AND defendedBy == 0"
+        },
+        "isPinned": {
+          "type": "boolean",
+          "description": "Piece is pinned to the king"
+        },
+        "isRestricted": {
+          "type": "boolean",
+          "description": "mobilityLegal < 3 (low mobility)"
+        },
+        "isDominated": {
+          "type": "boolean",
+          "description": "netDefense < -1 (under significant pressure)"
+        },
+        "isAttacker": {
+          "type": "boolean",
+          "description": "Attacks enemy pieces or key squares"
+        },
+        "isDefenderOfKing": {
+          "type": "boolean",
+          "description": "Defends squares around friendly king"
+        }
+      }
+    }
+  }
+}
+
