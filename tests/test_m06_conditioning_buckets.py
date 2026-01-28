@@ -1,6 +1,5 @@
 """Tests for M06 conditioning bucket assignment functions."""
 
-import pytest
 
 from renacechess.conditioning.buckets import (
     assign_skill_bucket,

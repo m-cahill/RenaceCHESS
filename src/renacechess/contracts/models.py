@@ -7,7 +7,6 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-
 # =============================================================================
 # Structural Cognition Models (M11)
 # =============================================================================
@@ -472,7 +471,9 @@ class ContextBridgePayloadV2(BaseModel):
     )
     hdi: HDI = Field(..., description="Human Difficulty Index")
     narrative_seeds: list[NarrativeSeedV2] = Field(
-        ..., alias="narrativeSeeds", description="Narrative seeds for LLM (v2 with structural types)"
+        ...,
+        alias="narrativeSeeds",
+        description="Narrative seeds for LLM (v2 with structural types)",
     )
     meta: ContextBridgeMetaV2 = Field(..., description="Metadata (v2)")
     chosen_move: ChosenMove | None = Field(

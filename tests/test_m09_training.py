@@ -6,7 +6,6 @@ from pathlib import Path
 
 import pytest
 
-from renacechess.contracts.models import DatasetManifestV2, FrozenEvalManifestV1
 from renacechess.models.training_outcome import OutcomeDataset, train_outcome_head
 
 

@@ -1,6 +1,5 @@
 """Tests for M07 Human Difficulty Index (HDI) computation."""
 
-import pytest
 
 from renacechess.eval.hdi import (
     clamp01,

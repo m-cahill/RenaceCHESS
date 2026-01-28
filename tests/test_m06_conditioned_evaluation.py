@@ -1,12 +1,7 @@
 """Tests for M06 conditioned evaluation runner."""
 
-from datetime import datetime
 from pathlib import Path
-from tempfile import TemporaryDirectory
 
-import pytest
-
-from renacechess.contracts.models import EvalReportV3
 from renacechess.eval.runner import run_conditioned_evaluation
 
 

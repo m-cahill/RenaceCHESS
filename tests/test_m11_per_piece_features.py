@@ -14,7 +14,6 @@ from pathlib import Path
 import chess
 import pytest
 
-from renacechess.contracts.models import PerPieceFeaturesV1, PieceFeatures
 from renacechess.features.per_piece import extract_per_piece_features
 
 

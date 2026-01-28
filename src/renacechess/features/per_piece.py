@@ -10,8 +10,7 @@ from __future__ import annotations
 
 import chess
 
-from renacechess.contracts.models import PieceFeatures, PerPieceFeaturesV1
-
+from renacechess.contracts.models import PerPieceFeaturesV1, PieceFeatures
 
 # Piece values for safe mobility calculation (no full SEE)
 PIECE_VALUES: dict[chess.PieceType, int] = {

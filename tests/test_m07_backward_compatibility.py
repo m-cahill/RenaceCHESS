@@ -2,8 +2,6 @@
 
 from datetime import datetime
 
-import pytest
-
 from renacechess.contracts.models import (
     ConditionedAccuracyMetrics,
     ConditionedDistributionMetrics,

@@ -9,28 +9,26 @@ These tests verify:
 from __future__ import annotations
 
 import chess
-import pytest
 
 from renacechess.contracts.models import (
-    StructuralCognition,
-    StructuralLabel,
-    ContextBridgePayloadV2,
+    HDI,
     ContextBridgeMetaV2,
-    Position,
-    PositionConditioning,
-    Policy,
-    PolicyMove,
+    ContextBridgePayloadV2,
+    HDIComponents,
     HumanWDL,
     HumanWDLContainer,
-    HDI,
-    HDIComponents,
     NarrativeSeedV2,
+    Policy,
+    PolicyMove,
+    Position,
+    PositionConditioning,
+    StructuralLabel,
 )
 from renacechess.features import (
-    extract_structural_cognition,
-    generate_structural_labels,
     extract_per_piece_features,
     extract_square_map_features,
+    extract_structural_cognition,
+    generate_structural_labels,
 )
 
 
@@ -104,7 +102,7 @@ class TestStructuralLabelGeneration:
         labels = generate_structural_labels(per_piece, square_map)
 
         # Check if any hanging-piece labels exist
-        hanging_labels = [l for l in labels if l.type == "hanging-piece"]
+        hanging_labels = [label for label in labels if label.type == "hanging-piece"]
         # May or may not find hanging pieces depending on exact position
         assert isinstance(hanging_labels, list)
 
