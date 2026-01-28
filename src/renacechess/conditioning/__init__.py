@@ -2,8 +2,8 @@
 
 from renacechess.conditioning.buckets import (
     SkillBucketId,
-    TimeControlClass,
     TimePressureBucket,
+    TimeControlClass,
     assign_skill_bucket,
     assign_time_pressure_bucket,
     parse_time_control,

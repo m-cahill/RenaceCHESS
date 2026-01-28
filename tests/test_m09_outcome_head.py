@@ -305,9 +305,8 @@ def test_outcome_head_renormalization_needed() -> None:
     This test forces the renormalization branch by patching softmax output
     to create values that need renormalization after clamping.
     """
-    from unittest.mock import patch
-
     import torch
+    from unittest.mock import patch
 
     model = OutcomeHeadV1()
     model.eval()
@@ -344,9 +343,8 @@ def test_outcome_head_renormalization_skipped() -> None:
     values that sum to exactly 1.0 (within epsilon), ensuring the renormalization
     branch is not taken.
     """
-    from unittest.mock import patch
-
     import torch
+    from unittest.mock import patch
 
     model = OutcomeHeadV1()
     model.eval()

@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 from typing import Any
 
-from renacechess.contracts.models import DatasetManifestV2
+from renacechess.contracts.models import DatasetManifestV2, EvalReportV3
 from renacechess.dataset.split import compute_split_assignment
 from renacechess.eval.baselines import compute_policy_seed, create_policy_provider
 from renacechess.eval.conditioned_metrics import ConditionedMetricsAccumulator

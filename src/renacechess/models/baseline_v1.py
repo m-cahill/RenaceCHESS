@@ -5,6 +5,7 @@ to predict human move distributions from position features and conditioning.
 """
 
 import hashlib
+from typing import Any
 
 import torch
 import torch.nn as nn

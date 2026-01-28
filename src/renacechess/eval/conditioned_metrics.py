@@ -7,6 +7,7 @@ M07 Extension: Adds Human Difficulty Index (HDI) computation.
 """
 
 from collections import defaultdict
+from typing import Any
 
 from renacechess.contracts.models import (
     ConditionedAccuracyMetrics,
@@ -59,13 +60,13 @@ class ConditionedMetricsAccumulator:
         self.unique_moves: set[str] = set()
 
         # Stratified accumulators
-        self.by_skill_bucket_id: dict[str, ConditionedMetricsAccumulator] = defaultdict(
+        self.by_skill_bucket_id: dict[str, "ConditionedMetricsAccumulator"] = defaultdict(
             lambda: ConditionedMetricsAccumulator(self.compute_accuracy, self.top_k_values)
         )
-        self.by_time_control_class: dict[str, ConditionedMetricsAccumulator] = defaultdict(
+        self.by_time_control_class: dict[str, "ConditionedMetricsAccumulator"] = defaultdict(
             lambda: ConditionedMetricsAccumulator(self.compute_accuracy, self.top_k_values)
         )
-        self.by_time_pressure_bucket: dict[str, ConditionedMetricsAccumulator] = defaultdict(
+        self.by_time_pressure_bucket: dict[str, "ConditionedMetricsAccumulator"] = defaultdict(
             lambda: ConditionedMetricsAccumulator(self.compute_accuracy, self.top_k_values)
         )
 
