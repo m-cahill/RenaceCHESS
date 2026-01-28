@@ -140,6 +140,66 @@ def test_baseline_policy_v1_deterministic() -> None:
         assert abs(probs1[move] - probs2[move]) < 1e-6
 
 
+def test_baseline_policy_v1_probability_precision() -> None:
+    """Regression test: ensure probabilities are clamped to [0, 1] and sum to 1.
+
+    This test guards against floating-point precision issues that can cause
+    tiny negative values after softmax computation.
+    """
+    model = BaselinePolicyV1(move_vocab_size=10)
+    model.eval()
+
+    # Add moves to vocabulary
+    model.add_move_to_vocab("e2e4")
+    model.add_move_to_vocab("d2d4")
+    model.add_move_to_vocab("g1f3")
+
+    fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    legal_moves = ["e2e4", "d2d4", "g1f3"]
+
+    # Run multiple times with different seeds to catch edge cases
+    for seed_offset in range(10):
+        # Create a new model instance to vary initialization
+        test_model = BaselinePolicyV1(move_vocab_size=10)
+        test_model.eval()
+        test_model.add_move_to_vocab("e2e4")
+        test_model.add_move_to_vocab("d2d4")
+        test_model.add_move_to_vocab("g1f3")
+
+        move_probs = test_model(fen, "1200_1399", "blitz", legal_moves)
+
+        # All probabilities must be non-negative (no tiny negatives)
+        for move, prob in move_probs.items():
+            assert prob >= 0.0, f"Probability for {move} is negative: {prob}"
+
+        # All probabilities must be <= 1.0
+        for move, prob in move_probs.items():
+            assert prob <= 1.0, f"Probability for {move} exceeds 1.0: {prob}"
+
+        # Probabilities must sum to 1.0 within tight epsilon
+        total = sum(move_probs.values())
+        assert abs(total - 1.0) < 1e-6, f"Probabilities sum to {total}, expected 1.0"
+
+    # Test case: legal moves include moves not in vocabulary (covers remaining_moves path)
+    test_model2 = BaselinePolicyV1(move_vocab_size=5)
+    test_model2.eval()
+    test_model2.add_move_to_vocab("e2e4")
+    test_model2.add_move_to_vocab("d2d4")
+    # Add moves not in vocabulary to trigger remaining_moves path
+    legal_moves_with_unknown = ["e2e4", "d2d4", "g1f3", "b1c3", "f1c4"]
+    move_probs2 = test_model2(fen, "1200_1399", "blitz", legal_moves_with_unknown)
+
+    # Verify all moves have probabilities
+    assert len(move_probs2) == len(legal_moves_with_unknown)
+    # Verify probabilities are valid
+    for move, prob in move_probs2.items():
+        assert prob >= 0.0, f"Probability for {move} is negative: {prob}"
+        assert prob <= 1.0, f"Probability for {move} exceeds 1.0: {prob}"
+    # Verify sum is 1.0
+    total2 = sum(move_probs2.values())
+    assert abs(total2 - 1.0) < 1e-6, f"Probabilities sum to {total2}, expected 1.0"
+
+
 def test_baseline_policy_v1_skill_bucket_legacy_formats() -> None:
     """Test skill bucket encoding with various legacy formats."""
     model = BaselinePolicyV1()

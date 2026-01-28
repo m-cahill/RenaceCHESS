@@ -17,6 +17,8 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M06 | ✅ Closed (MERGED) | `m06-conditioned-frozen-eval` → `main` | 2026-01-24 | Conditioned, Frozen Human Evaluation: Skill/Time Conditioning + Frozen Eval Manifest |
 | M07 | ✅ Closed (MERGED) | `m07-hdi-v1` → `main` | 2026-01-24 | Human Difficulty Index (HDI) v1 + CLI Completion |
 | M08 | ✅ Closed (MERGED) | `m08-learned-policy-baseline` → `main` | 2026-01-24 | First Learned Human Policy Baseline |
+| M09 | ✅ Closed (FUNCTIONALLY COMPLETE) | `m09-outcome-head-v1` → `main` | 2026-01-25 | Human Outcome Head (W/D/L) v1 |
+| M10 | ✅ Closed | `m10-execution-surface-hardening` → `main` | 2026-01-27 | Coverage Hardening + Runner/CLI Path Tests |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -136,6 +138,54 @@ This document tracks milestones, schema, migrations, and governance decisions fo
   - Local-only training (not in CI)
   - Deterministic training with fixed seeds
   - Additive integration (does not replace existing baselines)
+
+**M09 Details:**
+- **Objective:** Implement learned human outcome head (Win/Draw/Loss prediction)
+- **CI Run 1-14:** Multiple runs addressing schema, coverage, and branch coverage gaps
+- **CI Run 15-24:** Coverage governance exception implemented (XML-based overlap-set non-regression rule)
+- **Final Coverage:** M09-specific files: 100% (all new files); Global: 88.96% (legacy files below threshold)
+- **Test Count:** 384+ tests (100+ new tests)
+- **PR:** #11 (functionally complete, regressions deferred to M10)
+- **Final Commit:** `b7f9a63`
+- **Audit:** `docs/milestones/PoC/M09/M09_audit.md`
+- **Summary:** `docs/milestones/PoC/M09/M09_summary.md`
+- **Key Files:**
+  - `src/renacechess/models/outcome_head_v1.py` — OutcomeHeadV1 PyTorch model
+  - `src/renacechess/models/training_outcome.py` — Training infrastructure with frozen eval exclusion
+  - `src/renacechess/eval/outcome_head.py` — LearnedOutcomeHeadV1 outcome provider
+  - `src/renacechess/eval/outcome_metrics.py` — Outcome metrics computation
+  - `src/renacechess/contracts/schemas/v1/eval_report.v5.schema.json` — Eval report v5 schema
+- **Notable Features:**
+  - Completes human evaluation triad (move prediction, difficulty, outcome likelihood)
+  - All M09-specific files at 100% coverage
+  - XML-based overlap-set coverage non-regression governance mechanism
+  - Coverage regressions in orchestration layers deferred to M10
+- **Deferred Issues:**
+  - LEGACY-COV-001: Global coverage below 90% due to pre-M09 legacy files → M10
+  - CLI-COV-001: Outcome-head CLI command untested → M10
+  - EVAL-RUNNER-COV-001: Outcome-head eval integration untested → M10
+
+**M10 Details:**
+- **Objective:** Restore coverage in orchestration layers, fix M08 float precision issue, establish permanent CI governance
+- **CI Run 1:** 21388511020 (SUCCESS - All checks passing)
+- **Final Coverage:** 90.64% (exceeds 90% threshold)
+- **Test Count:** 336 passed, 1 skipped
+- **PR:** #12 (ready for merge)
+- **Final Commit:** `24d2fc6`
+- **Audit:** `docs/milestones/PoC/M10/M10_audit.md`
+- **Summary:** `docs/milestones/PoC/M10/M10_summary.md`
+- **Key Files:**
+  - `tests/test_cli.py` — CLI integration tests for train-outcome-head
+  - `tests/test_m10_runner_outcome_head.py` — Eval runner integration tests
+  - `src/renacechess/models/baseline_v1.py` — Float precision fix (clamping + renormalization)
+  - `tests/test_m08_model.py` — Regression test for float precision
+  - `.github/workflows/ci.yml` — Permanent overlap-set comparison governance
+- **Notable Features:**
+  - Coverage restored in CLI and eval runner via integration tests
+  - M08 float precision edge case fixed deterministically
+  - CI governance hardened with permanent overlap-set non-regression rule
+  - All M09 deferrals resolved (LEGACY-COV-001, CLI-COV-001, EVAL-RUNNER-COV-001)
+  - Real coverage regression detected and fixed (baseline_v1.py: 94.39% → 95.81%)
 
 ---
 
