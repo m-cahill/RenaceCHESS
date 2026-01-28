@@ -1,7 +1,5 @@
 """Tests for backward compatibility (M09)."""
 
-
-
 from renacechess.contracts.models import EvalReportV3, EvalReportV4, EvalReportV5
 
 

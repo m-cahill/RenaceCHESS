@@ -279,4 +279,3 @@ class TestNarrativeSeedV2:
             facts=["Engine win% up, but human blunder risk up"],
         )
         assert seed.type == "trap-risk"
-

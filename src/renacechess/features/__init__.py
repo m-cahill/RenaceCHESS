@@ -19,4 +19,3 @@ __all__ = [
     "extract_structural_cognition",
     "generate_structural_labels",
 ]
-

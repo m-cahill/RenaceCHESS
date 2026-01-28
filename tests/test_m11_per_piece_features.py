@@ -238,4 +238,3 @@ class TestPerPieceFeaturesModel:
             assert "mobilityLegal" in piece
             assert "attackedBy" in piece
             assert "isHanging" in piece
-

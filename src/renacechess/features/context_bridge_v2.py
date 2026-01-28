@@ -206,4 +206,3 @@ def extract_structural_cognition(board: chess.Board) -> StructuralCognition:
         square_map=square_map,
         structural_labels=labels,
     )
-

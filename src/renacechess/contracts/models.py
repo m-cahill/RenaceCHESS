@@ -29,12 +29,8 @@ class PieceFeatures(BaseModel):
 
     # State fields
     alive: bool = Field(..., description="Is the piece still on the board?")
-    square: str | None = Field(
-        ..., description="Current square (e.g., 'e4') or null if captured"
-    )
-    is_promoted: bool = Field(
-        False, alias="isPromoted", description="Has this pawn promoted?"
-    )
+    square: str | None = Field(..., description="Current square (e.g., 'e4') or null if captured")
+    is_promoted: bool = Field(False, alias="isPromoted", description="Has this pawn promoted?")
     promoted_to: Literal["Q", "R", "B", "N"] | None = Field(
         None, alias="promotedTo", description="Promotion target (only if is_promoted)"
     )
@@ -43,9 +39,7 @@ class PieceFeatures(BaseModel):
     mobility_legal: int = Field(
         ..., alias="mobilityLegal", ge=0, description="Count of legal moves for this piece"
     )
-    mobility_safe: int = Field(
-        ..., alias="mobilitySafe", ge=0, description="Count of 'safe' moves"
-    )
+    mobility_safe: int = Field(..., alias="mobilitySafe", ge=0, description="Count of 'safe' moves")
 
     # Tension fields
     attacked_by: int = Field(
@@ -54,23 +48,15 @@ class PieceFeatures(BaseModel):
     defended_by: int = Field(
         ..., alias="defendedBy", ge=0, description="Count of friendly pieces defending this piece"
     )
-    net_defense: int = Field(
-        ..., alias="netDefense", description="defended_by - attacked_by"
-    )
+    net_defense: int = Field(..., alias="netDefense", description="defended_by - attacked_by")
 
     # Tactical flags
     is_hanging: bool = Field(
         ..., alias="isHanging", description="attacked_by > 0 AND defended_by == 0"
     )
-    is_pinned: bool = Field(
-        ..., alias="isPinned", description="Piece is pinned to the king"
-    )
-    is_restricted: bool = Field(
-        ..., alias="isRestricted", description="mobility_legal < 3"
-    )
-    is_dominated: bool = Field(
-        ..., alias="isDominated", description="net_defense < -1"
-    )
+    is_pinned: bool = Field(..., alias="isPinned", description="Piece is pinned to the king")
+    is_restricted: bool = Field(..., alias="isRestricted", description="mobility_legal < 3")
+    is_dominated: bool = Field(..., alias="isDominated", description="net_defense < -1")
     is_attacker: bool = Field(
         ..., alias="isAttacker", description="Attacks enemy pieces or key squares"
     )
@@ -194,12 +180,8 @@ class StructuralLabel(BaseModel):
         "hanging-piece",
         "pinned-piece",
     ] = Field(..., description="Structural label type")
-    target: str = Field(
-        ..., description="Target (square like 'd5' or piece slot like 'P_e')"
-    )
-    description: str = Field(
-        ..., description="Human-readable description for LLM grounding"
-    )
+    target: str = Field(..., description="Target (square like 'd5' or piece slot like 'P_e')")
+    description: str = Field(..., description="Human-readable description for LLM grounding")
 
 
 class StructuralCognition(BaseModel):

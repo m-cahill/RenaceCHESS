@@ -122,9 +122,7 @@ def _is_square_safe_for_piece(
     return False
 
 
-def _compute_piece_mobility(
-    board: chess.Board, piece_square: chess.Square
-) -> tuple[int, int]:
+def _compute_piece_mobility(board: chess.Board, piece_square: chess.Square) -> tuple[int, int]:
     """Compute legal and safe mobility for a piece.
 
     Returns:
@@ -329,4 +327,3 @@ def extract_per_piece_features(board: chess.Board) -> PerPieceFeaturesV1:
         pieces.append(piece_features)
 
     return PerPieceFeaturesV1(schema_version="per_piece.v1", pieces=pieces)
-

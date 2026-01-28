@@ -1,6 +1,5 @@
 """Tests for outcome metrics computation (M09)."""
 
-
 from renacechess.eval.outcome_metrics import (
     OutcomeMetricsAccumulator,
     compute_brier_score,

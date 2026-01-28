@@ -252,4 +252,3 @@ class TestSquareMapFeaturesModel:
         # Re-validate through model
         validated = SquareMapFeaturesV1.model_validate(result.model_dump())
         assert validated.schema_version == "square_map.v1"
-

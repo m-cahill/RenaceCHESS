@@ -208,4 +208,3 @@ def extract_square_map_features(board: chess.Board) -> SquareMapFeaturesV1:
         pawn_contestable_white=pawn_contestable_white,
         pawn_contestable_black=pawn_contestable_black,
     )
-
