@@ -2,8 +2,8 @@
 
 **Milestone:** M10  
 **Mode:** DELTA AUDIT  
-**Range:** `b7f9a63...<current>` (PR to be created)  
-**CI Status:** 🟢 Green (coverage 90.35%, all tests passing)  
+**Range:** `b7f9a63...24d2fc6` (PR #12)  
+**CI Status:** 🟢 Green (coverage 90.64%, all tests passing, run #21388511020)  
 **Audit Verdict:** ✅ **PASS** — M10 is complete, correct, and audit-defensible. All M09 deferrals resolved.
 
 ---
@@ -16,7 +16,7 @@
 2. **Float precision stabilized** — Deterministic clamping + renormalization prevents edge cases
 3. **CI governance cleaned** — M09-specific exception removed, overlap-set comparison permanent
 4. **All M09 deferrals resolved** — LEGACY-COV-001, CLI-COV-001, EVAL-RUNNER-COV-001 closed
-5. **Total coverage restored** — 90.35% exceeds 90% threshold
+5. **Total coverage restored** — 90.64% exceeds 90% threshold
 
 ### Risks
 
@@ -138,8 +138,8 @@
 
 ### Coverage Threshold
 
-- **Total coverage:** 90.35% (exceeds 90% threshold)
-- **M09 baseline:** 88.96% (M10 improves by +1.39%)
+- **Total coverage:** 90.64% (exceeds 90% threshold)
+- **M09 baseline:** 88.96% (M10 improves by +1.68%)
 - **Overlap-set regressions:** None detected
 
 ### Determinism
@@ -197,7 +197,10 @@ See `docs/audit/DeferredIssuesRegistry.md` for details.
 ## 12. Canonical References
 
 - **Branch:** `m10-execution-surface-hardening`
-- **Final Coverage:** 90.35%
+- **PR:** #12
+- **Final CI Run:** #21388511020
+- **Final Coverage:** 90.64%
+- **Final Commit:** `24d2fc6`
 - **Plan:** `docs/milestones/PoC/M10/M10_plan.md`
 - **Audit:** `docs/milestones/PoC/M10/M10_audit.md` (this file)
 - **Summary:** `docs/milestones/PoC/M10/M10_summary.md`
@@ -228,7 +231,7 @@ See `docs/audit/DeferredIssuesRegistry.md` for details.
     {
       "id": "LEGACY-COV-001",
       "resolved": true,
-      "exit_criteria": "Total coverage 90.35%"
+      "exit_criteria": "Total coverage 90.64%"
     },
     {
       "id": "CLI-COV-001",

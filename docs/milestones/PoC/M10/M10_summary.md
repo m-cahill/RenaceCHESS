@@ -3,7 +3,7 @@
 **Project:** RenaceCHESS  
 **Phase:** Proof of Concept (PoC)  
 **Milestone:** M10 — Coverage Hardening + Runner/CLI Path Tests (v1)  
-**Timeframe:** 2026-01-26 → 2026-01-26  
+**Timeframe:** 2026-01-26 → 2026-01-27  
 **Status:** ✅ **CLOSED / IMMUTABLE**
 
 ---
@@ -79,7 +79,8 @@ M10 completes the **execution surface hardening** that makes the governance rule
 - 6 files changed
 - ~300 insertions, ~50 deletions
 - 6 new tests (all passing)
-- Coverage: 90.35% (exceeds 90% threshold)
+- Coverage: 90.64% (exceeds 90% threshold)
+- Final CI Run: #21388511020 (all checks passing)
 
 ---
 
@@ -98,16 +99,16 @@ M10 completes the **execution surface hardening** that makes the governance rule
 
 | Run | Conclusion | Root Cause |
 |-----|-----------:|------------|
-| Full test suite | ✅ success | Coverage 90.35% (exceeds 90% threshold) |
+| Run #21388511020 | ✅ success | Coverage 90.64% (exceeds 90% threshold), all checks passing |
 
 ### Coverage Status
 
-**Total Coverage:** 90.35% (exceeds 90% threshold)
+**Total Coverage:** 90.64% (exceeds 90% threshold)
 
 **Key Files:**
 - `cli.py`: 68.33% (improved from 66.08% in M09, new paths covered)
 - `eval/runner.py`: 78.97% (improved from 73.84% in M09, new paths covered)
-- `baseline_v1.py`: 89.82% (float precision fix tested)
+- `baseline_v1.py`: 95.81% (improved from 94.39% baseline, regression fixed)
 
 **Coverage Regressions Eliminated:**
 - ✅ `cli.py`: Coverage restored (new M09 paths now tested)
@@ -181,7 +182,7 @@ M10 introduced no new deferrals.
 
 ### What Is Now Provably True
 
-- ✅ Total coverage meets 90% threshold (90.35%)
+- ✅ Total coverage meets 90% threshold (90.64%)
 - ✅ Coverage regressions in `cli.py` and `eval/runner.py` eliminated via tests
 - ✅ Float precision edge case fixed deterministically
 - ✅ CI workflow has clean, permanent governance (no exceptions)
@@ -193,9 +194,9 @@ M10 introduced no new deferrals.
 
 | Criterion | Status | Evidence |
 |-----------|--------|----------|
-| CI is GREEN with required checks passing | ✅ Met | Full test suite passes, coverage 90.35% |
+| CI is GREEN with required checks passing | ✅ Met | CI run #21388511020 passes, coverage 90.64% |
 | Overlap-set coverage comparison reports no regressions | ✅ Met | New paths covered, no regressions detected |
-| Overall project coverage meets enforced threshold | ✅ Met | 90.35% exceeds 90% threshold |
+| Overall project coverage meets enforced threshold | ✅ Met | 90.64% exceeds 90% threshold |
 | M08 floating-point precision failure resolved | ✅ Met | Clamping + renormalization implemented, regression test added |
 | Deferred Issues Registry updated | ✅ Met | All M09 deferrals marked resolved |
 
@@ -229,15 +230,16 @@ M10 successfully restores coverage in orchestration layers, fixes the M08 float 
 ### Commits
 
 - Branch: `m10-execution-surface-hardening`
-- Final coverage: 90.35%
+- Final commit: `24d2fc6`
+- Final coverage: 90.64%
 
 ### Pull Request
 
-- PR: (to be created)
+- PR: #12 (ready for merge)
 
 ### CI Runs
 
-- Full test suite: ✅ PASS (coverage 90.35%)
+- Run #21388511020: ✅ PASS (coverage 90.64%, all checks passing)
 
 ### Documents
 
