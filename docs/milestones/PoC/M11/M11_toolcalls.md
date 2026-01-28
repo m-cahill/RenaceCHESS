@@ -125,22 +125,45 @@
 
 ---
 
+### 2026-01-28T01:50:00Z — CI Analysis (Run 4 - GREEN)
+
+| Field | Value |
+|-------|-------|
+| **Tool** | run_terminal_cmd, gh CLI |
+| **Purpose** | Monitor CI runs and generate analysis report |
+| **Files** | `docs/milestones/PoC/M11/M11_run1.md` |
+| **Status** | ✅ Complete |
+
+**CI Run History:**
+1. Run 21421262018 — ❌ Lint failure (E501, E741)
+2. Run 21421396840 — ❌ Format + coverage regression  
+3. Run 21421520149 — ❌ Coverage regression (non-M11 file changes)
+4. Run 21421642384 — ✅ GREEN (all checks passed)
+
+**Resolution:** Reverted auto-fixes to non-M11 files to avoid unintended coverage regressions.
+
+---
+
 ## Summary
 
-**M11 Implementation Complete**
+**M11 Implementation Complete — CI GREEN ✅**
 
 Files created/modified:
 - 1 contract document
-- 3 JSON schemas
+- 3 JSON schemas  
 - 1 Pydantic models file (extended)
 - 4 Python feature extractor files
 - 1 JSON test fixture
 - 3 test files
+- 1 CI analysis report
 
 **Test Results:**
 - 47 new M11 tests (all passing)
 - 383 total tests (all passing)
-- Coverage: 90.69%
+- Coverage: 90%+ (non-regression satisfied)
 
-**Awaiting:** CI verification and merge permission
+**CI Status:** ✅ GREEN (Run 21421642384)
+**Verdict:** ✅ Merge approved
+
+**Awaiting:** Express merge permission from user
 
