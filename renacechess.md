@@ -19,6 +19,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M08 | ✅ Closed (MERGED) | `m08-learned-policy-baseline` → `main` | 2026-01-24 | First Learned Human Policy Baseline |
 | M09 | ✅ Closed (FUNCTIONALLY COMPLETE) | `m09-outcome-head-v1` → `main` | 2026-01-25 | Human Outcome Head (W/D/L) v1 |
 | M10 | ✅ Closed | `m10-execution-surface-hardening` → `main` | 2026-01-27 | Coverage Hardening + Runner/CLI Path Tests |
+| M11 | ✅ Closed (MERGED) | `m11-structural-interpretability` → `main` | 2026-01-28 | Structural Interpretability Expansion — Per-Piece & Square-Level Cognition |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -187,6 +188,34 @@ This document tracks milestones, schema, migrations, and governance decisions fo
   - All M09 deferrals resolved (LEGACY-COV-001, CLI-COV-001, EVAL-RUNNER-COV-001)
   - Real coverage regression detected and fixed (baseline_v1.py: 94.39% → 95.81%)
 
+**M11 Details:**
+- **Objective:** Introduce per-piece and square-level structural cognition without altering core policy or evaluation
+- **CI Runs:** 4 runs (3 failures due to lint/coverage drift from auto-fixes, 1 success)
+- **Final CI Run:** 21421642384 (SUCCESS - All checks passing)
+- **Final Coverage:** 90%+ (exceeds threshold, non-regression satisfied)
+- **Test Count:** 383 passed, 1 skipped (47 new M11 tests)
+- **PR:** #13 (merged)
+- **Final Commit:** `b8860ee`
+- **Audit:** `docs/milestones/PoC/M11/M11_audit.md`
+- **Summary:** `docs/milestones/PoC/M11/M11_summary.md`
+- **Key Files:**
+  - `src/renacechess/features/per_piece.py` — Per-piece feature extractor (32 slots)
+  - `src/renacechess/features/square_map.py` — Square-level feature extractor (weak/strong/hole)
+  - `src/renacechess/features/context_bridge_v2.py` — Context Bridge v2 integration
+  - `src/renacechess/contracts/models.py` — Added PerPieceFeaturesV1, SquareMapFeaturesV1, ContextBridgePayloadV2
+  - `docs/contracts/StructuralCognitionContract_v1.md` — Frozen v1 semantic definitions
+- **Notable Features:**
+  - 32-slot piece tensor with mobility, tension, and semantic flags
+  - Square-level weak/strong/hole maps for both sides
+  - Context Bridge v2 supersetting v1 with structural cognition
+  - Frozen StructuralCognitionContract_v1.md establishes immutable semantics
+  - CI correctly detected and blocked out-of-scope auto-fixes (truthful CI)
+- **PoC Cognitive Substrate Complete:**
+  - Move prediction (M04-M08)
+  - Human difficulty (M07)
+  - Outcome prediction (M09)
+  - Structural cognition (M11)
+
 ---
 
 ## Database Schema
@@ -278,6 +307,25 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 - **Pydantic Model:** `renacechess.contracts.models.ContextBridgePayload`
 - **Status:** ✅ Complete and validated (v1-compatible extension with optional `chosenMove` and M06 conditioning fields)
 
+### Context Bridge Schema (v2) — Structural Cognition
+- **Location:** `src/renacechess/contracts/schemas/v1/context_bridge.v2.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.ContextBridgePayloadV2`
+- **Status:** ✅ Complete and validated (supersets v1 with structural cognition)
+
+### Per-Piece Features Schema (v1)
+- **Location:** `src/renacechess/contracts/schemas/v1/PerPieceFeaturesV1.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.PerPieceFeaturesV1`
+- **Status:** ✅ Complete and validated (32-slot piece tensor with mobility, tension, flags)
+
+### Square Map Features Schema (v1)
+- **Location:** `src/renacechess/contracts/schemas/v1/SquareMapFeaturesV1.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.SquareMapFeaturesV1`
+- **Status:** ✅ Complete and validated (64-entry weak/strong/hole maps)
+
+### Structural Cognition Contract (v1)
+- **Location:** `docs/contracts/StructuralCognitionContract_v1.md`
+- **Status:** ✅ FROZEN (immutable v1 semantic definitions for M11+ structural layers)
+
 ---
 
 ## Key Guarantees Established in M00
@@ -293,6 +341,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-01-24 (M06 closeout)
+**Last Updated:** 2026-01-28 (M11 closeout — PoC Cognitive Substrate Complete)
 
 
