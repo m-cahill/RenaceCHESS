@@ -24,5 +24,5 @@ This registry tracks **explicit deferrals only** — items that were identified 
 
 ---
 
-**Last Updated:** 2026-01-26 (M10 closeout - all M09 deferrals resolved)
+**Last Updated:** 2026-01-27 (M10 closeout - all M09 deferrals resolved, final coverage 90.64%)
 

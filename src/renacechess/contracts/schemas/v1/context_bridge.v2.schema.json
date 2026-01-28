@@ -1,0 +1,307 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "LLM Context Bridge Payload V2",
+  "description": "Schema for LLM Context Bridge payload (v2) - extends v1 with structural cognition",
+  "type": "object",
+  "required": [
+    "position",
+    "conditioning",
+    "policy",
+    "humanWDL",
+    "hdi",
+    "narrativeSeeds",
+    "meta"
+  ],
+  "properties": {
+    "position": {
+      "type": "object",
+      "required": ["fen", "sideToMove", "legalMoves"],
+      "properties": {
+        "fen": {
+          "type": "string",
+          "description": "FEN string representation of the position"
+        },
+        "sideToMove": {
+          "type": "string",
+          "enum": ["white", "black"],
+          "description": "Side to move"
+        },
+        "legalMoves": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "List of legal moves in UCI format"
+        }
+      }
+    },
+    "conditioning": {
+      "type": "object",
+      "required": ["skillBucket", "timePressureBucket"],
+      "properties": {
+        "skillBucket": {
+          "type": "string",
+          "description": "Skill bucket identifier (e.g., '1200-1400', legacy)"
+        },
+        "timePressureBucket": {
+          "type": "string",
+          "enum": ["NORMAL", "LOW", "TROUBLE", "early", "normal", "low", "trouble", "unknown"],
+          "description": "Time pressure bucket (legacy uppercase or M06 lowercase values)"
+        },
+        "timeControlClass": {
+          "type": ["string", "null"],
+          "enum": ["blitz", "rapid", "classical", "bullet", "unknown"],
+          "description": "Time control class (optional, legacy or M06 values)"
+        },
+        "skillBucketId": {
+          "type": ["string", "null"],
+          "enum": ["lt_800", "800_999", "1000_1199", "1200_1399", "1400_1599", "1600_1799", "gte_1800", "unknown", null],
+          "description": "M06 skill bucket ID (optional, M06 spec v1)"
+        },
+        "skillBucketSpecVersion": {
+          "type": ["integer", "null"],
+          "description": "Skill bucket spec version (1 for M06, null for legacy)"
+        },
+        "timeControlRaw": {
+          "type": ["string", "null"],
+          "description": "Original PGN TimeControl header string (optional, M06)"
+        },
+        "timeControlSpecVersion": {
+          "type": ["integer", "null"],
+          "description": "Time control spec version (1 for M06, null for legacy)"
+        },
+        "timePressureSpecVersion": {
+          "type": ["integer", "null"],
+          "description": "Time pressure spec version (1 for M06, null for legacy)"
+        }
+      }
+    },
+    "policy": {
+      "type": "object",
+      "required": ["topMoves", "entropy", "topGap"],
+      "properties": {
+        "topMoves": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["uci", "p"],
+            "properties": {
+              "uci": {
+                "type": "string",
+                "description": "Move in UCI format"
+              },
+              "san": {
+                "type": ["string", "null"],
+                "description": "Move in SAN format (optional)"
+              },
+              "p": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Probability of this move"
+              }
+            }
+          }
+        },
+        "entropy": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Policy entropy (Shannon entropy)"
+        },
+        "topGap": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Gap between top move probability and second move"
+        }
+      }
+    },
+    "humanWDL": {
+      "type": "object",
+      "required": ["pre", "postByMove"],
+      "properties": {
+        "pre": {
+          "type": "object",
+          "required": ["w", "d", "l"],
+          "properties": {
+            "w": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Win probability"
+            },
+            "d": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Draw probability"
+            },
+            "l": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Loss probability"
+            }
+          }
+        },
+        "postByMove": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "object",
+            "required": ["w", "d", "l"],
+            "properties": {
+              "w": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "d": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              },
+              "l": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1
+              }
+            }
+          },
+          "description": "WDL probabilities after each candidate move (keyed by UCI)"
+        }
+      }
+    },
+    "hdi": {
+      "type": "object",
+      "required": ["value", "components"],
+      "properties": {
+        "value": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Human Difficulty Index (scalar)"
+        },
+        "components": {
+          "type": "object",
+          "required": ["entropy", "topGap", "wdlSensitivity"],
+          "properties": {
+            "entropy": {
+              "type": "number",
+              "minimum": 0,
+              "description": "Policy entropy component"
+            },
+            "topGap": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Top gap component"
+            },
+            "wdlSensitivity": {
+              "type": "number",
+              "minimum": 0,
+              "description": "WDL sensitivity component"
+            }
+          }
+        }
+      }
+    },
+    "narrativeSeeds": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["type", "severity", "facts"],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": ["trap-risk", "confusing", "time-sensitive", "critical", "dominated-piece", "hole", "weak-square", "key-defender"],
+            "description": "Narrative seed type (v2 adds structural types)"
+          },
+          "severity": {
+            "type": "string",
+            "enum": ["low", "medium", "high"],
+            "description": "Severity level"
+          },
+          "facts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array of factual statements"
+          }
+        }
+      }
+    },
+    "meta": {
+      "type": "object",
+      "required": ["schemaVersion", "generatedAt", "inputHash"],
+      "properties": {
+        "schemaVersion": {
+          "type": "string",
+          "enum": ["v1", "v2"],
+          "description": "Schema version (v2 for structural cognition)"
+        },
+        "generatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp of generation"
+        },
+        "inputHash": {
+          "type": "string",
+          "description": "Hash of input data (PGN + position)"
+        }
+      }
+    },
+    "chosenMove": {
+      "type": ["object", "null"],
+      "description": "Ground-truth move that was actually played (optional label)",
+      "properties": {
+        "uci": {
+          "type": "string",
+          "description": "Move in UCI format (required)"
+        },
+        "san": {
+          "type": ["string", "null"],
+          "description": "Move in SAN format (optional)"
+        }
+      },
+      "required": ["uci"]
+    },
+    "structuralCognition": {
+      "type": ["object", "null"],
+      "description": "Structural cognition features (v2, optional for backward compatibility)",
+      "properties": {
+        "perPiece": {
+          "$ref": "PerPieceFeaturesV1.schema.json",
+          "description": "Per-piece structural features"
+        },
+        "squareMap": {
+          "$ref": "SquareMapFeaturesV1.schema.json",
+          "description": "Square-level structural maps"
+        },
+        "structuralLabels": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["type", "target", "description"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["dominated-piece", "hole", "overextended-pawn", "key-defender", "weak-square", "strong-square", "hanging-piece", "pinned-piece"],
+                "description": "Structural label type"
+              },
+              "target": {
+                "type": "string",
+                "description": "Target (square like 'd5' or piece slot like 'P_e')"
+              },
+              "description": {
+                "type": "string",
+                "description": "Human-readable description for LLM grounding"
+              }
+            }
+          },
+          "description": "Semantic labels for narrative seeding"
+        }
+      }
+    }
+  }
+}
+

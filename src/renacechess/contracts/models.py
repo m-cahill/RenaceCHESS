@@ -8,6 +8,217 @@ from typing import Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 
+# =============================================================================
+# Structural Cognition Models (M11)
+# =============================================================================
+
+
+class PieceFeatures(BaseModel):
+    """Per-piece structural features (Structural Cognition Contract v1)."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    # Identity fields
+    slot_id: int = Field(..., alias="slotId", ge=0, le=31, description="Fixed slot index (0-31)")
+    color: Literal["white", "black"] = Field(..., description="Piece color")
+    piece_type: Literal["K", "Q", "R", "B", "N", "P"] = Field(
+        ..., alias="pieceType", description="Original piece type"
+    )
+    starting_file: Literal["a", "b", "c", "d", "e", "f", "g", "h"] = Field(
+        ..., alias="startingFile", description="Starting file for piece identity"
+    )
+
+    # State fields
+    alive: bool = Field(..., description="Is the piece still on the board?")
+    square: str | None = Field(
+        ..., description="Current square (e.g., 'e4') or null if captured"
+    )
+    is_promoted: bool = Field(
+        False, alias="isPromoted", description="Has this pawn promoted?"
+    )
+    promoted_to: Literal["Q", "R", "B", "N"] | None = Field(
+        None, alias="promotedTo", description="Promotion target (only if is_promoted)"
+    )
+
+    # Mobility fields
+    mobility_legal: int = Field(
+        ..., alias="mobilityLegal", ge=0, description="Count of legal moves for this piece"
+    )
+    mobility_safe: int = Field(
+        ..., alias="mobilitySafe", ge=0, description="Count of 'safe' moves"
+    )
+
+    # Tension fields
+    attacked_by: int = Field(
+        ..., alias="attackedBy", ge=0, description="Count of enemy pieces attacking this piece"
+    )
+    defended_by: int = Field(
+        ..., alias="defendedBy", ge=0, description="Count of friendly pieces defending this piece"
+    )
+    net_defense: int = Field(
+        ..., alias="netDefense", description="defended_by - attacked_by"
+    )
+
+    # Tactical flags
+    is_hanging: bool = Field(
+        ..., alias="isHanging", description="attacked_by > 0 AND defended_by == 0"
+    )
+    is_pinned: bool = Field(
+        ..., alias="isPinned", description="Piece is pinned to the king"
+    )
+    is_restricted: bool = Field(
+        ..., alias="isRestricted", description="mobility_legal < 3"
+    )
+    is_dominated: bool = Field(
+        ..., alias="isDominated", description="net_defense < -1"
+    )
+    is_attacker: bool = Field(
+        ..., alias="isAttacker", description="Attacks enemy pieces or key squares"
+    )
+    is_defender_of_king: bool = Field(
+        ..., alias="isDefenderOfKing", description="Defends squares around friendly king"
+    )
+
+
+class PerPieceFeaturesV1(BaseModel):
+    """Per-piece features container (32 slots, Structural Cognition Contract v1)."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    schema_version: Literal["per_piece.v1"] = Field(
+        "per_piece.v1", alias="schemaVersion", description="Schema version identifier"
+    )
+    pieces: list[PieceFeatures] = Field(
+        ...,
+        min_length=32,
+        max_length=32,
+        description="Fixed 32-slot array of piece features",
+    )
+
+
+class SquareMapFeaturesV1(BaseModel):
+    """Square-level structural maps (Structural Cognition Contract v1)."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    schema_version: Literal["square_map.v1"] = Field(
+        "square_map.v1", alias="schemaVersion", description="Schema version identifier"
+    )
+
+    # Required maps
+    weak_for_white: list[bool] = Field(
+        ...,
+        alias="weakForWhite",
+        min_length=64,
+        max_length=64,
+        description="Squares that are weak for White",
+    )
+    strong_for_white: list[bool] = Field(
+        ...,
+        alias="strongForWhite",
+        min_length=64,
+        max_length=64,
+        description="Squares that are strong for White",
+    )
+    weak_for_black: list[bool] = Field(
+        ...,
+        alias="weakForBlack",
+        min_length=64,
+        max_length=64,
+        description="Squares that are weak for Black",
+    )
+    strong_for_black: list[bool] = Field(
+        ...,
+        alias="strongForBlack",
+        min_length=64,
+        max_length=64,
+        description="Squares that are strong for Black",
+    )
+    is_hole_for_white: list[bool] = Field(
+        ...,
+        alias="isHoleForWhite",
+        min_length=64,
+        max_length=64,
+        description="Holes for White",
+    )
+    is_hole_for_black: list[bool] = Field(
+        ...,
+        alias="isHoleForBlack",
+        min_length=64,
+        max_length=64,
+        description="Holes for Black",
+    )
+
+    # Optional diagnostic maps
+    control_diff_white: list[int] | None = Field(
+        None,
+        alias="controlDiffWhite",
+        min_length=64,
+        max_length=64,
+        description="Control differential for White per square",
+    )
+    control_diff_black: list[int] | None = Field(
+        None,
+        alias="controlDiffBlack",
+        min_length=64,
+        max_length=64,
+        description="Control differential for Black per square",
+    )
+    pawn_contestable_white: list[bool] | None = Field(
+        None,
+        alias="pawnContestableWhite",
+        min_length=64,
+        max_length=64,
+        description="Squares contestable by White pawns",
+    )
+    pawn_contestable_black: list[bool] | None = Field(
+        None,
+        alias="pawnContestableBlack",
+        min_length=64,
+        max_length=64,
+        description="Squares contestable by Black pawns",
+    )
+
+
+class StructuralLabel(BaseModel):
+    """Semantic label for narrative seeding (Context Bridge v2)."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    type: Literal[
+        "dominated-piece",
+        "hole",
+        "overextended-pawn",
+        "key-defender",
+        "weak-square",
+        "strong-square",
+        "hanging-piece",
+        "pinned-piece",
+    ] = Field(..., description="Structural label type")
+    target: str = Field(
+        ..., description="Target (square like 'd5' or piece slot like 'P_e')"
+    )
+    description: str = Field(
+        ..., description="Human-readable description for LLM grounding"
+    )
+
+
+class StructuralCognition(BaseModel):
+    """Structural cognition container (Context Bridge v2)."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    per_piece: PerPieceFeaturesV1 | None = Field(
+        None, alias="perPiece", description="Per-piece structural features"
+    )
+    square_map: SquareMapFeaturesV1 | None = Field(
+        None, alias="squareMap", description="Square-level structural maps"
+    )
+    structural_labels: list[StructuralLabel] | None = Field(
+        None, alias="structuralLabels", description="Semantic labels for narrative seeding"
+    )
+
+
 class Position(BaseModel):
     """Chess position representation."""
 
@@ -181,6 +392,20 @@ class ContextBridgeMeta(BaseModel):
     )
 
 
+class ContextBridgeMetaV2(BaseModel):
+    """Metadata for Context Bridge payload (v2)."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    schema_version: Literal["v2"] = Field("v2", alias="schemaVersion", description="Schema version")
+    generated_at: datetime = Field(
+        ..., alias="generatedAt", description="ISO 8601 timestamp of generation"
+    )
+    input_hash: str = Field(
+        ..., alias="inputHash", description="Hash of input data (PGN + position)"
+    )
+
+
 class HumanWDLContainer(BaseModel):
     """Container for pre-move and post-move WDL probabilities."""
 
@@ -214,6 +439,51 @@ class ContextBridgePayload(BaseModel):
         None,
         alias="chosenMove",
         description="Ground-truth move that was actually played (optional label)",
+    )
+
+
+class NarrativeSeedV2(BaseModel):
+    """Narrative seed for LLM context (v2 with structural types)."""
+
+    type: Literal[
+        "trap-risk",
+        "confusing",
+        "time-sensitive",
+        "critical",
+        "dominated-piece",
+        "hole",
+        "weak-square",
+        "key-defender",
+    ] = Field(..., description="Narrative seed type (v2 adds structural types)")
+    severity: Literal["low", "medium", "high"] = Field(..., description="Severity level")
+    facts: list[str] = Field(..., description="Array of factual statements")
+
+
+class ContextBridgePayloadV2(BaseModel):
+    """LLM Context Bridge payload (v2) - extends v1 with structural cognition."""
+
+    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+
+    position: Position = Field(..., description="Chess position")
+    conditioning: PositionConditioning = Field(..., description="Conditioning variables")
+    policy: Policy = Field(..., description="Move policy distribution")
+    human_wdl: HumanWDLContainer = Field(
+        ..., alias="humanWDL", description="Human WDL probabilities"
+    )
+    hdi: HDI = Field(..., description="Human Difficulty Index")
+    narrative_seeds: list[NarrativeSeedV2] = Field(
+        ..., alias="narrativeSeeds", description="Narrative seeds for LLM (v2 with structural types)"
+    )
+    meta: ContextBridgeMetaV2 = Field(..., description="Metadata (v2)")
+    chosen_move: ChosenMove | None = Field(
+        None,
+        alias="chosenMove",
+        description="Ground-truth move that was actually played (optional label)",
+    )
+    structural_cognition: StructuralCognition | None = Field(
+        None,
+        alias="structuralCognition",
+        description="Structural cognition features (v2, optional for backward compatibility)",
     )
 
 

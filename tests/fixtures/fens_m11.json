@@ -1,0 +1,54 @@
+{
+  "description": "Golden FEN positions for M11 structural feature testing (Structural Cognition Contract v1)",
+  "version": "1.0.0",
+  "positions": [
+    {
+      "id": "m11_fen_1",
+      "name": "Hole on d5 / Weak squares",
+      "description": "Position with a clear hole on d5 for Black (no Black pawns can contest it)",
+      "fen": "r1bqkb1r/pp2pppp/2n2n2/3p4/3P4/2N2N2/PPP1PPPP/R1BQKB1R w KQkq - 4 4",
+      "assertions": {
+        "square_map": {
+          "is_hole_for_black": {
+            "d5": false,
+            "e5": false
+          },
+          "notes": "d5 has a Black pawn so not a hole; testing basic functionality"
+        }
+      }
+    },
+    {
+      "id": "m11_fen_2",
+      "name": "Dominated / Restricted piece",
+      "description": "Position where a piece is dominated (net_defense < -1) or restricted (low mobility)",
+      "fen": "r1bqkbnr/pppp1ppp/2n5/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R b KQkq - 3 3",
+      "assertions": {
+        "per_piece": {
+          "notes": "Italian Game position - testing piece mobility and attack/defense"
+        }
+      }
+    },
+    {
+      "id": "m11_fen_3",
+      "name": "Pawn structure tension with asymmetric control",
+      "description": "Position with pawn tension and clear control asymmetries",
+      "fen": "rnbqkb1r/ppp1pppp/5n2/3pP3/3P4/8/PPP2PPP/RNBQKBNR b KQkq - 0 3",
+      "assertions": {
+        "square_map": {
+          "notes": "French Advance - e5 pawn creates control asymmetry; d6 may be weak for Black"
+        },
+        "per_piece": {
+          "notes": "Pawn structure creates blocked/restricted pieces"
+        }
+      }
+    }
+  ],
+  "invariants": [
+    "All extractions must produce exactly 32 piece slots",
+    "All square maps must have exactly 64 entries",
+    "Same FEN must produce byte-identical output across invocations",
+    "Captured pieces must have alive=false, square=null",
+    "Slot ordering must match Structural Cognition Contract v1"
+  ]
+}
+
