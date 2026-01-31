@@ -95,12 +95,24 @@ class PerPieceFeaturesV1(RenaceBaseModel):
         Pydantic v2 converts nested model instances to dicts using field names
         (snake_case), but validation expects alias keys (camelCase). This validator
         intercepts the list before nested validation and normalizes dict keys.
+
+        Handles both PieceFeatures instances (converts to dict first) and dicts.
         """
         if isinstance(value, list):
-            return [
-                normalize_dict_keys_to_aliases(v, PieceFeatures) if isinstance(v, dict) else v
-                for v in value
-            ]
+            normalized = []
+            for v in value:
+                if isinstance(v, dict):
+                    # Already a dict, normalize keys
+                    normalized.append(normalize_dict_keys_to_aliases(v, PieceFeatures))
+                elif hasattr(v, "model_dump"):
+                    # Pydantic model instance, convert to dict then normalize
+                    normalized.append(
+                        normalize_dict_keys_to_aliases(v.model_dump(), PieceFeatures)
+                    )
+                else:
+                    # Not a dict or model, pass through
+                    normalized.append(v)
+            return normalized
         return value
 
 
