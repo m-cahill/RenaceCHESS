@@ -25,6 +25,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M14 | ✅ Closed (MERGED) | `m14-train-pack-001` → `main` | 2026-01-31 | TRAIN-PACK-001 — Training Readiness & Benchmark Pack |
 | M15 | ✅ Closed (MERGED) | `m15-personality-contract-001` → `main` | 2026-01-31 | PERSONALITY-CONTRACT-001 — Personality Safety Contract + Interface |
 | M16 | ✅ Closed (MERGED) | `m16-personality-pawnclamp-001` → `main` | 2026-01-31 | PERSONALITY-PAWNCLAMP-001 — First Concrete Personality Module (Pawn Clamp) |
+| M17 | ✅ Closed (MERGED) | `m17-personality-neutral-baseline-001` → `main` | 2026-01-31 | PERSONALITY-NEUTRAL-BASELINE-001 — Neutral Baseline Personality (Experimental Control) |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -322,6 +323,28 @@ This document tracks milestones, schema, migrations, and governance decisions fo
   - All safety invariants tested (determinism, legality, probability conservation)
 - **Phase B Status:** First concrete personality delivered; framework proven operational
 
+**M17 Details:**
+- **Objective:** Introduce Neutral Baseline Personality (identity transformation) for experimental control
+- **CI Run 1:** 21552248388 (SUCCESS - All checks passing on first run)
+- **Final Coverage:** 90%+ (exceeds 90% threshold)
+- **Test Count:** 459 passed, 1 skipped (18 new M17 tests)
+- **PR:** #23 (merged)
+- **Final Commit:** `48dbed0`
+- **Audit:** `docs/milestones/PhaseB/M17/M17_audit.md`
+- **Summary:** `docs/milestones/PhaseB/M17/M17_summary.md`
+- **Key Files:**
+  - `src/renacechess/personality/neutral_baseline.py` — NeutralBaselinePersonalityV1 implementation
+  - `configs/personalities/neutral_baseline.v1.yaml` — Identity personality configuration
+  - `tests/test_m17_neutral_baseline.py` — 18 comprehensive tests
+  - `docs/personality/M17_NEUTRAL_BASELINE_DESCRIPTION.md` — Purpose documentation
+- **Notable Features:**
+  - True identity transformation (output === input)
+  - `is_identity()` always returns True (definitionally identity)
+  - Zero divergence from raw policy (KL div = 0, TV distance = 0)
+  - Comparative tests prove PawnClamp divergence > 0 (style effects are real)
+  - First-run CI success (all gates passed)
+- **Phase B Status:** Experimental control established; personality effects now measurable
+
 ---
 
 ## Database Schema
@@ -469,6 +492,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-01-31 (Phase B OPEN, M16 CLOSED — First Concrete Personality Delivered)
+**Last Updated:** 2026-01-31 (Phase B OPEN, M17 CLOSED — Neutral Baseline Personality Established)
 
 
