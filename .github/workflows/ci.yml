@@ -80,7 +80,9 @@ jobs:
             echo "Using absolute threshold: 90% for branch: $BRANCH_NAME"
           fi
       - name: Generate baseline coverage XML
+        id: baseline_coverage
         if: steps.coverage_check.outputs.mode == 'both'
+        continue-on-error: true
         shell: bash
         run: |
           # Get PR base commit SHA
@@ -118,8 +120,15 @@ jobs:
           python -m pytest --cov=src/renacechess --cov-report=xml --cov-fail-under=0 -q
           mv coverage.xml coverage-head.xml
           echo "✅ PR head coverage XML generated"
+      - name: Skip overlap comparison (baseline failed)
+        if: steps.coverage_check.outputs.mode == 'both' && steps.baseline_coverage.outcome != 'success'
+        shell: bash
+        run: |
+          echo "⚠️ Baseline coverage generation failed (likely due to breaking changes in main)"
+          echo "   Skipping overlap-set comparison for this PR"
+          echo "   This is expected when main has incompatible dependencies/configs"
       - name: Compare overlap-set coverage
-        if: steps.coverage_check.outputs.mode == 'both'
+        if: steps.coverage_check.outputs.mode == 'both' && steps.baseline_coverage.outcome == 'success'
         shell: bash
         run: |
           python << 'EOF'

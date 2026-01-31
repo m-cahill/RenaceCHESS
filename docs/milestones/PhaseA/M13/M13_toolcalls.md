@@ -123,5 +123,27 @@
 **Tool:** `run_terminal_cmd`
 **Purpose:** Stage and commit changes, create PR
 **Files/Target:** Git operations
-**Status:** Starting
+**Status:** ✅ Completed - PR #15 created
+
+## Tool Call #17
+**Timestamp:** 2026-02-01
+**Tool:** `gh run view`
+**Purpose:** Analyze CI run 21538761274 failure
+**Files/Target:** CI logs
+**Status:** ✅ Completed
+**Finding:** torch~=2.0.0 not available on Python 3.12 (oldest is 2.2.0)
+
+## Tool Call #18
+**Timestamp:** 2026-02-01
+**Tool:** `search_replace`, `git commit`, `git push`
+**Purpose:** Fix torch dependency constraint to >=2.2.0
+**Files/Target:** pyproject.toml
+**Status:** ✅ Completed - Pushed fix commit e984cd8
+
+## Tool Call #19
+**Timestamp:** 2026-02-01
+**Tool:** `gh run view` / `gh pr checks`
+**Purpose:** Monitor CI run 2 after torch fix
+**Files/Target:** CI
+**Status:** In progress
 
