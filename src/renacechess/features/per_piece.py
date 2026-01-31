@@ -341,7 +341,12 @@ def extract_per_piece_features(board: chess.Board) -> PerPieceFeaturesV1:
             normalized_pieces.append(normalize_dict_keys_to_aliases(piece_dict, PieceFeatures))
         else:
             # Already a dict, normalize it
-            normalized_pieces.append(normalize_dict_keys_to_aliases(p, PieceFeatures))
+            # Type check: ensure p is a dict (MyPy doesn't know this from hasattr check)
+            if isinstance(p, dict):
+                normalized_pieces.append(normalize_dict_keys_to_aliases(p, PieceFeatures))
+            else:
+                # Fallback: if it's not a dict and not a model, pass through (shouldn't happen)
+                normalized_pieces.append(p)
 
     return PerPieceFeaturesV1.model_validate(
         {"schemaVersion": "per_piece.v1", "pieces": normalized_pieces}
