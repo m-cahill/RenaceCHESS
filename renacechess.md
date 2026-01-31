@@ -26,6 +26,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M15 | ✅ Closed (MERGED) | `m15-personality-contract-001` → `main` | 2026-01-31 | PERSONALITY-CONTRACT-001 — Personality Safety Contract + Interface |
 | M16 | ✅ Closed (MERGED) | `m16-personality-pawnclamp-001` → `main` | 2026-01-31 | PERSONALITY-PAWNCLAMP-001 — First Concrete Personality Module (Pawn Clamp) |
 | M17 | ✅ Closed (MERGED) | `m17-personality-neutral-baseline-001` → `main` | 2026-01-31 | PERSONALITY-NEUTRAL-BASELINE-001 — Neutral Baseline Personality (Experimental Control) |
+| M18 | ✅ Closed (MERGED) | `m18-personality-eval-harness-001` → `main` | 2026-01-31 | PERSONALITY-EVAL-HARNESS-001 — Personality Evaluation Harness (Phase B Exit) |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -345,6 +346,32 @@ This document tracks milestones, schema, migrations, and governance decisions fo
   - First-run CI success (all gates passed)
 - **Phase B Status:** Experimental control established; personality effects now measurable
 
+**M18 Details:**
+- **Objective:** Introduce deterministic, offline Personality Evaluation Harness for measuring bounded behavioral divergence
+- **CI Run 1:** 21552744755 (SUCCESS - All checks passing on first run)
+- **Final Coverage:** 91.04% (exceeds 90% threshold)
+- **Test Count:** 485 passed, 1 skipped (44 new M18 tests)
+- **PR:** #24 (merged)
+- **Final Commit:** `4da2635`
+- **Audit:** `docs/milestones/PhaseB/M18/M18_audit.md`
+- **Summary:** `docs/milestones/PhaseB/M18/M18_summary.md`
+- **Key Files:**
+  - `src/renacechess/personality/eval_harness.py` — PersonalityEvalHarness implementation
+  - `src/renacechess/contracts/models.py` — PersonalityEvalArtifactV1 and related models
+  - `src/renacechess/contracts/schemas/v1/personality_eval_artifact.v1.schema.json` — Evaluation artifact schema
+  - `tests/fixtures/personality_eval/synthetic_fixtures.py` — Synthetic test fixtures
+  - `tests/test_m18_personality_eval_harness.py` — 44 comprehensive tests
+  - `docs/personality/M18_PERSONALITY_EVAL_HARNESS.md` — Harness documentation
+- **Notable Features:**
+  - Divergence metrics (KL divergence, Total Variation, Jensen-Shannon)
+  - Envelope utilization tracking
+  - Structural attribution (mean/min/max component stats)
+  - Determinism hashes (SHA-256, reproducible)
+  - First-run CI success (all gates passed)
+  - Zero divergence verified for Neutral vs Neutral
+  - Bounded divergence verified for Pawn Clamp vs Neutral
+- **Phase B Status:** COMPLETE — Personality effects are now measurable, comparable, and auditable
+
 ---
 
 ## Database Schema
@@ -464,6 +491,30 @@ This document tracks milestones, schema, migrations, and governance decisions fo
   - Normalization happens at contract boundaries
 - **Enforcement:** CI + code review + import-linter
 
+### Personality Safety Contract (v1)
+- **Location:** `docs/contracts/PERSONALITY_SAFETY_CONTRACT_v1.md`
+- **Status:** ✅ FROZEN (immutable v1 safety envelope for personality modules)
+- **Key Constraints:**
+  - top_k: Maximum moves considered (default: 5)
+  - delta_p_max: Maximum probability delta (default: 0.15)
+  - entropy bounds: [0.5, 4.0] by default
+  - base_reachable: All base moves must remain reachable
+
+### Personality Config Schema (v1)
+- **Location:** `src/renacechess/contracts/schemas/v1/personality_config.v1.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.PersonalityConfigV1`
+- **Status:** ✅ Complete and validated (personality module configuration)
+
+### Personality Eval Artifact Schema (v1)
+- **Location:** `src/renacechess/contracts/schemas/v1/personality_eval_artifact.v1.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.PersonalityEvalArtifactV1`
+- **Status:** ✅ Complete and validated (offline evaluation artifact with divergence metrics)
+- **Key Fields:**
+  - divergenceMetrics: KL divergence, Total Variation, Jensen-Shannon
+  - envelopeUtilization: delta_p_max usage, top_k binding
+  - structuralAttribution: style score components, feature deltas
+  - determinismHash: SHA-256 for reproducibility verification
+
 ---
 
 ## Phase Status
@@ -472,8 +523,8 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 |-------|------|--------|------------|----------|
 | PoC | Proof of Concept | 🔒 Locked | M00–M11 | `poc-v1.0` tag |
 | A | Post-PoC Hardening & Training Readiness | 🔒 **CLOSED** | M12–M14 | `docs/phases/PhaseA_closeout.md` |
-| B | Personality Framework & Style Modulation | ⏳ **IN PROGRESS** | M15+ | — |
-| C | Elo-Appropriate Coaching & Explanation | 🔜 Planned | M19+ | — |
+| B | Personality Framework & Style Modulation | 🔒 **CLOSED** | M15–M18 | `docs/phases/PhaseB_closeout.md` |
+| C | Elo-Appropriate Coaching & Explanation | ⏳ **IN PROGRESS** | M19+ | — |
 | D | Data Expansion, Calibration & Quality | 🔜 Planned | M23+ | — |
 | E | Field Testing & Product Surfaces | 🔜 Planned | M31+ | — |
 
@@ -492,6 +543,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-01-31 (Phase B OPEN, M17 CLOSED — Neutral Baseline Personality Established)
+**Last Updated:** 2026-01-31 (Phase B CLOSED, M18 CLOSED — Personality Framework Complete, Advancing to Phase C)
 
 
