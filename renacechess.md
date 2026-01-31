@@ -20,6 +20,8 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M09 | ✅ Closed (FUNCTIONALLY COMPLETE) | `m09-outcome-head-v1` → `main` | 2026-01-25 | Human Outcome Head (W/D/L) v1 |
 | M10 | ✅ Closed | `m10-execution-surface-hardening` → `main` | 2026-01-27 | Coverage Hardening + Runner/CLI Path Tests |
 | M11 | ✅ Closed (MERGED) | `m11-structural-interpretability` → `main` | 2026-01-28 | Structural Interpretability Expansion — Per-Piece & Square-Level Cognition |
+| M12 | ⛔ Closed (SUPERSEDED) | `m12-archive-audit-remediation` | 2026-01-31 | Audit Remediation Pack — Surfaced contract ambiguity, superseded by M13 |
+| M13 | ✅ Closed (MERGED) | `m13-contract-input-semantics` → `main` | 2026-01-31 | CONTRACT-INPUT-SEMANTICS-001 — Explicit contract semantics for dict inputs |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -216,6 +218,38 @@ This document tracks milestones, schema, migrations, and governance decisions fo
   - Outcome prediction (M09)
   - Structural cognition (M11)
 
+**M12 Details:**
+- **Objective:** Audit remediation pack for post-PoC hardening
+- **Status:** ⛔ Closed without merge — superseded by M13
+- **Reason:** M12 surfaced a contract ambiguity (dict-based model instantiation semantics undefined). Rather than choosing an arbitrary fix, M12 correctly deferred the semantic decision to M13.
+- **Governance:** This is the correct governance pattern — M12 identified the problem; M13 made the decision.
+- **Branch:** Archived as `m12-archive-audit-remediation` for reference
+- **PR:** #14 (closed without merge)
+- **Documented in:** `docs/milestones/PhaseA/M12/` (plan, run analyses)
+
+**M13 Details:**
+- **Objective:** Explicitly define contract input semantics, resolve Pydantic dict-input ambiguity
+- **CI Run 1-4:** Multiple runs addressing torch version, baseline coverage, lint errors
+- **CI Run 5:** 21539031015 (SUCCESS - All checks passing)
+- **Final Coverage:** 90.67% (exceeds 90% threshold)
+- **Test Count:** 383 passed, 1 skipped
+- **PR:** #15 (merged)
+- **Final Commit:** `4617482`
+- **Audit:** `docs/milestones/PhaseA/M13/M13_audit.md`
+- **Summary:** `docs/milestones/PhaseA/M13/M13_summary.md`
+- **Key Files:**
+  - `docs/contracts/CONTRACT_INPUT_SEMANTICS.md` — Frozen v1.0 contract semantics
+  - `src/renacechess/contracts/models.py` — All 53 models updated to `populate_by_name=True`
+  - `importlinter_contracts.ini` — Import-linter configuration for contracts isolation
+  - `.github/workflows/ci.yml` — SHA-pinned actions, import-linter step, Python 3.12
+- **Notable Features:**
+  - **Option A (Alias-Only Dict Inputs):** Dict inputs MUST use camelCase aliases; kwargs MAY use snake_case
+  - Supply-chain hardening: all dependencies pinned with `~=`, all Actions SHA-pinned
+  - Architectural boundary enforcement via import-linter
+  - PYDANTIC-DICT-CONTRACT-001 resolved in DeferredIssuesRegistry
+  - M12 superseded (closed without merge, branch archived)
+- **Phase A Hardening Started:** M13 is the first completed Phase A milestone
+
 ---
 
 ## Database Schema
@@ -326,6 +360,15 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 - **Location:** `docs/contracts/StructuralCognitionContract_v1.md`
 - **Status:** ✅ FROZEN (immutable v1 semantic definitions for M11+ structural layers)
 
+### Contract Input Semantics (v1)
+- **Location:** `docs/contracts/CONTRACT_INPUT_SEMANTICS.md`
+- **Status:** ✅ FROZEN (immutable v1.0 contract for dict-based model instantiation)
+- **Rule:** Option A (Alias-Only Dict Inputs)
+  - Dict inputs MUST use camelCase alias keys
+  - Keyword arguments MAY use snake_case
+  - Normalization happens at contract boundaries
+- **Enforcement:** CI + code review + import-linter
+
 ---
 
 ## Key Guarantees Established in M00
@@ -341,6 +384,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-01-28 (M11 closeout — PoC Cognitive Substrate Complete)
+**Last Updated:** 2026-01-31 (M13 closeout — CONTRACT-INPUT-SEMANTICS-001, Phase A Hardening Started)
 
 
