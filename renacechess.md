@@ -276,6 +276,30 @@ This document tracks milestones, schema, migrations, and governance decisions fo
   - Benchmark script linted/type-checked only (not executed in CI)
 - **Phase A Status:** Training readiness established; Phase A hardening complete
 
+**M15 Details:**
+- **Objective:** Define Personality Safety Contract and interface (no behavior, contract + interface only)
+- **CI Run 1:** 21540464307 (SUCCESS - All checks passing on first run)
+- **Final Coverage:** 90%+ (exceeds 90% threshold)
+- **Test Count:** 408+ passed, 1 skipped
+- **PR:** #18 (pending merge)
+- **Branch Commit:** `605fb81`
+- **Audit:** `docs/milestones/PhaseB/M15/M15_audit.md`
+- **Summary:** `docs/milestones/PhaseB/M15/M15_summary.md`
+- **Key Files:**
+  - `docs/contracts/PERSONALITY_SAFETY_CONTRACT_v1.md` — Frozen v1 safety contract
+  - `src/renacechess/personality/interfaces.py` — PersonalityModuleV1 protocol
+  - `src/renacechess/contracts/schemas/v1/personality_config.v1.schema.json` — Config schema
+  - `src/renacechess/contracts/models.py` — SafetyEnvelopeV1, PersonalityConfigV1 models
+  - `docs/personality/M15_PERSONALITY_EVAL_REQUIREMENTS.md` — Evaluation requirements
+  - `docs/phases/PhaseA_closeout.md` — Formal Phase A closeout
+- **Notable Features:**
+  - Explicit allowed/forbidden interventions defined
+  - Safety envelope parameters (top_k, delta_p_max, entropy bounds)
+  - Import boundary enforcement via personality-isolation contract
+  - Protocol-based interface for type-safe extensibility
+  - 25 new schema/model validation tests
+- **Phase B Status:** Opened; first Phase B milestone (contract-only, no behavior)
+
 ---
 
 ## Database Schema
