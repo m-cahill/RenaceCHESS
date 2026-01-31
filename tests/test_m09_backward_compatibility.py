@@ -1,10 +1,5 @@
 """Tests for backward compatibility (M09)."""
 
-import json
-from pathlib import Path
-
-import pytest
-
 from renacechess.contracts.models import EvalReportV3, EvalReportV4, EvalReportV5
 
 

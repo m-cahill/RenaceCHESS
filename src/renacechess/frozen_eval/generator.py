@@ -8,7 +8,6 @@ import json
 from collections import defaultdict
 from datetime import datetime
 from pathlib import Path
-from typing import Any
 
 from renacechess.contracts.models import (
     DatasetManifestV2,
@@ -18,7 +17,7 @@ from renacechess.contracts.models import (
     FrozenEvalManifestStratificationTargets,
     FrozenEvalManifestV1,
 )
-from renacechess.determinism import canonical_hash, canonical_json_dump
+from renacechess.determinism import canonical_json_dump
 
 
 def generate_frozen_eval_manifest(

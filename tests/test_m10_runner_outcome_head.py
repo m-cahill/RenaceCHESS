@@ -89,8 +89,8 @@ def test_runner_outcome_head_integration(tmp_path: Path, monkeypatch) -> None:
     if outcome_metrics["total_predictions"] > 0:
         assert outcome_metrics["cross_entropy"] is not None
         assert outcome_metrics["brier_score"] is not None
-        assert isinstance(outcome_metrics["cross_entropy"], (int, float))
-        assert isinstance(outcome_metrics["brier_score"], (int, float))
+        assert isinstance(outcome_metrics["cross_entropy"], int | float)
+        assert isinstance(outcome_metrics["brier_score"], int | float)
 
     # Verify stratified outcome metrics are present
     assert "outcome_metrics_by_skill" in result

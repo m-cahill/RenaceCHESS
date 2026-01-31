@@ -12,7 +12,15 @@ This registry tracks **explicit deferrals only** — items that were identified 
 
 ---
 
-## Resolved Deferred Issues
+## Resolved Deferred Issues (M13+)
+
+| ID | Issue | Discovered (M#) | Resolved In (M#) | Resolution | Exit Criteria Met |
+|----|-------|-----------------|------------------|------------|-------------------|
+| PYDANTIC-DICT-CONTRACT-001 | Dict-Based Contract Input Semantics Undefined | M12 | ✅ M13 | Contract explicitly defined: Option A (Alias-Only Dict Inputs). Models use `populate_by_name=True`. Dict inputs require camelCase alias keys; keyword args may use snake_case. | ✅ `docs/contracts/CONTRACT_INPUT_SEMANTICS.md` created; tests comply with contract; CI green |
+
+---
+
+## Resolved Deferred Issues (M10 and earlier)
 
 | ID | Issue | Discovered (M#) | Deferred To (M#) | Reason | Blocker? | Exit Criteria |
 |----|-------|-----------------|------------------|--------|----------|---------------|
@@ -24,5 +32,5 @@ This registry tracks **explicit deferrals only** — items that were identified 
 
 ---
 
-**Last Updated:** 2026-01-27 (M10 closeout - all M09 deferrals resolved, final coverage 90.64%)
+**Last Updated:** 2026-02-01 (M13 closeout - PYDANTIC-DICT-CONTRACT-001 resolved; contract semantics explicitly defined)
 

@@ -5,7 +5,6 @@ to predict human win/draw/loss probabilities from position features and conditio
 """
 
 import hashlib
-from typing import Any
 
 import torch
 import torch.nn as nn
