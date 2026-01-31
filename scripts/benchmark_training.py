@@ -679,4 +679,3 @@ It does NOT produce production models and is excluded from CI.
 
 if __name__ == "__main__":
     sys.exit(main())
-
