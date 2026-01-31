@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "personality_config.v1.schema.json",
+  "title": "Personality Configuration v1",
+  "description": "Configuration schema for personality modules. See docs/contracts/PERSONALITY_SAFETY_CONTRACT_v1.md for the governing contract.",
+  "type": "object",
+  "required": ["schemaVersion", "personalityId", "displayName", "description"],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "personality_config.v1",
+      "description": "Schema version identifier"
+    },
+    "personalityId": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*(\\.[a-z][a-z0-9_]*)+$",
+      "description": "Unique personality identifier (e.g., 'style.pawn_clamp.v1')"
+    },
+    "displayName": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable personality name"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of personality behavior and style"
+    },
+    "safetyEnvelope": {
+      "$ref": "#/$defs/SafetyEnvelopeV1",
+      "description": "Safety envelope parameters for this personality"
+    },
+    "tunableParameters": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "number"
+      },
+      "description": "Personality-specific tunable parameters (keyed by parameter name)"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether this personality is enabled"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "SafetyEnvelopeV1": {
+      "type": "object",
+      "description": "Safety envelope parameters for personality transformations",
+      "properties": {
+        "topK": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100,
+          "default": 5,
+          "description": "Maximum number of candidate moves considered"
+        },
+        "deltaPMax": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "default": 0.15,
+          "description": "Maximum probability shift allowed per move"
+        },
+        "entropyMin": {
+          "type": "number",
+          "minimum": 0.0,
+          "default": 0.5,
+          "description": "Minimum output entropy (prevents over-sharpening)"
+        },
+        "entropyMax": {
+          "type": "number",
+          "minimum": 0.0,
+          "default": 3.0,
+          "description": "Maximum output entropy (prevents over-softening)"
+        },
+        "baseReachable": {
+          "type": "boolean",
+          "default": true,
+          "description": "Require that identity configuration exists"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
+

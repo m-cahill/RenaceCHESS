@@ -98,6 +98,8 @@ branch = true
 omit = [
     "*/tests/*",
     "*/__init__.py",
+    # Protocol-only interface modules have no executable code
+    "*/personality/interfaces.py",
 ]
 
 [tool.coverage.report]

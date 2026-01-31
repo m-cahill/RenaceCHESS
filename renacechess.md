@@ -23,6 +23,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M12 | ⛔ Closed (SUPERSEDED) | `m12-archive-audit-remediation` | 2026-01-31 | Audit Remediation Pack — Surfaced contract ambiguity, superseded by M13 |
 | M13 | ✅ Closed (MERGED) | `m13-contract-input-semantics` → `main` | 2026-01-31 | CONTRACT-INPUT-SEMANTICS-001 — Explicit contract semantics for dict inputs |
 | M14 | ✅ Closed (MERGED) | `m14-train-pack-001` → `main` | 2026-01-31 | TRAIN-PACK-001 — Training Readiness & Benchmark Pack |
+| M15 | ⏳ In Progress | `m15-personality-contract-001` | — | PERSONALITY-CONTRACT-001 — Personality Safety Contract + Interface |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -396,6 +397,19 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 
 ---
 
+## Phase Status
+
+| Phase | Name | Status | Milestones | Closeout |
+|-------|------|--------|------------|----------|
+| PoC | Proof of Concept | 🔒 Locked | M00–M11 | `poc-v1.0` tag |
+| A | Post-PoC Hardening & Training Readiness | 🔒 **CLOSED** | M12–M14 | `docs/phases/PhaseA_closeout.md` |
+| B | Personality Framework & Style Modulation | ⏳ **IN PROGRESS** | M15+ | — |
+| C | Elo-Appropriate Coaching & Explanation | 🔜 Planned | M19+ | — |
+| D | Data Expansion, Calibration & Quality | 🔜 Planned | M23+ | — |
+| E | Field Testing & Product Surfaces | 🔜 Planned | M31+ | — |
+
+---
+
 ## Key Guarantees Established in M00
 
 From M00 forward, RenaceCHESS guarantees:
@@ -409,6 +423,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-01-31 (M14 closeout — TRAIN-PACK-001, Phase A Training Readiness Complete)
+**Last Updated:** 2026-01-31 (Phase A CLOSED, M15 PERSONALITY-CONTRACT-001 in progress)
 
 
