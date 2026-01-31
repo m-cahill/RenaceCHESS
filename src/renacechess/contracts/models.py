@@ -1611,3 +1611,220 @@ class EvalReportV2(BaseModel):
     splits: EvalReportSplitsV2 | None = Field(
         None, description="Per-split metric breakdown (only includes splits that were evaluated)"
     )
+
+
+# =============================================================================
+# Personality Evaluation Artifact Models (M18)
+# =============================================================================
+
+
+class ComponentStatsV1(BaseModel):
+    """Statistics for a single component or feature (M18)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    mean: float = Field(..., description="Mean value")
+    min: float | None = Field(None, description="Minimum value")
+    max: float | None = Field(None, description="Maximum value")
+
+
+class DivergenceMetricsV1(BaseModel):
+    """Divergence metrics between personality output and baseline (M18)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    kl_divergence: float = Field(
+        ...,
+        alias="klDivergence",
+        ge=0.0,
+        description="Kullback-Leibler divergence from baseline (bits)",
+    )
+    total_variation: float = Field(
+        ...,
+        alias="totalVariation",
+        ge=0.0,
+        le=1.0,
+        description="Total Variation distance [0.0, 1.0]",
+    )
+    jensen_shannon: float | None = Field(
+        None,
+        alias="jensenShannon",
+        ge=0.0,
+        le=1.0,
+        description="Jensen-Shannon divergence [0.0, 1.0] (optional)",
+    )
+    max_probability_delta: float = Field(
+        ...,
+        alias="maxProbabilityDelta",
+        ge=0.0,
+        le=1.0,
+        description="Maximum probability shift for any move",
+    )
+    mean_probability_delta: float = Field(
+        ...,
+        alias="meanProbabilityDelta",
+        ge=0.0,
+        le=1.0,
+        description="Mean absolute probability shift across moves",
+    )
+
+
+class EnvelopeUtilizationV1(BaseModel):
+    """Safety envelope utilization statistics (M18)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    delta_p_max_used_pct: float = Field(
+        ...,
+        alias="deltaPMaxUsedPct",
+        ge=0.0,
+        le=100.0,
+        description="Percentage of delta_p_max utilized [0.0, 100.0]",
+    )
+    delta_p_max_used_abs: float | None = Field(
+        None,
+        alias="deltaPMaxUsedAbs",
+        ge=0.0,
+        le=1.0,
+        description="Absolute delta_p_max utilization",
+    )
+    delta_p_max_limit: float = Field(
+        ...,
+        alias="deltaPMaxLimit",
+        ge=0.0,
+        le=1.0,
+        description="The delta_p_max limit from constraints",
+    )
+    top_k_binding: bool = Field(
+        ...,
+        alias="topKBinding",
+        description="Whether top_k constraint was binding (moves were truncated)",
+    )
+    top_k_limit: int = Field(
+        ..., alias="topKLimit", ge=1, description="The top_k limit from constraints"
+    )
+    moves_considered: int = Field(
+        ..., alias="movesConsidered", ge=0, description="Actual number of moves considered"
+    )
+    entropy_in_bounds: bool = Field(
+        ..., alias="entropyInBounds", description="Whether output entropy is within bounds"
+    )
+    output_entropy: float = Field(
+        ..., alias="outputEntropy", ge=0.0, description="Actual output entropy"
+    )
+
+
+class StructuralAttributionV1(BaseModel):
+    """Attribution of divergence to structural features (M18)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    style_score_components: dict[str, ComponentStatsV1] | None = Field(
+        None,
+        alias="styleScoreComponents",
+        description="Per-component style score statistics",
+    )
+    feature_deltas: dict[str, ComponentStatsV1] | None = Field(
+        None,
+        alias="featureDeltas",
+        description="Per-feature delta statistics",
+    )
+    correlation_proxy: float | None = Field(
+        None,
+        alias="correlationProxy",
+        ge=-1.0,
+        le=1.0,
+        description="Normalized dot product between style scores and divergence (proxy)",
+    )
+
+
+class PolicyStatsV1(BaseModel):
+    """Policy distribution statistics (M18)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    base_entropy: float = Field(
+        ..., alias="baseEntropy", ge=0.0, description="Entropy of base policy"
+    )
+    output_entropy: float = Field(
+        ..., alias="outputEntropy", ge=0.0, description="Entropy of output policy"
+    )
+    entropy_delta: float = Field(
+        ..., alias="entropyDelta", description="Change in entropy (output - base)"
+    )
+    move_count: int = Field(..., alias="moveCount", ge=0, description="Number of moves in policy")
+    base_top_gap: float | None = Field(
+        None, alias="baseTopGap", ge=0.0, le=1.0, description="Top gap in base policy"
+    )
+    output_top_gap: float | None = Field(
+        None, alias="outputTopGap", ge=0.0, le=1.0, description="Top gap in output policy"
+    )
+
+
+class PersonalityEvalArtifactV1(BaseModel):
+    """Personality evaluation artifact (M18).
+
+    Captures divergence metrics, envelope utilization, and structural attribution
+    for offline personality evaluation and comparison.
+
+    This artifact is output-only (not used for runtime wiring) and supports:
+    - Scientific claims about personality effects
+    - Determinism verification via hash
+    - Traceable attribution to structural features
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    schema_version: Literal["personality_eval_artifact.v1"] = Field(
+        "personality_eval_artifact.v1",
+        alias="schemaVersion",
+        description="Schema version identifier",
+    )
+    created_at: datetime = Field(
+        ..., alias="createdAt", description="ISO 8601 timestamp of artifact creation"
+    )
+    personality_id: str = Field(
+        ...,
+        alias="personalityId",
+        pattern=r"^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$",
+        description="Personality being evaluated (e.g., 'style.pawn_clamp.v1')",
+    )
+    baseline_id: str = Field(
+        ...,
+        alias="baselineId",
+        pattern=r"^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$",
+        description="Baseline personality for comparison (e.g., 'control.neutral_baseline.v1')",
+    )
+    config_hash: str = Field(
+        ...,
+        alias="configHash",
+        pattern="^[a-f0-9]{64}$",
+        description="SHA-256 hash of personality configuration used",
+    )
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern="^[a-f0-9]{64}$",
+        description="SHA-256 hash for determinism verification (hash of all inputs + outputs)",
+    )
+    fixture_id: str | None = Field(
+        None, alias="fixtureId", description="Identifier of the fixture used (for traceability)"
+    )
+    divergence_metrics: DivergenceMetricsV1 = Field(
+        ...,
+        alias="divergenceMetrics",
+        description="Divergence metrics between personality and baseline",
+    )
+    envelope_utilization: EnvelopeUtilizationV1 = Field(
+        ...,
+        alias="envelopeUtilization",
+        description="Safety envelope utilization statistics",
+    )
+    structural_attribution: StructuralAttributionV1 | None = Field(
+        None,
+        alias="structuralAttribution",
+        description="Attribution of divergence to structural features (optional)",
+    )
+    policy_stats: PolicyStatsV1 = Field(
+        ..., alias="policyStats", description="Policy distribution statistics"
+    )
