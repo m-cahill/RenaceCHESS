@@ -48,15 +48,66 @@ def _normalize_to_aliases(cls: type[BaseModel], data: dict[str, Any]) -> dict[st
     alias_set = set(field_to_alias.values())
 
     for key, value in data.items():
+        # Normalize the key
         if key in alias_set:
             # Already an alias, use as-is
-            normalized_data[key] = value
+            normalized_key = key
         elif key in field_to_alias:
             # Field name, convert to alias
-            normalized_data[field_to_alias[key]] = value
+            normalized_key = field_to_alias[key]
         else:
             # Unknown key (no alias defined), pass through
-            normalized_data[key] = value
+            normalized_key = key
+
+        # Recursively normalize nested dicts (for nested model validation)
+        if isinstance(value, dict):
+            # Check if this field is a nested model type
+            if key in cls.model_fields:
+                field_info = cls.model_fields[key]
+                # Try to get the inner type (could be a model or list of models)
+                # For now, try to normalize if it looks like a model dict
+                # This is a heuristic - we'll normalize if it has common model keys
+                if any(
+                    k in value for k in ["schema_version", "schemaVersion", "slot_id", "slotId"]
+                ):
+                    # Likely a nested model dict, try to normalize recursively
+                    # We need the nested model class, but we can't easily get it here
+                    # So we'll just pass it through and let Pydantic handle it
+                    normalized_data[normalized_key] = value
+                else:
+                    normalized_data[normalized_key] = value
+        elif isinstance(value, list):
+            # Check if list contains dicts that might be nested models
+            if value and isinstance(value[0], dict):
+                # Get the field annotation to determine the nested model type
+                nested_model_cls = None
+                if key in cls.model_fields:
+                    field_info = cls.model_fields[key]
+                    # Try to extract the inner type from list[T] or list[T] | None
+                    annotation = field_info.annotation
+                    # Handle typing.List, list, and Optional/Union types
+                    if hasattr(annotation, "__args__"):
+                        args = annotation.__args__
+                        if args:
+                            # Get the first argument (the inner type)
+                            inner_type = args[0]
+                            # Check if it's a BaseModel subclass
+                            if isinstance(inner_type, type) and issubclass(inner_type, BaseModel):
+                                nested_model_cls = inner_type
+
+                # Recursively normalize each dict in the list
+                normalized_list = []
+                for item in value:
+                    if isinstance(item, dict) and nested_model_cls:
+                        # Normalize using the nested model's field-to-alias mapping
+                        normalized_list.append(_normalize_to_aliases(nested_model_cls, item))
+                    else:
+                        normalized_list.append(item)
+                normalized_data[normalized_key] = normalized_list
+            else:
+                normalized_data[normalized_key] = value
+        else:
+            normalized_data[normalized_key] = value
 
     return normalized_data
 
