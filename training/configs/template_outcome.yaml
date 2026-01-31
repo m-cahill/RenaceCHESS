@@ -1,0 +1,164 @@
+# RenaceCHESS Outcome Head Training Configuration Template
+# =========================================================
+#
+# IMPORTANT: This is a TEMPLATE configuration file.
+# Values are ILLUSTRATIVE ONLY and are NOT official defaults.
+#
+# This file exists to document the training configuration schema
+# for outcome head (W/D/L prediction) training. Actual
+# hyperparameters should be determined through experimentation.
+#
+# M14 Note: This template establishes training readiness only.
+# No models are trained as part of M14.
+#
+# Schema Version: 1.0.0
+# Last Updated: 2026-01-31
+
+# === Model Configuration ===
+model:
+  type: "OutcomeHeadV1"
+  # Output classes: win, draw, loss (3 classes)
+  num_classes: 3
+
+# === Training Hyperparameters ===
+# NOTE: These values are illustrative only, not recommended defaults.
+training:
+  # Number of training epochs
+  # Example: 10 epochs for initial baseline
+  epochs: 10
+
+  # Batch size (samples per gradient step)
+  # Example: 32 (adjust based on available VRAM)
+  batch_size: 32
+
+  # Learning rate for optimizer
+  # Example: 0.001 (AdamW default starting point)
+  learning_rate: 0.001
+
+  # Random seed for reproducibility
+  seed: 42
+
+  # Optimizer configuration
+  optimizer:
+    type: "AdamW"
+    weight_decay: 0.01
+
+  # Learning rate scheduler (optional)
+  scheduler:
+    enabled: false
+    type: "StepLR"
+    step_size: 5
+    gamma: 0.5
+
+  # Loss function configuration
+  loss:
+    type: "CrossEntropyLoss"
+    # Optional: class weights for imbalanced datasets
+    class_weights: null
+
+# === Data Configuration ===
+data:
+  # Path to dataset manifest (v2 format)
+  # REQUIRED: Must be provided at runtime
+  manifest_path: null
+
+  # Path to frozen eval manifest
+  # REQUIRED: Must be provided for contamination protection
+  frozen_eval_manifest_path: null
+
+  # Data loading configuration
+  loader:
+    num_workers: 4
+    pin_memory: true
+    shuffle: false  # Deterministic training
+
+  # Data filtering
+  filters:
+    # Only include records with game results
+    require_game_result: true
+
+# === Output Configuration ===
+output:
+  # Directory for model checkpoints and logs
+  output_dir: "training_output/outcome_head"
+
+  # Checkpoint saving frequency (epochs)
+  save_every_n_epochs: 5
+
+  # Save final model
+  save_final: true
+
+  # Log training metrics
+  log_metrics: true
+
+# === Validation Configuration ===
+validation:
+  # Run validation after each epoch
+  enabled: true
+
+  # Validation metrics to compute
+  metrics:
+    - "accuracy"
+    - "calibration_error"
+    - "wdl_accuracy_by_class"
+    - "cross_entropy"
+
+# === Environment Configuration ===
+environment:
+  # Device selection (auto, cuda, cpu)
+  device: "auto"
+
+  # Mixed precision training (experimental)
+  mixed_precision: false
+
+  # Deterministic mode (slower but reproducible)
+  deterministic: true
+
+# === Frozen Eval Protection ===
+# This section documents the frozen eval exclusion contract
+frozen_eval_protection:
+  # If true, training will fail if frozen eval records are detected
+  enforce: true
+
+  # Method for exclusion
+  exclusion_method: "record_key_filter"
+
+  # Description of enforcement
+  description: |
+    Frozen eval records are excluded from training data by filtering
+    on record keys (inputHash). This is enforced in OutcomeDataset
+    at load time. The benchmark script independently verifies no
+    overlap exists before training.
+
+# === Outcome-Specific Configuration ===
+outcome:
+  # Label mapping (internal use)
+  label_mapping:
+    win: 0
+    draw: 1
+    loss: 2
+
+  # Calibration targets (for reference, not enforced)
+  calibration:
+    description: |
+      Outcome predictions should be calibrated such that if we predict
+      P(win) = 0.6, the actual win rate over such predictions should
+      be approximately 60%. Calibration is measured on validation set.
+
+# === Metadata ===
+metadata:
+  # Configuration schema version
+  schema_version: "1.0.0"
+
+  # This is a template, not a production config
+  is_template: true
+
+  # M14 milestone reference
+  milestone: "M14"
+
+  # Warning about values
+  warning: |
+    All hyperparameter values in this template are ILLUSTRATIVE ONLY.
+    They are not recommended defaults and should be determined through
+    proper experimentation. Do not treat these as official settings.
+
