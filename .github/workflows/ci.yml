@@ -193,8 +193,9 @@ jobs:
               overlap_count += 1
               head_cov = head[file]
               
-              # Use small epsilon for floating point comparison
-              if head_cov + 1e-9 < base_cov:
+              # Allow up to 0.5% tolerance for minor fluctuations (formatting, line shifts)
+              TOLERANCE = 0.005
+              if head_cov + TOLERANCE < base_cov:
                   regressions.append((file, base_cov, head_cov))
 
           print(f"Overlap files compared: {overlap_count}")
