@@ -106,9 +106,7 @@ class PerPieceFeaturesV1(RenaceBaseModel):
                     normalized.append(normalize_dict_keys_to_aliases(v, PieceFeatures))
                 elif hasattr(v, "model_dump"):
                     # Pydantic model instance, convert to dict then normalize
-                    normalized.append(
-                        normalize_dict_keys_to_aliases(v.model_dump(), PieceFeatures)
-                    )
+                    normalized.append(normalize_dict_keys_to_aliases(v.model_dump(), PieceFeatures))
                 else:
                     # Not a dict or model, pass through
                     normalized.append(v)
