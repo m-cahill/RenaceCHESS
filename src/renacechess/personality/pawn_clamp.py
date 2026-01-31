@@ -119,9 +119,7 @@ class PawnClampPersonalityV1:
             return base_policy
 
         # Compute style scores for each move
-        style_scores = self._compute_style_scores(
-            top_moves, context, constraints
-        )
+        style_scores = self._compute_style_scores(top_moves, context, constraints)
 
         # Apply style shaping within safety envelope
         modified_moves = self._apply_style_shaping(
@@ -192,9 +190,7 @@ class PawnClampPersonalityV1:
 
             # Compute mobility reduction score
             if per_piece is not None:
-                mobility_score = self._score_mobility_reduction(
-                    from_square, to_square, per_piece
-                )
+                mobility_score = self._score_mobility_reduction(from_square, to_square, per_piece)
 
             # Compute weak square creation score
             if square_map is not None:
@@ -418,9 +414,7 @@ class PawnClampPersonalityV1:
         total_prob = sum(modified_probs.values())
         if total_prob > 0:
             # Normalize
-            modified_probs = {
-                uci: prob / total_prob for uci, prob in modified_probs.items()
-            }
+            modified_probs = {uci: prob / total_prob for uci, prob in modified_probs.items()}
 
             # Check if normalization caused any violations
             max_violation = 0.0
@@ -470,8 +464,7 @@ class PawnClampPersonalityV1:
             if delta > constraints.delta_p_max + 1e-4:  # Tolerance for floating point
                 # If still violated, return base probabilities as fallback
                 return [
-                    PolicyMove(uci=move.uci, san=move.san, p=base_probs[move.uci])
-                    for move in moves
+                    PolicyMove(uci=move.uci, san=move.san, p=base_probs[move.uci]) for move in moves
                 ]
 
         # Create modified PolicyMove objects
@@ -500,4 +493,3 @@ class PawnClampPersonalityV1:
             if move.p > 0:
                 entropy -= move.p * math.log2(move.p)
         return entropy
-

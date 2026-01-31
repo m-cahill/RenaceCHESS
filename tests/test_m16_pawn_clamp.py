@@ -2,7 +2,6 @@
 
 import math
 
-import chess
 import pytest
 
 from renacechess.contracts.models import (
@@ -154,9 +153,7 @@ class TestPawnClampPersonalityV1:
 
         # Should be identical to base policy
         assert len(result.top_moves) == len(base_policy.top_moves)
-        for i, (result_move, base_move) in enumerate(
-            zip(result.top_moves, base_policy.top_moves)
-        ):
+        for i, (result_move, base_move) in enumerate(zip(result.top_moves, base_policy.top_moves)):
             assert result_move.uci == base_move.uci
             assert abs(result_move.p - base_move.p) < 1e-6
 
@@ -236,9 +233,7 @@ class TestPawnClampPersonalityV1:
         personality = PawnClampPersonalityV1()
         base_policy = create_test_policy()
         context = MockStructuralContext()
-        constraints = SafetyEnvelopeV1(
-            top_k=4, delta_p_max=0.1, entropy_min=0.5, entropy_max=3.0
-        )
+        constraints = SafetyEnvelopeV1(top_k=4, delta_p_max=0.1, entropy_min=0.5, entropy_max=3.0)
 
         result = personality.apply(base_policy, context, constraints)
 
@@ -292,9 +287,7 @@ class TestPawnClampPersonalityV1:
 
         # At least one move should have different probability
         differences = [
-            abs(result_probs[uci] - base_probs[uci])
-            for uci in result_probs
-            if uci in base_probs
+            abs(result_probs[uci] - base_probs[uci]) for uci in result_probs if uci in base_probs
         ]
         assert any(diff > 1e-6 for diff in differences)
 
@@ -322,9 +315,7 @@ class TestPawnClampPersonalityV1:
         )
         context = MockStructuralContext()
         # Use entropy_min=0.0 to allow single-move policies
-        constraints = SafetyEnvelopeV1(
-            top_k=1, delta_p_max=0.1, entropy_min=0.0, entropy_max=3.0
-        )
+        constraints = SafetyEnvelopeV1(top_k=1, delta_p_max=0.1, entropy_min=0.0, entropy_max=3.0)
 
         result = personality.apply(base_policy, context, constraints)
 
@@ -376,11 +367,9 @@ class TestPawnClampPersonalityV1:
 
         all_moves = set(base_probs.keys()) | set(result_probs.keys())
         tv_distance = 0.5 * sum(
-            abs(result_probs.get(uci, 0.0) - base_probs.get(uci, 0.0))
-            for uci in all_moves
+            abs(result_probs.get(uci, 0.0) - base_probs.get(uci, 0.0)) for uci in all_moves
         )
 
         # TV distance should be bounded by delta_p_max * top_k
         max_tv = constraints.delta_p_max * constraints.top_k
         assert tv_distance <= max_tv + 1e-6
-
