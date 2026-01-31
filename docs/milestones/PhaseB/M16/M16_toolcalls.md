@@ -14,4 +14,8 @@
 | 2026-01-31 | run_terminal_cmd | Resolve M15 merge conflicts | M15 branch merge | ✅ Complete |
 | 2026-01-31 | run_terminal_cmd | Create M16 branch and commit | `m16-personality-pawnclamp-001` | ✅ Complete |
 | 2026-01-31 | run_terminal_cmd | Push branch and create PR | PR #21 | ✅ Complete |
+| 2026-01-31 | ruff format | Fix formatting for pawn_clamp.py and tests | `pawn_clamp.py`, `test_m16_pawn_clamp.py` | ✅ Complete |
+| 2026-01-31 | gh pr close | Close PR #21 (stale base SHA) | PR #21 | ✅ Complete |
+| 2026-01-31 | gh pr create | Create new PR with updated base | PR #22 | ✅ Complete |
+| 2026-01-31 | gh pr checks | Monitor CI workflow Run 1 | PR #22, Run 21551746971 | ✅ Green |
 
