@@ -1,0 +1,49 @@
+# RenaceCHESS Pawn Clamp Personality Configuration (v1)
+# ======================================================
+#
+# This configuration defines the Pawn Clamp personality module parameters.
+# The Pawn Clamp personality boosts moves that:
+# - Reduce opponent piece mobility
+# - Create weak squares/holes
+#
+# Schema Version: personality_config.v1
+# Last Updated: 2026-01-31 (M16)
+
+schemaVersion: "personality_config.v1"
+personalityId: "style.pawn_clamp.v1"
+displayName: "Pawn Clamp"
+description: |
+  GM-style personality that prefers pawn pushes and moves that restrict
+  opponent mobility and create weak squares. Demonstrates bounded style
+  modulation using M11 structural cognition features.
+
+# Safety envelope parameters
+safetyEnvelope:
+  topK: 5
+  deltaPMax: 0.15
+  entropyMin: 0.5
+  entropyMax: 3.0
+  baseReachable: true
+
+# Tunable personality parameters
+tunableParameters:
+  mobilityWeight: 0.6
+  weakSquareWeight: 0.4
+
+# Enable/disable personality
+enabled: true
+
+# === Parameter Descriptions ===
+#
+# mobilityWeight (0.0 - 1.0):
+#   Weight for mobility reduction scoring. Higher values prioritize
+#   moves that reduce opponent piece mobility. Default: 0.6
+#
+# weakSquareWeight (0.0 - 1.0):
+#   Weight for weak square creation scoring. Higher values prioritize
+#   moves that create weak squares or holes. Default: 0.4
+#
+# Note: weights should sum to approximately 1.0 for balanced scoring,
+# but this is not enforced (allows experimentation with emphasis).
+
+
