@@ -1,0 +1,47 @@
+## M12 — Audit Remediation Pack
+
+Addresses all high-priority audit findings from the full PoC audit without changing PoC semantics or model behavior.
+
+### Deliverables
+
+1. **Supply-Chain Hardening**
+   - Pin GitHub Actions to commit SHAs (checkout, setup-python, upload-artifact)
+   - Convert dependency versions from `>=` to `~=` (compatible release pinning)
+   - Add `.env` to `.gitignore` (SEC-001)
+
+2. **Architectural Boundary Enforcement**
+   - Add `import-linter` config with authoritative layer boundaries
+   - Wire import-linter into CI workflow
+   - Add minimal sanity tests for boundary enforcement
+
+3. **CLI / Orchestration Seam Hardening**
+   - Create CLI contract documentation with side-effect guarantees
+   - Add minimal sanity tests for CLI invariants
+
+4. **Documentation**
+   - Create supply chain governance documentation
+
+### Files Changed
+
+- `importlinter_contracts.ini` — Import boundary enforcement config
+- `.github/workflows/ci.yml` — SHA-pinned actions + import-linter check
+- `pyproject.toml` — Dependency pinning (`~=` instead of `>=`)
+- `.gitignore` — Added `.env` and `.env.local` (SEC-001)
+- `docs/contracts/CLI_CONTRACT.md` — CLI contract documentation
+- `docs/governance/supply_chain.md` — Supply chain governance
+- `tests/test_m12_boundaries.py` — Boundary enforcement tests
+- `tests/test_m12_cli_invariants.py` — CLI invariant tests
+
+### Testing
+
+All 8 M12-specific tests pass locally.
+
+### Non-Goals (Explicit)
+
+- ❌ No model output or training logic changes
+- ❌ No PoC-locked schema or contract modifications
+- ❌ No personalities or coaching logic
+- ❌ No retraining required
+
+Refs: `docs/milestones/PhaseA/M12/M12_plan.md`
+
