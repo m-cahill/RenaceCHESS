@@ -8,7 +8,9 @@ This registry tracks **explicit deferrals only** — items that were identified 
 
 ## Active Deferred Issues
 
-*(No active deferred issues)*
+| ID | Issue | Discovered (M#) | Deferred To (M#) | Reason | Blocker? | Exit Criteria |
+|----|-------|-----------------|------------------|--------|----------|---------------|
+| PYDANTIC-DICT-CONTRACT-001 | Dict-Based Contract Input Semantics Undefined | M12 | M13 — CONTRACT-INPUT-SEMANTICS-001 | Fixing requires explicit contract decision; would alter public contract semantics; out of scope for post-PoC hardening | No | Explicit contract semantics defined for dict-based model instantiation; tests updated to reflect contract; all boundaries normalized as needed |
 
 ---
 
@@ -24,5 +26,5 @@ This registry tracks **explicit deferrals only** — items that were identified 
 
 ---
 
-**Last Updated:** 2026-01-27 (M10 closeout - all M09 deferrals resolved, final coverage 90.64%)
+**Last Updated:** 2026-01-31 (M12 closeout - PYDANTIC-DICT-CONTRACT-001 deferred to M13)
 

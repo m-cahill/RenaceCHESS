@@ -20,6 +20,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M09 | ✅ Closed (FUNCTIONALLY COMPLETE) | `m09-outcome-head-v1` → `main` | 2026-01-25 | Human Outcome Head (W/D/L) v1 |
 | M10 | ✅ Closed | `m10-execution-surface-hardening` → `main` | 2026-01-27 | Coverage Hardening + Runner/CLI Path Tests |
 | M11 | ✅ Closed (MERGED) | `m11-structural-interpretability` → `main` | 2026-01-28 | Structural Interpretability Expansion — Per-Piece & Square-Level Cognition |
+| M12 | ✅ Closed | `m12-audit-remediation` → `main` | 2026-01-31 | Audit Remediation Pack — Supply-chain hardening, boundary enforcement, CLI contracts; contract ambiguity regarding dict inputs discovered and deferred |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -198,6 +199,18 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 - **Final Commit:** `b8860ee`
 - **Audit:** `docs/milestones/PoC/M11/M11_audit.md`
 - **Summary:** `docs/milestones/PoC/M11/M11_summary.md`
+
+**M12 Details:**
+- **Objective:** Audit Remediation Pack - Supply-chain hardening, boundary enforcement, CLI contracts
+- **CI Run 1:** 21535164527 (FAILURE - 175 test failures, Pydantic compatibility issue revealed)
+- **M12.1 Corrective Work:** 5 CI runs exploring Pydantic compatibility restoration
+- **Final CI Status:** RED (intentional and correct - contract clarification deferred to M13)
+- **Test Count:** 384 tests (6 new M12 tests, 175 failures expected signal)
+- **PR:** #14 (in progress)
+- **Final Commit:** `85db546`
+- **Audit:** `docs/milestones/PhaseA/M12/M12_audit.md`
+- **Summary:** `docs/milestones/PhaseA/M12/M12_summary.md`
+- **Key Outcome:** Contract ambiguity regarding dict inputs discovered and deferred to M13 - CONTRACT-INPUT-SEMANTICS-001
 - **Key Files:**
   - `src/renacechess/features/per_piece.py` — Per-piece feature extractor (32 slots)
   - `src/renacechess/features/square_map.py` — Square-level feature extractor (weak/strong/hole)
@@ -341,6 +354,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-01-28 (M11 closeout — PoC Cognitive Substrate Complete)
+**Last Updated:** 2026-01-31 (M12 closeout - Audit remediation complete; contract ambiguity regarding dict inputs discovered and deferred)
 
 
