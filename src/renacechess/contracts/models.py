@@ -922,8 +922,7 @@ class AccuracyMetrics(BaseModel):
     """Ground-truth accuracy metrics (computed only over labeled records)."""
 
     model_config = ConfigDict(
-        validate_by_alias=True,
-        validate_by_name=True,
+        populate_by_name=True,  # Allow both field names and aliases for input
         extra="allow",  # Allow dynamic top-K fields (top1, top3, top5, etc.)
     )
 
