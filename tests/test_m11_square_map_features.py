@@ -249,6 +249,6 @@ class TestSquareMapFeaturesModel:
         board = chess.Board()
         result = extract_square_map_features(board)
 
-        # Re-validate through model
-        validated = SquareMapFeaturesV1.model_validate(result.model_dump())
+        # Re-validate through model - use by_alias=True per CONTRACT_INPUT_SEMANTICS
+        validated = SquareMapFeaturesV1.model_validate(result.model_dump(by_alias=True))
         assert validated.schema_version == "square_map.v1"
