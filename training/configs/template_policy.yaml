@@ -1,0 +1,138 @@
+# RenaceCHESS Policy Training Configuration Template
+# ==================================================
+#
+# IMPORTANT: This is a TEMPLATE configuration file.
+# Values are ILLUSTRATIVE ONLY and are NOT official defaults.
+#
+# This file exists to document the training configuration schema
+# and provide a starting point for training campaigns. Actual
+# hyperparameters should be determined through experimentation.
+#
+# M14 Note: This template establishes training readiness only.
+# No models are trained as part of M14.
+#
+# Schema Version: 1.0.0
+# Last Updated: 2026-01-31
+
+# === Model Configuration ===
+model:
+  type: "BaselinePolicyV1"
+  # Move vocabulary size (determined at training time from dataset)
+  # Example value only - actual value depends on dataset coverage
+  move_vocab_size: 1000
+
+# === Training Hyperparameters ===
+# NOTE: These values are illustrative only, not recommended defaults.
+training:
+  # Number of training epochs
+  # Example: 10 epochs for initial baseline
+  epochs: 10
+
+  # Batch size (samples per gradient step)
+  # Example: 32 (adjust based on available VRAM)
+  batch_size: 32
+
+  # Learning rate for optimizer
+  # Example: 0.001 (AdamW default starting point)
+  learning_rate: 0.001
+
+  # Random seed for reproducibility
+  seed: 42
+
+  # Optimizer configuration
+  optimizer:
+    type: "AdamW"
+    weight_decay: 0.01
+
+  # Learning rate scheduler (optional)
+  scheduler:
+    enabled: false
+    type: "StepLR"
+    step_size: 5
+    gamma: 0.5
+
+# === Data Configuration ===
+data:
+  # Path to dataset manifest (v2 format)
+  # REQUIRED: Must be provided at runtime
+  manifest_path: null
+
+  # Path to frozen eval manifest
+  # REQUIRED: Must be provided for contamination protection
+  frozen_eval_manifest_path: null
+
+  # Data loading configuration
+  loader:
+    num_workers: 4
+    pin_memory: true
+    shuffle: false  # Deterministic training
+
+# === Output Configuration ===
+output:
+  # Directory for model checkpoints and logs
+  output_dir: "training_output/policy"
+
+  # Checkpoint saving frequency (epochs)
+  save_every_n_epochs: 5
+
+  # Save final model
+  save_final: true
+
+  # Log training metrics
+  log_metrics: true
+
+# === Validation Configuration ===
+validation:
+  # Run validation after each epoch
+  enabled: true
+
+  # Validation metrics to compute
+  metrics:
+    - "accuracy"
+    - "top_5_accuracy"
+    - "nll"
+
+# === Environment Configuration ===
+environment:
+  # Device selection (auto, cuda, cpu)
+  device: "auto"
+
+  # Mixed precision training (experimental)
+  mixed_precision: false
+
+  # Deterministic mode (slower but reproducible)
+  deterministic: true
+
+# === Frozen Eval Protection ===
+# This section documents the frozen eval exclusion contract
+frozen_eval_protection:
+  # If true, training will fail if frozen eval records are detected
+  enforce: true
+
+  # Method for exclusion
+  exclusion_method: "record_key_filter"
+
+  # Description of enforcement
+  description: |
+    Frozen eval records are excluded from training data by filtering
+    on record keys (inputHash). This is enforced in PolicyDataset
+    at load time. The benchmark script independently verifies no
+    overlap exists before training.
+
+# === Metadata ===
+metadata:
+  # Configuration schema version
+  schema_version: "1.0.0"
+
+  # This is a template, not a production config
+  is_template: true
+
+  # M14 milestone reference
+  milestone: "M14"
+
+  # Warning about values
+  warning: |
+    All hyperparameter values in this template are ILLUSTRATIVE ONLY.
+    They are not recommended defaults and should be determined through
+    proper experimentation. Do not treat these as official settings.
+
