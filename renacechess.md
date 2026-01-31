@@ -281,8 +281,13 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 - **CI Run 1:** 21540464307 (SUCCESS - All checks passing on first run)
 - **Final Coverage:** 90%+ (exceeds 90% threshold)
 - **Test Count:** 408+ passed, 1 skipped
+<<<<<<< HEAD
 - **PR:** #18 (merged)
 - **Final Commit:** `206e712`
+=======
+- **PR:** #18 (pending merge)
+- **Branch Commit:** `605fb81`
+>>>>>>> origin/m15-personality-contract-001
 - **Audit:** `docs/milestones/PhaseB/M15/M15_audit.md`
 - **Summary:** `docs/milestones/PhaseB/M15/M15_summary.md`
 - **Key Files:**
@@ -447,6 +452,10 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
+<<<<<<< HEAD
 **Last Updated:** 2026-01-31 (Phase A CLOSED, M15 CLOSED, Phase B OPEN)
+=======
+**Last Updated:** 2026-01-31 (Phase A CLOSED, M15 PERSONALITY-CONTRACT-001 in progress)
+>>>>>>> origin/m15-personality-contract-001
 
 
