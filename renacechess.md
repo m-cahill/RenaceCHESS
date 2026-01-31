@@ -23,7 +23,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M12 | ⛔ Closed (SUPERSEDED) | `m12-archive-audit-remediation` | 2026-01-31 | Audit Remediation Pack — Surfaced contract ambiguity, superseded by M13 |
 | M13 | ✅ Closed (MERGED) | `m13-contract-input-semantics` → `main` | 2026-01-31 | CONTRACT-INPUT-SEMANTICS-001 — Explicit contract semantics for dict inputs |
 | M14 | ✅ Closed (MERGED) | `m14-train-pack-001` → `main` | 2026-01-31 | TRAIN-PACK-001 — Training Readiness & Benchmark Pack |
-| M15 | ⏳ In Progress | `m15-personality-contract-001` | — | PERSONALITY-CONTRACT-001 — Personality Safety Contract + Interface |
+| M15 | ✅ Closed (MERGED) | `m15-personality-contract-001` → `main` | 2026-01-31 | PERSONALITY-CONTRACT-001 — Personality Safety Contract + Interface |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -281,8 +281,8 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 - **CI Run 1:** 21540464307 (SUCCESS - All checks passing on first run)
 - **Final Coverage:** 90%+ (exceeds 90% threshold)
 - **Test Count:** 408+ passed, 1 skipped
-- **PR:** #18 (pending merge)
-- **Branch Commit:** `605fb81`
+- **PR:** #18 (merged)
+- **Final Commit:** `206e712`
 - **Audit:** `docs/milestones/PhaseB/M15/M15_audit.md`
 - **Summary:** `docs/milestones/PhaseB/M15/M15_summary.md`
 - **Key Files:**
@@ -447,6 +447,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-01-31 (Phase A CLOSED, M15 PERSONALITY-CONTRACT-001 in progress)
+**Last Updated:** 2026-01-31 (Phase A CLOSED, M15 CLOSED, Phase B OPEN)
 
 
