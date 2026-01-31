@@ -25,6 +25,11 @@
 | 2026-01-31T10:50:00Z | ruff format | Fix benchmark script formatting | `scripts/benchmark_training.py` | ✅ Complete |
 | 2026-01-31T10:55:00Z | git push | Push formatting fix | Commit fecdb7c | ✅ Complete |
 | 2026-01-31T11:00:00Z | gh run view | Monitor CI workflow Run 2 | PR #17, Run 21539604426 | ✅ Green |
+| 2026-01-31T11:30:00Z | gh pr merge | Merge PR #17 to main | PR #17 | Pending |
+| 2026-01-31T11:35:00Z | write | Generate M14_audit.md | `docs/milestones/PhaseA/M14/M14_audit.md` | Pending |
+| 2026-01-31T11:40:00Z | write | Generate M14_summary.md | `docs/milestones/PhaseA/M14/M14_summary.md` | Pending |
+| 2026-01-31T11:45:00Z | search_replace | Update renacechess.md | `renacechess.md` | Pending |
+| 2026-01-31T11:50:00Z | write | Create M15 folder skeleton | `docs/milestones/PhaseA/M15/` | Pending |
 
 ---
 
