@@ -326,4 +326,23 @@ def extract_per_piece_features(board: chess.Board) -> PerPieceFeaturesV1:
 
         pieces.append(piece_features)
 
-    return PerPieceFeaturesV1(schema_version="per_piece.v1", pieces=pieces)
+    # Normalize pieces to alias-keyed dicts before model creation
+    # This is the explicit contract boundary: all data passed to models must use alias keys
+    # Pydantic v2 nested validation does not reliably invoke validators, so normalization
+    # must happen at the boundary before models reach Pydantic.
+    from renacechess.contracts.validation import normalize_dict_keys_to_aliases
+
+    normalized_pieces = []
+    for p in pieces:
+        if hasattr(p, "model_dump"):
+            # Convert PieceFeatures instance to dict with alias keys
+            piece_dict = p.model_dump(by_alias=True)
+            # Ensure all keys are aliases (normalize_dict_keys_to_aliases handles edge cases)
+            normalized_pieces.append(normalize_dict_keys_to_aliases(piece_dict, PieceFeatures))
+        else:
+            # Already a dict, normalize it
+            normalized_pieces.append(normalize_dict_keys_to_aliases(p, PieceFeatures))
+
+    return PerPieceFeaturesV1.model_validate(
+        {"schemaVersion": "per_piece.v1", "pieces": normalized_pieces}
+    )
