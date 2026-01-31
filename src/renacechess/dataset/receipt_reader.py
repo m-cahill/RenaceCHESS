@@ -4,6 +4,7 @@ import json
 from pathlib import Path
 
 from renacechess.contracts.models import IngestReceiptV1
+from renacechess.contracts.validation import validate_with_aliases
 from renacechess.determinism import stable_hash
 
 
@@ -23,7 +24,7 @@ def load_receipt_from_path(receipt_path: Path) -> IngestReceiptV1:
         raise FileNotFoundError(f"Receipt not found: {receipt_path}")
 
     receipt_dict = json.loads(receipt_path.read_text())
-    return IngestReceiptV1.model_validate(receipt_dict)
+    return validate_with_aliases(IngestReceiptV1, receipt_dict)
 
 
 def get_pgn_path_from_receipt(

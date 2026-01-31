@@ -18,6 +18,7 @@ from renacechess.contracts.models import (
     FrozenEvalManifestStratificationTargets,
     FrozenEvalManifestV1,
 )
+from renacechess.contracts.validation import validate_with_aliases
 from renacechess.determinism import canonical_hash, canonical_json_dump
 
 
@@ -53,7 +54,7 @@ def generate_frozen_eval_manifest(
     with source_manifest_path.open() as f:
         manifest_dict = json.load(f)
 
-    source_manifest = DatasetManifestV2.model_validate(manifest_dict)
+    source_manifest = validate_with_aliases(DatasetManifestV2, manifest_dict)
 
     # Read all shards and extract labeled records with conditioning metadata
     records: list[FrozenEvalManifestRecord] = []

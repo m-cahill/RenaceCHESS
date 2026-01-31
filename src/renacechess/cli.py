@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 from renacechess.contracts.models import FrozenEvalManifestV1
+from renacechess.contracts.validation import validate_with_aliases
 from renacechess.dataset.builder import build_dataset
 from renacechess.dataset.config import DatasetBuildConfig
 from renacechess.demo.pgn_overlay import generate_demo_payload
@@ -468,7 +469,9 @@ def main() -> None:
                         frozen_manifest_dict = json.loads(
                             args.frozen_eval_manifest.read_text(encoding="utf-8")
                         )
-                        frozen_manifest = FrozenEvalManifestV1.model_validate(frozen_manifest_dict)
+                        frozen_manifest = validate_with_aliases(
+                            FrozenEvalManifestV1, frozen_manifest_dict
+                        )
                         frozen_eval_manifest_hash = frozen_manifest.manifest_hash
                     except Exception as e:
                         print(

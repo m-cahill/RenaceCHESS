@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from renacechess.contracts.models import DatasetManifestV2, EvalReportV3
+from renacechess.contracts.validation import validate_with_aliases
 from renacechess.dataset.split import compute_split_assignment
 from renacechess.eval.baselines import compute_policy_seed, create_policy_provider
 from renacechess.eval.conditioned_metrics import ConditionedMetricsAccumulator
@@ -38,7 +39,7 @@ def load_manifest(manifest_path: Path) -> DatasetManifestV2:
             "M04 only supports v2 manifests."
         )
 
-    return DatasetManifestV2.model_validate(manifest_dict)
+    return validate_with_aliases(DatasetManifestV2, manifest_dict)
 
 
 def run_evaluation(

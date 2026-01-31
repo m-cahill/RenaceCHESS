@@ -10,6 +10,7 @@ import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
 
 from renacechess.contracts.models import DatasetManifestV2, FrozenEvalManifestV1
+from renacechess.contracts.validation import validate_with_aliases
 from renacechess.eval.runner import load_manifest
 from renacechess.models.outcome_head_v1 import OutcomeHeadV1
 
@@ -84,13 +85,13 @@ class OutcomeDataset(Dataset):
 
         # Load manifest
         manifest_dict = json.loads(manifest_path.read_text(encoding="utf-8"))
-        self.manifest = DatasetManifestV2.model_validate(manifest_dict)
+        self.manifest = validate_with_aliases(DatasetManifestV2, manifest_dict)
 
         # Load frozen eval manifest if provided
         self.frozen_eval_keys: set[str] = set()
         if frozen_eval_manifest_path is not None:
             frozen_dict = json.loads(frozen_eval_manifest_path.read_text(encoding="utf-8"))
-            frozen_manifest = FrozenEvalManifestV1.model_validate(frozen_dict)
+            frozen_manifest = validate_with_aliases(FrozenEvalManifestV1, frozen_dict)
             self.frozen_eval_keys = {record.record_key for record in frozen_manifest.records}
 
         # Load all training records

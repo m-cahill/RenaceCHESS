@@ -14,6 +14,7 @@ from renacechess.contracts.models import (
     ProvenanceV1,
     SourceArtifactRefV1,
 )
+from renacechess.contracts.validation import validate_with_aliases
 from renacechess.ingest.cache import CacheManager
 from renacechess.ingest.types import FetchResult
 
@@ -127,7 +128,7 @@ def load_receipt(cache: CacheManager, source_id: str) -> IngestReceiptV1:
         raise FileNotFoundError(f"Receipt not found: {receipt_path}")
 
     receipt_dict = json.loads(receipt_path.read_text())
-    return IngestReceiptV1.model_validate(receipt_dict)
+    return validate_with_aliases(IngestReceiptV1, receipt_dict)
 
 
 def _get_tool_version() -> str:
