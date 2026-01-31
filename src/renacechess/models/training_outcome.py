@@ -7,10 +7,9 @@ from typing import Any, Literal
 
 import torch
 import torch.nn as nn
-from torch.utils.data import Dataset, DataLoader
+from torch.utils.data import DataLoader, Dataset
 
 from renacechess.contracts.models import DatasetManifestV2, FrozenEvalManifestV1
-from renacechess.eval.runner import load_manifest
 from renacechess.models.outcome_head_v1 import OutcomeHeadV1
 
 

@@ -6,7 +6,6 @@ time control classes, and time pressure buckets according to M06 specifications.
 
 from typing import Literal
 
-
 # M06 Skill Bucket IDs (frozen)
 SkillBucketId = Literal[
     "lt_800",

@@ -15,7 +15,7 @@ from pydantic import BaseModel, ConfigDict, Field
 class PieceFeatures(BaseModel):
     """Per-piece structural features (Structural Cognition Contract v1)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     # Identity fields
     slot_id: int = Field(..., alias="slotId", ge=0, le=31, description="Fixed slot index (0-31)")
@@ -68,7 +68,7 @@ class PieceFeatures(BaseModel):
 class PerPieceFeaturesV1(BaseModel):
     """Per-piece features container (32 slots, Structural Cognition Contract v1)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     schema_version: Literal["per_piece.v1"] = Field(
         "per_piece.v1", alias="schemaVersion", description="Schema version identifier"
@@ -84,7 +84,7 @@ class PerPieceFeaturesV1(BaseModel):
 class SquareMapFeaturesV1(BaseModel):
     """Square-level structural maps (Structural Cognition Contract v1)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     schema_version: Literal["square_map.v1"] = Field(
         "square_map.v1", alias="schemaVersion", description="Schema version identifier"
@@ -168,7 +168,7 @@ class SquareMapFeaturesV1(BaseModel):
 class StructuralLabel(BaseModel):
     """Semantic label for narrative seeding (Context Bridge v2)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     type: Literal[
         "dominated-piece",
@@ -187,7 +187,7 @@ class StructuralLabel(BaseModel):
 class StructuralCognition(BaseModel):
     """Structural cognition container (Context Bridge v2)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     per_piece: PerPieceFeaturesV1 | None = Field(
         None, alias="perPiece", description="Per-piece structural features"
@@ -203,7 +203,7 @@ class StructuralCognition(BaseModel):
 class Position(BaseModel):
     """Chess position representation."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     fen: str = Field(..., description="FEN string representation of the position")
     side_to_move: Literal["white", "black"] = Field(
@@ -224,7 +224,7 @@ class PositionConditioning(BaseModel):
       remain required/optional as before
     """
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     # Legacy fields (backward compatible)
     skill_bucket: str = Field(
@@ -294,7 +294,7 @@ class PolicyMove(BaseModel):
 class ChosenMove(BaseModel):
     """Ground-truth move that was actually played (optional label)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     uci: str = Field(..., description="Move in UCI format (required)")
     san: str | None = Field(None, description="Move in SAN format (optional)")
@@ -303,7 +303,7 @@ class ChosenMove(BaseModel):
 class Policy(BaseModel):
     """Move policy distribution."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     top_moves: list[PolicyMove] = Field(
         ..., alias="topMoves", description="Top moves with probabilities"
@@ -317,7 +317,7 @@ class Policy(BaseModel):
 class HumanWDL(BaseModel):
     """Human win/draw/loss probabilities."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     w: float = Field(..., ge=0.0, le=1.0, description="Win probability")
     d: float = Field(..., ge=0.0, le=1.0, description="Draw probability")
@@ -333,7 +333,7 @@ class HumanWDL(BaseModel):
 class HDIComponents(BaseModel):
     """Components of Human Difficulty Index."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     entropy: float = Field(..., ge=0.0, description="Policy entropy component")
     top_gap: float = Field(..., alias="topGap", ge=0.0, le=1.0, description="Top gap component")
@@ -362,7 +362,7 @@ class NarrativeSeed(BaseModel):
 class ContextBridgeMeta(BaseModel):
     """Metadata for Context Bridge payload."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     schema_version: Literal["v1"] = Field("v1", alias="schemaVersion", description="Schema version")
     generated_at: datetime = Field(
@@ -376,7 +376,7 @@ class ContextBridgeMeta(BaseModel):
 class ContextBridgeMetaV2(BaseModel):
     """Metadata for Context Bridge payload (v2)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     schema_version: Literal["v2"] = Field("v2", alias="schemaVersion", description="Schema version")
     generated_at: datetime = Field(
@@ -390,7 +390,7 @@ class ContextBridgeMetaV2(BaseModel):
 class HumanWDLContainer(BaseModel):
     """Container for pre-move and post-move WDL probabilities."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     pre: HumanWDL = Field(..., description="WDL probabilities before move")
     post_by_move: dict[str, HumanWDL] = Field(
@@ -403,7 +403,7 @@ class HumanWDLContainer(BaseModel):
 class ContextBridgePayload(BaseModel):
     """LLM Context Bridge payload (v1)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     position: Position = Field(..., description="Chess position")
     conditioning: PositionConditioning = Field(..., description="Conditioning variables")
@@ -443,7 +443,7 @@ class NarrativeSeedV2(BaseModel):
 class ContextBridgePayloadV2(BaseModel):
     """LLM Context Bridge payload (v2) - extends v1 with structural cognition."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     position: Position = Field(..., description="Chess position")
     conditioning: PositionConditioning = Field(..., description="Conditioning variables")
@@ -473,7 +473,7 @@ class ContextBridgePayloadV2(BaseModel):
 class DatasetManifestShardRef(BaseModel):
     """Reference to a dataset shard."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     shard_id: str = Field(..., alias="shardId", description="Unique shard identifier")
     hash: str = Field(..., description="SHA-256 hash of shard file")
@@ -483,7 +483,7 @@ class DatasetManifestShardRef(BaseModel):
 class DatasetManifestSplitAssignments(BaseModel):
     """Split assignments for dataset."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     train: list[str] = Field(default_factory=list, description="Training split shard IDs")
     val: list[str] = Field(default_factory=list, description="Validation split shard IDs")
@@ -495,7 +495,7 @@ class DatasetManifestSplitAssignments(BaseModel):
 class DatasetManifest(BaseModel):
     """Dataset manifest (v1)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     schema_version: Literal["v1"] = Field("v1", alias="schemaVersion", description="Schema version")
     created_at: datetime = Field(
@@ -515,7 +515,7 @@ class DatasetManifest(BaseModel):
 class DatasetManifestShardRefV2(BaseModel):
     """Reference to a dataset shard (v2) - includes record count."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     shard_id: str = Field(..., alias="shardId", description="Unique shard identifier")
     hash: str = Field(
@@ -530,7 +530,7 @@ class DatasetManifestShardRefV2(BaseModel):
 class DatasetManifestInputV2(BaseModel):
     """Input source reference (v2) - receipt or PGN file."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     type: Literal["ingest_receipt", "pgn_file"] = Field(..., description="Input type")
     digest: str = Field(
@@ -550,7 +550,7 @@ class DatasetManifestInputV2(BaseModel):
 class DatasetManifestAssemblyConfigV2(BaseModel):
     """Assembly configuration (v2)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     shard_size: int = Field(
         ..., alias="shardSize", ge=1, description="Maximum number of records per shard"
@@ -584,7 +584,7 @@ class DatasetManifestAssemblyConfigV2(BaseModel):
 class DatasetManifestV2(BaseModel):
     """Dataset manifest (v2) - includes assembly config and input provenance."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     schema_version: Literal["v2"] = Field("v2", alias="schemaVersion", description="Schema version")
     created_at: datetime = Field(
@@ -631,7 +631,7 @@ class DatasetManifestV2(BaseModel):
 class SourceArtifactRefV1(BaseModel):
     """Source artifact reference (v1)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     uri: str = Field(..., description="Original source URI (URL or file:// path)")
     resolved_uri: str | None = Field(
@@ -649,7 +649,7 @@ class SourceArtifactRefV1(BaseModel):
 class ArtifactRefV1(BaseModel):
     """Cached artifact reference (v1)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     cache_path: str = Field(
         ...,
@@ -675,7 +675,7 @@ class ArtifactRefV1(BaseModel):
 class DerivedArtifactRefV1(BaseModel):
     """Derived artifact reference (v1) - e.g., decompressed files."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     decompressed_path: str = Field(
         ..., alias="decompressedPath", description="Path to decompressed artifact"
@@ -697,7 +697,7 @@ class DerivedArtifactRefV1(BaseModel):
 class ProvenanceV1(BaseModel):
     """Provenance information (v1)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     tool_version: str = Field(
         ..., alias="toolVersion", description="Version of renacechess tool used"
@@ -713,7 +713,7 @@ class ProvenanceV1(BaseModel):
 class IngestReceiptV1(BaseModel):
     """Ingest receipt (v1) - documents downloaded/cached artifacts."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     schema_version: Literal["v1"] = Field("v1", alias="schemaVersion", description="Schema version")
     created_at: datetime = Field(
@@ -733,7 +733,7 @@ class IngestReceiptV1(BaseModel):
 class TopKLegalCoverage(BaseModel):
     """Top-K legal coverage metrics."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     top1: str = Field(
         ...,
@@ -754,7 +754,7 @@ class TopKLegalCoverage(BaseModel):
 class PolicyEntropyStats(BaseModel):
     """Policy entropy statistics."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     mean: str = Field(
         ...,
@@ -771,7 +771,7 @@ class PolicyEntropyStats(BaseModel):
 class EvalMetricsV1(BaseModel):
     """Evaluation metrics (v1) - policy validity metrics."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     records_evaluated: int = Field(
         ..., alias="recordsEvaluated", ge=0, description="Total number of records evaluated"
@@ -800,7 +800,7 @@ class EvalMetricsV1(BaseModel):
 class EvalReportSplitsV1(BaseModel):
     """Per-split evaluation metrics (v1)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     train: EvalMetricsV1 | None = Field(None, description="Training split metrics (if evaluated)")
     val: EvalMetricsV1 | None = Field(None, description="Validation split metrics (if evaluated)")
@@ -812,7 +812,7 @@ class EvalReportSplitsV1(BaseModel):
 class EvalReportV1(BaseModel):
     """Evaluation report (v1) - policy validity evaluation over dataset manifests."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     schema_version: Literal["eval_report.v1"] = Field(
         "eval_report.v1", alias="schemaVersion", description="Schema version"
@@ -873,7 +873,7 @@ class AccuracyMetrics(BaseModel):
 class EvalMetricsV2(BaseModel):
     """Evaluation metrics (v2) - policy validity metrics + accuracy metrics."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     records_evaluated: int = Field(
         ..., alias="recordsEvaluated", ge=0, description="Total number of records evaluated"
@@ -915,7 +915,7 @@ class EvalMetricsV2(BaseModel):
 class EvalReportSplitsV2(BaseModel):
     """Per-split evaluation metrics (v2)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     train: EvalMetricsV2 | None = Field(None, description="Training split metrics (if evaluated)")
     val: EvalMetricsV2 | None = Field(None, description="Validation split metrics (if evaluated)")
@@ -930,7 +930,7 @@ class EvalReportSplitsV2(BaseModel):
 class DistributionStats(BaseModel):
     """Distribution statistics for a metric."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     mean: str = Field(..., description="Mean value (fixed-decimal string)")
     median: str | None = Field(None, description="Median value (fixed-decimal string, optional)")
@@ -942,7 +942,7 @@ class DistributionStats(BaseModel):
 class ConditionedDistributionMetrics(BaseModel):
     """Distribution metrics for conditioned evaluation."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     entropy: DistributionStats | None = Field(None, description="Policy entropy statistics")
     top_gap: DistributionStats | None = Field(
@@ -956,7 +956,7 @@ class ConditionedDistributionMetrics(BaseModel):
 class ConditionedValidityMetrics(BaseModel):
     """Policy validity metrics for conditioned evaluation."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     illegal_rate: str = Field(
         ..., alias="illegalRate", description="Illegal move rate (fixed-decimal string)"
@@ -977,7 +977,7 @@ class ConditionedValidityMetrics(BaseModel):
 class ConditionedAccuracyMetrics(BaseModel):
     """Accuracy metrics for conditioned evaluation."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     top1: str = Field(..., description="Top-1 accuracy (fixed-decimal string)")
     top_k: dict[str, str] = Field(
@@ -993,7 +993,7 @@ class ConditionedAccuracyMetrics(BaseModel):
 class ConditionedMetrics(BaseModel):
     """Metrics for a single conditioning stratum (v3 report, extended with HDI in v4)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     total_records: int = Field(
         ..., alias="totalRecords", ge=0, description="Total number of records in this stratum"
@@ -1025,7 +1025,7 @@ class ConditionedMetrics(BaseModel):
 class EvalReportV3(BaseModel):
     """Evaluation report (v3) - adds conditioned metrics stratified by skill/time."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     schema_version: Literal["eval_report.v3"] = Field(
         "eval_report.v3", alias="schemaVersion", description="Schema version"
@@ -1081,7 +1081,7 @@ class EvalReportV3(BaseModel):
 class EvalReportV4(BaseModel):
     """Evaluation report (v4) - extends v3 with Human Difficulty Index (HDI) metrics (M07)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     schema_version: Literal["eval_report.v4"] = Field(
         "eval_report.v4", alias="schemaVersion", description="Schema version"
@@ -1137,7 +1137,7 @@ class EvalReportV4(BaseModel):
 class EvalReportV5(BaseModel):
     """Evaluation report (v5) - extends v4 with outcome metrics (M09)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     schema_version: Literal["eval_report.v5"] = Field(
         "eval_report.v5", alias="schemaVersion", description="Schema version"
@@ -1224,7 +1224,7 @@ class EvalReportV5(BaseModel):
 class HDIOutcomeSensitivity(BaseModel):
     """Outcome sensitivity component for HDI (M07)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     value: float = Field(
         ..., ge=0.0, le=1.0, description="Outcome sensitivity value (normalized to [0.0, 1.0])"
@@ -1244,7 +1244,7 @@ class HDIOutcomeSensitivity(BaseModel):
 class HDIMetricsComponents(BaseModel):
     """HDI component values for evaluation reports (M07)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     entropy: float = Field(
         ..., ge=0.0, le=1.0, description="Normalized policy entropy component [0.0, 1.0]"
@@ -1273,7 +1273,7 @@ class HDIMetricsComponents(BaseModel):
 class HDIMetrics(BaseModel):
     """Human Difficulty Index (HDI) metrics for evaluation reports (M07)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     value: float = Field(
         ...,
@@ -1293,7 +1293,7 @@ class HDIMetrics(BaseModel):
 class OutcomeMetrics(BaseModel):
     """Outcome metrics for human W/D/L evaluation (M09)."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     total_predictions: int = Field(
         ..., alias="totalPredictions", ge=0, description="Total number of outcome predictions"
@@ -1322,7 +1322,7 @@ class OutcomeMetrics(BaseModel):
 class FrozenEvalManifestSourceRef(BaseModel):
     """Reference to source dataset manifest v2 for frozen eval manifest."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     dataset_digest: str = Field(
         ...,
@@ -1338,7 +1338,7 @@ class FrozenEvalManifestSourceRef(BaseModel):
 class FrozenEvalManifestRecord(BaseModel):
     """Record reference in frozen eval manifest."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     record_key: str = Field(
         ..., alias="recordKey", description="Record identifier (e.g., 'fen:ply')"
@@ -1384,7 +1384,7 @@ class FrozenEvalManifestRecord(BaseModel):
 class FrozenEvalManifestStratificationTargets(BaseModel):
     """Stratification targets for frozen eval manifest."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     total_records: int = Field(
         ..., alias="totalRecords", ge=0, description="Target total record count"
@@ -1400,7 +1400,7 @@ class FrozenEvalManifestStratificationTargets(BaseModel):
 class FrozenEvalManifestCoverageShortfall(BaseModel):
     """Coverage shortfall in frozen eval manifest."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     axis: Literal["skillBucketId", "timeControlClass", "timePressureBucket"] = Field(
         ..., description="Conditioning axis with shortfall"
@@ -1413,7 +1413,7 @@ class FrozenEvalManifestCoverageShortfall(BaseModel):
 class FrozenEvalManifestV1(BaseModel):
     """Frozen evaluation manifest (v1) - immutable evaluation set with stratification metadata."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     schema_version: Literal[1] = Field(1, alias="schemaVersion", description="Schema version")
     created_at: datetime = Field(
@@ -1463,7 +1463,7 @@ class FrozenEvalManifestV1(BaseModel):
 class EvalReportV2(BaseModel):
     """Evaluation report (v2) - policy validity evaluation + ground-truth accuracy metrics."""
 
-    model_config = ConfigDict(validate_by_alias=True, validate_by_name=True)
+    model_config = ConfigDict(populate_by_name=True)
 
     schema_version: Literal["eval_report.v2"] = Field(
         "eval_report.v2", alias="schemaVersion", description="Schema version"
