@@ -118,7 +118,7 @@ def generate_frozen_eval_manifest(
         )
 
     # Stratify by skill bucket
-    records_by_skill = defaultdict(list)
+    records_by_skill: dict[str, list] = defaultdict(list)  # type: ignore[var-annotated]  # Pre-existing MyPy issue deferred to future milestone
     for record in records:
         bucket_id = record.skill_bucket_id or "unknown"
         records_by_skill[bucket_id].append(record)
