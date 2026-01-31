@@ -225,5 +225,5 @@ This run correctly identifies a **pre-existing compatibility issue** that was hi
 
 M12's implementation is **correct** and has successfully achieved its goals. The CI failures are due to a **pre-existing compatibility issue** that was hidden by floating dependency versions. M12's dependency pinning has correctly revealed this issue, which is exactly what supply-chain hardening is supposed to do.
 
-The issue must be addressed in a future milestone, as fixing it would require semantic changes that are explicitly out of M12's scope.
+**Resolution Path:** M12.1 (PYDANTIC-COMPAT-001) has been created as a **blocking interstitial milestone** to restore Pydantic compatibility without changing PoC semantics. M12 will remain open until M12.1 completes, preserving governance integrity.
 
