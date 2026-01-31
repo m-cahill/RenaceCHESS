@@ -26,14 +26,14 @@
 
 
 # Tool Logging Rule
-Whenever you invoke a tool (run, fix, apply_patch, search, test, etc.), append a short entry to `docs/milestones/PoC/MNN/MNN_toolcalls.md` **BEFORE** running the tool for the milestone describing:
+Whenever you invoke a tool (run, fix, apply_patch, search, test, etc.), append a short entry to `docs/milestones/PhaseA/MNN/MNN_toolcalls.md` **BEFORE** running the tool for the milestone describing:
 - the tool name
 - the purpose of the call
 - the files involved
 - the timestamp
 
 # Recovery Rule
-**Before** performing any action, check `docs/milestones/PoC/MNN/MNN_toolcalls.md` for the milestone for the most recent entry.
+**Before** performing any action, check `docs/milestones/PhaseA/MNN/MNN_toolcalls.md` for the milestone for the most recent entry.
 Restate:
 - what you were doing
 - what step was next
@@ -73,7 +73,7 @@ This workflow governs collaboration between you (AI agent) and external AI agent
 
 **Before ANY action:**
 
-1. Check `docs/milestones/PoC/MNN/MNN_toolcalls.md` for the current milestone
+1. Check `docs/milestones/PhaseA/MNN/MNN_toolcalls.md` for the current milestone
 2. If resuming, restate: what you were doing, what step was next, whether the previous tool call completed
 3. Wait for confirmation before continuing
 
@@ -83,7 +83,7 @@ This workflow governs collaboration between you (AI agent) and external AI agent
 
 ## Phase 1: Plan Review
 
-1. Read `docs/milestones/PoC/MNN/MNN_plan.md`
+1. Read `docs/milestones/PhaseA/MNN/MNN_plan.md`
 2. Read referenced prompts for audit/summary generation
 3. Identify the milestone's **single objective** and **definition of done**
 
@@ -181,6 +181,6 @@ Generate using the specified prompts:
 
 If session is interrupted:
 
-1. Read `docs/milestones/PoC/MNN/MNN_toolcalls.md` for last recorded action
+1. Read `docs/milestones/PhaseA/MNN/MNN_toolcalls.md` for last recorded action
 2. Report: last action, next planned action, completion status
 3. Wait for user confirmation before resuming

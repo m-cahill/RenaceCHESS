@@ -15,8 +15,8 @@ jobs:
     name: Lint and Format
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.1.1
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.0.0
         with:
           python-version: "3.11"
           cache: "pip"
@@ -30,13 +30,17 @@ jobs:
         run: git checkout HEAD -- .
       - name: Ruff format check
         run: ruff format --check .
+      - name: Import boundary enforcement
+        run: |
+          pip install import-linter
+          import-linter
 
   typecheck:
     name: Type Check
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.1.1
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.0.0
         with:
           python-version: "3.11"
           cache: "pip"
@@ -51,8 +55,8 @@ jobs:
     name: Test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5  # v4.1.1
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.0.0
         with:
           python-version: "3.11"
           cache: "pip"
@@ -208,13 +212,13 @@ jobs:
         run: |
           python -m pytest --cov-fail-under=${{ steps.coverage_check.outputs.threshold }}
       - name: Upload coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.3.1
         if: always()
         with:
           name: coverage-xml
           path: coverage.xml
       - name: Upload HTML coverage
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.3.1
         if: always()
         with:
           name: coverage-html

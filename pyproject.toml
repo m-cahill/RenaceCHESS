@@ -21,12 +21,12 @@ classifiers = [
 ]
 
 dependencies = [
-    "python-chess>=1.999",
-    "pydantic>=2.0.0",
-    "jsonschema>=4.0.0",
-    "requests>=2.31.0",
-    "torch>=2.0.0",
-    "zstandard>=0.22",
+    "python-chess~=1.999",
+    "pydantic~=2.5.0",
+    "jsonschema~=4.20.0",
+    "requests~=2.31.0",
+    "torch~=2.2.0",
+    "zstandard~=0.22.0",
 ]
 
 [project.optional-dependencies]
