@@ -22,6 +22,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M11 | ✅ Closed (MERGED) | `m11-structural-interpretability` → `main` | 2026-01-28 | Structural Interpretability Expansion — Per-Piece & Square-Level Cognition |
 | M12 | ⛔ Closed (SUPERSEDED) | `m12-archive-audit-remediation` | 2026-01-31 | Audit Remediation Pack — Surfaced contract ambiguity, superseded by M13 |
 | M13 | ✅ Closed (MERGED) | `m13-contract-input-semantics` → `main` | 2026-01-31 | CONTRACT-INPUT-SEMANTICS-001 — Explicit contract semantics for dict inputs |
+| M14 | ✅ Closed (MERGED) | `m14-train-pack-001` → `main` | 2026-01-31 | TRAIN-PACK-001 — Training Readiness & Benchmark Pack |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -250,6 +251,30 @@ This document tracks milestones, schema, migrations, and governance decisions fo
   - M12 superseded (closed without merge, branch archived)
 - **Phase A Hardening Started:** M13 is the first completed Phase A milestone
 
+**M14 Details:**
+- **Objective:** Establish training readiness infrastructure without retraining models
+- **CI Run 1:** 21539554164 (FAILURE - Format check + spurious coverage regression)
+- **CI Run 2:** 21539604426 (SUCCESS - All checks passing)
+- **Final Coverage:** 90%+ (exceeds 90% threshold)
+- **Test Count:** 383 passed, 1 skipped
+- **PR:** #17 (merged)
+- **Final Commit:** `148204d`
+- **Audit:** `docs/milestones/PhaseA/M14/M14_audit.md`
+- **Summary:** `docs/milestones/PhaseA/M14/M14_summary.md`
+- **Key Files:**
+  - `scripts/benchmark_training.py` — Training benchmark harness (local-only)
+  - `training/configs/template_policy.yaml` — Policy training config template
+  - `training/configs/template_outcome.yaml` — Outcome head training config template
+  - `docs/training/M14_TRAINING_BENCHMARK.md` — Benchmark report template
+  - `docs/training/CHECKPOINT_PUBLICATION_STANDARD.md` — Checkpoint publication rules
+- **Notable Features:**
+  - Hardware-agnostic benchmark (GPU detection, VRAM, CPU threads)
+  - Explicit frozen-eval contamination check (fail-fast on overlap)
+  - Structured JSON output for benchmark results
+  - Placeholder hyperparameters with "illustrative only" labeling
+  - Benchmark script linted/type-checked only (not executed in CI)
+- **Phase A Status:** Training readiness established; Phase A hardening complete
+
 ---
 
 ## Database Schema
@@ -384,6 +409,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-01-31 (M13 closeout — CONTRACT-INPUT-SEMANTICS-001, Phase A Hardening Started)
+**Last Updated:** 2026-01-31 (M14 closeout — TRAIN-PACK-001, Phase A Training Readiness Complete)
 
 
