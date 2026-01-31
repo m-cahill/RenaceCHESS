@@ -5,14 +5,16 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import ConfigDict, Field
+
+from renacechess.contracts.base_model import RenaceBaseModel
 
 # =============================================================================
 # Structural Cognition Models (M11)
 # =============================================================================
 
 
-class PieceFeatures(BaseModel):
+class PieceFeatures(RenaceBaseModel):
     """Per-piece structural features (Structural Cognition Contract v1)."""
 
     model_config = ConfigDict(
@@ -67,7 +69,7 @@ class PieceFeatures(BaseModel):
     )
 
 
-class PerPieceFeaturesV1(BaseModel):
+class PerPieceFeaturesV1(RenaceBaseModel):
     """Per-piece features container (32 slots, Structural Cognition Contract v1)."""
 
     model_config = ConfigDict(
@@ -85,7 +87,7 @@ class PerPieceFeaturesV1(BaseModel):
     )
 
 
-class SquareMapFeaturesV1(BaseModel):
+class SquareMapFeaturesV1(RenaceBaseModel):
     """Square-level structural maps (Structural Cognition Contract v1)."""
 
     model_config = ConfigDict(
@@ -171,7 +173,7 @@ class SquareMapFeaturesV1(BaseModel):
     )
 
 
-class StructuralLabel(BaseModel):
+class StructuralLabel(RenaceBaseModel):
     """Semantic label for narrative seeding (Context Bridge v2)."""
 
     model_config = ConfigDict(
@@ -192,7 +194,7 @@ class StructuralLabel(BaseModel):
     description: str = Field(..., description="Human-readable description for LLM grounding")
 
 
-class StructuralCognition(BaseModel):
+class StructuralCognition(RenaceBaseModel):
     """Structural cognition container (Context Bridge v2)."""
 
     model_config = ConfigDict(
@@ -210,7 +212,7 @@ class StructuralCognition(BaseModel):
     )
 
 
-class Position(BaseModel):
+class Position(RenaceBaseModel):
     """Chess position representation."""
 
     model_config = ConfigDict(
@@ -226,7 +228,7 @@ class Position(BaseModel):
     )
 
 
-class PositionConditioning(BaseModel):
+class PositionConditioning(RenaceBaseModel):
     """Conditioning variables for position evaluation.
 
     M06 Extension:
@@ -297,7 +299,7 @@ class PositionConditioning(BaseModel):
     )
 
 
-class PolicyMove(BaseModel):
+class PolicyMove(RenaceBaseModel):
     """Single move in policy distribution."""
 
     uci: str = Field(..., description="Move in UCI format")
@@ -305,7 +307,7 @@ class PolicyMove(BaseModel):
     p: float = Field(..., ge=0.0, le=1.0, description="Probability of this move")
 
 
-class ChosenMove(BaseModel):
+class ChosenMove(RenaceBaseModel):
     """Ground-truth move that was actually played (optional label)."""
 
     model_config = ConfigDict(
@@ -316,7 +318,7 @@ class ChosenMove(BaseModel):
     san: str | None = Field(None, description="Move in SAN format (optional)")
 
 
-class Policy(BaseModel):
+class Policy(RenaceBaseModel):
     """Move policy distribution."""
 
     model_config = ConfigDict(
@@ -332,7 +334,7 @@ class Policy(BaseModel):
     )
 
 
-class HumanWDL(BaseModel):
+class HumanWDL(RenaceBaseModel):
     """Human win/draw/loss probabilities."""
 
     model_config = ConfigDict(
@@ -350,7 +352,7 @@ class HumanWDL(BaseModel):
             raise ValueError(f"WDL probabilities must sum to 1.0, got {total}")
 
 
-class HDIComponents(BaseModel):
+class HDIComponents(RenaceBaseModel):
     """Components of Human Difficulty Index."""
 
     model_config = ConfigDict(
@@ -364,14 +366,14 @@ class HDIComponents(BaseModel):
     )
 
 
-class HDI(BaseModel):
+class HDI(RenaceBaseModel):
     """Human Difficulty Index."""
 
     value: float = Field(..., ge=0.0, description="Human Difficulty Index (scalar)")
     components: HDIComponents = Field(..., description="HDI component values")
 
 
-class NarrativeSeed(BaseModel):
+class NarrativeSeed(RenaceBaseModel):
     """Narrative seed for LLM context."""
 
     type: Literal["trap-risk", "confusing", "time-sensitive", "critical"] = Field(
@@ -381,7 +383,7 @@ class NarrativeSeed(BaseModel):
     facts: list[str] = Field(..., description="Array of factual statements")
 
 
-class ContextBridgeMeta(BaseModel):
+class ContextBridgeMeta(RenaceBaseModel):
     """Metadata for Context Bridge payload."""
 
     model_config = ConfigDict(
@@ -397,7 +399,7 @@ class ContextBridgeMeta(BaseModel):
     )
 
 
-class ContextBridgeMetaV2(BaseModel):
+class ContextBridgeMetaV2(RenaceBaseModel):
     """Metadata for Context Bridge payload (v2)."""
 
     model_config = ConfigDict(
@@ -413,7 +415,7 @@ class ContextBridgeMetaV2(BaseModel):
     )
 
 
-class HumanWDLContainer(BaseModel):
+class HumanWDLContainer(RenaceBaseModel):
     """Container for pre-move and post-move WDL probabilities."""
 
     model_config = ConfigDict(
@@ -428,7 +430,7 @@ class HumanWDLContainer(BaseModel):
     )
 
 
-class ContextBridgePayload(BaseModel):
+class ContextBridgePayload(RenaceBaseModel):
     """LLM Context Bridge payload (v1)."""
 
     model_config = ConfigDict(
@@ -453,7 +455,7 @@ class ContextBridgePayload(BaseModel):
     )
 
 
-class NarrativeSeedV2(BaseModel):
+class NarrativeSeedV2(RenaceBaseModel):
     """Narrative seed for LLM context (v2 with structural types)."""
 
     type: Literal[
@@ -470,7 +472,7 @@ class NarrativeSeedV2(BaseModel):
     facts: list[str] = Field(..., description="Array of factual statements")
 
 
-class ContextBridgePayloadV2(BaseModel):
+class ContextBridgePayloadV2(RenaceBaseModel):
     """LLM Context Bridge payload (v2) - extends v1 with structural cognition."""
 
     model_config = ConfigDict(
@@ -502,7 +504,7 @@ class ContextBridgePayloadV2(BaseModel):
     )
 
 
-class DatasetManifestShardRef(BaseModel):
+class DatasetManifestShardRef(RenaceBaseModel):
     """Reference to a dataset shard."""
 
     model_config = ConfigDict(
@@ -514,7 +516,7 @@ class DatasetManifestShardRef(BaseModel):
     path: str = Field(..., description="Relative or absolute path to shard file")
 
 
-class DatasetManifestSplitAssignments(BaseModel):
+class DatasetManifestSplitAssignments(RenaceBaseModel):
     """Split assignments for dataset."""
 
     model_config = ConfigDict(
@@ -528,7 +530,7 @@ class DatasetManifestSplitAssignments(BaseModel):
     )
 
 
-class DatasetManifest(BaseModel):
+class DatasetManifest(RenaceBaseModel):
     """Dataset manifest (v1)."""
 
     model_config = ConfigDict(
@@ -550,7 +552,7 @@ class DatasetManifest(BaseModel):
     )
 
 
-class DatasetManifestShardRefV2(BaseModel):
+class DatasetManifestShardRefV2(RenaceBaseModel):
     """Reference to a dataset shard (v2) - includes record count."""
 
     model_config = ConfigDict(
@@ -567,7 +569,7 @@ class DatasetManifestShardRefV2(BaseModel):
     records: int = Field(..., ge=0, description="Number of records in this shard")
 
 
-class DatasetManifestInputV2(BaseModel):
+class DatasetManifestInputV2(RenaceBaseModel):
     """Input source reference (v2) - receipt or PGN file."""
 
     model_config = ConfigDict(
@@ -589,7 +591,7 @@ class DatasetManifestInputV2(BaseModel):
     path: str | None = Field(None, description="Path to input (receipt path or PGN file path)")
 
 
-class DatasetManifestAssemblyConfigV2(BaseModel):
+class DatasetManifestAssemblyConfigV2(RenaceBaseModel):
     """Assembly configuration (v2)."""
 
     model_config = ConfigDict(
@@ -625,7 +627,7 @@ class DatasetManifestAssemblyConfigV2(BaseModel):
     )
 
 
-class DatasetManifestV2(BaseModel):
+class DatasetManifestV2(RenaceBaseModel):
     """Dataset manifest (v2) - includes assembly config and input provenance."""
 
     model_config = ConfigDict(
@@ -674,7 +676,7 @@ class DatasetManifestV2(BaseModel):
     )
 
 
-class SourceArtifactRefV1(BaseModel):
+class SourceArtifactRefV1(RenaceBaseModel):
     """Source artifact reference (v1)."""
 
     model_config = ConfigDict(
@@ -694,7 +696,7 @@ class SourceArtifactRefV1(BaseModel):
     )
 
 
-class ArtifactRefV1(BaseModel):
+class ArtifactRefV1(RenaceBaseModel):
     """Cached artifact reference (v1)."""
 
     model_config = ConfigDict(
@@ -722,7 +724,7 @@ class ArtifactRefV1(BaseModel):
     )
 
 
-class DerivedArtifactRefV1(BaseModel):
+class DerivedArtifactRefV1(RenaceBaseModel):
     """Derived artifact reference (v1) - e.g., decompressed files."""
 
     model_config = ConfigDict(
@@ -746,7 +748,7 @@ class DerivedArtifactRefV1(BaseModel):
     )
 
 
-class ProvenanceV1(BaseModel):
+class ProvenanceV1(RenaceBaseModel):
     """Provenance information (v1)."""
 
     model_config = ConfigDict(
@@ -764,7 +766,7 @@ class ProvenanceV1(BaseModel):
     )
 
 
-class IngestReceiptV1(BaseModel):
+class IngestReceiptV1(RenaceBaseModel):
     """Ingest receipt (v1) - documents downloaded/cached artifacts."""
 
     model_config = ConfigDict(
@@ -786,7 +788,7 @@ class IngestReceiptV1(BaseModel):
 # Evaluation Report Models (v1)
 
 
-class TopKLegalCoverage(BaseModel):
+class TopKLegalCoverage(RenaceBaseModel):
     """Top-K legal coverage metrics."""
 
     model_config = ConfigDict(
@@ -809,7 +811,7 @@ class TopKLegalCoverage(BaseModel):
     )
 
 
-class PolicyEntropyStats(BaseModel):
+class PolicyEntropyStats(RenaceBaseModel):
     """Policy entropy statistics."""
 
     model_config = ConfigDict(
@@ -828,7 +830,7 @@ class PolicyEntropyStats(BaseModel):
     )
 
 
-class EvalMetricsV1(BaseModel):
+class EvalMetricsV1(RenaceBaseModel):
     """Evaluation metrics (v1) - policy validity metrics."""
 
     model_config = ConfigDict(
@@ -859,7 +861,7 @@ class EvalMetricsV1(BaseModel):
     )
 
 
-class EvalReportSplitsV1(BaseModel):
+class EvalReportSplitsV1(RenaceBaseModel):
     """Per-split evaluation metrics (v1)."""
 
     model_config = ConfigDict(
@@ -873,7 +875,7 @@ class EvalReportSplitsV1(BaseModel):
     )
 
 
-class EvalReportV1(BaseModel):
+class EvalReportV1(RenaceBaseModel):
     """Evaluation report (v1) - policy validity evaluation over dataset manifests."""
 
     model_config = ConfigDict(
@@ -918,7 +920,7 @@ class EvalReportV1(BaseModel):
 # Evaluation Report Models (v2)
 
 
-class AccuracyMetrics(BaseModel):
+class AccuracyMetrics(RenaceBaseModel):
     """Ground-truth accuracy metrics (computed only over labeled records)."""
 
     model_config = ConfigDict(
@@ -935,7 +937,7 @@ class AccuracyMetrics(BaseModel):
     )
 
 
-class EvalMetricsV2(BaseModel):
+class EvalMetricsV2(RenaceBaseModel):
     """Evaluation metrics (v2) - policy validity metrics + accuracy metrics."""
 
     model_config = ConfigDict(
@@ -979,7 +981,7 @@ class EvalMetricsV2(BaseModel):
     )
 
 
-class EvalReportSplitsV2(BaseModel):
+class EvalReportSplitsV2(RenaceBaseModel):
     """Per-split evaluation metrics (v2)."""
 
     model_config = ConfigDict(
@@ -996,7 +998,7 @@ class EvalReportSplitsV2(BaseModel):
 # Evaluation Report Models (v3) - Conditioned Metrics
 
 
-class DistributionStats(BaseModel):
+class DistributionStats(RenaceBaseModel):
     """Distribution statistics for a metric."""
 
     model_config = ConfigDict(
@@ -1010,7 +1012,7 @@ class DistributionStats(BaseModel):
     )
 
 
-class ConditionedDistributionMetrics(BaseModel):
+class ConditionedDistributionMetrics(RenaceBaseModel):
     """Distribution metrics for conditioned evaluation."""
 
     model_config = ConfigDict(
@@ -1026,7 +1028,7 @@ class ConditionedDistributionMetrics(BaseModel):
     )
 
 
-class ConditionedValidityMetrics(BaseModel):
+class ConditionedValidityMetrics(RenaceBaseModel):
     """Policy validity metrics for conditioned evaluation."""
 
     model_config = ConfigDict(
@@ -1049,7 +1051,7 @@ class ConditionedValidityMetrics(BaseModel):
     )
 
 
-class ConditionedAccuracyMetrics(BaseModel):
+class ConditionedAccuracyMetrics(RenaceBaseModel):
     """Accuracy metrics for conditioned evaluation."""
 
     model_config = ConfigDict(
@@ -1067,7 +1069,7 @@ class ConditionedAccuracyMetrics(BaseModel):
     )
 
 
-class ConditionedMetrics(BaseModel):
+class ConditionedMetrics(RenaceBaseModel):
     """Metrics for a single conditioning stratum (v3 report, extended with HDI in v4)."""
 
     model_config = ConfigDict(
@@ -1101,7 +1103,7 @@ class ConditionedMetrics(BaseModel):
     )
 
 
-class EvalReportV3(BaseModel):
+class EvalReportV3(RenaceBaseModel):
     """Evaluation report (v3) - adds conditioned metrics stratified by skill/time."""
 
     model_config = ConfigDict(
@@ -1159,7 +1161,7 @@ class EvalReportV3(BaseModel):
     )
 
 
-class EvalReportV4(BaseModel):
+class EvalReportV4(RenaceBaseModel):
     """Evaluation report (v4) - extends v3 with Human Difficulty Index (HDI) metrics (M07)."""
 
     model_config = ConfigDict(
@@ -1217,7 +1219,7 @@ class EvalReportV4(BaseModel):
     )
 
 
-class EvalReportV5(BaseModel):
+class EvalReportV5(RenaceBaseModel):
     """Evaluation report (v5) - extends v4 with outcome metrics (M09)."""
 
     model_config = ConfigDict(
@@ -1306,7 +1308,7 @@ class EvalReportV5(BaseModel):
 # HDI Models (M07) - for Evaluation Reports
 
 
-class HDIOutcomeSensitivity(BaseModel):
+class HDIOutcomeSensitivity(RenaceBaseModel):
     """Outcome sensitivity component for HDI (M07)."""
 
     model_config = ConfigDict(
@@ -1328,7 +1330,7 @@ class HDIOutcomeSensitivity(BaseModel):
     )
 
 
-class HDIMetricsComponents(BaseModel):
+class HDIMetricsComponents(RenaceBaseModel):
     """HDI component values for evaluation reports (M07)."""
 
     model_config = ConfigDict(
@@ -1359,7 +1361,7 @@ class HDIMetricsComponents(BaseModel):
     )
 
 
-class HDIMetrics(BaseModel):
+class HDIMetrics(RenaceBaseModel):
     """Human Difficulty Index (HDI) metrics for evaluation reports (M07)."""
 
     model_config = ConfigDict(
@@ -1381,7 +1383,7 @@ class HDIMetrics(BaseModel):
 # Outcome Metrics Models (M09)
 
 
-class OutcomeMetrics(BaseModel):
+class OutcomeMetrics(RenaceBaseModel):
     """Outcome metrics for human W/D/L evaluation (M09)."""
 
     model_config = ConfigDict(
@@ -1412,7 +1414,7 @@ class OutcomeMetrics(BaseModel):
 # Frozen Eval Manifest Models
 
 
-class FrozenEvalManifestSourceRef(BaseModel):
+class FrozenEvalManifestSourceRef(RenaceBaseModel):
     """Reference to source dataset manifest v2 for frozen eval manifest."""
 
     model_config = ConfigDict(
@@ -1430,7 +1432,7 @@ class FrozenEvalManifestSourceRef(BaseModel):
     )
 
 
-class FrozenEvalManifestRecord(BaseModel):
+class FrozenEvalManifestRecord(RenaceBaseModel):
     """Record reference in frozen eval manifest."""
 
     model_config = ConfigDict(
@@ -1478,7 +1480,7 @@ class FrozenEvalManifestRecord(BaseModel):
     )
 
 
-class FrozenEvalManifestStratificationTargets(BaseModel):
+class FrozenEvalManifestStratificationTargets(RenaceBaseModel):
     """Stratification targets for frozen eval manifest."""
 
     model_config = ConfigDict(
@@ -1496,7 +1498,7 @@ class FrozenEvalManifestStratificationTargets(BaseModel):
     )
 
 
-class FrozenEvalManifestCoverageShortfall(BaseModel):
+class FrozenEvalManifestCoverageShortfall(RenaceBaseModel):
     """Coverage shortfall in frozen eval manifest."""
 
     model_config = ConfigDict(
@@ -1511,7 +1513,7 @@ class FrozenEvalManifestCoverageShortfall(BaseModel):
     actual: int = Field(..., ge=0, description="Actual record count")
 
 
-class FrozenEvalManifestV1(BaseModel):
+class FrozenEvalManifestV1(RenaceBaseModel):
     """Frozen evaluation manifest (v1) - immutable evaluation set with stratification metadata."""
 
     model_config = ConfigDict(
@@ -1563,7 +1565,7 @@ class FrozenEvalManifestV1(BaseModel):
     )
 
 
-class EvalReportV2(BaseModel):
+class EvalReportV2(RenaceBaseModel):
     """Evaluation report (v2) - policy validity evaluation + ground-truth accuracy metrics."""
 
     model_config = ConfigDict(
