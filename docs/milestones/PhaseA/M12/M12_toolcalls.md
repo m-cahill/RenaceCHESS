@@ -20,6 +20,12 @@
 | 2026-01-30T00:00:00Z | search_replace | Convert dependencies to ~= | `pyproject.toml` | ✅ completed |
 | 2026-01-30T00:00:00Z | search_replace | Add .env to .gitignore | `.gitignore` | ✅ completed |
 | 2026-01-30T00:00:00Z | search_replace | Add import-linter to CI | `.github/workflows/ci.yml` | ✅ completed |
+| 2026-01-31T00:09:00Z | run_terminal_cmd | Create PR #14 | `gh pr create` | ✅ completed |
+| 2026-01-31T00:09:00Z | run_terminal_cmd | Monitor CI run 21535048568 | `gh run view` | ✅ completed |
+| 2026-01-31T00:15:00Z | search_replace | Fix lint errors in test files | `tests/test_m12_*.py` | ✅ completed |
+| 2026-01-31T00:15:00Z | search_replace | Pin pydantic to 2.0.1 (compatible) | `pyproject.toml` | ✅ completed |
+| 2026-01-31T00:18:00Z | run_terminal_cmd | Monitor CI run 21535164527 | `gh run view` | ✅ completed |
+| 2026-01-31T00:19:00Z | write | Generate CI analysis report | `M12_run1.md` | ✅ completed |
 
 ---
 
