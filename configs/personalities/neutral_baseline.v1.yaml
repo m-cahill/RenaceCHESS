@@ -1,0 +1,44 @@
+# RenaceCHESS Neutral Baseline Personality Configuration (v1)
+# =============================================================
+#
+# This configuration defines the Neutral Baseline personality module.
+# The Neutral Baseline is an identity-preserving transformation that:
+# - Returns the base policy unchanged
+# - Provides experimental control for personality comparisons
+# - Proves the personality system can be enabled without behavioral change
+#
+# Schema Version: personality_config.v1
+# Last Updated: 2026-01-31 (M17)
+
+schemaVersion: "personality_config.v1"
+personalityId: "control.neutral_baseline.v1"
+displayName: "Neutral Baseline"
+description: |
+  Identity-preserving personality that returns the base policy unchanged.
+  Used as experimental control: proves personality system can be enabled
+  without changing behavior. All observed divergence from other personalities
+  is therefore real, not systemic.
+
+# Safety envelope parameters
+# (Validated but not applied - identity returns base policy unchanged)
+safetyEnvelope:
+  topK: 5
+  deltaPMax: 0.15
+  entropyMin: 0.5
+  entropyMax: 3.0
+  baseReachable: true
+
+# No tunable parameters - identity transformation
+tunableParameters: {}
+
+# Enable/disable personality
+enabled: true
+
+# === Identity Property ===
+#
+# This personality is definitionally identity: is_identity() always returns true.
+# The safety envelope is validated but not applied.
+# Output policy equals input policy within floating-point tolerance.
+#
+# This personality exists for experimental control, not style modulation.
+
