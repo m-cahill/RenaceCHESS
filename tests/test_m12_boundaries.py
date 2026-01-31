@@ -29,7 +29,9 @@ def test_features_do_not_import_training() -> None:
         if module is not None:
             # Check that module's __file__ exists and is in features directory
             if hasattr(module, "__file__") and module.__file__:
-                assert "features" in module.__file__, f"{module_name} should be in features directory"
+                assert "features" in module.__file__, (
+                    f"{module_name} should be in features directory"
+                )
 
 
 def test_cli_does_not_import_training_at_module_level() -> None:
@@ -43,26 +45,33 @@ def test_cli_does_not_import_training_at_module_level() -> None:
     assert cli_module is not None
 
     # Get CLI module source file
-    cli_file = Path(cli_module.__file__) if hasattr(cli_module, "__file__") and cli_module.__file__ else None
+    cli_file = (
+        Path(cli_module.__file__)
+        if hasattr(cli_module, "__file__") and cli_module.__file__
+        else None
+    )
     if cli_file and cli_file.exists():
         # Read source and check for module-level training imports
         source = cli_file.read_text(encoding="utf-8")
-        # Training imports should only appear inside function bodies (after 'def' or 'elif')
+        # Training imports should only appear inside function bodies
         # This is a simple heuristic; import-linter is the real enforcement
         lines = source.split("\n")
-        in_function = False
         for i, line in enumerate(lines):
             stripped = line.strip()
-            # Check for function definitions
-            if stripped.startswith("def ") or stripped.startswith("elif "):
-                in_function = True
             # Check for module-level imports (not indented)
-            if not line.startswith(" ") and not line.startswith("\t") and "training" in line.lower():
+            is_module_level = not line.startswith(" ") and not line.startswith("\t")
+            if is_module_level and "training" in line.lower():
                 # Allow comments and docstrings
-                if not stripped.startswith("#") and not stripped.startswith('"""') and not stripped.startswith("'''"):
+                is_comment_or_docstring = (
+                    stripped.startswith("#")
+                    or stripped.startswith('"""')
+                    or stripped.startswith("'''")
+                )
+                if not is_comment_or_docstring:
                     # This is a module-level import - should not contain 'training'
                     assert "training" not in line.lower(), (
-                        f"Module-level import of training detected at line {i+1}: {line.strip()}\n"
+                        f"Module-level import of training detected at line {i+1}: "
+                        f"{line.strip()}\n"
                         "Training imports should only occur inside command handlers."
                     )
 

@@ -33,3 +33,20 @@
 - Pin GitHub Actions to commit SHAs
 - Document CLI contract with side-effect guarantees
 
+**Status:** ✅ **COMPLETE** — All M12 deliverables implemented and committed to branch `m12-audit-remediation`
+
+**Files Changed:**
+- `importlinter_contracts.ini` — Import boundary enforcement config
+- `.github/workflows/ci.yml` — SHA-pinned actions + import-linter check
+- `pyproject.toml` — Dependency pinning (`~=` instead of `>=`)
+- `.gitignore` — Added `.env` and `.env.local` (SEC-001)
+- `docs/contracts/CLI_CONTRACT.md` — CLI contract documentation
+- `docs/governance/supply_chain.md` — Supply chain governance
+- `tests/test_m12_boundaries.py` — Boundary enforcement tests
+- `tests/test_m12_cli_invariants.py` — CLI invariant tests
+
+**Next Steps:**
+- Create PR to `main`
+- Wait for CI to pass
+- Address any import-linter violations if detected
+

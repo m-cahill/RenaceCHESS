@@ -22,7 +22,7 @@ classifiers = [
 
 dependencies = [
     "python-chess~=1.999",
-    "pydantic~=2.5.0",
+    "pydantic~=2.0.1",  # Pin to 2.0.x to avoid breaking changes from 2.5+
     "jsonschema~=4.20.0",
     "requests~=2.31.0",
     "torch~=2.2.0",
