@@ -5,7 +5,107 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
+
+# =============================================================================
+# Personality Models (M15)
+# =============================================================================
+
+
+class SafetyEnvelopeV1(BaseModel):
+    """Safety envelope parameters for personality transformations.
+
+    Defines the bounded region within which a personality may operate.
+    See docs/contracts/PERSONALITY_SAFETY_CONTRACT_v1.md for the governing contract.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    top_k: int = Field(
+        5,
+        alias="topK",
+        ge=1,
+        le=100,
+        description="Maximum number of candidate moves considered",
+    )
+    delta_p_max: float = Field(
+        0.15,
+        alias="deltaPMax",
+        ge=0.0,
+        le=1.0,
+        description="Maximum probability shift allowed per move",
+    )
+    entropy_min: float = Field(
+        0.5,
+        alias="entropyMin",
+        ge=0.0,
+        description="Minimum output entropy (prevents over-sharpening)",
+    )
+    entropy_max: float = Field(
+        3.0,
+        alias="entropyMax",
+        ge=0.0,
+        description="Maximum output entropy (prevents over-softening)",
+    )
+    base_reachable: bool = Field(
+        True,
+        alias="baseReachable",
+        description="Require that identity configuration exists",
+    )
+
+    @model_validator(mode="after")
+    def validate_entropy_bounds(self) -> SafetyEnvelopeV1:
+        """Validate that entropy bounds are consistent."""
+        if self.entropy_min > self.entropy_max:
+            msg = f"entropy_min ({self.entropy_min}) must be <= entropy_max ({self.entropy_max})"
+            raise ValueError(msg)
+        return self
+
+
+class PersonalityConfigV1(BaseModel):
+    """Personality configuration schema (v1).
+
+    Defines tunable parameters for a personality module.
+    See docs/contracts/PERSONALITY_SAFETY_CONTRACT_v1.md for the governing contract.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    schema_version: Literal["personality_config.v1"] = Field(
+        "personality_config.v1",
+        alias="schemaVersion",
+        description="Schema version identifier",
+    )
+    personality_id: str = Field(
+        ...,
+        alias="personalityId",
+        description="Unique personality identifier (e.g., 'style.pawn_clamp.v1')",
+        pattern=r"^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$",
+    )
+    display_name: str = Field(
+        ...,
+        alias="displayName",
+        description="Human-readable personality name",
+    )
+    description: str = Field(
+        ...,
+        description="Description of personality behavior and style",
+    )
+    safety_envelope: SafetyEnvelopeV1 = Field(
+        default_factory=SafetyEnvelopeV1,
+        alias="safetyEnvelope",
+        description="Safety envelope parameters for this personality",
+    )
+    tunable_parameters: dict[str, float] = Field(
+        default_factory=dict,
+        alias="tunableParameters",
+        description="Personality-specific tunable parameters (keyed by parameter name)",
+    )
+    enabled: bool = Field(
+        True,
+        description="Whether this personality is enabled",
+    )
+
 
 # =============================================================================
 # Structural Cognition Models (M11)

@@ -30,14 +30,14 @@ import sys
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, TypedDict
+from typing import TypedDict
 
 import torch
 
 # Import existing training infrastructure
 from renacechess.contracts.models import DatasetManifestV2, FrozenEvalManifestV1
-from renacechess.models.training import PolicyDataset, train_baseline_policy
-from renacechess.models.training_outcome import OutcomeDataset, train_outcome_head
+from renacechess.models.training import PolicyDataset
+from renacechess.models.training_outcome import OutcomeDataset
 
 # --- Constants ---
 
