@@ -24,7 +24,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M13 | ✅ Closed (MERGED) | `m13-contract-input-semantics` → `main` | 2026-01-31 | CONTRACT-INPUT-SEMANTICS-001 — Explicit contract semantics for dict inputs |
 | M14 | ✅ Closed (MERGED) | `m14-train-pack-001` → `main` | 2026-01-31 | TRAIN-PACK-001 — Training Readiness & Benchmark Pack |
 | M15 | ✅ Closed (MERGED) | `m15-personality-contract-001` → `main` | 2026-01-31 | PERSONALITY-CONTRACT-001 — Personality Safety Contract + Interface |
-| M16 | ⏳ In Progress | `m16-personality-pawnclamp-001` | — | PERSONALITY-PAWNCLAMP-001 — First Concrete Personality Module (Pawn Clamp) |
+| M16 | ✅ Closed (MERGED) | `m16-personality-pawnclamp-001` → `main` | 2026-01-31 | PERSONALITY-PAWNCLAMP-001 — First Concrete Personality Module (Pawn Clamp) |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -301,6 +301,27 @@ This document tracks milestones, schema, migrations, and governance decisions fo
   - 25 new schema/model validation tests
 - **Phase B Status:** Opened; first Phase B milestone (contract-only, no behavior)
 
+**M16 Details:**
+- **Objective:** Implement first concrete personality module (Pawn Clamp) demonstrating M15 contract
+- **CI Run 1:** 21551746971 (SUCCESS - All checks passing)
+- **Final Coverage:** 90%+ (exceeds 90% threshold)
+- **Test Count:** 423+ passed, 1 skipped
+- **PR:** #22 (merged)
+- **Final Commit:** `11a6b02`
+- **Audit:** `docs/milestones/PhaseB/M16/M16_audit.md`
+- **Summary:** `docs/milestones/PhaseB/M16/M16_summary.md`
+- **Key Files:**
+  - `src/renacechess/personality/pawn_clamp.py` — PawnClampPersonalityV1 implementation
+  - `configs/personalities/pawn_clamp.v1.yaml` — Default personality configuration
+  - `tests/test_m16_pawn_clamp.py` — 15 comprehensive tests
+- **Notable Features:**
+  - Style scoring using M11 structural features (mobility reduction, weak square creation)
+  - Safety envelope enforcement with iterative delta_p_max scaling
+  - Divergence metrics (KL divergence, Total Variation distance)
+  - Configuration-driven tunable parameters
+  - All safety invariants tested (determinism, legality, probability conservation)
+- **Phase B Status:** First concrete personality delivered; framework proven operational
+
 ---
 
 ## Database Schema
@@ -448,6 +469,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-01-31 (Phase B OPEN, M16 in progress)
+**Last Updated:** 2026-01-31 (Phase B OPEN, M16 CLOSED — First Concrete Personality Delivered)
 
 

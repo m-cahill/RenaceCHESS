@@ -23,4 +23,16 @@
 | 2026-01-31 | write | Generate milestone summary | `M16_summary.md` | ✅ Complete |
 | 2026-01-31 | search_replace | Update renacechess.md with M16 entry | `renacechess.md` | ✅ Complete |
 | 2026-01-31 | git push | Push documentation | All M16 docs | ✅ Complete |
+| 2026-01-31 | gh pr merge | Merge PR #22 to main | PR #22 | ✅ Complete |
+| 2026-01-31 | write | Create M17 folder skeleton | `docs/milestones/PhaseB/M17/` | ✅ Complete |
+| 2026-01-31 | search_replace | Mark M16 CLOSED in renacechess.md | `renacechess.md` | ✅ Complete |
+
+---
+
+## Closeout
+
+**Milestone Status:** ✅ CLOSED  
+**Merge Commit:** `11a6b02`  
+**Closed By:** AI with express user permission  
+**Closed At:** 2026-01-31
 
