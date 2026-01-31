@@ -3,11 +3,12 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
-from pydantic import ConfigDict, Field
+from pydantic import ConfigDict, Field, field_validator
 
 from renacechess.contracts.base_model import RenaceBaseModel
+from renacechess.contracts.validation import normalize_dict_keys_to_aliases
 
 # =============================================================================
 # Structural Cognition Models (M11)
@@ -85,6 +86,22 @@ class PerPieceFeaturesV1(RenaceBaseModel):
         max_length=32,
         description="Fixed 32-slot array of piece features",
     )
+
+    @field_validator("pieces", mode="before")
+    @classmethod
+    def normalize_pieces(cls, value: Any) -> Any:
+        """Normalize dict keys in pieces list to use aliases before validation.
+
+        Pydantic v2 converts nested model instances to dicts using field names
+        (snake_case), but validation expects alias keys (camelCase). This validator
+        intercepts the list before nested validation and normalizes dict keys.
+        """
+        if isinstance(value, list):
+            return [
+                normalize_dict_keys_to_aliases(v, PieceFeatures) if isinstance(v, dict) else v
+                for v in value
+            ]
+        return value
 
 
 class SquareMapFeaturesV1(RenaceBaseModel):
@@ -211,6 +228,19 @@ class StructuralCognition(RenaceBaseModel):
         None, alias="structuralLabels", description="Semantic labels for narrative seeding"
     )
 
+    @field_validator("structural_labels", mode="before")
+    @classmethod
+    def normalize_structural_labels(cls, value: Any) -> Any:
+        """Normalize dict keys in structural_labels list to use aliases before validation."""
+        if value is None:
+            return None
+        if isinstance(value, list):
+            return [
+                normalize_dict_keys_to_aliases(v, StructuralLabel) if isinstance(v, dict) else v
+                for v in value
+            ]
+        return value
+
 
 class Position(RenaceBaseModel):
     """Chess position representation."""
@@ -333,6 +363,17 @@ class Policy(RenaceBaseModel):
         ..., alias="topGap", ge=0.0, le=1.0, description="Gap between top move and second move"
     )
 
+    @field_validator("top_moves", mode="before")
+    @classmethod
+    def normalize_top_moves(cls, value: Any) -> Any:
+        """Normalize dict keys in top_moves list to use aliases before validation."""
+        if isinstance(value, list):
+            return [
+                normalize_dict_keys_to_aliases(v, PolicyMove) if isinstance(v, dict) else v
+                for v in value
+            ]
+        return value
+
 
 class HumanWDL(RenaceBaseModel):
     """Human win/draw/loss probabilities."""
@@ -429,6 +470,17 @@ class HumanWDLContainer(RenaceBaseModel):
         description="WDL probabilities after each candidate move (keyed by UCI)",
     )
 
+    @field_validator("post_by_move", mode="before")
+    @classmethod
+    def normalize_post_by_move(cls, value: Any) -> Any:
+        """Normalize dict values in post_by_move dict to use aliases before validation."""
+        if isinstance(value, dict):
+            return {
+                k: normalize_dict_keys_to_aliases(v, HumanWDL) if isinstance(v, dict) else v
+                for k, v in value.items()
+            }
+        return value
+
 
 class ContextBridgePayload(RenaceBaseModel):
     """LLM Context Bridge payload (v1)."""
@@ -453,6 +505,17 @@ class ContextBridgePayload(RenaceBaseModel):
         alias="chosenMove",
         description="Ground-truth move that was actually played (optional label)",
     )
+
+    @field_validator("narrative_seeds", mode="before")
+    @classmethod
+    def normalize_narrative_seeds(cls, value: Any) -> Any:
+        """Normalize dict keys in narrative_seeds list to use aliases before validation."""
+        if isinstance(value, list):
+            return [
+                normalize_dict_keys_to_aliases(v, NarrativeSeed) if isinstance(v, dict) else v
+                for v in value
+            ]
+        return value
 
 
 class NarrativeSeedV2(RenaceBaseModel):
@@ -502,6 +565,17 @@ class ContextBridgePayloadV2(RenaceBaseModel):
         alias="structuralCognition",
         description="Structural cognition features (v2, optional for backward compatibility)",
     )
+
+    @field_validator("narrative_seeds", mode="before")
+    @classmethod
+    def normalize_narrative_seeds(cls, value: Any) -> Any:
+        """Normalize dict keys in narrative_seeds list to use aliases before validation."""
+        if isinstance(value, list):
+            return [
+                normalize_dict_keys_to_aliases(v, NarrativeSeedV2) if isinstance(v, dict) else v
+                for v in value
+            ]
+        return value
 
 
 class DatasetManifestShardRef(RenaceBaseModel):

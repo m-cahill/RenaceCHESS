@@ -12,6 +12,56 @@ from pydantic import BaseModel
 T = TypeVar("T", bound=BaseModel)
 
 
+def normalize_dict_keys_to_aliases(
+    data: dict[str, Any], model_cls: type[BaseModel]
+) -> dict[str, Any]:
+    """Normalize dict keys from field names (snake_case) to aliases (camelCase).
+
+    This is a pure function that converts dict keys to match the aliases expected
+    by Pydantic v2 when aliases are defined. It only normalizes keys that have
+    corresponding aliases in the model.
+
+    Args:
+        data: Dictionary with snake_case field names or camelCase aliases
+        model_cls: The Pydantic model class to get field-to-alias mappings from
+
+    Returns:
+        Dictionary with alias keys where aliases are defined
+
+    Example:
+        >>> from renacechess.contracts.models import PieceFeatures
+        >>> data = {"slot_id": 0, "color": "white"}
+        >>> normalized = normalize_dict_keys_to_aliases(data, PieceFeatures)
+        >>> # Returns {"slotId": 0, "color": "white"}
+    """
+    # Build field name to alias mapping
+    field_to_alias: dict[str, str] = {}
+    for field_name, field_info in model_cls.model_fields.items():
+        if field_info.alias:
+            field_to_alias[field_name] = field_info.alias
+
+    if not field_to_alias:
+        # No aliases defined, return as-is
+        return data
+
+    # Convert dict keys from field names to aliases if needed
+    normalized_data: dict[str, Any] = {}
+    alias_set = set(field_to_alias.values())
+
+    for key, value in data.items():
+        if key in alias_set:
+            # Already an alias, use as-is
+            normalized_data[key] = value
+        elif key in field_to_alias:
+            # Field name, convert to alias
+            normalized_data[field_to_alias[key]] = value
+        else:
+            # Unknown key (no alias defined), pass through
+            normalized_data[key] = value
+
+    return normalized_data
+
+
 def validate_with_aliases(
     model: Type[T],
     data: dict[str, Any],

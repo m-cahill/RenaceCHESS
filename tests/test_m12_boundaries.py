@@ -70,7 +70,7 @@ def test_cli_does_not_import_training_at_module_level() -> None:
                 if not is_comment_or_docstring:
                     # This is a module-level import - should not contain 'training'
                     assert "training" not in line.lower(), (
-                        f"Module-level import of training detected at line {i+1}: "
+                        f"Module-level import of training detected at line {i + 1}: "
                         f"{line.strip()}\n"
                         "Training imports should only occur inside command handlers."
                     )
@@ -109,4 +109,3 @@ def test_import_linter_config_exists() -> None:
     config_content = config_path.read_text(encoding="utf-8")
     assert "[importlinter]" in config_content, "Config must have [importlinter] section"
     assert "root_package = renacechess" in config_content, "Config must specify root_package"
-

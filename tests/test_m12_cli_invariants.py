@@ -34,15 +34,11 @@ def test_train_commands_are_explicit() -> None:
     # Verify no other commands start with 'train' (except the explicit ones)
     lines = help_text.split("\n")
     train_commands = [
-        line
-        for line in lines
-        if "train" in line.lower() and not line.strip().startswith("#")
+        line for line in lines if "train" in line.lower() and not line.strip().startswith("#")
     ]
     # Should only find the two explicit training commands
     train_command_count = sum(
-        1
-        for line in train_commands
-        if "train-policy" in line or "train-outcome-head" in line
+        1 for line in train_commands if "train-policy" in line or "train-outcome-head" in line
     )
     assert train_command_count >= 2, "Must have at least two explicit training commands"
 
@@ -104,4 +100,3 @@ def test_supply_chain_doc_exists() -> None:
     doc_content = supply_chain_path.read_text(encoding="utf-8")
     assert "Dependency Pinning Strategy" in doc_content, "Doc must document dependency pinning"
     assert "GitHub Actions Pinning" in doc_content, "Doc must document action pinning"
-
