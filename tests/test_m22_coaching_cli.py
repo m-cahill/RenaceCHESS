@@ -492,9 +492,7 @@ class TestCliToneParameter:
     """Test that CLI respects --tone parameter."""
 
     @pytest.mark.parametrize("tone", ["neutral", "encouraging", "concise"])
-    def test_tone_parameter_accepted(
-        self, valid_artifacts: tuple[Path, Path], tone: str
-    ) -> None:
+    def test_tone_parameter_accepted(self, valid_artifacts: tuple[Path, Path], tone: str) -> None:
         """CLI accepts all valid tone values."""
         advice_path, delta_path = valid_artifacts
 
@@ -532,9 +530,7 @@ class TestCliToneParameter:
 class TestCliExitCode:
     """Test that CLI exits with appropriate codes."""
 
-    def test_exit_nonzero_on_threshold_failure(
-        self, valid_artifacts: tuple[Path, Path]
-    ) -> None:
+    def test_exit_nonzero_on_threshold_failure(self, valid_artifacts: tuple[Path, Path]) -> None:
         """CLI exits non-zero when thresholds fail, but still outputs artifact."""
         advice_path, delta_path = valid_artifacts
 
@@ -784,9 +780,7 @@ class TestCoachingSurfaceSchema:
         assert schema["$schema"] == "https://json-schema.org/draft/2020-12/schema"
         assert schema["title"] == "CoachingSurfaceV1"
 
-    def test_artifact_validates_against_schema(
-        self, valid_artifacts: tuple[Path, Path]
-    ) -> None:
+    def test_artifact_validates_against_schema(self, valid_artifacts: tuple[Path, Path]) -> None:
         """Verify CLI output validates against JSON schema."""
         import jsonschema
 
@@ -810,4 +804,3 @@ class TestCoachingSurfaceSchema:
 
             # Should not raise
             jsonschema.validate(output, schema)
-
