@@ -28,7 +28,12 @@ jobs:
       - name: Dependency vulnerability scan (pip-audit)
         run: |
           echo "Running pip-audit against installed environment..."
-          pip-audit --desc on --progress-spinner off
+          # Ignore deferred torch vulnerabilities (see M23_audit.md TORCH-SEC-001)
+          pip-audit --desc on --progress-spinner off \
+            --ignore-vuln PYSEC-2025-41 \
+            --ignore-vuln PYSEC-2024-259 \
+            --ignore-vuln GHSA-3749-ghw9-m3mg \
+            --ignore-vuln GHSA-887c-mr87-cxwp
       - name: Static security analysis (bandit)
         run: |
           echo "Running bandit SAST scan..."

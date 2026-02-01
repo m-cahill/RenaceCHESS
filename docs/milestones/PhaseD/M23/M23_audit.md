@@ -69,6 +69,7 @@ Harden the RenaceCHESS codebase with security scanning, performance benchmarks, 
 - Model loading uses controlled local paths only
 - No user-supplied model files are accepted
 - DoS vulnerabilities are local attack surface only
+- **CI ignores these CVEs explicitly** via `pip-audit --ignore-vuln` (documented deferral)
 
 ### Proposed Resolution
 

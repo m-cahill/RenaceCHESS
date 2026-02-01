@@ -28,7 +28,10 @@
 | 2026-02-01 15:11 | search_replace | Update requests>=2.32.4 | pyproject.toml | ✅ done |
 | 2026-02-01 15:12 | search_replace | Add --no-cov to benchmarks | ci.yml | ✅ done |
 | 2026-02-01 15:13 | write | Create M23_audit.md with torch deferral | M23_audit.md | ✅ done |
-| 2026-02-01 15:14 | run_terminal_cmd | Commit and push for Run 2 | git | pending |
+| 2026-02-01 15:14 | run_terminal_cmd | Commit and push for Run 2 | git | ✅ done |
+| 2026-02-01 15:20 | — | Await Run 2 completion | CI Run 21556935928 | ✅ done |
+| 2026-02-01 15:21 | search_replace | Add --ignore-vuln for deferred torch CVEs | ci.yml | ✅ done |
+| 2026-02-01 15:22 | run_terminal_cmd | Commit and push for Run 3 | git | pending |
 
 ---
 
