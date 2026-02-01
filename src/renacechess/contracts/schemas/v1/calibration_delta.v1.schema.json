@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://renacechess.dev/schemas/v1/calibration_delta.v1.schema.json",
+  "title": "CalibrationDeltaArtifactV1",
+  "description": "Before/after comparison artifact showing calibration changes after recalibration (M25). Separate from RecalibrationParametersV1 (parameters vs. evaluation).",
+  "type": "object",
+  "required": [
+    "version",
+    "generatedAt",
+    "sourceRecalibrationParametersHash",
+    "sourceCalibrationMetricsBeforeHash",
+    "sourceCalibrationMetricsAfterHash",
+    "byEloBucket",
+    "determinismHash"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version identifier"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of delta generation"
+    },
+    "sourceRecalibrationParametersHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the RecalibrationParametersV1 artifact used"
+    },
+    "sourceCalibrationMetricsBeforeHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the CalibrationMetricsV1 artifact (before recalibration)"
+    },
+    "sourceCalibrationMetricsAfterHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the CalibrationMetricsV1 artifact (after recalibration)"
+    },
+    "byEloBucket": {
+      "type": "array",
+      "items": {
+        "type": "array",
+        "items": {
+          "$ref": "#/$defs/CalibrationDeltaV1"
+        }
+      },
+      "description": "List of deltas per bucket (each bucket has multiple metrics)"
+    },
+    "determinismHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash for determinism verification"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "CalibrationDeltaV1": {
+      "type": "object",
+      "required": [
+        "eloBucket",
+        "metric",
+        "before",
+        "after",
+        "delta",
+        "improved"
+      ],
+      "properties": {
+        "eloBucket": {
+          "type": "string",
+          "description": "Canonical skill bucket ID"
+        },
+        "metric": {
+          "type": "string",
+          "enum": [
+            "outcome_ece",
+            "outcome_nll",
+            "outcome_brier",
+            "policy_nll",
+            "policy_top1_ece"
+          ],
+          "description": "Metric name being compared"
+        },
+        "before": {
+          "type": "number",
+          "description": "Metric value before recalibration"
+        },
+        "after": {
+          "type": "number",
+          "description": "Metric value after recalibration"
+        },
+        "delta": {
+          "type": "number",
+          "description": "Change in metric (after - before). Negative = improvement for ECE/NLL/Brier"
+        },
+        "improved": {
+          "type": "boolean",
+          "description": "Whether recalibration improved this metric (True if delta < 0 for ECE/NLL/Brier)"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
+

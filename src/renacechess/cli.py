@@ -437,6 +437,93 @@ def main() -> None:
         type=Path,
         help="Output file for CalibrationMetricsV1 JSON (default: stdout)",
     )
+    calibration_parser.add_argument(
+        "--with-recalibration",
+        type=Path,
+        help="Path to RecalibrationParametersV1 JSON (M25: preview before/after, off by default)",
+    )
+
+    # M25: Recalibration command
+    recalibration_parser = subparsers.add_parser(
+        "recalibration",
+        help="Fit and apply recalibration parameters (M25)",
+    )
+    recalibration_subparsers = recalibration_parser.add_subparsers(dest="recalibration_command")
+
+    # Recalibration fit command
+    recal_fit_parser = recalibration_subparsers.add_parser(
+        "fit",
+        help="Fit recalibration parameters using grid search (M25)",
+    )
+    recal_fit_parser.add_argument(
+        "--manifest",
+        type=Path,
+        required=True,
+        help="Path to FrozenEvalManifestV1 JSON file (REQUIRED)",
+    )
+    recal_fit_parser.add_argument(
+        "--calibration-metrics",
+        type=Path,
+        required=True,
+        help="Path to CalibrationMetricsV1 JSON (before recalibration)",
+    )
+    recal_fit_parser.add_argument(
+        "--policy-id",
+        type=str,
+        default="baseline.uniform_random",
+        help="Policy identifier (default: baseline.uniform_random)",
+    )
+    recal_fit_parser.add_argument(
+        "--outcome-head-id",
+        type=str,
+        help="Outcome head identifier (optional, uses baselines if not provided)",
+    )
+    recal_fit_parser.add_argument(
+        "--out",
+        type=Path,
+        required=True,
+        help="Output file for RecalibrationParametersV1 JSON",
+    )
+
+    # Recalibration preview command
+    recal_preview_parser = recalibration_subparsers.add_parser(
+        "preview",
+        help="Preview before/after calibration comparison (M25)",
+    )
+    recal_preview_parser.add_argument(
+        "--manifest",
+        type=Path,
+        required=True,
+        help="Path to FrozenEvalManifestV1 JSON file (REQUIRED)",
+    )
+    recal_preview_parser.add_argument(
+        "--calibration-metrics-before",
+        type=Path,
+        required=True,
+        help="Path to CalibrationMetricsV1 JSON (before recalibration)",
+    )
+    recal_preview_parser.add_argument(
+        "--recalibration-parameters",
+        type=Path,
+        required=True,
+        help="Path to RecalibrationParametersV1 JSON",
+    )
+    recal_preview_parser.add_argument(
+        "--policy-id",
+        type=str,
+        default="baseline.uniform_random",
+        help="Policy identifier (default: baseline.uniform_random)",
+    )
+    recal_preview_parser.add_argument(
+        "--outcome-head-id",
+        type=str,
+        help="Outcome head identifier (optional, uses baselines if not provided)",
+    )
+    recal_preview_parser.add_argument(
+        "--out",
+        type=Path,
+        help="Output file for CalibrationDeltaArtifactV1 JSON (default: stdout)",
+    )
 
     args = parser.parse_args()
 
@@ -1026,6 +1113,153 @@ def main() -> None:
                 f"  Buckets evaluated: {len([b for b in metrics.by_elo_bucket if b.samples > 0])}",
                 file=sys.stderr,
             )
+
+            # M25: Optional preview with recalibration
+            if args.with_recalibration:
+                from renacechess.eval.recalibration_runner import (
+                    load_recalibration_parameters,
+                    run_calibration_evaluation_with_recalibration,
+                    compute_calibration_delta,
+                )
+
+                try:
+                    recal_params = load_recalibration_parameters(args.with_recalibration)
+                    metrics_after = run_calibration_evaluation_with_recalibration(
+                        manifest_path=args.manifest,
+                        recalibration_params=recal_params,
+                        model_dir=args.model_dir,
+                        policy_id=args.policy_id,
+                        outcome_head_id=args.outcome_head_id,
+                    )
+                    delta = compute_calibration_delta(metrics, metrics_after, recal_params)
+
+                    # Print preview summary
+                    print("\n=== Recalibration Preview ===", file=sys.stderr)
+                    for bucket_deltas in delta.by_elo_bucket:
+                        if not bucket_deltas:
+                            continue
+                        bucket = bucket_deltas[0].elo_bucket
+                        print(f"\nElo bucket: {bucket}", file=sys.stderr)
+                        for d in bucket_deltas:
+                            direction = "↓" if d.improved else "↑"
+                            print(
+                                f"  {d.metric}: {d.before:.4f} → {d.after:.4f} "
+                                f"(Δ {d.delta:+.4f}) {direction}",
+                                file=sys.stderr,
+                            )
+                except Exception as e:
+                    print(f"Warning: Recalibration preview failed: {e}", file=sys.stderr)
+        except Exception as e:
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
+    elif args.command == "recalibration":
+        # M25: Recalibration commands
+        from renacechess.eval.recalibration_runner import (
+            fit_recalibration_parameters,
+            load_calibration_metrics,
+            save_recalibration_parameters,
+            load_recalibration_parameters,
+            run_calibration_evaluation_with_recalibration,
+            compute_calibration_delta,
+            save_calibration_delta,
+        )
+
+        try:
+            if args.recalibration_command == "fit":
+                # Fit recalibration parameters
+                if not args.manifest.exists():
+                    print(
+                        f"Error: Frozen eval manifest not found: {args.manifest}",
+                        file=sys.stderr,
+                    )
+                    sys.exit(1)
+
+                if not args.calibration_metrics.exists():
+                    print(
+                        f"Error: Calibration metrics not found: {args.calibration_metrics}",
+                        file=sys.stderr,
+                    )
+                    sys.exit(1)
+
+                metrics_before = load_calibration_metrics(args.calibration_metrics)
+                params = fit_recalibration_parameters(
+                    manifest_path=args.manifest,
+                    calibration_metrics=metrics_before,
+                    policy_id=args.policy_id,
+                    outcome_head_id=args.outcome_head_id,
+                )
+
+                save_recalibration_parameters(params, args.out)
+                print(f"Recalibration parameters written to {args.out}", file=sys.stderr)
+                print(f"  Buckets fitted: {len(params.by_elo_bucket)}", file=sys.stderr)
+
+            elif args.recalibration_command == "preview":
+                # Preview before/after comparison
+                if not args.manifest.exists():
+                    print(
+                        f"Error: Frozen eval manifest not found: {args.manifest}",
+                        file=sys.stderr,
+                    )
+                    sys.exit(1)
+
+                if not args.calibration_metrics_before.exists():
+                    print(
+                        f"Error: Calibration metrics (before) not found: "
+                        f"{args.calibration_metrics_before}",
+                        file=sys.stderr,
+                    )
+                    sys.exit(1)
+
+                if not args.recalibration_parameters.exists():
+                    print(
+                        f"Error: Recalibration parameters not found: "
+                        f"{args.recalibration_parameters}",
+                        file=sys.stderr,
+                    )
+                    sys.exit(1)
+
+                metrics_before = load_calibration_metrics(args.calibration_metrics_before)
+                recal_params = load_recalibration_parameters(args.recalibration_parameters)
+
+                metrics_after = run_calibration_evaluation_with_recalibration(
+                    manifest_path=args.manifest,
+                    recalibration_params=recal_params,
+                    model_dir=None,  # CI uses baselines only
+                    policy_id=args.policy_id,
+                    outcome_head_id=args.outcome_head_id,
+                )
+
+                delta = compute_calibration_delta(metrics_before, metrics_after, recal_params)
+
+                # Print preview summary
+                print("=== Recalibration Preview ===", file=sys.stderr)
+                for bucket_deltas in delta.by_elo_bucket:
+                    if not bucket_deltas:
+                        continue
+                    bucket = bucket_deltas[0].elo_bucket
+                    print(f"\nElo bucket: {bucket}", file=sys.stderr)
+                    for d in bucket_deltas:
+                        direction = "↓" if d.improved else "↑"
+                        print(
+                            f"  {d.metric}: {d.before:.4f} → {d.after:.4f} "
+                            f"(Δ {d.delta:+.4f}) {direction}",
+                            file=sys.stderr,
+                        )
+
+                # Serialize to JSON
+                output_json = json.dumps(delta.model_dump(by_alias=True), default=str, indent=2)
+
+                # Write output
+                if args.out:
+                    save_calibration_delta(delta, args.out)
+                    print(f"\nCalibration delta written to {args.out}", file=sys.stderr)
+                else:
+                    print("\n" + output_json)
+
+            else:
+                recalibration_parser.print_help()
+                sys.exit(1)
+
         except Exception as e:
             print(f"Error: {e}", file=sys.stderr)
             sys.exit(1)
