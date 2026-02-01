@@ -83,6 +83,23 @@ make test
 make demo
 ```
 
+### Pre-commit Hooks (Optional)
+
+For local lint/format guardrails before committing:
+
+```bash
+# Install pre-commit
+pip install pre-commit
+
+# Set up hooks
+pre-commit install
+
+# Run manually on all files
+pre-commit run --all-files
+```
+
+**Note:** CI remains the source of truth. Pre-commit hooks are for local convenience only.
+
 ## Project Structure
 
 ```

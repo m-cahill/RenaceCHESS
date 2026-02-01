@@ -1,0 +1,18 @@
+# Pre-commit hooks for RenaceCHESS
+# M23: Local DX guardrail (not CI-breaking)
+#
+# Install: pip install pre-commit && pre-commit install
+# Run manually: pre-commit run --all-files
+#
+# NOTE: CI remains the source of truth. These hooks are for local convenience only.
+
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.9.0
+    hooks:
+      # Linting
+      - id: ruff
+        args: [--fix]
+      # Formatting
+      - id: ruff-format
+

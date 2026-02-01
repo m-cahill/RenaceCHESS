@@ -24,7 +24,7 @@ dependencies = [
     "python-chess~=1.999",
     "pydantic~=2.10.0",
     "jsonschema~=4.20.0",
-    "requests~=2.31.0",
+    "requests>=2.32.4",
     "torch~=2.2.0",
     "zstandard~=0.22",
 ]
@@ -35,8 +35,11 @@ dev = [
     "mypy~=1.14.0",
     "pytest~=8.0.0",
     "pytest-cov~=6.0.0",
+    "pytest-benchmark~=4.0.0",
     "coverage~=7.6.0",
     "import-linter~=2.1",
+    "pip-audit~=2.7.0",
+    "bandit~=1.7.0",
 ]
 
 [project.scripts]
@@ -90,6 +93,7 @@ markers = [
     "integration: Integration tests",
     "golden: Golden file regression tests",
     "slow: Slow-running tests (training, large datasets)",
+    "benchmark: Performance benchmark tests (M23)",
 ]
 
 [tool.coverage.run]
