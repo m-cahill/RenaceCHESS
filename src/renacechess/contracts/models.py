@@ -3117,7 +3117,9 @@ class CalibrationDeltaV1(BaseModel):
         alias="eloBucket",
         description="Canonical skill bucket ID",
     )
-    metric: Literal["outcome_ece", "outcome_nll", "outcome_brier", "policy_nll", "policy_top1_ece"] = Field(
+    metric: Literal[
+        "outcome_ece", "outcome_nll", "outcome_brier", "policy_nll", "policy_top1_ece"
+    ] = Field(
         ...,
         description="Metric name being compared",
     )
@@ -3135,7 +3137,10 @@ class CalibrationDeltaV1(BaseModel):
     )
     improved: bool = Field(
         ...,
-        description="Whether recalibration improved this metric (True if delta < 0 for ECE/NLL/Brier)",
+        description=(
+            "Whether recalibration improved this metric "
+            "(True if delta < 0 for ECE/NLL/Brier)"
+        ),
     )
 
 

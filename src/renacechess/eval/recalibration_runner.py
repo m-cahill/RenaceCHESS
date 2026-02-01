@@ -110,8 +110,8 @@ def _collect_predictions_for_fitting(
     policy_id: str = "baseline.uniform_random",
     outcome_head_id: str | None = None,
 ) -> tuple[
-    dict[str, list[tuple[list[tuple[str, float]], str]]],  # policy: bucket -> [(move_probs, chosen_move)]
-    dict[str, list[tuple[float, float, float, Literal["win", "draw", "loss"]]]],  # outcome: bucket -> [(p_win, p_draw, p_loss, actual)]
+    dict[str, list[tuple[list[tuple[str, float]], str]]],  # policy predictions
+    dict[str, list[tuple[float, float, float, Literal["win", "draw", "loss"]]]],  # outcome predictions
 ]:
     """Collect raw predictions from baseline models for temperature fitting.
 
@@ -130,7 +130,9 @@ def _collect_predictions_for_fitting(
     policy_predictions: dict[str, list[tuple[list[tuple[str, float]], str]]] = {
         bucket: [] for bucket in canonical_buckets
     }
-    outcome_predictions: dict[str, list[tuple[float, float, float, Literal["win", "draw", "loss"]]]] = {
+    outcome_predictions: dict[
+        str, list[tuple[float, float, float, Literal["win", "draw", "loss"]]]
+    ] = {
         bucket: [] for bucket in canonical_buckets
     }
 
@@ -564,14 +566,19 @@ def run_calibration_evaluation_with_recalibration(
         for move_probs, chosen_move in policy_preds[bucket]:
             probs = [p for _, p in move_probs]
             scaled_probs = apply_temperature_scaling_to_probs(probs, policy_temp)
-            scaled_move_probs = [(move, scaled_probs[i] if i < len(scaled_probs) else 0.0) for i, (move, _) in enumerate(move_probs)]
+            scaled_move_probs = [
+                (move, scaled_probs[i] if i < len(scaled_probs) else 0.0)
+                for i, (move, _) in enumerate(move_probs)
+            ]
             policy_accs[bucket].add(scaled_move_probs, chosen_move)
 
         # Outcome predictions
         for p_win, p_draw, p_loss, actual_outcome in outcome_preds[bucket]:
             probs = [p_win, p_draw, p_loss]
             scaled_probs = apply_temperature_scaling_to_probs(probs, outcome_temp)
-            outcome_accs[bucket].add(scaled_probs[0], scaled_probs[1], scaled_probs[2], actual_outcome)
+            outcome_accs[bucket].add(
+                scaled_probs[0], scaled_probs[1], scaled_probs[2], actual_outcome
+            )
 
     # Build CalibrationMetricsV1 (reusing structure from calibration_runner)
     manifest = load_frozen_eval_manifest(manifest_path)
@@ -608,7 +615,10 @@ def run_calibration_evaluation_with_recalibration(
         for move_probs, chosen_move in policy_preds[bucket]:
             probs = [p for _, p in move_probs]
             scaled_probs = apply_temperature_scaling_to_probs(probs, policy_temp)
-            scaled_move_probs = [(move, scaled_probs[i] if i < len(scaled_probs) else 0.0) for i, (move, _) in enumerate(move_probs)]
+            scaled_move_probs = [
+                (move, scaled_probs[i] if i < len(scaled_probs) else 0.0)
+                for i, (move, _) in enumerate(move_probs)
+            ]
             overall_policy_acc.add(scaled_move_probs, chosen_move)
 
         for p_win, p_draw, p_loss, actual_outcome in outcome_preds[bucket]:
@@ -683,7 +693,10 @@ def save_recalibration_parameters(params: RecalibrationParametersV1, out_path: P
         params: RecalibrationParametersV1 instance.
         out_path: Output file path.
     """
-    out_path.write_text(canonical_json_dump(params.model_dump(by_alias=True)), encoding="utf-8")
+    out_path.write_text(
+        canonical_json_dump(params.model_dump(by_alias=True)).decode("utf-8"),
+        encoding="utf-8",
+    )
 
 
 def load_recalibration_parameters(params_path: Path) -> RecalibrationParametersV1:
@@ -713,5 +726,8 @@ def save_calibration_delta(delta: CalibrationDeltaArtifactV1, out_path: Path) ->
         delta: CalibrationDeltaArtifactV1 instance.
         out_path: Output file path.
     """
-    out_path.write_text(canonical_json_dump(delta.model_dump(by_alias=True)), encoding="utf-8")
+    out_path.write_text(
+        canonical_json_dump(delta.model_dump(by_alias=True)).decode("utf-8"),
+        encoding="utf-8",
+    )
 

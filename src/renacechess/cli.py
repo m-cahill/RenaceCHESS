@@ -1204,14 +1204,16 @@ def main() -> None:
 
                 if not args.calibration_metrics_before.exists():
                     print(
-                        f"Error: Calibration metrics (before) not found: {args.calibration_metrics_before}",
+                        f"Error: Calibration metrics (before) not found: "
+                        f"{args.calibration_metrics_before}",
                         file=sys.stderr,
                     )
                     sys.exit(1)
 
                 if not args.recalibration_parameters.exists():
                     print(
-                        f"Error: Recalibration parameters not found: {args.recalibration_parameters}",
+                        f"Error: Recalibration parameters not found: "
+                        f"{args.recalibration_parameters}",
                         file=sys.stderr,
                     )
                     sys.exit(1)

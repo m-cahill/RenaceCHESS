@@ -6,7 +6,6 @@ from pathlib import Path
 
 import pytest
 
-from renacechess.conditioning.buckets import get_canonical_skill_buckets
 from renacechess.contracts.models import (
     CalibrationDeltaArtifactV1,
     CalibrationDeltaV1,
@@ -16,6 +15,7 @@ from renacechess.contracts.models import (
 )
 from renacechess.determinism import canonical_hash
 from renacechess.eval.calibration_runner import run_calibration_evaluation
+from renacechess.eval.calibration_runner import get_canonical_skill_buckets
 from renacechess.eval.recalibration_runner import (
     TEMPERATURE_GRID,
     TEMPERATURE_MAX,
@@ -240,7 +240,9 @@ class TestRecalibrationFitting:
             policy_id="baseline.uniform_random",
         )
 
-    def test_fit_recalibration_parameters(self, frozen_eval_manifest_path: Path, calibration_metrics: CalibrationMetricsV1) -> None:
+    def test_fit_recalibration_parameters(
+        self, frozen_eval_manifest_path: Path, calibration_metrics: CalibrationMetricsV1
+    ) -> None:
         """Test fitting recalibration parameters."""
         params = fit_recalibration_parameters(
             manifest_path=frozen_eval_manifest_path,
@@ -259,7 +261,9 @@ class TestRecalibrationFitting:
             assert bucket_params.fit_method == "grid_search"
             assert bucket_params.fit_metric == "nll"
 
-    def test_fit_recalibration_parameters_deterministic(self, frozen_eval_manifest_path: Path, calibration_metrics: CalibrationMetricsV1) -> None:
+    def test_fit_recalibration_parameters_deterministic(
+        self, frozen_eval_manifest_path: Path, calibration_metrics: CalibrationMetricsV1
+    ) -> None:
         """Test that fitting is deterministic."""
         params1 = fit_recalibration_parameters(
             manifest_path=frozen_eval_manifest_path,
@@ -296,7 +300,9 @@ class TestRecalibrationApplication:
         )
 
     @pytest.fixture
-    def recalibration_params(self, frozen_eval_manifest_path: Path, calibration_metrics: CalibrationMetricsV1) -> RecalibrationParametersV1:
+    def recalibration_params(
+        self, frozen_eval_manifest_path: Path, calibration_metrics: CalibrationMetricsV1
+    ) -> RecalibrationParametersV1:
         """Generate recalibration parameters for testing."""
         return fit_recalibration_parameters(
             manifest_path=frozen_eval_manifest_path,
@@ -358,7 +364,13 @@ class TestRecalibrationApplication:
                 ]
                 assert d.delta == d.after - d.before
                 # Improved should be True if delta < 0 (for ECE/NLL/Brier)
-                if d.metric in ["outcome_ece", "outcome_nll", "outcome_brier", "policy_nll", "policy_top1_ece"]:
+                if d.metric in [
+                    "outcome_ece",
+                    "outcome_nll",
+                    "outcome_brier",
+                    "policy_nll",
+                    "policy_top1_ece",
+                ]:
                     assert d.improved == (d.delta < 0)
 
 
