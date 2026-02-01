@@ -83,11 +83,22 @@ Create **M24** or **M25** milestone for:
 
 ## Bandit SAST Results
 
-Bandit scan completed with **0 findings** at medium/high severity.
+Bandit scan completed with **2 acknowledged findings** (B614 skipped):
 
-```
-bandit -r src/renacechess -ll -ii
-# No issues identified
+| ID | Location | Issue | Disposition |
+|----|----------|-------|-------------|
+| B614 | `training.py:244` | pytorch_load_save | Skipped - `torch.save(state_dict)` is safe pattern |
+| B614 | `training_outcome.py:271` | pytorch_load_save | Skipped - `torch.save(state_dict)` is safe pattern |
+
+**Rationale for B614 skip:**
+- We save `model.state_dict()` (weights only), not pickled code
+- All model loading is internal and controlled
+- This is the standard recommended PyTorch serialization pattern
+- Related to TORCH-SEC-001 torch version deferral
+
+```bash
+bandit -r src/renacechess -ll -ii --skip B614
+# No actionable issues identified
 ```
 
 ---

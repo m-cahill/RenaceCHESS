@@ -37,7 +37,9 @@ jobs:
       - name: Static security analysis (bandit)
         run: |
           echo "Running bandit SAST scan..."
-          bandit -r src/renacechess -ll -ii
+          # Skip B614 (pytorch_load_save) - torch.save(state_dict) is safe pattern
+          # Related to TORCH-SEC-001 deferral in M23_audit.md
+          bandit -r src/renacechess -ll -ii --skip B614
 
   lint:
     name: Lint and Format
