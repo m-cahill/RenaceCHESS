@@ -31,6 +31,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M20 | ✅ Closed (MERGED) | `m20-elo-bucket-delta-facts` → `main` | 2026-02-01 | ELO-BUCKET-DELTA-FACTS-001 — Elo-Bucket Delta Facts Artifact (Cross-Bucket Comparison) |
 | M21 | ✅ Closed (MERGED) | `m21-llm-translation-harness-001` → `main` | 2026-02-01 | LLM-TRANSLATION-HARNESS-001 — LLM Translation Harness + Coaching Evaluation (Phase C Core Complete) |
 | M22 | ✅ Closed (MERGED) | `m22-coaching-surface-cli` → `main` | 2026-02-01 | COACHING-SURFACE-CLI-001 — Coaching CLI Surface Exposure (Phase C Exit) |
+| M23 | ✅ Closed (MERGED) | `m23-phase-d-hardening-001` → `main` | 2026-02-01 | PHASE-D-HARDENING-001 — Security, Performance, Coverage, DX (Phase D Entry) |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -727,6 +728,31 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-02-01 (Phase C CLOSED — M22 COACHING-SURFACE-CLI-001, Phase C Complete)
+**M23 Details:**
+- **Objective:** Harden Phase D entry with security scanning, performance benchmarks, CLI coverage, and DX improvements
+- **CI Runs:** 4 runs (3 failures due to security findings, bandit B614, 1 success)
+- **Final CI Run:** 21557136080 (SUCCESS - All checks passing)
+- **Final Coverage:** 92.20% (exceeds 90% threshold)
+- **Test Count:** 649 passed, 1 skipped (36 new M23 tests)
+- **PR:** #29 (merged)
+- **Final Commit:** `a706c84`
+- **Audit:** `docs/milestones/PhaseD/M23/M23_audit.md`
+- **Summary:** `docs/milestones/PhaseD/M23/M23_summary.md`
+- **Key Files:**
+  - `.github/workflows/ci.yml` — Added security + perf-benchmarks jobs
+  - `tests/test_m23_perf_benchmarks.py` — 10 performance benchmark tests
+  - `tests/test_m23_cli_coverage.py` — 27 CLI coverage tests
+  - `.pre-commit-config.yaml` — Local DX pre-commit hooks
+- **Notable Features:**
+  - Security CI: pip-audit (dependency vulnerabilities) + bandit (SAST)
+  - Performance benchmarks: pytest-benchmark with artifact upload (no thresholds)
+  - CLI coverage improved: ~72% → 84%
+  - Pre-commit hooks: local DX guardrail (CI remains authoritative)
+  - Documented deferrals: TORCH-SEC-001 (torch 2.2.2 CVEs), CLI-COV-001 (file-level 84%)
+- **Phase D Status:** ENTERED — Hardened foundation for data expansion, calibration, and quality
+
+---
+
+**Last Updated:** 2026-02-01 (Phase D ENTERED — M23 PHASE-D-HARDENING-001 Complete)
 
 

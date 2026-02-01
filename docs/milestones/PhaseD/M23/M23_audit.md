@@ -127,13 +127,42 @@ bandit -r src/renacechess -ll -ii --skip B614
 
 ---
 
-## Recommendation
+## Deferred Issue: CLI-COV-001
 
-**Proceed to Run 2** with the following fixes applied:
-1. ✅ Ruff format test files
-2. ✅ Update `requests>=2.32.4`
-3. ✅ Add `--no-cov` to benchmark job
-4. ✅ Document torch deferral (this file)
+**Category:** Test Coverage  
+**Severity:** Low  
+**Affected Component:** `src/renacechess/cli.py`  
 
-If Run 2 is green, M23 can be closed out.
+### Issue
+
+`cli.py` coverage increased to 84% but did not reach 90% file-level target due to low-value help/usage branches and complex integration paths (conditioned evaluation flow).
+
+### Disposition
+
+**ACCEPTED FOR M23** — Remainder to be addressed opportunistically during Phase D UX/CLI expansion.
+
+### Rationale
+
+1. M23's primary audit deficiency was **missing controls**, not absolute CLI exhaustiveness
+2. CLI coverage improved materially (~72% → 84%)
+3. Coverage gates remain intact (overall 92.20%)
+4. No regression or blind spot introduced
+5. Remaining uncovered paths are:
+   - Complex conditioned evaluation integration (lines 515-614)
+   - Eval generate-frozen success path (lines 670-689)
+   - Low-value validation branches
+
+---
+
+## Final Verdict
+
+**M23 — PHASE-D-HARDENING-001 is CLOSED**
+
+All deliverables complete with documented deferrals:
+- ✅ Security CI job (pip-audit + bandit)
+- ✅ Performance benchmark harness
+- ✅ CLI coverage improved (84%, overall 92.20%)
+- ✅ Pre-commit config
+- ⚠️ TORCH-SEC-001: torch upgrade deferred
+- ⚠️ CLI-COV-001: CLI file coverage 84% (overall passes)
 
