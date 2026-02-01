@@ -1,0 +1,120 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "coaching_draft.v1.schema.json",
+  "title": "CoachingDraftV1",
+  "description": "Coaching draft artifact produced by LLM translation of facts (M21). An intermediate, evaluable artifact - not user-facing.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "draftText",
+    "skillBucket",
+    "toneProfile",
+    "sourceAdviceFactsHash",
+    "determinismMetadata",
+    "determinismHash"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "coaching_draft.v1",
+      "description": "Schema version identifier"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of generation"
+    },
+    "draftText": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Generated coaching prose"
+    },
+    "skillBucket": {
+      "type": "string",
+      "description": "Target skill bucket for this draft"
+    },
+    "toneProfile": {
+      "type": "string",
+      "enum": ["neutral", "encouraging", "concise"],
+      "description": "Tone profile used for generation"
+    },
+    "referencedFacts": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ReferencedFact"
+      },
+      "default": [],
+      "description": "Explicit list of facts referenced in the draft"
+    },
+    "sourceAdviceFactsHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Determinism hash of source AdviceFactsV1"
+    },
+    "sourceDeltaFactsHash": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Determinism hash of source EloBucketDeltaFactsV1 (optional)"
+    },
+    "determinismMetadata": {
+      "$ref": "#/definitions/DeterminismMetadata"
+    },
+    "determinismHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of canonical JSON for this artifact"
+    }
+  },
+  "definitions": {
+    "ReferencedFact": {
+      "type": "object",
+      "required": ["sourceArtifact", "fieldPath", "valueSummary"],
+      "properties": {
+        "sourceArtifact": {
+          "type": "string",
+          "enum": ["advice_facts", "delta_facts"],
+          "description": "Source artifact type"
+        },
+        "fieldPath": {
+          "type": "string",
+          "description": "JSON path to the referenced field"
+        },
+        "valueSummary": {
+          "type": "string",
+          "description": "Summary of the referenced value"
+        }
+      }
+    },
+    "DeterminismMetadata": {
+      "type": "object",
+      "required": ["promptTemplateVersion", "promptHash", "modelId", "temperature", "provider"],
+      "properties": {
+        "promptTemplateVersion": {
+          "type": "string",
+          "description": "Version of prompt template used"
+        },
+        "promptHash": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$",
+          "description": "SHA-256 hash of the actual prompt sent"
+        },
+        "modelId": {
+          "type": "string",
+          "description": "LLM model identifier"
+        },
+        "temperature": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 2.0,
+          "description": "Temperature setting (0 for deterministic)"
+        },
+        "provider": {
+          "type": "string",
+          "description": "Provider name"
+        }
+      }
+    }
+  }
+}
+
