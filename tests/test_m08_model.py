@@ -265,7 +265,6 @@ def test_baseline_policy_v1_get_move_index_hash_conflict() -> None:
     # Try to get index for a move that hashes to an occupied slot
     # This tests the conflict detection branch (line 180-182)
     move = "a1a2"
-    hash_val = hash(move) % model.move_vocab_size
 
     # If hash conflicts with existing move, should return None
     idx = model.get_move_index(move)
