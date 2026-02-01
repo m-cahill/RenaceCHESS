@@ -779,9 +779,9 @@ def main() -> None:
         from renacechess.coaching.translation_harness import translate_facts_to_coaching
 
         # M22 uses M21 thresholds exactly (locked answer #3)
-        FACT_COVERAGE_MIN = 0.5
-        HALLUCINATION_RATE_MAX = 0.2
-        DELTA_FAITHFULNESS_MIN = 0.5
+        fact_coverage_min = 0.5
+        hallucination_rate_max = 0.2
+        delta_faithfulness_min = 0.5
 
         # Load advice facts
         if not args.advice_facts.exists():
@@ -894,29 +894,35 @@ def main() -> None:
         print("=== Evaluation Summary ===", file=sys.stderr)
         print(f"Fact coverage: {eval_summary.fact_coverage * 100:.0f}%", file=sys.stderr)
         print(f"Hallucination rate: {eval_summary.hallucination_rate * 100:.0f}%", file=sys.stderr)
-        print(f"Delta faithfulness: {'PASS' if eval_summary.delta_faithfulness >= 0.5 else 'FAIL'}", file=sys.stderr)
-        print(f"Bucket alignment: {'PASS' if eval_summary.bucket_alignment else 'FAIL'}", file=sys.stderr)
-        print(f"Verbosity score: {'OK' if 0.2 <= eval_summary.verbosity_score <= 0.8 else 'WARN'}", file=sys.stderr)
-        print(f"Overall: {'PASS' if eval_summary.passed else 'FAIL'}", file=sys.stderr)
+        delta_pass = "PASS" if eval_summary.delta_faithfulness >= 0.5 else "FAIL"
+        print(f"Delta faithfulness: {delta_pass}", file=sys.stderr)
+        bucket_pass = "PASS" if eval_summary.bucket_alignment else "FAIL"
+        print(f"Bucket alignment: {bucket_pass}", file=sys.stderr)
+        verb_ok = "OK" if 0.2 <= eval_summary.verbosity_score <= 0.8 else "WARN"
+        print(f"Verbosity score: {verb_ok}", file=sys.stderr)
+        overall_pass = "PASS" if eval_summary.passed else "FAIL"
+        print(f"Overall: {overall_pass}", file=sys.stderr)
         if eval_summary.failure_reasons:
             print(f"Failure reasons: {', '.join(eval_summary.failure_reasons)}", file=sys.stderr)
         print("", file=sys.stderr)
 
         # Check thresholds (M21 thresholds, M22 locked answer #3)
         threshold_failures: list[str] = []
-        if eval_summary.fact_coverage < FACT_COVERAGE_MIN:
+        if eval_summary.fact_coverage < fact_coverage_min:
             threshold_failures.append(
-                f"factCoverage {eval_summary.fact_coverage:.2f} < {FACT_COVERAGE_MIN}"
+                f"factCoverage {eval_summary.fact_coverage:.2f} < {fact_coverage_min}"
             )
-        if eval_summary.hallucination_rate >= HALLUCINATION_RATE_MAX:
+        if eval_summary.hallucination_rate >= hallucination_rate_max:
             threshold_failures.append(
-                f"hallucinationRate {eval_summary.hallucination_rate:.2f} >= {HALLUCINATION_RATE_MAX}"
+                f"hallucinationRate {eval_summary.hallucination_rate:.2f} "
+                f">= {hallucination_rate_max}"
             )
         if not eval_summary.bucket_alignment:
             threshold_failures.append("bucketAlignment is False")
-        if eval_summary.delta_faithfulness < DELTA_FAITHFULNESS_MIN:
+        if eval_summary.delta_faithfulness < delta_faithfulness_min:
             threshold_failures.append(
-                f"deltaFaithfulness {eval_summary.delta_faithfulness:.2f} < {DELTA_FAITHFULNESS_MIN}"
+                f"deltaFaithfulness {eval_summary.delta_faithfulness:.2f} "
+                f"< {delta_faithfulness_min}"
             )
 
         # If thresholds fail, print warning but still output artifact (exit non-zero)

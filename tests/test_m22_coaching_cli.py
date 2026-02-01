@@ -26,13 +26,6 @@ from typing import Any
 import pytest
 
 from renacechess.contracts.models import (
-    AdviceFactsContextV1,
-    AdviceFactsHDIV1,
-    AdviceFactsMoveV1,
-    AdviceFactsOutcomeV1,
-    AdviceFactsPolicyV1,
-    AdviceFactsPositionV1,
-    AdviceFactsSourceContractsV1,
     AdviceFactsV1,
     CoachingSurfaceV1,
     DifficultyDeltaV1,
@@ -41,7 +34,6 @@ from renacechess.contracts.models import (
     OutcomeDeltaV1,
     PolicyDeltaV1,
 )
-
 
 # =============================================================================
 # Test Fixtures
@@ -388,7 +380,7 @@ class TestCliOutputStable:
         advice_path, delta_path = valid_artifacts
         out_path = tmp_path / "surface.json"
 
-        result = _run_coach_cli(
+        _run_coach_cli(
             advice_path=advice_path,
             delta_path=delta_path,
             out_path=out_path,
