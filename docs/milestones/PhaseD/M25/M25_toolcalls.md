@@ -29,6 +29,9 @@
 | 2026-02-01 | write | Generate M25_run4.md CI analysis | M25_run4.md | ✅ Complete |
 | 2026-02-01 | search_replace | Fix test assertion (check stderr not stdout) | test_m25_recalibration.py | ✅ Complete |
 | 2026-02-01 | run_terminal_cmd | Auto-format test file | test_m25_recalibration.py | ✅ Complete |
+| 2026-02-01 | write | Generate M25_run5.md CI analysis | M25_run5.md | ✅ Complete |
+| 2026-02-01 | search_replace | Add comprehensive CLI tests for coverage | test_m25_recalibration.py | ✅ Complete |
+| 2026-02-01 | write | Generate M25_run6.md CI analysis | M25_run6.md | ✅ Complete |
 
 ---
 

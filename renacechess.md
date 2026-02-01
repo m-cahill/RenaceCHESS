@@ -33,6 +33,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M22 | ✅ Closed (MERGED) | `m22-coaching-surface-cli` → `main` | 2026-02-01 | COACHING-SURFACE-CLI-001 — Coaching CLI Surface Exposure (Phase C Exit) |
 | M23 | ✅ Closed (MERGED) | `m23-phase-d-hardening-001` → `main` | 2026-02-01 | PHASE-D-HARDENING-001 — Security, Performance, Coverage, DX (Phase D Entry) |
 | M24 | ✅ Closed (MERGED) | `m24-phase-d-calibration-001` → `main` | 2026-02-01 | PHASE-D-CALIBRATION-001 — Calibration Metrics and Evaluation Runner |
+| M25 | ✅ Closed (MERGED) | `m25-phase-d-recalibration-001` → `main` | 2026-02-01 | PHASE-D-RECALIBRATION-001 — Temperature-Based Probability Recalibration |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -758,10 +759,37 @@ From M00 forward, RenaceCHESS guarantees:
 - **Final CI Run:** 21569555120 (SUCCESS - All checks passing)
 - **Final Coverage:** ≥90% (exceeds threshold, no regressions)
 - **Test Count:** 684 passed, 1 skipped (30 new M24 tests)
-- **PR:** #30 (ready for merge)
+- **PR:** #30 (merged)
 - **Final Commit:** `029e611`
 - **Audit:** `docs/milestones/PhaseD/M24/M24_audit.md`
 - **Summary:** `docs/milestones/PhaseD/M24/M24_summary.md`
+
+**M25 Details:**
+- **Objective:** Introduce explicit, measurable probability recalibration using temperature scaling
+- **CI Runs:** 6 runs (5 failures addressing import, lint, types, CI config, datetime, fixture path, formatting, test assertion, coverage; 1 success)
+- **Final CI Run:** 21571065091 (SUCCESS - All checks passing)
+- **Final Coverage:** 92.53% (exceeds 90% threshold, improved from 92.14%)
+- **Test Count:** 713 passed, 1 skipped (30+ new M25 tests)
+- **PR:** #31 (merged)
+- **Final Commit:** `435231f`
+- **Audit:** `docs/milestones/PhaseD/M25/M25_audit.md`
+- **Summary:** `docs/milestones/PhaseD/M25/M25_summary.md`
+- **Key Files:**
+  - `src/renacechess/eval/recalibration_runner.py` — Recalibration fitting and evaluation (734 lines)
+  - `src/renacechess/contracts/schemas/v1/recalibration_parameters.v1.schema.json` — Recalibration parameters schema
+  - `src/renacechess/contracts/schemas/v1/calibration_delta.v1.schema.json` — Calibration delta schema
+  - `tests/test_m25_recalibration.py` — Comprehensive test suite (914 lines)
+- **Notable Features:**
+  - Temperature scaling for outcome head (W/D/L) and policy head (move probabilities)
+  - Per-Elo bucket parameters with deterministic grid search fitting
+  - Before/after calibration delta computation
+  - Offline-only recalibration (no runtime behavior changes)
+  - CLI preview mode (explicit opt-in, off by default)
+  - CI recalibration job with artifact upload
+- **Governance:**
+  - No Phase C contract changes (AdviceFactsV1, EloBucketDeltaFactsV1, CoachingDraftV1 untouched)
+  - Coverage improved despite adding 652 new statements
+  - All quality gates passing, no regressions introduced
 - **Key Files:**
   - `src/renacechess/contracts/models.py` — Added CalibrationMetricsV1 models
   - `src/renacechess/contracts/schemas/v1/calibration_metrics.v1.schema.json` — JSON Schema
