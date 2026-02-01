@@ -2994,3 +2994,201 @@ class CalibrationMetricsV1(BaseModel):
         pattern="^sha256:[a-f0-9]{64}$",
         description="SHA-256 hash for determinism verification",
     )
+
+
+# =============================================================================
+# M25 — Recalibration Parameters v1 (Phase D Recalibration)
+# =============================================================================
+
+
+class RecalibrationBucketParametersV1(BaseModel):
+    """Recalibration parameters for a single Elo bucket.
+
+    Contains fitted temperature scaling parameters for outcome and policy heads.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    elo_bucket: str = Field(
+        ...,
+        alias="eloBucket",
+        description="Canonical skill bucket ID (from conditioning.buckets.SkillBucketId)",
+    )
+    outcome_temperature: float = Field(
+        ...,
+        alias="outcomeTemperature",
+        ge=0.25,
+        le=3.0,
+        description="Fitted temperature for outcome head (W/D/L) recalibration",
+    )
+    policy_temperature: float = Field(
+        ...,
+        alias="policyTemperature",
+        ge=0.25,
+        le=3.0,
+        description="Fitted temperature for policy head (move probabilities) recalibration",
+    )
+    fit_method: Literal["grid_search"] = Field(
+        "grid_search",
+        alias="fitMethod",
+        description="Method used for fitting (M25: grid_search only)",
+    )
+    fit_metric: Literal["nll"] = Field(
+        "nll",
+        alias="fitMetric",
+        description="Metric optimized during fitting (M25: NLL only)",
+    )
+
+
+class RecalibrationParametersV1(BaseModel):
+    """Top-level recalibration parameters artifact (M25).
+
+    Pure parameter artifact containing fitted temperature scaling parameters per Elo bucket.
+    Contains no logic and no metrics, only fitted parameters + provenance.
+
+    See docs/milestones/PhaseD/M25/M25_plan.md for the governing plan.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    version: Literal["1.0"] = Field(
+        "1.0",
+        description="Schema version identifier",
+    )
+    generated_at: datetime = Field(
+        ...,
+        alias="generatedAt",
+        description="ISO 8601 timestamp of parameters generation",
+    )
+    source_calibration_metrics_hash: str = Field(
+        ...,
+        alias="sourceCalibrationMetricsHash",
+        pattern="^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of the CalibrationMetricsV1 artifact used for fitting",
+    )
+    source_manifest_hash: str = Field(
+        ...,
+        alias="sourceManifestHash",
+        pattern="^[a-f0-9]{64}$",
+        description="SHA-256 hash of the frozen eval manifest used",
+    )
+    policy_id: str = Field(
+        ...,
+        alias="policyId",
+        description="Policy provider identifier used for evaluation",
+    )
+    outcome_head_id: str | None = Field(
+        None,
+        alias="outcomeHeadId",
+        description="Outcome head identifier used (None if using baselines)",
+    )
+
+    # Per-bucket parameters
+    by_elo_bucket: list[RecalibrationBucketParametersV1] = Field(
+        ...,
+        alias="byEloBucket",
+        description="Recalibration parameters per Elo bucket",
+    )
+
+    # Determinism
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern="^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash for determinism verification",
+    )
+
+
+# =============================================================================
+# M25 — Calibration Delta v1 (Before/After Comparison)
+# =============================================================================
+
+
+class CalibrationDeltaV1(BaseModel):
+    """Calibration improvement/deterioration delta for a single metric and bucket.
+
+    Represents before/after comparison for a single calibration metric.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    elo_bucket: str = Field(
+        ...,
+        alias="eloBucket",
+        description="Canonical skill bucket ID",
+    )
+    metric: Literal["outcome_ece", "outcome_nll", "outcome_brier", "policy_nll", "policy_top1_ece"] = Field(
+        ...,
+        description="Metric name being compared",
+    )
+    before: float = Field(
+        ...,
+        description="Metric value before recalibration",
+    )
+    after: float = Field(
+        ...,
+        description="Metric value after recalibration",
+    )
+    delta: float = Field(
+        ...,
+        description="Change in metric (after - before). Negative = improvement for ECE/NLL/Brier",
+    )
+    improved: bool = Field(
+        ...,
+        description="Whether recalibration improved this metric (True if delta < 0 for ECE/NLL/Brier)",
+    )
+
+
+class CalibrationDeltaArtifactV1(BaseModel):
+    """Top-level calibration delta artifact (M25).
+
+    Before/after comparison artifact showing calibration changes after recalibration.
+    Separate from RecalibrationParametersV1 (parameters vs. evaluation).
+
+    See docs/milestones/PhaseD/M25/M25_plan.md for the governing plan.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    version: Literal["1.0"] = Field(
+        "1.0",
+        description="Schema version identifier",
+    )
+    generated_at: datetime = Field(
+        ...,
+        alias="generatedAt",
+        description="ISO 8601 timestamp of delta generation",
+    )
+    source_recalibration_parameters_hash: str = Field(
+        ...,
+        alias="sourceRecalibrationParametersHash",
+        pattern="^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of the RecalibrationParametersV1 artifact used",
+    )
+    source_calibration_metrics_before_hash: str = Field(
+        ...,
+        alias="sourceCalibrationMetricsBeforeHash",
+        pattern="^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of the CalibrationMetricsV1 artifact (before recalibration)",
+    )
+    source_calibration_metrics_after_hash: str = Field(
+        ...,
+        alias="sourceCalibrationMetricsAfterHash",
+        pattern="^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of the CalibrationMetricsV1 artifact (after recalibration)",
+    )
+
+    # Per-bucket deltas
+    by_elo_bucket: list[list[CalibrationDeltaV1]] = Field(
+        ...,
+        alias="byEloBucket",
+        description="List of deltas per bucket (each bucket has multiple metrics)",
+    )
+
+    # Determinism
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern="^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash for determinism verification",
+    )
