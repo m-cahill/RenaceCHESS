@@ -4,7 +4,12 @@ import json
 from pathlib import Path
 from typing import Any
 
-from renacechess.contracts.models import DatasetManifestV2
+from renacechess.contracts.models import (
+    DatasetManifestV2,
+    PolicyMove,
+    RecalibrationGateV1,
+    RecalibrationParametersV1,
+)
 from renacechess.dataset.split import compute_split_assignment
 from renacechess.eval.baselines import compute_policy_seed, create_policy_provider
 from renacechess.eval.conditioned_metrics import ConditionedMetricsAccumulator
@@ -204,6 +209,8 @@ def run_conditioned_evaluation(
     frozen_eval_manifest_hash: str | None = None,
     model_path: Path | None = None,
     outcome_head_path: Path | None = None,
+    recalibration_gate: RecalibrationGateV1 | None = None,
+    recalibration_params: RecalibrationParametersV1 | None = None,
 ) -> dict[str, Any]:
     """Run evaluation with conditioned metrics (M06) and optional outcome head (M09).
 
@@ -217,6 +224,8 @@ def run_conditioned_evaluation(
         frozen_eval_manifest_hash: SHA-256 hash of frozen eval manifest (if frozen eval).
         model_path: Path to trained policy model (for learned.v1).
         outcome_head_path: Path to outcome head model directory (M09, optional).
+        recalibration_gate: Optional RecalibrationGateV1 artifact (M26). If None or enabled=False, no recalibration applied.
+        recalibration_params: Optional RecalibrationParametersV1 artifact (M26). Required if gate.enabled=True.
 
     Returns:
         Dictionary with evaluation results (ready for EvalReportV3/V4/V5 construction).
@@ -296,6 +305,34 @@ def run_conditioned_evaluation(
 
                 # Extract policy output
                 predicted_moves = policy.predict(record)
+
+                # Apply recalibration if gate is enabled (M26)
+                if (
+                    recalibration_gate is not None
+                    and recalibration_gate.enabled
+                    and skill_bucket_id
+                ):
+                    from renacechess.eval.runtime_recalibration import (
+                        apply_recalibration_if_enabled,
+                    )
+
+                    # Extract probabilities from PolicyMove list
+                    move_probs = [move.p for move in predicted_moves]
+                    if move_probs:
+                        scaled_probs, _metadata = apply_recalibration_if_enabled(
+                            move_probs,
+                            skill_bucket_id,
+                            recalibration_gate,
+                            recalibration_params,
+                        )
+                        # Update PolicyMove probabilities
+                        predicted_moves = [
+                            PolicyMove(uci=move.uci, san=move.san, p=scaled_probs[i])
+                            for i, move in enumerate(predicted_moves)
+                        ]
+                        # Re-sort by probability (descending)
+                        predicted_moves.sort(key=lambda x: x.p, reverse=True)
+
                 policy_output = predicted_moves[0].uci if predicted_moves else None
 
                 # Extract policy metrics
@@ -322,6 +359,28 @@ def run_conditioned_evaluation(
                     if game_result is not None:
                         # Predict W/D/L
                         predicted_wdl = outcome_head.predict(record)
+
+                        # Apply recalibration if gate is enabled (M26)
+                        if (
+                            recalibration_gate is not None
+                            and recalibration_gate.enabled
+                            and skill_bucket_id
+                        ):
+                            from renacechess.eval.runtime_recalibration import (
+                                apply_recalibration_to_outcome_if_enabled,
+                            )
+
+                            (scaled_w, scaled_d, scaled_l), _metadata = (
+                                apply_recalibration_to_outcome_if_enabled(
+                                    predicted_wdl["w"],
+                                    predicted_wdl["d"],
+                                    predicted_wdl["l"],
+                                    skill_bucket_id,
+                                    recalibration_gate,
+                                    recalibration_params,
+                                )
+                            )
+                            predicted_wdl = {"w": scaled_w, "d": scaled_d, "l": scaled_l}
 
                         # Add to overall accumulator
                         outcome_accumulator.add_prediction(predicted_wdl, game_result)

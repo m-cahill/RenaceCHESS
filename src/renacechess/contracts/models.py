@@ -3196,3 +3196,47 @@ class CalibrationDeltaArtifactV1(BaseModel):
         pattern="^sha256:[a-f0-9]{64}$",
         description="SHA-256 hash for determinism verification",
     )
+
+
+# =============================================================================
+# M26 — Recalibration Gate v1 (Phase D Runtime Gating)
+# =============================================================================
+
+
+class RecalibrationGateV1(BaseModel):
+    """Runtime gate artifact for enabling recalibration (M26).
+
+    This is the only authority that allows runtime recalibration to be applied.
+    Must be explicitly provided as a file artifact (no environment variables or defaults).
+
+    See docs/milestones/PhaseD/M26/M26_plan.md for the governing plan.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    version: Literal["1.0"] = Field(
+        "1.0",
+        description="Schema version identifier",
+    )
+    enabled: bool = Field(
+        ...,
+        description="Whether recalibration is enabled (false = no change to runtime behavior)",
+    )
+    parameters_ref: str | None = Field(
+        None,
+        alias="parametersRef",
+        description="Path or hash reference to RecalibrationParametersV1 artifact (required if enabled=True)",
+    )
+    scope: Literal["outcome", "policy", "both"] = Field(
+        "both",
+        description="Which heads to apply recalibration to: outcome (W/D/L), policy (move probabilities), or both",
+    )
+    applied_at: datetime | None = Field(
+        None,
+        alias="appliedAt",
+        description="ISO 8601 timestamp when gate was applied (set at runtime, not in artifact)",
+    )
+    notes: str | None = Field(
+        None,
+        description="Optional notes about why this gate is enabled (for audit/debugging)",
+    )

@@ -191,6 +191,11 @@ def main() -> None:
         type=Path,
         help="Path to frozen eval manifest (M07, REQUIRED when --conditioned-metrics is used)",
     )
+    run_parser.add_argument(
+        "--recalibration-gate",
+        type=Path,
+        help="Path to RecalibrationGateV1 JSON file (M26, optional, explicit file-based gate only)",
+    )
 
     # M06: Frozen eval generation command
     frozen_parser = eval_subparsers.add_parser(
@@ -631,7 +636,49 @@ def main() -> None:
                         )
                         sys.exit(1)
 
-                    # Run conditioned evaluation (M07, M09)
+                    # M26: Load recalibration gate if provided
+                    recalibration_gate = None
+                    recalibration_params = None
+                    if args.recalibration_gate:
+                        from renacechess.eval.runtime_recalibration import (
+                            load_recalibration_gate,
+                        )
+                        from renacechess.eval.recalibration_runner import (
+                            load_recalibration_parameters,
+                        )
+
+                        try:
+                            recalibration_gate = load_recalibration_gate(
+                                args.recalibration_gate
+                            )
+                            # If gate is enabled, load parameters
+                            if recalibration_gate.enabled:
+                                if not recalibration_gate.parameters_ref:
+                                    print(
+                                        "Error: RecalibrationGateV1.enabled=True requires parametersRef to be set",
+                                        file=sys.stderr,
+                                    )
+                                    sys.exit(1)
+                                # Try to load parameters from path (parameters_ref can be path or hash)
+                                params_path = Path(recalibration_gate.parameters_ref)
+                                if params_path.exists():
+                                    recalibration_params = load_recalibration_parameters(
+                                        params_path
+                                    )
+                                else:
+                                    print(
+                                        f"Error: RecalibrationParametersV1 not found at: {params_path}",
+                                        file=sys.stderr,
+                                    )
+                                    sys.exit(1)
+                        except Exception as e:
+                            print(
+                                f"Error: Failed to load recalibration gate: {e}",
+                                file=sys.stderr,
+                            )
+                            sys.exit(1)
+
+                    # Run conditioned evaluation (M07, M09, M26)
                     outcome_head_path = getattr(args, "outcome_head_path", None)
                     eval_results = run_conditioned_evaluation(
                         manifest_path=args.dataset_manifest,
@@ -643,6 +690,8 @@ def main() -> None:
                         frozen_eval_manifest_hash=frozen_eval_manifest_hash,
                         model_path=getattr(args, "model_path", None),
                         outcome_head_path=outcome_head_path,
+                        recalibration_gate=recalibration_gate,
+                        recalibration_params=recalibration_params,
                     )
 
                     # Validate frozen eval manifest hash matches (if provided in results)

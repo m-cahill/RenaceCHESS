@@ -1,0 +1,43 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://renacechess.dev/schemas/v1/recalibration_gate.v1.schema.json",
+  "title": "RecalibrationGateV1",
+  "description": "Runtime gate artifact for enabling recalibration (M26). This is the only authority that allows runtime recalibration to be applied. Must be explicitly provided as a file artifact (no environment variables or defaults).",
+  "type": "object",
+  "required": [
+    "version",
+    "enabled"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version identifier"
+    },
+    "enabled": {
+      "type": "boolean",
+      "description": "Whether recalibration is enabled (false = no change to runtime behavior)"
+    },
+    "parametersRef": {
+      "type": ["string", "null"],
+      "description": "Path or hash reference to RecalibrationParametersV1 artifact (required if enabled=true)"
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["outcome", "policy", "both"],
+      "default": "both",
+      "description": "Which heads to apply recalibration to: outcome (W/D/L), policy (move probabilities), or both"
+    },
+    "appliedAt": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when gate was applied (set at runtime, not in artifact)"
+    },
+    "notes": {
+      "type": ["string", "null"],
+      "description": "Optional notes about why this gate is enabled (for audit/debugging)"
+    }
+  },
+  "additionalProperties": false
+}
+
