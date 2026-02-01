@@ -116,9 +116,7 @@ class TestApplyRecalibrationIfEnabled:
         gate = RecalibrationGateV1(version="1.0", enabled=False, scope="both")
         probs = [0.5, 0.3, 0.2]
 
-        scaled_probs, metadata = apply_recalibration_if_enabled(
-            probs, "1200-1400", gate, None
-        )
+        scaled_probs, metadata = apply_recalibration_if_enabled(probs, "1200-1400", gate, None)
 
         assert scaled_probs == probs
         assert metadata.applied is False
@@ -154,9 +152,7 @@ class TestApplyRecalibrationIfEnabled:
         # Uniform probabilities
         probs = [0.25, 0.25, 0.25, 0.25]
 
-        scaled_probs, metadata = apply_recalibration_if_enabled(
-            probs, "1200-1400", gate, params
-        )
+        scaled_probs, metadata = apply_recalibration_if_enabled(probs, "1200-1400", gate, params)
 
         # With temperature 0.5, probabilities should be sharper (more peaked)
         assert scaled_probs != probs
@@ -234,9 +230,7 @@ class TestApplyRecalibrationIfEnabled:
 
         probs = [0.25, 0.25, 0.25, 0.25]
 
-        scaled_probs, metadata = apply_recalibration_if_enabled(
-            probs, "1200-1400", gate, params
-        )
+        scaled_probs, metadata = apply_recalibration_if_enabled(probs, "1200-1400", gate, params)
 
         # Should use policy_temperature (0.5), not outcome_temperature (2.0)
         assert scaled_probs != probs
@@ -251,10 +245,8 @@ class TestApplyRecalibrationToOutcomeIfEnabled:
         gate = RecalibrationGateV1(version="1.0", enabled=False, scope="both")
         p_win, p_draw, p_loss = 0.4, 0.3, 0.3
 
-        (scaled_w, scaled_d, scaled_l), metadata = (
-            apply_recalibration_to_outcome_if_enabled(
-                p_win, p_draw, p_loss, "1200-1400", gate, None
-            )
+        (scaled_w, scaled_d, scaled_l), metadata = apply_recalibration_to_outcome_if_enabled(
+            p_win, p_draw, p_loss, "1200-1400", gate, None
         )
 
         assert (scaled_w, scaled_d, scaled_l) == (p_win, p_draw, p_loss)
@@ -288,10 +280,8 @@ class TestApplyRecalibrationToOutcomeIfEnabled:
 
         p_win, p_draw, p_loss = 0.4, 0.3, 0.3
 
-        (scaled_w, scaled_d, scaled_l), metadata = (
-            apply_recalibration_to_outcome_if_enabled(
-                p_win, p_draw, p_loss, "1200-1400", gate, params
-            )
+        (scaled_w, scaled_d, scaled_l), metadata = apply_recalibration_to_outcome_if_enabled(
+            p_win, p_draw, p_loss, "1200-1400", gate, params
         )
 
         assert (scaled_w, scaled_d, scaled_l) != (p_win, p_draw, p_loss)
@@ -327,10 +317,8 @@ class TestApplyRecalibrationToOutcomeIfEnabled:
 
         p_win, p_draw, p_loss = 0.4, 0.3, 0.3
 
-        (scaled_w, scaled_d, scaled_l), metadata = (
-            apply_recalibration_to_outcome_if_enabled(
-                p_win, p_draw, p_loss, "1200-1400", gate, params
-            )
+        (scaled_w, scaled_d, scaled_l), metadata = apply_recalibration_to_outcome_if_enabled(
+            p_win, p_draw, p_loss, "1200-1400", gate, params
         )
 
         # Should use outcome_temperature (0.5), not policy_temperature (2.0)
@@ -384,4 +372,3 @@ class TestRuntimeRecalibrationMetadata:
             "parametersHash": "sha256:def456",
             "scope": "policy",
         }
-

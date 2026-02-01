@@ -84,9 +84,7 @@ def load_recalibration_gate(gate_path: Path) -> RecalibrationGateV1:
 
     # Validate that if enabled, parameters_ref is provided
     if gate.enabled and not gate.parameters_ref:
-        raise ValueError(
-            "RecalibrationGateV1.enabled=True requires parametersRef to be set"
-        )
+        raise ValueError("RecalibrationGateV1.enabled=True requires parametersRef to be set")
 
     return gate
 
@@ -114,7 +112,8 @@ def apply_recalibration_if_enabled(
         ValueError: If gate is enabled but params is None or bucket not found
     """
     # Compute gate hash for provenance
-    gate_dict = gate.model_dump(by_alias=True)
+    # Use mode="json" to serialize datetime objects to strings for JSON serialization
+    gate_dict = gate.model_dump(by_alias=True, mode="json")
     gate_hash = f"sha256:{canonical_hash(gate_dict)}"
 
     # If disabled, return unchanged with metadata
@@ -147,16 +146,15 @@ def apply_recalibration_if_enabled(
         )
 
     # Compute parameters hash for provenance
-    params_dict = params.model_dump(by_alias=True)
+    # Use mode="json" to serialize datetime objects to strings for JSON serialization
+    params_dict = params.model_dump(by_alias=True, mode="json")
     params_hash = f"sha256:{canonical_hash(params_dict)}"
 
     # Apply temperature scaling based on scope
     # For now, we only handle policy probabilities here
     # Outcome recalibration is handled separately in outcome head path
     if gate.scope in ("policy", "both"):
-        scaled_probs = apply_temperature_scaling_to_probs(
-            probs, bucket_params.policy_temperature
-        )
+        scaled_probs = apply_temperature_scaling_to_probs(probs, bucket_params.policy_temperature)
     else:
         scaled_probs = probs
 
@@ -201,7 +199,8 @@ def apply_recalibration_to_outcome_if_enabled(
         ValueError: If gate is enabled but params is None or bucket not found
     """
     # Compute gate hash for provenance
-    gate_dict = gate.model_dump(by_alias=True)
+    # Use mode="json" to serialize datetime objects to strings for JSON serialization
+    gate_dict = gate.model_dump(by_alias=True, mode="json")
     gate_hash = f"sha256:{canonical_hash(gate_dict)}"
 
     # If disabled, return unchanged with metadata
@@ -234,15 +233,14 @@ def apply_recalibration_to_outcome_if_enabled(
         )
 
     # Compute parameters hash for provenance
-    params_dict = params.model_dump(by_alias=True)
+    # Use mode="json" to serialize datetime objects to strings for JSON serialization
+    params_dict = params.model_dump(by_alias=True, mode="json")
     params_hash = f"sha256:{canonical_hash(params_dict)}"
 
     # Apply temperature scaling based on scope
     if gate.scope in ("outcome", "both"):
         probs = [p_win, p_draw, p_loss]
-        scaled_probs = apply_temperature_scaling_to_probs(
-            probs, bucket_params.outcome_temperature
-        )
+        scaled_probs = apply_temperature_scaling_to_probs(probs, bucket_params.outcome_temperature)
         scaled_p_win, scaled_p_draw, scaled_p_loss = (
             scaled_probs[0],
             scaled_probs[1],
@@ -263,4 +261,3 @@ def apply_recalibration_to_outcome_if_enabled(
             scope=gate.scope,
         ),
     )
-

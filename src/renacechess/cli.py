@@ -648,9 +648,7 @@ def main() -> None:
                         )
 
                         try:
-                            recalibration_gate = load_recalibration_gate(
-                                args.recalibration_gate
-                            )
+                            recalibration_gate = load_recalibration_gate(args.recalibration_gate)
                             # If gate is enabled, load parameters
                             if recalibration_gate.enabled:
                                 if not recalibration_gate.parameters_ref:
