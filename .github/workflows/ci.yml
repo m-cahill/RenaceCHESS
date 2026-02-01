@@ -127,8 +127,8 @@ jobs:
           python -m pip install --upgrade pip --quiet
           pip install -e ".[dev]" --quiet
           
-          # Generate coverage XML at PR base
-          python -m pytest --cov=src/renacechess --cov-report=xml --cov-fail-under=0 -q
+          # Generate coverage XML at PR base (with branch coverage to match head)
+          python -m pytest --cov=src/renacechess --cov-branch --cov-report=xml --cov-fail-under=0 -q
           mv coverage.xml coverage-base.xml
           echo "✅ Baseline coverage XML generated"
           
@@ -146,8 +146,8 @@ jobs:
         if: steps.coverage_check.outputs.mode == 'both'
         shell: bash
         run: |
-          # Generate coverage XML at PR head
-          python -m pytest --cov=src/renacechess --cov-report=xml --cov-fail-under=0 -q
+          # Generate coverage XML at PR head (with branch coverage to match baseline)
+          python -m pytest --cov=src/renacechess --cov-branch --cov-report=xml --cov-fail-under=0 -q
           mv coverage.xml coverage-head.xml
           echo "✅ PR head coverage XML generated"
       - name: Skip overlap comparison (baseline failed)
