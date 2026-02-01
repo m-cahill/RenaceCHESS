@@ -2755,3 +2755,242 @@ class CoachingSurfaceV1(BaseModel):
         pattern="^sha256:[a-f0-9]{64}$",
         description="Determinism hash of source CoachingEvaluationV1",
     )
+
+
+# =============================================================================
+# M24 — Calibration Metrics v1 (Phase D Calibration)
+# =============================================================================
+
+
+class CalibrationBinV1(BaseModel):
+    """Single calibration bin with histogram statistics.
+
+    Represents one bin in a fixed 10-bin calibration histogram [0.0, 1.0].
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    bin_start: float = Field(
+        ...,
+        alias="binStart",
+        ge=0.0,
+        le=1.0,
+        description="Lower bound of bin (inclusive)",
+    )
+    bin_end: float = Field(
+        ...,
+        alias="binEnd",
+        ge=0.0,
+        le=1.0,
+        description="Upper bound of bin (exclusive, except last bin)",
+    )
+    count: int = Field(
+        ...,
+        ge=0,
+        description="Number of samples in this bin",
+    )
+    avg_confidence: float | None = Field(
+        None,
+        alias="avgConfidence",
+        ge=0.0,
+        le=1.0,
+        description="Average predicted confidence in this bin (None if count=0)",
+    )
+    empirical_accuracy: float | None = Field(
+        None,
+        alias="empiricalAccuracy",
+        ge=0.0,
+        le=1.0,
+        description="Empirical accuracy in this bin (None if count=0)",
+    )
+
+
+class CalibrationHistogramV1(BaseModel):
+    """Calibration histogram with fixed bin edges.
+
+    Uses 10 equal-width bins from 0.0 to 1.0.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    bin_edges: list[float] = Field(
+        ...,
+        alias="binEdges",
+        min_length=11,
+        max_length=11,
+        description="Fixed bin edges: [0.0, 0.1, 0.2, ..., 1.0] (11 values for 10 bins)",
+    )
+    bins: list[CalibrationBinV1] = Field(
+        ...,
+        min_length=10,
+        max_length=10,
+        description="Per-bin statistics (exactly 10 bins)",
+    )
+
+
+class OutcomeCalibrationMetricsV1(BaseModel):
+    """Outcome head (W/D/L) calibration metrics.
+
+    Measures calibration quality for the human outcome prediction head.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    brier_score: float = Field(
+        ...,
+        alias="brierScore",
+        ge=0.0,
+        le=1.0,
+        description="Brier score for outcome predictions (lower is better)",
+    )
+    nll: float = Field(
+        ...,
+        ge=0.0,
+        description="Negative log-likelihood of true outcome under predicted distribution",
+    )
+    ece: float = Field(
+        ...,
+        ge=0.0,
+        le=1.0,
+        description="Expected Calibration Error (lower is better)",
+    )
+    histogram: CalibrationHistogramV1 = Field(
+        ...,
+        description="Calibration histogram for outcome confidence",
+    )
+
+
+class PolicyCalibrationMetricsV1(BaseModel):
+    """Policy head (move distribution) calibration metrics.
+
+    Measures calibration quality for the human move prediction head.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    nll: float = Field(
+        ...,
+        ge=0.0,
+        description="Negative log-likelihood of chosen move under predicted distribution",
+    )
+    top1_ece: float = Field(
+        ...,
+        alias="top1Ece",
+        ge=0.0,
+        le=1.0,
+        description="Expected Calibration Error for top-1 move confidence",
+    )
+    histogram: CalibrationHistogramV1 = Field(
+        ...,
+        description="Calibration histogram for top-1 move confidence",
+    )
+
+
+class EloBucketCalibrationV1(BaseModel):
+    """Calibration metrics for a single Elo bucket.
+
+    Contains both outcome and policy calibration metrics for one skill bucket.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    elo_bucket: Literal[
+        "lt_800",
+        "800_999",
+        "1000_1199",
+        "1200_1399",
+        "1400_1599",
+        "1600_1799",
+        "gte_1800",
+        "unknown",
+    ] = Field(
+        ...,
+        alias="eloBucket",
+        description="Skill bucket ID from conditioning.buckets (M06)",
+    )
+    samples: int = Field(
+        ...,
+        ge=0,
+        description="Number of samples evaluated in this bucket",
+    )
+    outcome_calibration: OutcomeCalibrationMetricsV1 | None = Field(
+        None,
+        alias="outcomeCalibration",
+        description="Outcome head calibration metrics (None if no labeled outcomes)",
+    )
+    policy_calibration: PolicyCalibrationMetricsV1 | None = Field(
+        None,
+        alias="policyCalibration",
+        description="Policy head calibration metrics (None if no chosen move labels)",
+    )
+
+
+class CalibrationMetricsV1(BaseModel):
+    """Top-level calibration metrics artifact (M24).
+
+    Offline diagnostic artifact for measuring human-aligned calibration.
+    This artifact is measurement-only and does not feed runtime logic.
+
+    See docs/milestones/PhaseD/M24/M24_plan.md for the governing plan.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    version: Literal["1.0"] = Field(
+        "1.0",
+        description="Schema version identifier",
+    )
+    generated_at: datetime = Field(
+        ...,
+        alias="generatedAt",
+        description="ISO 8601 timestamp of metrics generation",
+    )
+    source_manifest_hash: str = Field(
+        ...,
+        alias="sourceManifestHash",
+        pattern="^[a-f0-9]{64}$",
+        description="SHA-256 hash of the frozen eval manifest used",
+    )
+    policy_id: str = Field(
+        ...,
+        alias="policyId",
+        description="Policy provider identifier used for evaluation",
+    )
+    outcome_head_id: str | None = Field(
+        None,
+        alias="outcomeHeadId",
+        description="Outcome head identifier used (None if using baselines)",
+    )
+
+    # Overall metrics (aggregated across all buckets)
+    overall_samples: int = Field(
+        ...,
+        alias="overallSamples",
+        ge=0,
+        description="Total number of samples evaluated",
+    )
+    overall_outcome_calibration: OutcomeCalibrationMetricsV1 | None = Field(
+        None,
+        alias="overallOutcomeCalibration",
+        description="Aggregated outcome calibration metrics",
+    )
+    overall_policy_calibration: PolicyCalibrationMetricsV1 | None = Field(
+        None,
+        alias="overallPolicyCalibration",
+        description="Aggregated policy calibration metrics",
+    )
+
+    # Per-bucket breakdown
+    by_elo_bucket: list[EloBucketCalibrationV1] = Field(
+        ...,
+        alias="byEloBucket",
+        description="Calibration metrics per Elo bucket",
+    )
+
+    # Determinism
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern="^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash for determinism verification",
+    )

@@ -1,0 +1,594 @@
+{
+  "countsBySkillBucketId": {
+    "1000_1199": 10,
+    "1200_1399": 10,
+    "1400_1599": 10,
+    "1600_1799": 10,
+    "800_999": 10,
+    "gte_1800": 10,
+    "lt_800": 10
+  },
+  "countsByTimeControlClass": {
+    "blitz": 23,
+    "bullet": 24,
+    "rapid": 23
+  },
+  "countsByTimePressureBucket": {
+    "low": 23,
+    "normal": 24,
+    "trouble": 23
+  },
+  "createdAt": "2026-01-01T12:00:00+00:00",
+  "manifestHash": "a6a50c6393f7502fbb7b7bed0b7934630131de942ff52c9f6ab9fdc38af22605",
+  "records": [
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1:0",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "lt_800",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1:1",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "lt_800",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2:2",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "lt_800",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3:3",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "lt_800",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4:4",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "lt_800",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1:5",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "lt_800",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1:6",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "lt_800",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2:7",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "lt_800",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3:8",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "lt_800",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4:9",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "lt_800",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1:10",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "800_999",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1:11",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "800_999",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2:12",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "800_999",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3:13",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "800_999",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4:14",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "800_999",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1:15",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "800_999",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1:16",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "800_999",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2:17",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "800_999",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3:18",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "800_999",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4:19",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "800_999",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1:20",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1000_1199",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1:21",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1000_1199",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2:22",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1000_1199",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3:23",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1000_1199",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4:24",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1000_1199",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1:25",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1000_1199",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1:26",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1000_1199",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2:27",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1000_1199",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3:28",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1000_1199",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4:29",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1000_1199",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1:30",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1200_1399",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1:31",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1200_1399",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2:32",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1200_1399",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3:33",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1200_1399",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4:34",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1200_1399",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1:35",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1200_1399",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1:36",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1200_1399",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2:37",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1200_1399",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3:38",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1200_1399",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4:39",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1200_1399",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1:40",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1400_1599",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1:41",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1400_1599",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2:42",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1400_1599",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3:43",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1400_1599",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4:44",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1400_1599",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1:45",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1400_1599",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1:46",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1400_1599",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2:47",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1400_1599",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3:48",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1400_1599",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4:49",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1400_1599",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1:50",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1600_1799",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1:51",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1600_1799",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2:52",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1600_1799",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3:53",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1600_1799",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4:54",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1600_1799",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1:55",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1600_1799",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1:56",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1600_1799",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2:57",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1600_1799",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3:58",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1600_1799",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4:59",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "1600_1799",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1:60",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "gte_1800",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1:61",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "gte_1800",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2:62",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "gte_1800",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3:63",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "gte_1800",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4:64",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "gte_1800",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1:65",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "gte_1800",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq - 0 1:66",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "gte_1800",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    },
+    {
+      "recordKey": "rnbqkbnr/pppp1ppp/8/4p3/4P3/8/PPPP1PPP/RNBQKBNR w KQkq - 0 2:67",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "gte_1800",
+      "timeControlClass": "blitz",
+      "timePressureBucket": "low"
+    },
+    {
+      "recordKey": "r1bqkbnr/pppp1ppp/2n5/4p3/4P3/5N2/PPPP1PPP/RNBQKB1R w KQkq - 2 3:68",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "gte_1800",
+      "timeControlClass": "rapid",
+      "timePressureBucket": "trouble"
+    },
+    {
+      "recordKey": "r1bqkb1r/pppp1ppp/2n2n2/4p3/2B1P3/5N2/PPPP1PPP/RNBQK2R w KQkq - 4 4:69",
+      "shardHash": "17b892a2d43ffce57fac981bf1c374e357b782b5f2ab81f0ec04811e18092ff0",
+      "shardId": "shard_000",
+      "skillBucketId": "gte_1800",
+      "timeControlClass": "bullet",
+      "timePressureBucket": "normal"
+    }
+  ],
+  "schemaVersion": 1,
+  "sourceManifestRef": {
+    "datasetDigest": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "manifestPath": "tests/fixtures/frozen_eval/source_manifest.json"
+  },
+  "stratificationTargets": {
+    "minPerSkillBucket": 10,
+    "totalRecords": 70
+  }
+}

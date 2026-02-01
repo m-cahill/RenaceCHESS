@@ -1,0 +1,216 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://renacechess.dev/schemas/v1/calibration_metrics.v1.schema.json",
+  "title": "CalibrationMetricsV1",
+  "description": "Offline diagnostic artifact for measuring human-aligned calibration (M24). This artifact is measurement-only and does not feed runtime logic.",
+  "type": "object",
+  "required": [
+    "version",
+    "generatedAt",
+    "sourceManifestHash",
+    "policyId",
+    "overallSamples",
+    "byEloBucket",
+    "determinismHash"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version identifier"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of metrics generation"
+    },
+    "sourceManifestHash": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the frozen eval manifest used"
+    },
+    "policyId": {
+      "type": "string",
+      "description": "Policy provider identifier used for evaluation"
+    },
+    "outcomeHeadId": {
+      "type": ["string", "null"],
+      "description": "Outcome head identifier used (null if using baselines)"
+    },
+    "overallSamples": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total number of samples evaluated"
+    },
+    "overallOutcomeCalibration": {
+      "$ref": "#/$defs/OutcomeCalibrationMetricsV1",
+      "description": "Aggregated outcome calibration metrics"
+    },
+    "overallPolicyCalibration": {
+      "$ref": "#/$defs/PolicyCalibrationMetricsV1",
+      "description": "Aggregated policy calibration metrics"
+    },
+    "byEloBucket": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/EloBucketCalibrationV1"
+      },
+      "description": "Calibration metrics per Elo bucket"
+    },
+    "determinismHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash for determinism verification"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "CalibrationBinV1": {
+      "type": "object",
+      "required": ["binStart", "binEnd", "count"],
+      "properties": {
+        "binStart": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Lower bound of bin (inclusive)"
+        },
+        "binEnd": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Upper bound of bin (exclusive, except last bin)"
+        },
+        "count": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of samples in this bin"
+        },
+        "avgConfidence": {
+          "type": ["number", "null"],
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Average predicted confidence in this bin (null if count=0)"
+        },
+        "empiricalAccuracy": {
+          "type": ["number", "null"],
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Empirical accuracy in this bin (null if count=0)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "CalibrationHistogramV1": {
+      "type": "object",
+      "required": ["binEdges", "bins"],
+      "properties": {
+        "binEdges": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "minItems": 11,
+          "maxItems": 11,
+          "description": "Fixed bin edges: [0.0, 0.1, 0.2, ..., 1.0] (11 values for 10 bins)"
+        },
+        "bins": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CalibrationBinV1"
+          },
+          "minItems": 10,
+          "maxItems": 10,
+          "description": "Per-bin statistics (exactly 10 bins)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "OutcomeCalibrationMetricsV1": {
+      "type": "object",
+      "required": ["brierScore", "nll", "ece", "histogram"],
+      "properties": {
+        "brierScore": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Brier score for outcome predictions (lower is better)"
+        },
+        "nll": {
+          "type": "number",
+          "minimum": 0.0,
+          "description": "Negative log-likelihood of true outcome under predicted distribution"
+        },
+        "ece": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Expected Calibration Error (lower is better)"
+        },
+        "histogram": {
+          "$ref": "#/$defs/CalibrationHistogramV1",
+          "description": "Calibration histogram for outcome confidence"
+        }
+      },
+      "additionalProperties": false
+    },
+    "PolicyCalibrationMetricsV1": {
+      "type": "object",
+      "required": ["nll", "top1Ece", "histogram"],
+      "properties": {
+        "nll": {
+          "type": "number",
+          "minimum": 0.0,
+          "description": "Negative log-likelihood of chosen move under predicted distribution"
+        },
+        "top1Ece": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Expected Calibration Error for top-1 move confidence"
+        },
+        "histogram": {
+          "$ref": "#/$defs/CalibrationHistogramV1",
+          "description": "Calibration histogram for top-1 move confidence"
+        }
+      },
+      "additionalProperties": false
+    },
+    "EloBucketCalibrationV1": {
+      "type": "object",
+      "required": ["eloBucket", "samples"],
+      "properties": {
+        "eloBucket": {
+          "type": "string",
+          "enum": [
+            "lt_800",
+            "800_999",
+            "1000_1199",
+            "1200_1399",
+            "1400_1599",
+            "1600_1799",
+            "gte_1800",
+            "unknown"
+          ],
+          "description": "Skill bucket ID from conditioning.buckets (M06)"
+        },
+        "samples": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of samples evaluated in this bucket"
+        },
+        "outcomeCalibration": {
+          "$ref": "#/$defs/OutcomeCalibrationMetricsV1",
+          "description": "Outcome head calibration metrics (null if no labeled outcomes)"
+        },
+        "policyCalibration": {
+          "$ref": "#/$defs/PolicyCalibrationMetricsV1",
+          "description": "Policy head calibration metrics (null if no chosen move labels)"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
+
+
