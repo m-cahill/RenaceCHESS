@@ -28,6 +28,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M17 | ✅ Closed (MERGED) | `m17-personality-neutral-baseline-001` → `main` | 2026-01-31 | PERSONALITY-NEUTRAL-BASELINE-001 — Neutral Baseline Personality (Experimental Control) |
 | M18 | ✅ Closed (MERGED) | `m18-personality-eval-harness-001` → `main` | 2026-01-31 | PERSONALITY-EVAL-HARNESS-001 — Personality Evaluation Harness (Phase B Exit) |
 | M19 | ✅ Closed (MERGED) | `m19-advice-facts-contract-001` → `main` | 2026-02-01 | ADVICE-FACTS-CONTRACT-001 — AdviceFacts Contract + Coaching Foundation (Phase C Entry) |
+| M20 | ✅ Closed (MERGED) | `m20-elo-bucket-delta-facts` → `main` | 2026-02-01 | ELO-BUCKET-DELTA-FACTS-001 — Elo-Bucket Delta Facts Artifact (Cross-Bucket Comparison) |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -399,6 +400,30 @@ This document tracks milestones, schema, migrations, and governance decisions fo
   - Pre-existing AccuracyMetrics ConfigDict issue fixed
 - **Phase C Status:** ENTERED — Facts-only coaching substrate established
 
+**M20 Details:**
+- **Objective:** Establish Elo-bucket delta reasoning artifact for cross-bucket comparison
+- **CI Run 1:** 21554238255 (SUCCESS - All checks passing on first run)
+- **Final Coverage:** 91.57% (exceeds 90% threshold)
+- **Test Count:** 554 passed, 1 skipped (42 new M20 tests)
+- **PR:** #26 (merged)
+- **Final Commit:** `f68b2f7`
+- **Audit:** `docs/milestones/PhaseC/M20/M20_audit.md`
+- **Summary:** `docs/milestones/PhaseC/M20/M20_summary.md`
+- **Key Files:**
+  - `docs/contracts/ELO_BUCKET_DELTA_FACTS_CONTRACT_v1.md` — Frozen v1 contract
+  - `src/renacechess/coaching/elo_bucket_deltas.py` — Pure builder function
+  - `src/renacechess/contracts/schemas/v1/elo_bucket_deltas.v1.schema.json` — JSON Schema
+  - `src/renacechess/contracts/models.py` — 10 new Pydantic models
+- **Notable Features:**
+  - PolicyDeltaV1: KL divergence, Total Variation, rank flips, mass shift
+  - OutcomeDeltaV1: W/D/L deltas, win rate monotonicity flag
+  - DifficultyDeltaV1: HDI delta
+  - StructuralEmphasisDeltaV1: Optional structural emphasis shifts
+  - Lineage tracking: sourceAdviceFactsHashes (required, exactly 2)
+  - Determinism hash (SHA-256) for reproducibility
+  - First-run CI success (all gates passed)
+- **Phase C Status:** Cross-bucket comparison artifact established
+
 ---
 
 ## Database Schema
@@ -557,6 +582,20 @@ This document tracks milestones, schema, migrations, and governance decisions fo
   - explanationHints: placeholder for M20+
   - determinismHash: SHA-256 for reproducibility
 
+### Elo-Bucket Delta Facts Schema (v1)
+- **Location:** `src/renacechess/contracts/schemas/v1/elo_bucket_deltas.v1.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.EloBucketDeltaFactsV1`
+- **Status:** ✅ FROZEN (Phase C cross-bucket comparison artifact)
+- **Governing ADR:** ADR-COACHING-001 ("LLMs translate facts, not invent")
+- **Key Fields:**
+  - baselineBucket / comparisonBucket: M06 skill bucket IDs
+  - sourceAdviceFactsHashes: Lineage to source AdviceFacts (required, exactly 2)
+  - policyDelta: KL divergence, TV distance, rank flips, mass shift
+  - outcomeDelta: W/D/L deltas, win rate monotonicity
+  - difficultyDelta: HDI delta
+  - structuralDelta: Optional structural emphasis shifts
+  - determinismHash: SHA-256 for reproducibility
+
 ---
 
 ## Phase Status
@@ -585,6 +624,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-02-01 (Phase C ENTERED, M19 CLOSED — AdviceFacts Contract Frozen, Coaching Foundation Established)
+**Last Updated:** 2026-02-01 (Phase C, M20 CLOSED — Elo-Bucket Delta Facts Artifact, Cross-Bucket Comparison Established)
 
 
