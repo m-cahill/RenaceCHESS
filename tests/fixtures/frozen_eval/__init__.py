@@ -8,5 +8,3 @@ Per M24 locked decisions:
 - Baselines only (no checkpoints required)
 - Deterministic, reproducible data
 """
-
-

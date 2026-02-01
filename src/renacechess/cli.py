@@ -1009,9 +1009,7 @@ def main() -> None:
             )
 
             # Serialize to JSON
-            output_json = json.dumps(
-                metrics.model_dump(by_alias=True), default=str, indent=2
-            )
+            output_json = json.dumps(metrics.model_dump(by_alias=True), default=str, indent=2)
 
             # Write output
             if args.out:

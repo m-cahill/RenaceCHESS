@@ -17,7 +17,7 @@ import math
 from collections import defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Literal
+from typing import Any, Literal, get_args
 
 from renacechess.conditioning.buckets import SkillBucketId
 from renacechess.contracts.models import (
@@ -42,7 +42,7 @@ def get_canonical_skill_buckets() -> list[str]:
     It ensures M24 calibration uses the same buckets as M06 conditioning.
     """
     # Extract from the Literal type
-    return list(SkillBucketId.__args__)  # type: ignore[attr-defined]
+    return list(get_args(SkillBucketId))
 
 
 class CalibrationAccumulator:
@@ -122,9 +122,7 @@ class CalibrationAccumulator:
             return 0.0
 
         n = len(self.predictions)
-        return sum(
-            (p - o) ** 2 for p, o in zip(self.predictions, self.outcomes)
-        ) / n
+        return sum((p - o) ** 2 for p, o in zip(self.predictions, self.outcomes)) / n
 
     def compute_nll(self) -> float:
         """Compute average negative log-likelihood."""
@@ -236,12 +234,8 @@ class OutcomeCalibrationAccumulator:
         ece = self.win_acc.compute_ece()
 
         # NLL from true outcome probabilities
-        total_nll = (
-            self.win_acc.nll_sum + self.draw_acc.nll_sum + self.loss_acc.nll_sum
-        )
-        total_count = (
-            self.win_acc.nll_count + self.draw_acc.nll_count + self.loss_acc.nll_count
-        )
+        total_nll = self.win_acc.nll_sum + self.draw_acc.nll_sum + self.loss_acc.nll_sum
+        total_count = self.win_acc.nll_count + self.draw_acc.nll_count + self.loss_acc.nll_count
         nll = total_nll / total_count if total_count > 0 else 0.0
 
         return OutcomeCalibrationMetricsV1(
@@ -393,8 +387,7 @@ def run_calibration_evaluation(
 
     # Process each shard
     for shard_ref in [
-        {"shard_id": sid, "path": f"shards/{sid}.jsonl"}
-        for sid in records_by_shard.keys()
+        {"shard_id": sid, "path": f"shards/{sid}.jsonl"} for sid in records_by_shard.keys()
     ]:
         shard_id = shard_ref["shard_id"]
         shard_path = manifest_dir / shard_ref["path"]
@@ -485,7 +478,7 @@ def run_calibration_evaluation(
 
     # Build artifact
     now = datetime.now(UTC)
-    artifact_data = {
+    artifact_data: dict[str, Any] = {
         "version": "1.0",
         "generatedAt": now.isoformat(),
         "sourceManifestHash": manifest.manifest_hash or "",
@@ -515,5 +508,3 @@ def run_calibration_evaluation(
         by_elo_bucket=by_elo_bucket,
         determinism_hash=determinism_hash,
     )
-
-

@@ -505,9 +505,7 @@ class TestCalibrationRunner:
         buckets_with_data = [b for b in metrics.by_elo_bucket if b.samples > 0]
         assert len(buckets_with_data) >= 1, "Expected at least one bucket with samples"
 
-    def test_run_calibration_json_serializable(
-        self, frozen_eval_manifest_path: Path
-    ) -> None:
+    def test_run_calibration_json_serializable(self, frozen_eval_manifest_path: Path) -> None:
         """Test that calibration output is JSON-serializable for CI artifacts."""
         metrics = run_calibration_evaluation(
             manifest_path=frozen_eval_manifest_path,
@@ -574,3 +572,82 @@ class TestCalibrationDeterminism:
         assert len(metrics1.by_elo_bucket) == len(metrics2.by_elo_bucket)
 
 
+# =============================================================================
+# CLI Integration Tests
+# =============================================================================
+
+
+class TestCalibrationCLI:
+    """Test calibration CLI command integration."""
+
+    def test_calibration_cli_requires_manifest(self, tmp_path: Path) -> None:
+        """Test that CLI fails fast if --manifest is missing."""
+        import subprocess
+        import sys
+
+        result = subprocess.run(
+            [sys.executable, "-m", "renacechess.cli", "calibration"],
+            capture_output=True,
+            text=True,
+            cwd=tmp_path,
+        )
+
+        assert result.returncode != 0
+        assert "manifest" in result.stderr.lower() or "required" in result.stderr.lower()
+
+    def test_calibration_cli_with_fixture(
+        self, frozen_eval_manifest_path: Path, tmp_path: Path
+    ) -> None:
+        """Test calibration CLI command with CI fixture."""
+        import subprocess
+        import sys
+
+        output_path = tmp_path / "calibration_output.json"
+
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "renacechess.cli",
+                "calibration",
+                "--manifest",
+                str(frozen_eval_manifest_path),
+                "--out",
+                str(output_path),
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        assert result.returncode == 0, f"CLI failed: {result.stderr}"
+        assert output_path.exists()
+
+        # Verify output is valid JSON
+        import json
+
+        data = json.loads(output_path.read_text(encoding="utf-8"))
+        assert data["version"] == "1.0"
+        assert "byEloBucket" in data
+
+    def test_calibration_cli_manifest_not_found(self, tmp_path: Path) -> None:
+        """Test CLI error when manifest doesn't exist."""
+        import subprocess
+        import sys
+
+        fake_manifest = tmp_path / "nonexistent.json"
+
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "renacechess.cli",
+                "calibration",
+                "--manifest",
+                str(fake_manifest),
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        assert result.returncode != 0
+        assert "not found" in result.stderr.lower() or "error" in result.stderr.lower()

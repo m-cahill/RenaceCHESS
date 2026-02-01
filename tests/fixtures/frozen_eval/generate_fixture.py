@@ -74,8 +74,7 @@ def generate_record(idx: int, skill_bucket: str) -> dict:
         },
         "policy": {
             "topMoves": [
-                {"uci": move, "p": round(prob, 6)}
-                for move, prob in zip(legal_moves, move_probs)
+                {"uci": move, "p": round(prob, 6)} for move, prob in zip(legal_moves, move_probs)
             ],
             "entropy": round(rng.uniform(0.5, 2.5), 6),
             "topGap": round(move_probs[0] - move_probs[1] if len(move_probs) > 1 else 0, 6),
@@ -169,9 +168,7 @@ def generate_fixture() -> None:
 
     # Write manifest
     manifest_path = fixture_dir / "manifest.json"
-    manifest_path.write_text(
-        json.dumps(manifest, indent=2, sort_keys=True), encoding="utf-8"
-    )
+    manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True), encoding="utf-8")
 
     print(f"Generated frozen eval fixture:")
     print(f"  - {len(all_records)} records")
@@ -183,5 +180,3 @@ def generate_fixture() -> None:
 
 if __name__ == "__main__":
     generate_fixture()
-
-
