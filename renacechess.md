@@ -752,8 +752,32 @@ From M00 forward, RenaceCHESS guarantees:
   - Documented deferrals: TORCH-SEC-001 (torch 2.2.2 CVEs), CLI-COV-001 (file-level 84%)
 - **Phase D Status:** ENTERED — Hardened foundation for data expansion, calibration, and quality
 
+**M24 Details:**
+- **Objective:** Introduce human-aligned calibration and evaluation signals without changing frozen Phase C contracts
+- **CI Runs:** 3 runs (2 failures due to coverage data type mismatch and lint errors, 1 success)
+- **Final CI Run:** 21569555120 (SUCCESS - All checks passing)
+- **Final Coverage:** ≥90% (exceeds threshold, no regressions)
+- **Test Count:** 684 passed, 1 skipped (30 new M24 tests)
+- **PR:** #30 (ready for merge)
+- **Final Commit:** `029e611`
+- **Audit:** `docs/milestones/PhaseD/M24/M24_audit.md`
+- **Summary:** `docs/milestones/PhaseD/M24/M24_summary.md`
+- **Key Files:**
+  - `src/renacechess/contracts/models.py` — Added CalibrationMetricsV1 models
+  - `src/renacechess/contracts/schemas/v1/calibration_metrics.v1.schema.json` — JSON Schema
+  - `src/renacechess/eval/calibration_runner.py` — Calibration evaluation runner
+  - `src/renacechess/cli.py` — Added calibration subcommand
+  - `tests/test_m24_calibration.py` — 30 comprehensive tests
+  - `.github/workflows/ci.yml` — Added calibration-eval job, fixed coverage data type alignment
+- **Notable Features:**
+  - CalibrationMetricsV1: ECE, Brier score, NLL, confidence histograms
+  - Per-Elo bucket stratification: Metrics broken down by canonical SkillBucketId
+  - Deterministic evaluation: Fixed seeds, canonical JSON, CI-verified
+  - Measurement-only: No Phase C contract changes, no runtime behavior changes
+  - Coverage system consistency: All coverage steps use `--cov-branch` (long-term maintainability win)
+
 ---
 
-**Last Updated:** 2026-02-01 (Phase D ENTERED — M23 PHASE-D-HARDENING-001 Complete)
+**Last Updated:** 2026-02-01 (Phase D IN PROGRESS — M24 PHASE-D-CALIBRATION-001 Complete)
 
 
