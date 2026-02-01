@@ -2615,3 +2615,143 @@ class CoachingEvaluationV1(BaseModel):
         pattern="^sha256:[a-f0-9]{64}$",
         description="SHA-256 hash of canonical JSON for this artifact",
     )
+
+
+# =============================================================================
+# Coaching Surface Models (M22) — CLI Exposure Artifact
+# =============================================================================
+
+
+class CoachingSurfaceEvaluationSummaryV1(BaseModel):
+    """Evaluation summary for CLI surface output (M22).
+
+    A subset of CoachingEvaluationV1 metrics for human-readable display.
+    This is a projection, not a transformation — values come directly
+    from the source CoachingEvaluationV1.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    fact_coverage: float = Field(
+        ...,
+        alias="factCoverage",
+        ge=0.0,
+        le=1.0,
+        description="Fraction of salient facts referenced (0.0-1.0)",
+    )
+    hallucination_rate: float = Field(
+        ...,
+        alias="hallucinationRate",
+        ge=0.0,
+        le=1.0,
+        description="Fraction of sentences with unsupported claims (0.0-1.0)",
+    )
+    bucket_alignment: bool = Field(
+        ...,
+        alias="bucketAlignment",
+        description="True if language matches target skill bucket",
+    )
+    delta_faithfulness: float = Field(
+        ...,
+        alias="deltaFaithfulness",
+        ge=0.0,
+        le=1.0,
+        description="Accuracy of Elo delta claims",
+    )
+    verbosity_score: float = Field(
+        ...,
+        alias="verbosityScore",
+        ge=0.0,
+        le=1.0,
+        description="Verbosity score (0.0=too short, 0.5=ideal, 1.0=too long)",
+    )
+    passed: bool = Field(
+        ...,
+        description="True if evaluation passed all quality gates",
+    )
+    failure_reasons: list[str] = Field(
+        default_factory=list,
+        alias="failureReasons",
+        description="Reasons for failure (empty if passed)",
+    )
+
+
+class CoachingSurfaceV1(BaseModel):
+    """Coaching surface artifact (M22).
+
+    A contracted, auditable projection of coaching output for CLI consumption.
+    This artifact wraps CoachingDraftV1 and CoachingEvaluationV1 into a
+    stable CLI output contract.
+
+    Key properties:
+    - This is a PROJECTION, not a transformation
+    - All fields come from existing artifacts
+    - Evaluation summary is ALWAYS visible (never hidden)
+    - Lineage hashes enable audit trail
+
+    See: M22_plan.md, ADR-COACHING-001
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    schema_version: Literal["coaching_surface.v1"] = Field(
+        "coaching_surface.v1",
+        alias="schemaVersion",
+        description="Schema version identifier",
+    )
+    generated_at: datetime = Field(
+        ...,
+        alias="generatedAt",
+        description="ISO 8601 timestamp of surface artifact creation",
+    )
+
+    # Core content (from CoachingDraftV1)
+    coaching_text: str = Field(
+        ...,
+        alias="coachingText",
+        min_length=1,
+        description="Generated coaching prose (from CoachingDraftV1.draftText)",
+    )
+    skill_bucket: str = Field(
+        ...,
+        alias="skillBucket",
+        description="Target skill bucket for this coaching",
+    )
+    tone_profile: Literal["neutral", "encouraging", "concise"] = Field(
+        ...,
+        alias="toneProfile",
+        description="Tone profile used for generation",
+    )
+
+    # Evaluation summary (always visible, never suppressed)
+    evaluation_summary: CoachingSurfaceEvaluationSummaryV1 = Field(
+        ...,
+        alias="evaluationSummary",
+        description="Evaluation metrics (always displayed, never hidden)",
+    )
+
+    # Lineage hashes (for audit trail)
+    source_advice_facts_hash: str = Field(
+        ...,
+        alias="sourceAdviceFactsHash",
+        pattern="^sha256:[a-f0-9]{64}$",
+        description="Determinism hash of source AdviceFactsV1",
+    )
+    source_delta_facts_hash: str = Field(
+        ...,
+        alias="sourceDeltaFactsHash",
+        pattern="^sha256:[a-f0-9]{64}$",
+        description="Determinism hash of source EloBucketDeltaFactsV1 (required in M22)",
+    )
+    coaching_draft_hash: str = Field(
+        ...,
+        alias="coachingDraftHash",
+        pattern="^sha256:[a-f0-9]{64}$",
+        description="Determinism hash of source CoachingDraftV1",
+    )
+    coaching_evaluation_hash: str = Field(
+        ...,
+        alias="coachingEvaluationHash",
+        pattern="^sha256:[a-f0-9]{64}$",
+        description="Determinism hash of source CoachingEvaluationV1",
+    )
