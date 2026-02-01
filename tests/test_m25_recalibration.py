@@ -579,10 +579,7 @@ class TestRecalibrationCLI:
         )
 
         assert result.returncode != 0
-        assert (
-            "recalibration" in result.stderr.lower()
-            or "required" in result.stderr.lower()
-        )
+        assert "recalibration" in result.stderr.lower() or "required" in result.stderr.lower()
 
     def test_calibration_cli_with_recalibration_flag(
         self, frozen_eval_manifest_path: Path, tmp_path: Path
@@ -651,7 +648,9 @@ class TestRecalibrationCLI:
 
         # Should succeed and show before/after comparison
         assert result.returncode == 0
-        assert "before" in result.stdout.lower() or "after" in result.stdout.lower()
+        # Preview output goes to stderr, not stdout
+        assert "recalibration preview" in result.stderr.lower()
+        assert "→" in result.stderr or "delta" in result.stderr.lower()
 
     def test_recalibration_fit_cli_manifest_not_found(self, tmp_path: Path) -> None:
         """Test that recalibration fit CLI fails with clear error if manifest not found."""

@@ -23,6 +23,9 @@
 | 2026-02-01 | search_replace | Fix lint errors, type errors, and CI job | Multiple files | ✅ Complete |
 | 2026-02-01 | search_replace | Fix datetime serialization and test paths | recalibration_runner.py, test_m25_recalibration.py | ✅ Complete |
 | 2026-02-01 | write | Generate M25_run1.md CI analysis | M25_run1.md | ✅ Complete |
+| 2026-02-01 | write | Generate M25_run3.md CI analysis | M25_run3.md | ✅ Complete |
+| 2026-02-01 | run_terminal_cmd | Auto-format files with ruff format | models.py, recalibration_runner.py, test_m25_recalibration.py | ✅ Complete |
+| 2026-02-01 | search_replace | Add CLI test coverage for recalibration commands | test_m25_recalibration.py | ✅ Complete |
 
 ---
 
