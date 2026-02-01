@@ -405,6 +405,39 @@ def main() -> None:
         help="Output file for CoachingSurfaceV1 JSON (default: stdout)",
     )
 
+    # M24: Calibration evaluation command
+    calibration_parser = subparsers.add_parser(
+        "calibration",
+        help="Run calibration evaluation over frozen eval manifest (M24)",
+    )
+    calibration_parser.add_argument(
+        "--manifest",
+        type=Path,
+        required=True,
+        help="Path to FrozenEvalManifestV1 JSON file (REQUIRED)",
+    )
+    calibration_parser.add_argument(
+        "--policy-id",
+        type=str,
+        default="baseline.uniform_random",
+        help="Policy identifier (default: baseline.uniform_random)",
+    )
+    calibration_parser.add_argument(
+        "--outcome-head-id",
+        type=str,
+        help="Outcome head identifier (optional, uses baselines if not provided)",
+    )
+    calibration_parser.add_argument(
+        "--model-dir",
+        type=Path,
+        help="Path to model checkpoint directory (optional, CI uses baselines only)",
+    )
+    calibration_parser.add_argument(
+        "--out",
+        type=Path,
+        help="Output file for CalibrationMetricsV1 JSON (default: stdout)",
+    )
+
     args = parser.parse_args()
 
     if args.command == "demo":
@@ -950,6 +983,54 @@ def main() -> None:
 
         # Exit with appropriate code (M22 guardrail: non-zero if thresholds fail)
         sys.exit(exit_code)
+    elif args.command == "calibration":
+        # M24: Calibration evaluation command
+        from renacechess.eval.calibration_runner import run_calibration_evaluation
+
+        try:
+            if not args.manifest.exists():
+                print(
+                    f"Error: Frozen eval manifest not found: {args.manifest}",
+                    file=sys.stderr,
+                )
+                print(
+                    "  Hint: Use 'eval generate-frozen' to create a frozen eval manifest, "
+                    "or use the CI fixture at tests/fixtures/frozen_eval/manifest.json",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+
+            # Run calibration evaluation
+            metrics = run_calibration_evaluation(
+                manifest_path=args.manifest,
+                model_dir=args.model_dir,
+                policy_id=args.policy_id,
+                outcome_head_id=args.outcome_head_id,
+            )
+
+            # Serialize to JSON
+            output_json = json.dumps(
+                metrics.model_dump(by_alias=True), default=str, indent=2
+            )
+
+            # Write output
+            if args.out:
+                args.out.write_text(output_json, encoding="utf-8")
+                print(f"Calibration metrics written to {args.out}", file=sys.stderr)
+            else:
+                print(output_json)
+
+            print(
+                f"  Overall samples: {metrics.overall_samples}",
+                file=sys.stderr,
+            )
+            print(
+                f"  Buckets evaluated: {len([b for b in metrics.by_elo_bucket if b.samples > 0])}",
+                file=sys.stderr,
+            )
+        except Exception as e:
+            print(f"Error: {e}", file=sys.stderr)
+            sys.exit(1)
     else:
         parser.print_help()
         sys.exit(1)
