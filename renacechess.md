@@ -27,6 +27,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M16 | ✅ Closed (MERGED) | `m16-personality-pawnclamp-001` → `main` | 2026-01-31 | PERSONALITY-PAWNCLAMP-001 — First Concrete Personality Module (Pawn Clamp) |
 | M17 | ✅ Closed (MERGED) | `m17-personality-neutral-baseline-001` → `main` | 2026-01-31 | PERSONALITY-NEUTRAL-BASELINE-001 — Neutral Baseline Personality (Experimental Control) |
 | M18 | ✅ Closed (MERGED) | `m18-personality-eval-harness-001` → `main` | 2026-01-31 | PERSONALITY-EVAL-HARNESS-001 — Personality Evaluation Harness (Phase B Exit) |
+| M19 | ✅ Closed (MERGED) | `m19-advice-facts-contract-001` → `main` | 2026-02-01 | ADVICE-FACTS-CONTRACT-001 — AdviceFacts Contract + Coaching Foundation (Phase C Entry) |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -372,6 +373,32 @@ This document tracks milestones, schema, migrations, and governance decisions fo
   - Bounded divergence verified for Pawn Clamp vs Neutral
 - **Phase B Status:** COMPLETE — Personality effects are now measurable, comparable, and auditable
 
+**M19 Details:**
+- **Objective:** Establish Phase C entry contract — facts-only coaching substrate
+- **CI Run 1:** 21553586177 (FAILURE - Ruff format, MyPy ConfigDict pre-existing issue)
+- **CI Run 2:** 21553672113 (SUCCESS - All checks passing)
+- **Final Coverage:** 91.33% (exceeds 90% threshold)
+- **Test Count:** 512 passed, 1 skipped (27 new M19 tests)
+- **PR:** #25 (merged)
+- **Final Commit:** `8404d9e`
+- **Audit:** `docs/milestones/PhaseC/M19/M19_audit.md`
+- **Summary:** `docs/milestones/PhaseC/M19/M19_summary.md`
+- **Key Files:**
+  - `docs/adr/ADR-COACHING-001.md` — Coaching truthfulness ADR
+  - `docs/contracts/ADVICE_FACTS_CONTRACT_v1.md` — Frozen v1 contract
+  - `src/renacechess/coaching/advice_facts.py` — Pure builder function
+  - `src/renacechess/contracts/schemas/v1/advice_facts.v1.schema.json` — JSON Schema
+  - `src/renacechess/contracts/models.py` — AdviceFactsV1 + related models
+  - `importlinter_contracts.ini` — coaching-isolation rule
+- **Notable Features:**
+  - ADR-COACHING-001: "LLMs translate facts, not invent analysis"
+  - Determinism hash (SHA-256) in every artifact
+  - Canonical ordering (prob descending, UCI ascending for ties)
+  - Float precision (6 decimals) for reproducibility
+  - explanationHints placeholder for M20+
+  - Pre-existing AccuracyMetrics ConfigDict issue fixed
+- **Phase C Status:** ENTERED — Facts-only coaching substrate established
+
 ---
 
 ## Database Schema
@@ -515,6 +542,21 @@ This document tracks milestones, schema, migrations, and governance decisions fo
   - structuralAttribution: style score components, feature deltas
   - determinismHash: SHA-256 for reproducibility verification
 
+### AdviceFacts Schema (v1)
+- **Location:** `src/renacechess/contracts/schemas/v1/advice_facts.v1.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.AdviceFactsV1`
+- **Status:** ✅ FROZEN (Phase C entry contract for coaching facts)
+- **Governing ADR:** ADR-COACHING-001 ("LLMs translate facts, not invent")
+- **Key Fields:**
+  - position: FEN + side to move
+  - context: skill/time buckets
+  - policy: top moves with probabilities
+  - outcome: W/D/L probabilities
+  - hdi: Human Difficulty Index
+  - structuralCognition: optional M11 deltas
+  - explanationHints: placeholder for M20+
+  - determinismHash: SHA-256 for reproducibility
+
 ---
 
 ## Phase Status
@@ -543,6 +585,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-01-31 (Phase B CLOSED, M18 CLOSED — Personality Framework Complete, Advancing to Phase C)
+**Last Updated:** 2026-02-01 (Phase C ENTERED, M19 CLOSED — AdviceFacts Contract Frozen, Coaching Foundation Established)
 
 
