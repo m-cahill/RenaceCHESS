@@ -1828,3 +1828,261 @@ class PersonalityEvalArtifactV1(BaseModel):
     policy_stats: PolicyStatsV1 = Field(
         ..., alias="policyStats", description="Policy distribution statistics"
     )
+
+
+# =============================================================================
+# AdviceFacts Models (M19) — Phase C Coaching Foundation
+# =============================================================================
+
+
+class AdviceFactsPositionV1(BaseModel):
+    """Position representation for AdviceFacts (M19)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    fen: str = Field(..., description="FEN string representing the position")
+    side_to_move: Literal["white", "black"] = Field(
+        ..., alias="sideToMove", description="Side to move"
+    )
+
+
+class AdviceFactsContextV1(BaseModel):
+    """Conditioning context for AdviceFacts (M19)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    skill_bucket: str = Field(
+        ..., alias="skillBucket", description="Skill bucket identifier"
+    )
+    time_control_bucket: str | None = Field(
+        None, alias="timeControlBucket", description="Time control bucket"
+    )
+    time_pressure_bucket: str | None = Field(
+        None, alias="timePressureBucket", description="Time pressure bucket"
+    )
+
+
+class AdviceFactsMoveV1(BaseModel):
+    """Move entry in policy distribution for AdviceFacts (M19)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    uci: str = Field(..., description="Move in UCI notation")
+    san: str | None = Field(None, description="Move in SAN notation (optional)")
+    prob: float = Field(
+        ..., ge=0.0, le=1.0, description="Probability of this move (0-1)"
+    )
+
+
+class AdviceFactsPolicyV1(BaseModel):
+    """Policy distribution for AdviceFacts (M19)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    top_moves: list[AdviceFactsMoveV1] = Field(
+        ...,
+        alias="topMoves",
+        min_length=1,
+        description="Top moves ordered by prob desc, then UCI asc",
+    )
+    recommended_move: AdviceFactsMoveV1 = Field(
+        ..., alias="recommendedMove", description="The top recommended move"
+    )
+
+
+class AdviceFactsOutcomeV1(BaseModel):
+    """Outcome (W/D/L) probabilities for AdviceFacts (M19)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    p_win: float = Field(
+        ..., alias="pWin", ge=0.0, le=1.0, description="Win probability"
+    )
+    p_draw: float = Field(
+        ..., alias="pDraw", ge=0.0, le=1.0, description="Draw probability"
+    )
+    p_loss: float = Field(
+        ..., alias="pLoss", ge=0.0, le=1.0, description="Loss probability"
+    )
+
+    @model_validator(mode="after")
+    def validate_probabilities_sum(self) -> AdviceFactsOutcomeV1:
+        """Validate that probabilities sum to approximately 1.0."""
+        total = self.p_win + self.p_draw + self.p_loss
+        if abs(total - 1.0) > 1e-4:
+            msg = f"Outcome probabilities must sum to 1.0, got {total:.6f}"
+            raise ValueError(msg)
+        return self
+
+
+class AdviceFactsHDIV1(BaseModel):
+    """Human Difficulty Index for AdviceFacts (M19)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    value: float = Field(
+        ..., ge=0.0, le=1.0, description="HDI value (0-1, higher = more difficult)"
+    )
+    entropy: float | None = Field(None, ge=0.0, description="Entropy component")
+    top_gap_inverted: float | None = Field(
+        None, alias="topGapInverted", ge=0.0, le=1.0, description="Top gap inverted"
+    )
+    legal_move_pressure: float | None = Field(
+        None, alias="legalMovePressure", ge=0.0, le=1.0, description="Legal move pressure"
+    )
+    outcome_sensitivity: float | None = Field(
+        None, alias="outcomeSensitivity", ge=0.0, le=1.0, description="Outcome sensitivity"
+    )
+
+
+class AdviceFactsStructuralCognitionV1(BaseModel):
+    """Summarized structural cognition for AdviceFacts (M19, optional)."""
+
+    model_config = ConfigDict(populate_by_name=True, extra="allow")
+
+    mobility_delta: float | None = Field(
+        None, alias="mobilityDelta", description="Change in mobility"
+    )
+    weak_squares_delta: float | None = Field(
+        None, alias="weakSquaresDelta", description="Change in weak squares count"
+    )
+    strong_squares_delta: float | None = Field(
+        None, alias="strongSquaresDelta", description="Change in strong squares count"
+    )
+    summary: str | None = Field(None, description="Brief structural summary")
+
+
+class AdviceFactsExplanationHintV1(BaseModel):
+    """Explanation hint tag for future coaching (M19 placeholder for M20+)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    tag: str = Field(..., description="Hint tag identifier")
+    weight: float | None = Field(None, description="Relative importance weight")
+
+
+class AdviceFactsSourceContractsV1(BaseModel):
+    """Source contract versions for traceability (M19)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    advice_facts_contract: str = Field(
+        ..., alias="adviceFactsContract", description="Version of ADVICE_FACTS_CONTRACT"
+    )
+    input_semantics_contract: str = Field(
+        ..., alias="inputSemanticsContract", description="Version of CONTRACT_INPUT_SEMANTICS"
+    )
+    structural_cognition_contract: str | None = Field(
+        None,
+        alias="structuralCognitionContract",
+        description="Version of StructuralCognitionContract (if structuralCognition present)",
+    )
+
+
+class AdviceFactsV1(BaseModel):
+    """AdviceFacts v1 — deterministic, schema-stable facts-only artifact for LLM coaching.
+
+    This artifact contains pre-computed signals that LLMs may translate into
+    Elo-appropriate coaching. LLMs must NOT invent analysis beyond these facts.
+
+    See: ADR-COACHING-001, ADVICE_FACTS_CONTRACT_v1.md
+
+    Canonical ordering rules:
+    - topMoves: ordered by prob descending, then UCI ascending for ties
+    - Float rounding: 6 decimal places for determinism hash
+    - Key ordering: alphabetical for canonical JSON
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    version: Literal["1.0"] = Field("1.0", description="Schema version")
+    generated_at: datetime = Field(
+        ..., alias="generatedAt", description="ISO 8601 timestamp"
+    )
+    position: AdviceFactsPositionV1 = Field(..., description="Chess position")
+    context: AdviceFactsContextV1 = Field(..., description="Conditioning context")
+    policy: AdviceFactsPolicyV1 = Field(..., description="Policy distribution")
+    outcome: AdviceFactsOutcomeV1 = Field(..., description="W/D/L probabilities")
+    hdi: AdviceFactsHDIV1 = Field(..., description="Human Difficulty Index")
+    structural_cognition: AdviceFactsStructuralCognitionV1 | None = Field(
+        None,
+        alias="structuralCognition",
+        description="Structural cognition deltas (optional)",
+    )
+    explanation_hints: list[AdviceFactsExplanationHintV1] | None = Field(
+        None,
+        alias="explanationHints",
+        description="Explanation hints for M20+ (optional placeholder)",
+    )
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern="^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of canonical JSON",
+    )
+    source_contract_versions: AdviceFactsSourceContractsV1 = Field(
+        ..., alias="sourceContractVersions", description="Source contract versions"
+    )
+
+
+class AdviceFactsInputsV1(BaseModel):
+    """Input container for AdviceFacts builder (M19).
+
+    This is the input to `build_advice_facts_v1()` — a pure function that
+    accepts pre-computed signals and produces AdviceFactsV1.
+
+    All inputs are already-computed values from policy/outcome/HDI providers.
+    The builder does not orchestrate provider calls.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    # Position
+    fen: str = Field(..., description="FEN string")
+    side_to_move: Literal["white", "black"] = Field(
+        ..., alias="sideToMove", description="Side to move"
+    )
+
+    # Context
+    skill_bucket: str = Field(..., alias="skillBucket", description="Skill bucket")
+    time_control_bucket: str | None = Field(
+        None, alias="timeControlBucket", description="Time control bucket"
+    )
+    time_pressure_bucket: str | None = Field(
+        None, alias="timePressureBucket", description="Time pressure bucket"
+    )
+
+    # Policy (already ordered by probability descending)
+    top_moves: list[tuple[str, float]] = Field(
+        ...,
+        alias="topMoves",
+        min_length=1,
+        description="Top moves as (uci, prob) tuples, ordered by prob desc",
+    )
+    top_moves_san: list[str] | None = Field(
+        None, alias="topMovesSan", description="SAN for top moves (optional, same order)"
+    )
+
+    # Outcome
+    p_win: float = Field(..., alias="pWin", ge=0.0, le=1.0)
+    p_draw: float = Field(..., alias="pDraw", ge=0.0, le=1.0)
+    p_loss: float = Field(..., alias="pLoss", ge=0.0, le=1.0)
+
+    # HDI
+    hdi_value: float = Field(..., alias="hdiValue", ge=0.0, le=1.0)
+    hdi_entropy: float | None = Field(None, alias="hdiEntropy", ge=0.0)
+    hdi_top_gap_inverted: float | None = Field(
+        None, alias="hdiTopGapInverted", ge=0.0, le=1.0
+    )
+    hdi_legal_move_pressure: float | None = Field(
+        None, alias="hdiLegalMovePressure", ge=0.0, le=1.0
+    )
+    hdi_outcome_sensitivity: float | None = Field(
+        None, alias="hdiOutcomeSensitivity", ge=0.0, le=1.0
+    )
+
+    # Structural cognition (optional)
+    mobility_delta: float | None = Field(None, alias="mobilityDelta")
+    weak_squares_delta: float | None = Field(None, alias="weakSquaresDelta")
+    strong_squares_delta: float | None = Field(None, alias="strongSquaresDelta")
+    structural_summary: str | None = Field(None, alias="structuralSummary")

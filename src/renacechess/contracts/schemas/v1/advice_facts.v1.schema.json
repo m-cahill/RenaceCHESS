@@ -1,0 +1,242 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://renacechess.dev/schemas/v1/advice_facts.v1.schema.json",
+  "title": "AdviceFactsV1",
+  "description": "Deterministic, schema-stable facts-only artifact for LLM coaching translation. See ADR-COACHING-001 and ADVICE_FACTS_CONTRACT_v1.",
+  "type": "object",
+  "required": [
+    "version",
+    "generatedAt",
+    "position",
+    "context",
+    "policy",
+    "outcome",
+    "hdi",
+    "determinismHash",
+    "sourceContractVersions"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version identifier"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of artifact generation"
+    },
+    "position": {
+      "type": "object",
+      "required": ["fen", "sideToMove"],
+      "properties": {
+        "fen": {
+          "type": "string",
+          "description": "FEN string representing the position"
+        },
+        "sideToMove": {
+          "type": "string",
+          "enum": ["white", "black"],
+          "description": "Side to move in the position"
+        }
+      },
+      "additionalProperties": false
+    },
+    "context": {
+      "type": "object",
+      "required": ["skillBucket"],
+      "properties": {
+        "skillBucket": {
+          "type": "string",
+          "description": "Skill bucket identifier (e.g., 'BUCKET_1200_1400')"
+        },
+        "timeControlBucket": {
+          "type": "string",
+          "description": "Time control bucket (e.g., 'BLITZ', 'RAPID')"
+        },
+        "timePressureBucket": {
+          "type": "string",
+          "description": "Time pressure bucket (e.g., 'NORMAL', 'LOW', 'TROUBLE')"
+        }
+      },
+      "additionalProperties": false
+    },
+    "policy": {
+      "type": "object",
+      "required": ["topMoves", "recommendedMove"],
+      "properties": {
+        "topMoves": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": ["uci", "prob"],
+            "properties": {
+              "uci": {
+                "type": "string",
+                "description": "Move in UCI notation (e.g., 'e2e4')"
+              },
+              "san": {
+                "type": "string",
+                "description": "Move in SAN notation (e.g., 'e4'), optional"
+              },
+              "prob": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Probability of this move being played (0-1)"
+              }
+            },
+            "additionalProperties": false
+          },
+          "description": "Top moves ordered by probability descending, then UCI ascending for ties"
+        },
+        "recommendedMove": {
+          "type": "object",
+          "required": ["uci", "prob"],
+          "properties": {
+            "uci": {
+              "type": "string",
+              "description": "Recommended move in UCI notation"
+            },
+            "san": {
+              "type": "string",
+              "description": "Recommended move in SAN notation, optional"
+            },
+            "prob": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "description": "Probability of the recommended move"
+            }
+          },
+          "additionalProperties": false,
+          "description": "The top recommended move (typically the highest probability move)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "outcome": {
+      "type": "object",
+      "required": ["pWin", "pDraw", "pLoss"],
+      "properties": {
+        "pWin": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Probability of winning from this position (0-1)"
+        },
+        "pDraw": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Probability of drawing from this position (0-1)"
+        },
+        "pLoss": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Probability of losing from this position (0-1)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "hdi": {
+      "type": "object",
+      "required": ["value"],
+      "properties": {
+        "value": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Human Difficulty Index value (0-1, higher = more difficult)"
+        },
+        "entropy": {
+          "type": "number",
+          "description": "Policy entropy component"
+        },
+        "topGapInverted": {
+          "type": "number",
+          "description": "Inverted top-gap component"
+        },
+        "legalMovePressure": {
+          "type": "number",
+          "description": "Legal move pressure component"
+        },
+        "outcomeSensitivity": {
+          "type": "number",
+          "description": "Outcome sensitivity component"
+        }
+      },
+      "additionalProperties": false
+    },
+    "structuralCognition": {
+      "type": "object",
+      "properties": {
+        "mobilityDelta": {
+          "type": "number",
+          "description": "Change in mobility score"
+        },
+        "weakSquaresDelta": {
+          "type": "number",
+          "description": "Change in weak squares count"
+        },
+        "strongSquaresDelta": {
+          "type": "number",
+          "description": "Change in strong squares count"
+        },
+        "summary": {
+          "type": "string",
+          "description": "Brief structural summary, optional"
+        }
+      },
+      "additionalProperties": true,
+      "description": "Summarized structural cognition deltas from M11 features (optional)"
+    },
+    "explanationHints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tag"],
+        "properties": {
+          "tag": {
+            "type": "string",
+            "description": "Hint tag identifier (e.g., 'mobility_advantage', 'time_pressure')"
+          },
+          "weight": {
+            "type": "number",
+            "description": "Relative importance weight (optional)"
+          }
+        },
+        "additionalProperties": false
+      },
+      "description": "Optional explanation hint tags for future coaching enhancements (M20+)"
+    },
+    "determinismHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of canonical JSON for determinism verification"
+    },
+    "sourceContractVersions": {
+      "type": "object",
+      "required": ["adviceFactsContract", "inputSemanticsContract"],
+      "properties": {
+        "adviceFactsContract": {
+          "type": "string",
+          "description": "Version of ADVICE_FACTS_CONTRACT (e.g., 'v1')"
+        },
+        "inputSemanticsContract": {
+          "type": "string",
+          "description": "Version of CONTRACT_INPUT_SEMANTICS (e.g., 'v1.0')"
+        },
+        "structuralCognitionContract": {
+          "type": "string",
+          "description": "Version of StructuralCognitionContract, if structuralCognition is present"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
+
