@@ -2335,3 +2335,283 @@ class EloBucketDeltaFactsV1(BaseModel):
         alias="sourceContractVersions",
         description="Source contract versions for traceability",
     )
+
+
+# =============================================================================
+# Coaching Draft Models (M21) — LLM Translation Artifacts
+# =============================================================================
+
+
+class ToneProfileV1(BaseModel):
+    """Tone profile for coaching output (M21).
+
+    Fixed enum for v1: NEUTRAL, ENCOURAGING, CONCISE
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    value: Literal["neutral", "encouraging", "concise"] = Field(
+        ..., description="Tone profile value"
+    )
+
+
+class CoachingDraftReferencedFactV1(BaseModel):
+    """Reference to a specific fact used in the draft (M21).
+
+    Tracks which facts from AdviceFactsV1/EloBucketDeltaFactsV1 were
+    referenced in the generated prose.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    source_artifact: Literal["advice_facts", "delta_facts"] = Field(
+        ..., alias="sourceArtifact", description="Source artifact type"
+    )
+    field_path: str = Field(..., alias="fieldPath", description="JSON path to the referenced field")
+    value_summary: str = Field(
+        ..., alias="valueSummary", description="Summary of the referenced value"
+    )
+
+
+class CoachingDraftDeterminismMetadataV1(BaseModel):
+    """Determinism metadata for audit trail (M21).
+
+    Records all parameters needed to reproduce the draft.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    prompt_template_version: str = Field(
+        ..., alias="promptTemplateVersion", description="Version of prompt template used"
+    )
+    prompt_hash: str = Field(
+        ...,
+        alias="promptHash",
+        pattern="^[a-f0-9]{64}$",
+        description="SHA-256 hash of the actual prompt sent",
+    )
+    model_id: str = Field(
+        ..., alias="modelId", description="LLM model identifier (e.g., 'stub-v1', 'gpt-4')"
+    )
+    temperature: float = Field(
+        ..., ge=0.0, le=2.0, description="Temperature setting (0 for deterministic)"
+    )
+    provider: str = Field(..., description="Provider name (e.g., 'stub', 'openai')")
+
+
+class CoachingDraftV1(BaseModel):
+    """Coaching draft artifact (M21).
+
+    An intermediate, evaluable artifact produced by LLM translation of facts.
+    This is NOT user-facing output — it's for evaluation and audit.
+
+    Key properties:
+    - draftText: The generated prose
+    - referencedFacts: Explicit list of facts used
+    - determinismMetadata: Full reproducibility info
+
+    See: COACHING_TRANSLATION_PROMPT_v1.md, ADR-COACHING-001
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    schema_version: Literal["coaching_draft.v1"] = Field(
+        "coaching_draft.v1",
+        alias="schemaVersion",
+        description="Schema version identifier",
+    )
+    generated_at: datetime = Field(
+        ..., alias="generatedAt", description="ISO 8601 timestamp of generation"
+    )
+
+    # Core content
+    draft_text: str = Field(
+        ..., alias="draftText", min_length=1, description="Generated coaching prose"
+    )
+    skill_bucket: str = Field(
+        ..., alias="skillBucket", description="Target skill bucket for this draft"
+    )
+    tone_profile: Literal["neutral", "encouraging", "concise"] = Field(
+        ..., alias="toneProfile", description="Tone profile used"
+    )
+
+    # Fact references (for hallucination detection)
+    referenced_facts: list[CoachingDraftReferencedFactV1] = Field(
+        default_factory=list,
+        alias="referencedFacts",
+        description="Explicit list of facts referenced in the draft",
+    )
+
+    # Source hashes (for lineage)
+    source_advice_facts_hash: str = Field(
+        ...,
+        alias="sourceAdviceFactsHash",
+        pattern="^sha256:[a-f0-9]{64}$",
+        description="Determinism hash of source AdviceFactsV1",
+    )
+    source_delta_facts_hash: str | None = Field(
+        None,
+        alias="sourceDeltaFactsHash",
+        pattern="^sha256:[a-f0-9]{64}$",
+        description="Determinism hash of source EloBucketDeltaFactsV1 (optional)",
+    )
+
+    # Determinism metadata
+    determinism_metadata: CoachingDraftDeterminismMetadataV1 = Field(
+        ..., alias="determinismMetadata", description="Metadata for reproducibility"
+    )
+
+    # Artifact hash
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern="^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of canonical JSON for this artifact",
+    )
+
+
+# =============================================================================
+# Coaching Evaluation Models (M21) — Offline Quality Metrics
+# =============================================================================
+
+
+class HallucinationMetricsV1(BaseModel):
+    """Hallucination detection metrics (M21).
+
+    Rule-based metrics for detecting unsupported claims.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    forbidden_terms_found: list[str] = Field(
+        default_factory=list,
+        alias="forbiddenTermsFound",
+        description="List of forbidden terms detected in the draft",
+    )
+    unsupported_moves: list[str] = Field(
+        default_factory=list,
+        alias="unsupportedMoves",
+        description="UCI moves mentioned but not in source facts",
+    )
+    unsupported_percentages: list[str] = Field(
+        default_factory=list,
+        alias="unsupportedPercentages",
+        description="Percentages mentioned but not matching source facts",
+    )
+    unsupported_structural_claims: list[str] = Field(
+        default_factory=list,
+        alias="unsupportedStructuralClaims",
+        description="Structural vocabulary not supported by facts",
+    )
+    total_unsupported_claims: int = Field(
+        ..., alias="totalUnsupportedClaims", ge=0, description="Total unsupported claims"
+    )
+    total_sentences: int = Field(
+        ..., alias="totalSentences", ge=1, description="Total sentences in draft"
+    )
+
+
+class CoachingEvaluationMetricsV1(BaseModel):
+    """Evaluation metrics for coaching draft (M21).
+
+    Numeric, deterministic metrics for offline scoring.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    fact_coverage: float = Field(
+        ...,
+        alias="factCoverage",
+        ge=0.0,
+        le=1.0,
+        description="Fraction of salient facts referenced (0.0-1.0)",
+    )
+    hallucination_rate: float = Field(
+        ...,
+        alias="hallucinationRate",
+        ge=0.0,
+        le=1.0,
+        description="Fraction of sentences with unsupported claims (0.0-1.0)",
+    )
+    bucket_alignment: bool = Field(
+        ...,
+        alias="bucketAlignment",
+        description="True if language matches target skill bucket",
+    )
+    delta_faithfulness: float = Field(
+        ...,
+        alias="deltaFaithfulness",
+        ge=0.0,
+        le=1.0,
+        description="Accuracy of Elo delta claims (1.0 if no deltas or all correct)",
+    )
+    verbosity_score: float = Field(
+        ...,
+        alias="verbosityScore",
+        ge=0.0,
+        le=1.0,
+        description="Verbosity score (0.0=too short, 0.5=ideal, 1.0=too long)",
+    )
+
+
+class CoachingEvaluationV1(BaseModel):
+    """Coaching evaluation artifact (M21).
+
+    Offline evaluation of a CoachingDraftV1 against source facts.
+    This artifact is used for quality assurance, not runtime.
+
+    See: COACHING_TRANSLATION_PROMPT_v1.md, ADR-COACHING-001
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    schema_version: Literal["coaching_evaluation.v1"] = Field(
+        "coaching_evaluation.v1",
+        alias="schemaVersion",
+        description="Schema version identifier",
+    )
+    evaluated_at: datetime = Field(
+        ..., alias="evaluatedAt", description="ISO 8601 timestamp of evaluation"
+    )
+
+    # Source references
+    source_draft_hash: str = Field(
+        ...,
+        alias="sourceDraftHash",
+        pattern="^sha256:[a-f0-9]{64}$",
+        description="Determinism hash of evaluated CoachingDraftV1",
+    )
+    source_advice_facts_hash: str = Field(
+        ...,
+        alias="sourceAdviceFactsHash",
+        pattern="^sha256:[a-f0-9]{64}$",
+        description="Determinism hash of source AdviceFactsV1",
+    )
+    source_delta_facts_hash: str | None = Field(
+        None,
+        alias="sourceDeltaFactsHash",
+        pattern="^sha256:[a-f0-9]{64}$",
+        description="Determinism hash of source EloBucketDeltaFactsV1 (optional)",
+    )
+
+    # Metrics
+    metrics: CoachingEvaluationMetricsV1 = Field(..., description="Evaluation metrics")
+    hallucination_details: HallucinationMetricsV1 = Field(
+        ..., alias="hallucinationDetails", description="Detailed hallucination analysis"
+    )
+
+    # Verdict
+    passed: bool = Field(..., description="True if draft passes all quality gates")
+    failure_reasons: list[str] = Field(
+        default_factory=list,
+        alias="failureReasons",
+        description="Reasons for failure (empty if passed)",
+    )
+
+    # Determinism
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern="^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of canonical JSON for this artifact",
+    )

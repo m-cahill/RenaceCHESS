@@ -1,112 +1,278 @@
-# M21 Milestone Plan — LLM-TRANSLATION-HARNESS-001
+Excellent. With **M20 cleanly closed** and the audit confirming first-run green at Phase-C depth , we are now at the **most sensitive transition point in the entire project**: introducing LLMs *without breaking truthfulness*.
 
-**Phase:** Phase C — Elo-Appropriate Coaching & Explanation  
-**Status:** 🔜 Planned  
-**Predecessor:** M20 — ELO-BUCKET-DELTA-FACTS-001
+Below is a **Cursor-ready, tightly scoped M21 plan** that preserves every invariant you’ve built so far.
 
 ---
 
-## Objective
+# **M21_plan — LLM-TRANSLATION-HARNESS-001**
 
-Introduce the LLM translation harness for converting facts-only artifacts (AdviceFactsV1, EloBucketDeltaFactsV1) into Elo-appropriate coaching prose.
-
-This milestone establishes:
-- A deterministic translation interface
-- Offline coaching evaluation framework
-- Truthfulness constraints per ADR-COACHING-001
+**Phase:** Phase C — Elo-Appropriate Coaching & Explanation
+**Mode:** Translation + Evaluation (No Computation)
+**Status:** Planned
 
 ---
 
-## Scope
+## 0. Milestone Intent (Lock This First)
 
-### In Scope
+**M21 introduces LLMs as *pure translators*, never analysts.**
 
-- LLM translation interface/protocol definition
-- Translation harness that consumes M19 + M20 artifacts
-- Offline coaching evaluation harness
-- Truthfulness metrics (fact grounding, hallucination detection)
-- Test fixtures for translation evaluation
-- Contract documentation
+This milestone answers **one question only**:
 
-### Out of Scope
+> *“Given grounded facts (M19 + M20), can an LLM produce skill-appropriate coaching prose **without inventing chess knowledge**?”*
 
-- Live LLM API calls in CI
-- User-facing coaching UI
-- Multi-turn conversation
-- Provider orchestration
-- Training or fine-tuning
+M21 is **not** about playing strength, engines, or training.
+It is about **controlling language**.
+
+This is the linguistic analogue of:
+
+* M15 (Personality Safety Contract)
+* M19 (AdviceFacts)
+* M20 (EloBucketDeltaFacts)
 
 ---
 
-## Entry Criteria
+## 1. In-Scope Deliverables
 
-- [x] M20 merged and closed
-- [x] EloBucketDeltaFactsV1 artifact available
-- [x] AdviceFactsV1 artifact available
-- [x] ADR-COACHING-001 in effect
+### 1. **Translation Harness (Facts → Prose)**
 
----
+Create a new module:
 
-## Exit Criteria
+```
+src/renacechess/coaching/translation_harness.py
+```
 
-- [ ] LLM translation interface defined (protocol/abstract class)
-- [ ] Translation harness accepts AdviceFacts + EloBucketDeltaFacts
-- [ ] Offline evaluation harness for coaching truthfulness
-- [ ] Truthfulness metrics documented (grounding, hallucination rate)
-- [ ] Contract documentation for translation interface
-- [ ] Tests for translation harness (determinism, grounding)
-- [ ] CI green
+**Responsibilities (strict):**
 
----
+* Accept **only**:
 
-## Technical Approach
+  * `AdviceFactsV1`
+  * `EloBucketDeltaFactsV1`
+* Emit:
 
-### 1. Translation Interface
+  * `CoachingDraftV1` (new artifact type)
+* Perform **no computation**
+* Perform **no chess reasoning**
+* Perform **no fact enrichment**
 
-Define a protocol for LLM translation:
-- Input: AdviceFactsV1, optional EloBucketDeltaFactsV1
-- Output: Structured coaching response with grounding metadata
-- Constraints: No analysis beyond provided facts
-
-### 2. Offline Evaluation
-
-Create an evaluation harness that:
-- Measures fact grounding (% of claims traceable to artifacts)
-- Detects hallucinations (claims not supported by artifacts)
-- Computes coaching quality metrics
-
-### 3. Test Fixtures
-
-Create synthetic fixtures for:
-- Simple positions with clear advice
-- Complex positions requiring delta reasoning
-- Edge cases (equal buckets, extreme skill gaps)
+The LLM is treated as a **rendering engine**, not a thinker.
 
 ---
 
-## Risks and Mitigations
+### 2. **CoachingDraftV1 Artifact (Prose, but Auditable)**
 
-| Risk | Mitigation |
-|------|------------|
-| LLM outputs are non-deterministic | Use structured output formats, temperature=0 |
-| Hallucination detection is hard | Focus on explicit fact grounding |
-| Scope creep into live systems | Strict offline-only constraint |
+Define a new Pydantic model + schema:
+
+```
+CoachingDraftV1
+```
+
+Required fields:
+
+* `draftText` (string)
+* `referencedFacts` (explicit list of fact IDs / fields used)
+* `skillBucket`
+* `toneProfile` (e.g. neutral, encouraging — fixed enum for now)
+* `sourceAdviceFactsHash`
+* `sourceDeltaFactsHash`
+* `determinismMetadata` (prompt hash, model ID, temperature = 0)
+
+> **Important:**
+> CoachingDraft is *not* user-facing output yet.
+> It is an **intermediate, evaluable artifact**.
 
 ---
 
-## Dependencies
+### 3. **Prompt Contract (Frozen)**
 
-- M19: AdviceFactsV1 artifact
-- M20: EloBucketDeltaFactsV1 artifact
-- ADR-COACHING-001: Truthfulness constraints
+Create:
+
+```
+docs/contracts/COACHING_TRANSLATION_PROMPT_v1.md
+```
+
+This document must:
+
+* Define the **exact prompt template**
+* Explicitly state:
+
+  * LLM may **only** rephrase provided facts
+  * LLM may **not** add chess analysis
+  * LLM may **not** reference engines, tactics, or unseen moves
+* Include **forbidden language examples**
+* Be marked **FROZEN v1** at close
+
+No prompt iteration after freeze without a new milestone.
 
 ---
 
-## Estimated Duration
+### 4. **Offline Coaching Evaluation Harness**
 
-2-3 sessions
+New module:
+
+```
+src/renacechess/coaching/evaluation.py
+```
+
+Purpose:
+
+* Score CoachingDrafts **offline**
+* No human users
+* No UI
+* No live API calls
+
+#### Required evaluation dimensions (numeric, deterministic):
+
+| Metric              | Description                                  |
+| ------------------- | -------------------------------------------- |
+| `factCoverage`      | % of salient facts referenced                |
+| `hallucinationRate` | % of sentences unsupported by facts          |
+| `bucketAlignment`   | Does language match skill bucket?            |
+| `deltaFaithfulness` | Are Elo deltas correctly reflected?          |
+| `verbosityScore`    | Bounded verbosity (avoid engine-like sprawl) |
+
+Output:
+
+```
+CoachingEvaluationV1
+```
 
 ---
 
-*Plan created: 2026-02-01*
+### 5. **Determinism & Reproducibility Rules**
 
+* Temperature **must be 0**
+* Prompt must be hash-stable
+* Model ID must be recorded
+* Same inputs → same CoachingDraft hash (to the extent API allows)
+* Any nondeterminism must be **explicitly documented** in audit
+
+---
+
+### 6. **Test Suite (Mandatory)**
+
+Add:
+
+```
+tests/test_m21_translation_harness.py
+```
+
+Minimum tests:
+
+* Translation uses **only provided facts**
+* Forbidden terms never appear
+* Same inputs → same draft text
+* CoachingDraft validates against schema
+* Evaluation metrics behave correctly on synthetic fixtures
+
+No golden prose tests.
+We test **constraints**, not style.
+
+---
+
+## 2. Explicitly Out-of-Scope (Hard No)
+
+❌ Live coaching UI
+❌ CLI commands
+❌ Training or fine-tuning
+❌ Engine references
+❌ New chess heuristics
+❌ AdviceFacts or DeltaFacts schema changes
+❌ Human-in-the-loop evaluation
+
+Any of these → scope violation.
+
+---
+
+## 3. Architectural Guardrails
+
+* Coaching remains downstream-only
+* Import-linter `coaching-isolation` must still pass
+* Translation harness may import:
+
+  * contracts
+  * coaching facts modules
+* Translation harness may **not** import:
+
+  * models
+  * eval
+  * features
+  * anything upstream of facts
+
+---
+
+## 4. Acceptance Criteria (Definition of Done)
+
+### Functional
+
+* [ ] CoachingDraftV1 schema + model defined
+* [ ] Translation harness produces draft from facts only
+* [ ] Offline evaluation metrics computed
+
+### Safety & Truthfulness
+
+* [ ] No hallucinated chess content
+* [ ] Explicit fact references included
+* [ ] Prompt contract frozen and documented
+
+### Governance
+
+* [ ] CI green
+* [ ] Coverage ≥ 90%
+* [ ] M21_summary.md generated
+* [ ] M21_audit.md generated
+* [ ] ADR-COACHING-001 respected and cited
+
+---
+
+## 5. Branching & Naming
+
+**Branch:**
+
+```
+m21-llm-translation-harness-001
+```
+
+**Milestone label:**
+
+```
+M21 — LLM-TRANSLATION-HARNESS-001
+```
+
+---
+
+## 6. Why M21 Is the Inflection Point
+
+After M21, the system can **prove**:
+
+> “This coaching text is a faithful linguistic rendering of human-conditioned chess facts — not engine analysis disguised as advice.”
+
+That is the difference between:
+
+* *AI chess coaching*
+  and
+* **RenaceCHESS**
+
+---
+
+## 7. Authorized Next Steps After M21
+
+Only after M21 closes:
+
+* M22: Coaching CLI / surface exposure
+* (Optional) Human evaluation loops
+* (Optional) tone/style expansion
+
+But **no surface exposure** before M21 passes audit.
+
+---
+
+### ✅ Authorization
+
+You are authorized to proceed with **M21 exactly as specified above**.
+
+If you want next:
+
+* I can pre-write the **COACHING_TRANSLATION_PROMPT_v1** text, or
+* Help you design **hallucination detection heuristics** that stay deterministic.
+
+Just say the word.

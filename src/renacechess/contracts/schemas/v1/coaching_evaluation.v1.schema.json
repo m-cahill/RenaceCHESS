@@ -1,0 +1,158 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "coaching_evaluation.v1.schema.json",
+  "title": "CoachingEvaluationV1",
+  "description": "Offline evaluation artifact for CoachingDraftV1 (M21). Measures quality metrics including hallucination detection.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "evaluatedAt",
+    "sourceDraftHash",
+    "sourceAdviceFactsHash",
+    "metrics",
+    "hallucinationDetails",
+    "passed",
+    "determinismHash"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "coaching_evaluation.v1",
+      "description": "Schema version identifier"
+    },
+    "evaluatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of evaluation"
+    },
+    "sourceDraftHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Determinism hash of evaluated CoachingDraftV1"
+    },
+    "sourceAdviceFactsHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Determinism hash of source AdviceFactsV1"
+    },
+    "sourceDeltaFactsHash": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Determinism hash of source EloBucketDeltaFactsV1 (optional)"
+    },
+    "metrics": {
+      "$ref": "#/definitions/EvaluationMetrics"
+    },
+    "hallucinationDetails": {
+      "$ref": "#/definitions/HallucinationMetrics"
+    },
+    "passed": {
+      "type": "boolean",
+      "description": "True if draft passes all quality gates"
+    },
+    "failureReasons": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "default": [],
+      "description": "Reasons for failure (empty if passed)"
+    },
+    "determinismHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of canonical JSON for this artifact"
+    }
+  },
+  "definitions": {
+    "EvaluationMetrics": {
+      "type": "object",
+      "required": [
+        "factCoverage",
+        "hallucinationRate",
+        "bucketAlignment",
+        "deltaFaithfulness",
+        "verbosityScore"
+      ],
+      "properties": {
+        "factCoverage": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Fraction of salient facts referenced"
+        },
+        "hallucinationRate": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Fraction of sentences with unsupported claims"
+        },
+        "bucketAlignment": {
+          "type": "boolean",
+          "description": "True if language matches target skill bucket"
+        },
+        "deltaFaithfulness": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Accuracy of Elo delta claims"
+        },
+        "verbosityScore": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Verbosity score (0.5 = ideal)"
+        }
+      }
+    },
+    "HallucinationMetrics": {
+      "type": "object",
+      "required": ["totalUnsupportedClaims", "totalSentences"],
+      "properties": {
+        "forbiddenTermsFound": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Forbidden terms detected in the draft"
+        },
+        "unsupportedMoves": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "UCI moves not in source facts"
+        },
+        "unsupportedPercentages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Percentages not matching source facts"
+        },
+        "unsupportedStructuralClaims": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "Structural vocabulary not in facts"
+        },
+        "totalUnsupportedClaims": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total unsupported claims"
+        },
+        "totalSentences": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Total sentences in draft"
+        }
+      }
+    }
+  }
+}
+
