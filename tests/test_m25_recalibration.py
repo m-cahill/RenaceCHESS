@@ -230,7 +230,7 @@ class TestRecalibrationFitting:
     @pytest.fixture
     def frozen_eval_manifest_path(self) -> Path:
         """Path to frozen eval manifest fixture."""
-        return Path(__file__).parent.parent / "fixtures" / "frozen_eval" / "manifest.json"
+        return Path(__file__).parent / "fixtures" / "frozen_eval" / "manifest.json"
 
     @pytest.fixture
     def calibration_metrics(self, frozen_eval_manifest_path: Path) -> CalibrationMetricsV1:
@@ -289,7 +289,7 @@ class TestRecalibrationApplication:
     @pytest.fixture
     def frozen_eval_manifest_path(self) -> Path:
         """Path to frozen eval manifest fixture."""
-        return Path(__file__).parent.parent / "fixtures" / "frozen_eval" / "manifest.json"
+        return Path(__file__).parent / "fixtures" / "frozen_eval" / "manifest.json"
 
     @pytest.fixture
     def calibration_metrics(self, frozen_eval_manifest_path: Path) -> CalibrationMetricsV1:

@@ -111,7 +111,7 @@ def _collect_predictions_for_fitting(
     outcome_head_id: str | None = None,
 ) -> tuple[
     dict[str, list[tuple[list[tuple[str, float]], str]]],  # policy predictions
-    dict[str, list[tuple[float, float, float, Literal["win", "draw", "loss"]]]],  # outcome predictions
+    dict[str, list[tuple[float, float, float, Literal["win", "draw", "loss"]]]],  # outcomes
 ]:
     """Collect raw predictions from baseline models for temperature fitting.
 
@@ -624,7 +624,9 @@ def run_calibration_evaluation_with_recalibration(
         for p_win, p_draw, p_loss, actual_outcome in outcome_preds[bucket]:
             probs = [p_win, p_draw, p_loss]
             scaled_probs = apply_temperature_scaling_to_probs(probs, outcome_temp)
-            overall_outcome_acc.add(scaled_probs[0], scaled_probs[1], scaled_probs[2], actual_outcome)
+            overall_outcome_acc.add(
+                scaled_probs[0], scaled_probs[1], scaled_probs[2], actual_outcome
+            )
 
     overall_outcome = None
     overall_policy = None
@@ -693,8 +695,9 @@ def save_recalibration_parameters(params: RecalibrationParametersV1, out_path: P
         params: RecalibrationParametersV1 instance.
         out_path: Output file path.
     """
+    # Use mode='json' to serialize datetime to strings
     out_path.write_text(
-        canonical_json_dump(params.model_dump(by_alias=True)).decode("utf-8"),
+        canonical_json_dump(params.model_dump(by_alias=True, mode="json")).decode("utf-8"),
         encoding="utf-8",
     )
 
@@ -726,8 +729,9 @@ def save_calibration_delta(delta: CalibrationDeltaArtifactV1, out_path: Path) ->
         delta: CalibrationDeltaArtifactV1 instance.
         out_path: Output file path.
     """
+    # Use mode='json' to serialize datetime to strings
     out_path.write_text(
-        canonical_json_dump(delta.model_dump(by_alias=True)).decode("utf-8"),
+        canonical_json_dump(delta.model_dump(by_alias=True, mode="json")).decode("utf-8"),
         encoding="utf-8",
     )
 
