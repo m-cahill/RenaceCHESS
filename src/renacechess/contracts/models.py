@@ -2071,3 +2071,267 @@ class AdviceFactsInputsV1(BaseModel):
     weak_squares_delta: float | None = Field(None, alias="weakSquaresDelta")
     strong_squares_delta: float | None = Field(None, alias="strongSquaresDelta")
     structural_summary: str | None = Field(None, alias="structuralSummary")
+
+
+# =============================================================================
+# Elo-Bucket Delta Facts Models (M20) — Phase C Elo-Relative Reasoning
+# =============================================================================
+
+
+class PolicySummaryMoveV1(BaseModel):
+    """Move entry in a policy summary for delta comparison (M20)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    uci: str = Field(..., description="Move in UCI notation")
+    prob: float = Field(..., ge=0.0, le=1.0, description="Probability of this move")
+
+
+class PolicySummaryV1(BaseModel):
+    """Policy summary for delta comparison (M20).
+
+    A compact representation of a policy distribution for computing deltas.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    top_moves: list[PolicySummaryMoveV1] = Field(
+        ...,
+        alias="topMoves",
+        min_length=1,
+        description="Top moves ordered by prob descending",
+    )
+    top_k: int = Field(
+        ...,
+        alias="topK",
+        ge=1,
+        description="Number of top moves included",
+    )
+
+
+class OutcomeSummaryV1(BaseModel):
+    """Outcome (W/D/L) summary for delta comparison (M20)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    p_win: float = Field(..., alias="pWin", ge=0.0, le=1.0, description="Win probability")
+    p_draw: float = Field(..., alias="pDraw", ge=0.0, le=1.0, description="Draw probability")
+    p_loss: float = Field(..., alias="pLoss", ge=0.0, le=1.0, description="Loss probability")
+
+    @model_validator(mode="after")
+    def validate_probabilities_sum(self) -> OutcomeSummaryV1:
+        """Validate that probabilities sum to approximately 1.0."""
+        total = self.p_win + self.p_draw + self.p_loss
+        if abs(total - 1.0) > 1e-4:
+            msg = f"Outcome probabilities must sum to 1.0, got {total:.6f}"
+            raise ValueError(msg)
+        return self
+
+
+class PolicyDeltaV1(BaseModel):
+    """Policy divergence metrics between two buckets (M20).
+
+    All metrics are computed by comparing baseline_bucket to comparison_bucket.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    kl_divergence: float = Field(
+        ...,
+        alias="klDivergence",
+        ge=0.0,
+        description="KL divergence from baseline to comparison (bits)",
+    )
+    total_variation: float = Field(
+        ...,
+        alias="totalVariation",
+        ge=0.0,
+        le=1.0,
+        description="Total Variation distance [0.0, 1.0]",
+    )
+    rank_flips: int = Field(
+        ...,
+        alias="rankFlips",
+        ge=0,
+        description="Number of moves ranked differently between buckets",
+    )
+    mass_shift_to_top: float = Field(
+        ...,
+        alias="massShiftToTop",
+        ge=-1.0,
+        le=1.0,
+        description="Probability mass shift toward top-1 (positive = comparison favors top move)",
+    )
+
+
+class OutcomeDeltaV1(BaseModel):
+    """Outcome expectation shifts between two buckets (M20)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    delta_p_win: float = Field(
+        ...,
+        alias="deltaPWin",
+        ge=-1.0,
+        le=1.0,
+        description="Change in win probability (comparison - baseline)",
+    )
+    delta_p_draw: float = Field(
+        ...,
+        alias="deltaPDraw",
+        ge=-1.0,
+        le=1.0,
+        description="Change in draw probability (comparison - baseline)",
+    )
+    delta_p_loss: float = Field(
+        ...,
+        alias="deltaPLoss",
+        ge=-1.0,
+        le=1.0,
+        description="Change in loss probability (comparison - baseline)",
+    )
+    win_rate_monotonic: bool = Field(
+        ...,
+        alias="winRateMonotonic",
+        description="True if win rate change is in expected direction (higher skill → higher win)",
+    )
+
+
+class DifficultyDeltaV1(BaseModel):
+    """Difficulty sensitivity metrics between two buckets (M20)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    delta_hdi: float = Field(
+        ...,
+        alias="deltaHDI",
+        ge=-1.0,
+        le=1.0,
+        description="Change in Human Difficulty Index (comparison - baseline)",
+    )
+
+
+class StructuralEmphasisDeltaV1(BaseModel):
+    """Structural emphasis shifts between two buckets (M20, optional).
+
+    Captures how structural features influence move selection differently
+    across skill levels.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    mobility_emphasis_delta: float | None = Field(
+        None,
+        alias="mobilityEmphasisDelta",
+        description="Change in mobility reliance (positive = comparison values mobility more)",
+    )
+    weak_square_sensitivity_delta: float | None = Field(
+        None,
+        alias="weakSquareSensitivityDelta",
+        description="Change in weak square sensitivity",
+    )
+    king_safety_weight_delta: float | None = Field(
+        None,
+        alias="kingSafetyWeightDelta",
+        description="Change in king safety weighting",
+    )
+
+
+class EloBucketDeltaSourceContractsV1(BaseModel):
+    """Source contract versions for traceability (M20)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    elo_bucket_delta_contract: str = Field(
+        ...,
+        alias="eloBucketDeltaContract",
+        description="Version of ELO_BUCKET_DELTA_FACTS_CONTRACT",
+    )
+    advice_facts_contract: str = Field(
+        ...,
+        alias="adviceFactsContract",
+        description="Version of ADVICE_FACTS_CONTRACT used for source artifacts",
+    )
+
+
+class EloBucketDeltaFactsV1(BaseModel):
+    """Elo-bucket delta facts artifact (M20).
+
+    Describes statistical and structural differences between two Elo buckets
+    for the same position. This is a facts-only artifact — no prose, no advice.
+
+    Lineage:
+    - Derived from two AdviceFactsV1 artifacts (baseline + comparison buckets)
+    - sourceAdviceFactsHashes provides audit trail
+
+    See: ELO_BUCKET_DELTA_FACTS_CONTRACT_v1.md
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    schema_version: Literal["elo_bucket_delta_facts.v1"] = Field(
+        "elo_bucket_delta_facts.v1",
+        alias="schemaVersion",
+        description="Schema version identifier",
+    )
+    generated_at: datetime = Field(
+        ...,
+        alias="generatedAt",
+        description="ISO 8601 timestamp of artifact creation",
+    )
+
+    # Bucket identification
+    baseline_bucket: str = Field(
+        ...,
+        alias="baselineBucket",
+        description="Baseline skill bucket ID (e.g., '1200_1399')",
+    )
+    comparison_bucket: str = Field(
+        ...,
+        alias="comparisonBucket",
+        description="Comparison skill bucket ID (e.g., '1600_1799')",
+    )
+
+    # Lineage (required for governance/auditability)
+    source_advice_facts_hashes: list[str] = Field(
+        ...,
+        alias="sourceAdviceFactsHashes",
+        min_length=2,
+        max_length=2,
+        description="SHA-256 hashes of source AdviceFacts [baseline_hash, comparison_hash]",
+    )
+
+    # Delta categories
+    policy_delta: PolicyDeltaV1 = Field(
+        ...,
+        alias="policyDelta",
+        description="Policy divergence metrics",
+    )
+    outcome_delta: OutcomeDeltaV1 = Field(
+        ...,
+        alias="outcomeDelta",
+        description="Outcome expectation shifts",
+    )
+    difficulty_delta: DifficultyDeltaV1 = Field(
+        ...,
+        alias="difficultyDelta",
+        description="Difficulty sensitivity metrics",
+    )
+    structural_delta: StructuralEmphasisDeltaV1 | None = Field(
+        None,
+        alias="structuralDelta",
+        description="Structural emphasis shifts (optional, present if structural data available)",
+    )
+
+    # Governance
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern="^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of canonical JSON for determinism verification",
+    )
+    source_contract_versions: EloBucketDeltaSourceContractsV1 = Field(
+        ...,
+        alias="sourceContractVersions",
+        description="Source contract versions for traceability",
+    )
