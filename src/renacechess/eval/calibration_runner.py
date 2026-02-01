@@ -461,7 +461,7 @@ def run_calibration_evaluation(
 
         by_elo_bucket.append(
             EloBucketCalibrationV1(
-                elo_bucket=bucket,  # type: ignore[arg-type]
+                elo_bucket=bucket,
                 samples=samples,
                 outcome_calibration=outcome_metrics,
                 policy_calibration=policy_metrics,
