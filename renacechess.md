@@ -29,6 +29,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M18 | ✅ Closed (MERGED) | `m18-personality-eval-harness-001` → `main` | 2026-01-31 | PERSONALITY-EVAL-HARNESS-001 — Personality Evaluation Harness (Phase B Exit) |
 | M19 | ✅ Closed (MERGED) | `m19-advice-facts-contract-001` → `main` | 2026-02-01 | ADVICE-FACTS-CONTRACT-001 — AdviceFacts Contract + Coaching Foundation (Phase C Entry) |
 | M20 | ✅ Closed (MERGED) | `m20-elo-bucket-delta-facts` → `main` | 2026-02-01 | ELO-BUCKET-DELTA-FACTS-001 — Elo-Bucket Delta Facts Artifact (Cross-Bucket Comparison) |
+| M21 | ✅ Closed (MERGED) | `m21-llm-translation-harness-001` → `main` | 2026-02-01 | LLM-TRANSLATION-HARNESS-001 — LLM Translation Harness + Coaching Evaluation (Phase C Core Complete) |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -424,6 +425,31 @@ This document tracks milestones, schema, migrations, and governance decisions fo
   - First-run CI success (all gates passed)
 - **Phase C Status:** Cross-bucket comparison artifact established
 
+**M21 Details:**
+- **Objective:** Introduce LLMs as pure translators, not analysts — deterministic coaching prose from facts
+- **CI Run 1:** 21554787481 (SUCCESS - First-run green, all checks passing)
+- **Final Coverage:** 91.34% (exceeds 90% threshold)
+- **Test Count:** 587 passed, 1 skipped (33 new M21 tests)
+- **PR:** #27 (merged)
+- **Final Commit:** `d351ca2`
+- **Audit:** `docs/milestones/PhaseC/M21/M21_audit.md`
+- **Summary:** `docs/milestones/PhaseC/M21/M21_summary.md`
+- **Key Files:**
+  - `src/renacechess/coaching/llm_client.py` — LLMClient protocol + DeterministicStubLLM
+  - `src/renacechess/coaching/translation_harness.py` — Facts → prose translation
+  - `src/renacechess/coaching/evaluation.py` — Hallucination detection + metrics
+  - `src/renacechess/contracts/schemas/v1/coaching_draft.v1.schema.json` — Draft schema
+  - `src/renacechess/contracts/schemas/v1/coaching_evaluation.v1.schema.json` — Evaluation schema
+  - `docs/contracts/COACHING_TRANSLATION_PROMPT_v1.md` — Frozen v1 prompt contract
+- **Notable Features:**
+  - DeterministicStubLLM for CI determinism (no network calls)
+  - Hallucination detection: forbidden terms, move constraints, numeric claims, structural claims
+  - Evaluation metrics: factCoverage, hallucinationRate, bucketAlignment, deltaFaithfulness, verbosityScore
+  - ToneProfile enum fixed at 3 values (NEUTRAL, ENCOURAGING, CONCISE)
+  - AST-based import boundary test + coaching-isolation contract
+  - First-run CI success (all gates passed)
+- **Phase C Status:** Core coaching spine complete (M19 facts → M20 deltas → M21 translation)
+
 ---
 
 ## Database Schema
@@ -596,6 +622,43 @@ This document tracks milestones, schema, migrations, and governance decisions fo
   - structuralDelta: Optional structural emphasis shifts
   - determinismHash: SHA-256 for reproducibility
 
+### Coaching Draft Schema (v1)
+- **Location:** `src/renacechess/contracts/schemas/v1/coaching_draft.v1.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.CoachingDraftV1`
+- **Status:** ✅ FROZEN (Phase C LLM translation artifact)
+- **Governing ADR:** ADR-COACHING-001 ("LLMs translate facts, not invent")
+- **Key Fields:**
+  - draftText: Generated coaching prose
+  - skillBucket: Target skill level
+  - toneProfile: NEUTRAL | ENCOURAGING | CONCISE
+  - referencedFacts: Explicit list of facts used
+  - sourceAdviceFactsHash / sourceDeltaFactsHash: Lineage
+  - determinismMetadata: promptTemplateVersion, promptHash, modelId, temperature, provider
+  - determinismHash: SHA-256 for reproducibility
+
+### Coaching Evaluation Schema (v1)
+- **Location:** `src/renacechess/contracts/schemas/v1/coaching_evaluation.v1.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.CoachingEvaluationV1`
+- **Status:** ✅ FROZEN (Phase C offline evaluation artifact)
+- **Governing ADR:** ADR-COACHING-001 ("LLMs translate facts, not invent")
+- **Key Fields:**
+  - metrics: factCoverage, hallucinationRate, bucketAlignment, deltaFaithfulness, verbosityScore
+  - hallucinationDetails: forbiddenTermsFound, unsupportedMoves, unsupportedPercentages, unsupportedStructuralClaims
+  - passed: Boolean quality gate result
+  - failureReasons: List of gate failures
+  - determinismHash: SHA-256 for reproducibility
+
+### Coaching Translation Prompt Contract (v1)
+- **Location:** `docs/contracts/COACHING_TRANSLATION_PROMPT_v1.md`
+- **Status:** ✅ FROZEN (Prompt template for LLM coaching translation)
+- **Governing ADR:** ADR-COACHING-001 ("LLMs translate facts, not invent")
+- **Key Rules:**
+  - Forbidden terms: engine, stockfish, centipawn, tablebase, mate in, eval
+  - Move references: Only topMoves/recommendedMove allowed
+  - Numeric claims: Must match source fact percentages (rounded)
+  - Structural claims: Controlled vocabulary only if structuralCognition present
+  - Tone profiles: NEUTRAL, ENCOURAGING, CONCISE (fixed v1 enum)
+
 ---
 
 ## Phase Status
@@ -624,6 +687,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-02-01 (Phase C, M20 CLOSED — Elo-Bucket Delta Facts Artifact, Cross-Bucket Comparison Established)
+**Last Updated:** 2026-02-01 (Phase C, M21 CLOSED — LLM Translation Harness, Phase C Core Complete)
 
 
