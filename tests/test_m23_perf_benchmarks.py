@@ -48,9 +48,7 @@ class TestStructuralCognitionBenchmarks:
     """Benchmark structural cognition extraction (primary audit recommendation)."""
 
     @pytest.mark.benchmark(group="structural_cognition")
-    def test_structural_cognition_starting_position(
-        self, benchmark: BenchmarkFixture
-    ) -> None:
+    def test_structural_cognition_starting_position(self, benchmark: BenchmarkFixture) -> None:
         """Benchmark structural cognition extraction for starting position."""
         board = chess.Board(BENCHMARK_FENS[0])
 
@@ -64,9 +62,7 @@ class TestStructuralCognitionBenchmarks:
         assert result.square_map is not None
 
     @pytest.mark.benchmark(group="structural_cognition")
-    def test_structural_cognition_complex_middlegame(
-        self, benchmark: BenchmarkFixture
-    ) -> None:
+    def test_structural_cognition_complex_middlegame(self, benchmark: BenchmarkFixture) -> None:
         """Benchmark structural cognition extraction for complex middlegame."""
         board = chess.Board(BENCHMARK_FENS[2])
 
@@ -92,9 +88,7 @@ class TestFeatureExtractionBenchmarks:
     """Benchmark structural feature extraction paths."""
 
     @pytest.mark.benchmark(group="features")
-    def test_per_piece_features_starting_position(
-        self, benchmark: BenchmarkFixture
-    ) -> None:
+    def test_per_piece_features_starting_position(self, benchmark: BenchmarkFixture) -> None:
         """Benchmark per-piece feature extraction for starting position."""
         board = chess.Board(BENCHMARK_FENS[0])
 
@@ -107,9 +101,7 @@ class TestFeatureExtractionBenchmarks:
         assert len(result.pieces) == 32
 
     @pytest.mark.benchmark(group="features")
-    def test_per_piece_features_complex_middlegame(
-        self, benchmark: BenchmarkFixture
-    ) -> None:
+    def test_per_piece_features_complex_middlegame(self, benchmark: BenchmarkFixture) -> None:
         """Benchmark per-piece feature extraction for complex middlegame."""
         board = chess.Board(BENCHMARK_FENS[2])
 
@@ -120,9 +112,7 @@ class TestFeatureExtractionBenchmarks:
         assert result is not None
 
     @pytest.mark.benchmark(group="features")
-    def test_square_map_features_starting_position(
-        self, benchmark: BenchmarkFixture
-    ) -> None:
+    def test_square_map_features_starting_position(self, benchmark: BenchmarkFixture) -> None:
         """Benchmark square map feature extraction for starting position."""
         board = chess.Board(BENCHMARK_FENS[0])
 
@@ -135,9 +125,7 @@ class TestFeatureExtractionBenchmarks:
         assert hasattr(result, "weak_for_black")
 
     @pytest.mark.benchmark(group="features")
-    def test_square_map_features_tactical_position(
-        self, benchmark: BenchmarkFixture
-    ) -> None:
+    def test_square_map_features_tactical_position(self, benchmark: BenchmarkFixture) -> None:
         """Benchmark square map feature extraction for tactical position."""
         board = chess.Board(BENCHMARK_FENS[4])
 
@@ -180,4 +168,3 @@ class TestCombinedBenchmarks:
 
         result = benchmark(process_batch)
         assert len(result) == len(BENCHMARK_FENS)
-

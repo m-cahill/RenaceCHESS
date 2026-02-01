@@ -271,7 +271,7 @@ jobs:
       - name: Run performance benchmarks
         run: |
           echo "Running performance benchmarks (no timing thresholds)..."
-          python -m pytest tests/test_m23_perf_benchmarks.py -v --benchmark-only --benchmark-json=benchmark-results.json
+          python -m pytest tests/test_m23_perf_benchmarks.py -v --benchmark-only --benchmark-json=benchmark-results.json --no-cov
       - name: Upload benchmark results
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02  # v4.6.2
         if: always()

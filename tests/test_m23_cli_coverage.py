@@ -800,4 +800,3 @@ class TestAdditionalCoveragePaths:
             main()
 
         assert called["ingest"]
-
