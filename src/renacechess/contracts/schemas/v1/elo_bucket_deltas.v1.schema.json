@@ -1,0 +1,181 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "elo_bucket_deltas.v1.schema.json",
+  "title": "EloBucketDeltaFactsV1",
+  "description": "Elo-bucket delta facts artifact — captures statistical and structural differences between two Elo buckets for the same position. Facts-only, no prose, no advice. See ELO_BUCKET_DELTA_FACTS_CONTRACT_v1.md.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "generatedAt",
+    "baselineBucket",
+    "comparisonBucket",
+    "sourceAdviceFactsHashes",
+    "policyDelta",
+    "outcomeDelta",
+    "difficultyDelta",
+    "determinismHash",
+    "sourceContractVersions"
+  ],
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "type": "string",
+      "const": "elo_bucket_delta_facts.v1",
+      "description": "Schema version identifier"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of artifact creation"
+    },
+    "baselineBucket": {
+      "type": "string",
+      "description": "Baseline skill bucket ID (e.g., '1200_1399')"
+    },
+    "comparisonBucket": {
+      "type": "string",
+      "description": "Comparison skill bucket ID (e.g., '1600_1799')"
+    },
+    "sourceAdviceFactsHashes": {
+      "type": "array",
+      "minItems": 2,
+      "maxItems": 2,
+      "items": {
+        "type": "string",
+        "pattern": "^sha256:[a-f0-9]{64}$"
+      },
+      "description": "SHA-256 hashes of source AdviceFacts [baseline_hash, comparison_hash]"
+    },
+    "policyDelta": {
+      "$ref": "#/definitions/PolicyDeltaV1"
+    },
+    "outcomeDelta": {
+      "$ref": "#/definitions/OutcomeDeltaV1"
+    },
+    "difficultyDelta": {
+      "$ref": "#/definitions/DifficultyDeltaV1"
+    },
+    "structuralDelta": {
+      "oneOf": [
+        { "$ref": "#/definitions/StructuralEmphasisDeltaV1" },
+        { "type": "null" }
+      ],
+      "description": "Structural emphasis shifts (optional, present if structural data available)"
+    },
+    "determinismHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of canonical JSON for determinism verification"
+    },
+    "sourceContractVersions": {
+      "$ref": "#/definitions/EloBucketDeltaSourceContractsV1"
+    }
+  },
+  "definitions": {
+    "PolicyDeltaV1": {
+      "type": "object",
+      "required": ["klDivergence", "totalVariation", "rankFlips", "massShiftToTop"],
+      "additionalProperties": false,
+      "properties": {
+        "klDivergence": {
+          "type": "number",
+          "minimum": 0,
+          "description": "KL divergence from baseline to comparison (bits)"
+        },
+        "totalVariation": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Total Variation distance [0.0, 1.0]"
+        },
+        "rankFlips": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of moves ranked differently between buckets"
+        },
+        "massShiftToTop": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1,
+          "description": "Probability mass shift toward top-1 (positive = comparison favors top move)"
+        }
+      }
+    },
+    "OutcomeDeltaV1": {
+      "type": "object",
+      "required": ["deltaPWin", "deltaPDraw", "deltaPLoss", "winRateMonotonic"],
+      "additionalProperties": false,
+      "properties": {
+        "deltaPWin": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1,
+          "description": "Change in win probability (comparison - baseline)"
+        },
+        "deltaPDraw": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1,
+          "description": "Change in draw probability (comparison - baseline)"
+        },
+        "deltaPLoss": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1,
+          "description": "Change in loss probability (comparison - baseline)"
+        },
+        "winRateMonotonic": {
+          "type": "boolean",
+          "description": "True if win rate change is in expected direction (higher skill → higher win)"
+        }
+      }
+    },
+    "DifficultyDeltaV1": {
+      "type": "object",
+      "required": ["deltaHDI"],
+      "additionalProperties": false,
+      "properties": {
+        "deltaHDI": {
+          "type": "number",
+          "minimum": -1,
+          "maximum": 1,
+          "description": "Change in Human Difficulty Index (comparison - baseline)"
+        }
+      }
+    },
+    "StructuralEmphasisDeltaV1": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "mobilityEmphasisDelta": {
+          "type": ["number", "null"],
+          "description": "Change in mobility reliance (positive = comparison values mobility more)"
+        },
+        "weakSquareSensitivityDelta": {
+          "type": ["number", "null"],
+          "description": "Change in weak square sensitivity"
+        },
+        "kingSafetyWeightDelta": {
+          "type": ["number", "null"],
+          "description": "Change in king safety weighting"
+        }
+      }
+    },
+    "EloBucketDeltaSourceContractsV1": {
+      "type": "object",
+      "required": ["eloBucketDeltaContract", "adviceFactsContract"],
+      "additionalProperties": false,
+      "properties": {
+        "eloBucketDeltaContract": {
+          "type": "string",
+          "description": "Version of ELO_BUCKET_DELTA_FACTS_CONTRACT"
+        },
+        "adviceFactsContract": {
+          "type": "string",
+          "description": "Version of ADVICE_FACTS_CONTRACT used for source artifacts"
+        }
+      }
+    }
+  }
+}
+

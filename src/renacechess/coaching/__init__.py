@@ -5,5 +5,6 @@ See ADR-COACHING-001 for the governing principle: "LLMs translate facts, not inv
 """
 
 from renacechess.coaching.advice_facts import build_advice_facts_v1
+from renacechess.coaching.elo_bucket_deltas import build_elo_bucket_delta_facts_v1
 
-__all__ = ["build_advice_facts_v1"]
+__all__ = ["build_advice_facts_v1", "build_elo_bucket_delta_facts_v1"]
