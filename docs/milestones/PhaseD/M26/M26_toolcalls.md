@@ -13,6 +13,8 @@ This file logs all tool invocations for M26 milestone execution.
 | 2026-02-01 | search_replace | Wire runtime wrapper into evaluation boundary | eval/runner.py, cli.py | ✅ Complete |
 | 2026-02-01 | write | Add comprehensive tests | tests/test_m26_runtime_recalibration.py | ✅ Complete |
 | 2026-02-01 | search_replace | Add CI guard job | .github/workflows/ci.yml | ✅ Complete |
+| 2026-02-01 | run_terminal_cmd | Create branch and commit M26 changes | m26-phase-d-runtime-gating-001 | ✅ Complete |
+| 2026-02-01 | run_terminal_cmd | Create PR #32 to main | PR #32 | ✅ Complete |
 
 ---
 
