@@ -1,10 +1,18 @@
 """CLI entry point for RenaceCHESS."""
 
 import argparse
+import json
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 
-from renacechess.contracts.models import FrozenEvalManifestV1
+from renacechess.contracts.models import (
+    AdviceFactsV1,
+    CoachingSurfaceEvaluationSummaryV1,
+    CoachingSurfaceV1,
+    EloBucketDeltaFactsV1,
+    FrozenEvalManifestV1,
+)
 from renacechess.dataset.builder import build_dataset
 from renacechess.dataset.config import DatasetBuildConfig
 from renacechess.demo.pgn_overlay import generate_demo_payload
@@ -367,6 +375,36 @@ def main() -> None:
         help="Decompress .zst to .pgn",
     )
 
+    # Coach command (M22)
+    coach_parser = subparsers.add_parser(
+        "coach",
+        help="Render coaching output from pre-computed facts (M22 surface exposure)",
+    )
+    coach_parser.add_argument(
+        "--advice-facts",
+        type=Path,
+        required=True,
+        help="Path to AdviceFactsV1 JSON file (REQUIRED)",
+    )
+    coach_parser.add_argument(
+        "--delta-facts",
+        type=Path,
+        required=True,
+        help="Path to EloBucketDeltaFactsV1 JSON file (REQUIRED)",
+    )
+    coach_parser.add_argument(
+        "--tone",
+        type=str,
+        choices=["neutral", "encouraging", "concise"],
+        default="neutral",
+        help="Tone profile for coaching output (default: neutral)",
+    )
+    coach_parser.add_argument(
+        "--out",
+        type=Path,
+        help="Output file for CoachingSurfaceV1 JSON (default: stdout)",
+    )
+
     args = parser.parse_args()
 
     if args.command == "demo":
@@ -416,8 +454,6 @@ def main() -> None:
     elif args.command == "eval":
         if args.eval_command == "run":
             try:
-                from datetime import datetime
-
                 # Parse created_at if provided
                 created_at = None
                 if args.created_at:
@@ -462,8 +498,6 @@ def main() -> None:
                         sys.exit(1)
 
                     # Load and validate frozen eval manifest
-                    import json
-
                     try:
                         frozen_manifest_dict = json.loads(
                             args.frozen_eval_manifest.read_text(encoding="utf-8")
@@ -619,8 +653,6 @@ def main() -> None:
                 sys.exit(1)
         elif args.eval_command == "generate-frozen":
             try:
-                from datetime import datetime
-
                 # Parse created_at if provided
                 created_at = None
                 if args.created_at:
@@ -739,6 +771,179 @@ def main() -> None:
         else:
             ingest_parser.print_help()
             sys.exit(1)
+    elif args.command == "coach":
+        # M22: Coaching surface CLI command
+        # Imports here to avoid pulling coaching module until needed
+        from renacechess.coaching.evaluation import evaluate_coaching_draft
+        from renacechess.coaching.llm_client import DeterministicStubLLM, ToneProfile
+        from renacechess.coaching.translation_harness import translate_facts_to_coaching
+
+        # M22 uses M21 thresholds exactly (locked answer #3)
+        FACT_COVERAGE_MIN = 0.5
+        HALLUCINATION_RATE_MAX = 0.2
+        DELTA_FAITHFULNESS_MIN = 0.5
+
+        # Load advice facts
+        if not args.advice_facts.exists():
+            print(
+                f"Error: AdviceFacts file not found: {args.advice_facts}",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+        # Load delta facts
+        if not args.delta_facts.exists():
+            print(
+                f"Error: EloBucketDeltaFacts file not found: {args.delta_facts}",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+        # Parse and validate advice facts
+        try:
+            advice_facts_dict = json.loads(args.advice_facts.read_text(encoding="utf-8"))
+            advice_facts = AdviceFactsV1.model_validate(advice_facts_dict)
+        except Exception as e:
+            print(
+                f"Error: Failed to load or validate AdviceFacts: {e}",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+        # Parse and validate delta facts
+        try:
+            delta_facts_dict = json.loads(args.delta_facts.read_text(encoding="utf-8"))
+            delta_facts = EloBucketDeltaFactsV1.model_validate(delta_facts_dict)
+        except Exception as e:
+            print(
+                f"Error: Failed to load or validate EloBucketDeltaFacts: {e}",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+        # Validate lineage: delta_facts must reference advice_facts hash
+        if advice_facts.determinism_hash not in delta_facts.source_advice_facts_hashes:
+            print(
+                "Error: Lineage mismatch — AdviceFacts hash not found in "
+                "DeltaFacts.sourceAdviceFactsHashes. "
+                "Ensure artifacts are correctly paired.",
+                file=sys.stderr,
+            )
+            sys.exit(1)
+
+        # Map CLI tone to ToneProfile (M22 locked: stub only)
+        tone_map = {
+            "neutral": ToneProfile.NEUTRAL,
+            "encouraging": ToneProfile.ENCOURAGING,
+            "concise": ToneProfile.CONCISE,
+        }
+        tone = tone_map[args.tone]
+
+        # Generate coaching draft using stub LLM only (M22 locked answer #5)
+        timestamp = datetime.now(UTC)
+        try:
+            draft = translate_facts_to_coaching(
+                advice_facts=advice_facts,
+                delta_facts=delta_facts,
+                tone=tone,
+                llm_client=DeterministicStubLLM(),  # Always stub, never network
+                generated_at=timestamp,
+            )
+        except Exception as e:
+            print(f"Error: Translation failed: {e}", file=sys.stderr)
+            sys.exit(1)
+
+        # Evaluate coaching draft
+        try:
+            evaluation = evaluate_coaching_draft(
+                draft=draft,
+                advice_facts=advice_facts,
+                delta_facts=delta_facts,
+                evaluated_at=timestamp,
+            )
+        except Exception as e:
+            print(f"Error: Evaluation failed: {e}", file=sys.stderr)
+            sys.exit(1)
+
+        # Build evaluation summary
+        eval_summary = CoachingSurfaceEvaluationSummaryV1(
+            fact_coverage=evaluation.metrics.fact_coverage,
+            hallucination_rate=evaluation.metrics.hallucination_rate,
+            bucket_alignment=evaluation.metrics.bucket_alignment,
+            delta_faithfulness=evaluation.metrics.delta_faithfulness,
+            verbosity_score=evaluation.metrics.verbosity_score,
+            passed=evaluation.passed,
+            failure_reasons=evaluation.failure_reasons,
+        )
+
+        # Build coaching surface artifact
+        surface = CoachingSurfaceV1(
+            schema_version="coaching_surface.v1",
+            generated_at=timestamp,
+            coaching_text=draft.draft_text,
+            skill_bucket=draft.skill_bucket,
+            tone_profile=draft.tone_profile,
+            evaluation_summary=eval_summary,
+            source_advice_facts_hash=draft.source_advice_facts_hash,
+            source_delta_facts_hash=draft.source_delta_facts_hash or delta_facts.determinism_hash,
+            coaching_draft_hash=draft.determinism_hash,
+            coaching_evaluation_hash=evaluation.determinism_hash,
+        )
+
+        # ALWAYS print evaluation summary (M22 guardrail: never suppress)
+        print("=== Evaluation Summary ===", file=sys.stderr)
+        print(f"Fact coverage: {eval_summary.fact_coverage * 100:.0f}%", file=sys.stderr)
+        print(f"Hallucination rate: {eval_summary.hallucination_rate * 100:.0f}%", file=sys.stderr)
+        print(f"Delta faithfulness: {'PASS' if eval_summary.delta_faithfulness >= 0.5 else 'FAIL'}", file=sys.stderr)
+        print(f"Bucket alignment: {'PASS' if eval_summary.bucket_alignment else 'FAIL'}", file=sys.stderr)
+        print(f"Verbosity score: {'OK' if 0.2 <= eval_summary.verbosity_score <= 0.8 else 'WARN'}", file=sys.stderr)
+        print(f"Overall: {'PASS' if eval_summary.passed else 'FAIL'}", file=sys.stderr)
+        if eval_summary.failure_reasons:
+            print(f"Failure reasons: {', '.join(eval_summary.failure_reasons)}", file=sys.stderr)
+        print("", file=sys.stderr)
+
+        # Check thresholds (M21 thresholds, M22 locked answer #3)
+        threshold_failures: list[str] = []
+        if eval_summary.fact_coverage < FACT_COVERAGE_MIN:
+            threshold_failures.append(
+                f"factCoverage {eval_summary.fact_coverage:.2f} < {FACT_COVERAGE_MIN}"
+            )
+        if eval_summary.hallucination_rate >= HALLUCINATION_RATE_MAX:
+            threshold_failures.append(
+                f"hallucinationRate {eval_summary.hallucination_rate:.2f} >= {HALLUCINATION_RATE_MAX}"
+            )
+        if not eval_summary.bucket_alignment:
+            threshold_failures.append("bucketAlignment is False")
+        if eval_summary.delta_faithfulness < DELTA_FAITHFULNESS_MIN:
+            threshold_failures.append(
+                f"deltaFaithfulness {eval_summary.delta_faithfulness:.2f} < {DELTA_FAITHFULNESS_MIN}"
+            )
+
+        # If thresholds fail, print warning but still output artifact (exit non-zero)
+        exit_code = 0
+        if threshold_failures:
+            print("⚠️  Quality thresholds failed:", file=sys.stderr)
+            for failure in threshold_failures:
+                print(f"    - {failure}", file=sys.stderr)
+            print("", file=sys.stderr)
+            exit_code = 1
+
+        # Print coaching text
+        print("=== Coaching Draft ===", file=sys.stderr)
+        print(draft.draft_text, file=sys.stderr)
+        print("", file=sys.stderr)
+
+        # Output CoachingSurfaceV1 as JSON
+        # mode='json' ensures datetime objects are serialized as ISO strings
+        surface_json = canonical_json_dump(surface.model_dump(by_alias=True, mode="json"))
+        if args.out:
+            args.out.write_bytes(surface_json)
+            print(f"CoachingSurfaceV1 written to {args.out}", file=sys.stderr)
+        else:
+            print(surface_json.decode("utf-8"))
+
+        # Exit with appropriate code (M22 guardrail: non-zero if thresholds fail)
+        sys.exit(exit_code)
     else:
         parser.print_help()
         sys.exit(1)
