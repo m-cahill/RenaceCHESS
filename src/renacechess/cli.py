@@ -655,11 +655,15 @@ def main() -> None:
                             if recalibration_gate.enabled:
                                 if not recalibration_gate.parameters_ref:
                                     print(
-                                        "Error: RecalibrationGateV1.enabled=True requires parametersRef to be set",
+                                        (
+                                            "Error: RecalibrationGateV1.enabled=True "
+                                            "requires parametersRef to be set"
+                                        ),
                                         file=sys.stderr,
                                     )
                                     sys.exit(1)
-                                # Try to load parameters from path (parameters_ref can be path or hash)
+                                # Try to load parameters from path
+                                # (parameters_ref can be path or hash)
                                 params_path = Path(recalibration_gate.parameters_ref)
                                 if params_path.exists():
                                     recalibration_params = load_recalibration_parameters(
@@ -667,7 +671,10 @@ def main() -> None:
                                     )
                                 else:
                                     print(
-                                        f"Error: RecalibrationParametersV1 not found at: {params_path}",
+                                        (
+                                            f"Error: RecalibrationParametersV1 "
+                                            f"not found at: {params_path}"
+                                        ),
                                         file=sys.stderr,
                                     )
                                     sys.exit(1)

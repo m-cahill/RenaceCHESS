@@ -3225,11 +3225,17 @@ class RecalibrationGateV1(BaseModel):
     parameters_ref: str | None = Field(
         None,
         alias="parametersRef",
-        description="Path or hash reference to RecalibrationParametersV1 artifact (required if enabled=True)",
+        description=(
+            "Path or hash reference to RecalibrationParametersV1 artifact "
+            "(required if enabled=True)"
+        ),
     )
     scope: Literal["outcome", "policy", "both"] = Field(
         "both",
-        description="Which heads to apply recalibration to: outcome (W/D/L), policy (move probabilities), or both",
+        description=(
+            "Which heads to apply recalibration to: outcome (W/D/L), "
+            "policy (move probabilities), or both"
+        ),
     )
     applied_at: datetime | None = Field(
         None,
@@ -3240,3 +3246,11 @@ class RecalibrationGateV1(BaseModel):
         None,
         description="Optional notes about why this gate is enabled (for audit/debugging)",
     )
+
+    @model_validator(mode="after")
+    def validate_enabled_requires_params_ref(self) -> RecalibrationGateV1:
+        """Validate that enabled=True requires parametersRef to be set."""
+        if self.enabled and not self.parameters_ref:
+            msg = "RecalibrationGateV1.enabled=True requires parametersRef to be set"
+            raise ValueError(msg)
+        return self

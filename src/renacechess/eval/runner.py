@@ -224,8 +224,10 @@ def run_conditioned_evaluation(
         frozen_eval_manifest_hash: SHA-256 hash of frozen eval manifest (if frozen eval).
         model_path: Path to trained policy model (for learned.v1).
         outcome_head_path: Path to outcome head model directory (M09, optional).
-        recalibration_gate: Optional RecalibrationGateV1 artifact (M26). If None or enabled=False, no recalibration applied.
-        recalibration_params: Optional RecalibrationParametersV1 artifact (M26). Required if gate.enabled=True.
+        recalibration_gate: Optional RecalibrationGateV1 artifact (M26).
+            If None or enabled=False, no recalibration applied.
+        recalibration_params: Optional RecalibrationParametersV1 artifact (M26).
+            Required if gate.enabled=True.
 
     Returns:
         Dictionary with evaluation results (ready for EvalReportV3/V4/V5 construction).

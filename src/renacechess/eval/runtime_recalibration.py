@@ -114,8 +114,8 @@ def apply_recalibration_if_enabled(
         ValueError: If gate is enabled but params is None or bucket not found
     """
     # Compute gate hash for provenance
-    gate_json = gate.model_dump_json(by_alias=True, mode="json")
-    gate_hash = f"sha256:{canonical_hash(gate_json)}"
+    gate_dict = gate.model_dump(by_alias=True)
+    gate_hash = f"sha256:{canonical_hash(gate_dict)}"
 
     # If disabled, return unchanged with metadata
     if not gate.enabled:
@@ -147,8 +147,8 @@ def apply_recalibration_if_enabled(
         )
 
     # Compute parameters hash for provenance
-    params_json = params.model_dump_json(by_alias=True, mode="json")
-    params_hash = f"sha256:{canonical_hash(params_json)}"
+    params_dict = params.model_dump(by_alias=True)
+    params_hash = f"sha256:{canonical_hash(params_dict)}"
 
     # Apply temperature scaling based on scope
     # For now, we only handle policy probabilities here
@@ -201,8 +201,8 @@ def apply_recalibration_to_outcome_if_enabled(
         ValueError: If gate is enabled but params is None or bucket not found
     """
     # Compute gate hash for provenance
-    gate_json = gate.model_dump_json(by_alias=True, mode="json")
-    gate_hash = f"sha256:{canonical_hash(gate_json)}"
+    gate_dict = gate.model_dump(by_alias=True)
+    gate_hash = f"sha256:{canonical_hash(gate_dict)}"
 
     # If disabled, return unchanged with metadata
     if not gate.enabled:
@@ -234,8 +234,8 @@ def apply_recalibration_to_outcome_if_enabled(
         )
 
     # Compute parameters hash for provenance
-    params_json = params.model_dump_json(by_alias=True, mode="json")
-    params_hash = f"sha256:{canonical_hash(params_json)}"
+    params_dict = params.model_dump(by_alias=True)
+    params_hash = f"sha256:{canonical_hash(params_dict)}"
 
     # Apply temperature scaling based on scope
     if gate.scope in ("outcome", "both"):
