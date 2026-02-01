@@ -30,6 +30,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M19 | ✅ Closed (MERGED) | `m19-advice-facts-contract-001` → `main` | 2026-02-01 | ADVICE-FACTS-CONTRACT-001 — AdviceFacts Contract + Coaching Foundation (Phase C Entry) |
 | M20 | ✅ Closed (MERGED) | `m20-elo-bucket-delta-facts` → `main` | 2026-02-01 | ELO-BUCKET-DELTA-FACTS-001 — Elo-Bucket Delta Facts Artifact (Cross-Bucket Comparison) |
 | M21 | ✅ Closed (MERGED) | `m21-llm-translation-harness-001` → `main` | 2026-02-01 | LLM-TRANSLATION-HARNESS-001 — LLM Translation Harness + Coaching Evaluation (Phase C Core Complete) |
+| M22 | ✅ Closed (MERGED) | `m22-coaching-surface-cli` → `main` | 2026-02-01 | COACHING-SURFACE-CLI-001 — Coaching CLI Surface Exposure (Phase C Exit) |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -450,6 +451,30 @@ This document tracks milestones, schema, migrations, and governance decisions fo
   - First-run CI success (all gates passed)
 - **Phase C Status:** Core coaching spine complete (M19 facts → M20 deltas → M21 translation)
 
+**M22 Details:**
+- **Objective:** Expose coaching output via governed CLI surface — pure projection layer
+- **CI Run 1-2:** Failures due to lint (N806, E501, F841) and format check
+- **CI Run 3:** SUCCESS (All checks passing)
+- **Final Coverage:** 90.99% (exceeds 90% threshold)
+- **Test Count:** 613 passed, 1 skipped (26 new M22 tests)
+- **PR:** #28 (merged)
+- **Final Commit:** `7887b69`
+- **Audit:** `docs/milestones/PhaseC/M22/M22_audit.md`
+- **Summary:** `docs/milestones/PhaseC/M22/M22_summary.md`
+- **Key Files:**
+  - `src/renacechess/cli.py` — Added `coach` command (~140 lines)
+  - `src/renacechess/contracts/models.py` — CoachingSurfaceV1, CoachingSurfaceEvaluationSummaryV1
+  - `src/renacechess/contracts/schemas/v1/coaching_surface.v1.schema.json` — CLI output schema
+  - `tests/test_m22_coaching_cli.py` — 26 comprehensive tests
+- **Notable Features:**
+  - Both inputs required (--advice-facts, --delta-facts)
+  - Lineage validation (delta facts must reference advice facts hash)
+  - Evaluation always printed to stderr (never hidden)
+  - Exit non-zero on threshold failure
+  - DeterministicStubLLM only (no network calls)
+  - Import boundary enforcement tested
+- **Phase C Status:** COMPLETE — All 4 milestones closed (M19–M22)
+
 ---
 
 ## Database Schema
@@ -659,6 +684,21 @@ This document tracks milestones, schema, migrations, and governance decisions fo
   - Structural claims: Controlled vocabulary only if structuralCognition present
   - Tone profiles: NEUTRAL, ENCOURAGING, CONCISE (fixed v1 enum)
 
+### Coaching Surface Schema (v1)
+- **Location:** `src/renacechess/contracts/schemas/v1/coaching_surface.v1.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.CoachingSurfaceV1`
+- **Status:** ✅ FROZEN (Phase C exit contract for CLI surface)
+- **Governing ADR:** ADR-COACHING-001 ("LLMs translate facts, not invent")
+- **Key Fields:**
+  - coachingText: The generated coaching prose
+  - skillBucket: Target skill level from input
+  - toneProfile: NEUTRAL | ENCOURAGING | CONCISE
+  - evaluationSummary: Embedded evaluation metrics subset
+  - coachingDraftHash / coachingEvaluationHash: Lineage to source artifacts
+  - sourceAdviceFactsHash / sourceDeltaFactsHash: Input artifact lineage
+  - determinismHash: SHA-256 for reproducibility
+- **Purpose:** Minimal, stable output shape for CLI to render coaching information
+
 ---
 
 ## Phase Status
@@ -668,8 +708,8 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | PoC | Proof of Concept | 🔒 Locked | M00–M11 | `poc-v1.0` tag |
 | A | Post-PoC Hardening & Training Readiness | 🔒 **CLOSED** | M12–M14 | `docs/phases/PhaseA_closeout.md` |
 | B | Personality Framework & Style Modulation | 🔒 **CLOSED** | M15–M18 | `docs/phases/PhaseB_closeout.md` |
-| C | Elo-Appropriate Coaching & Explanation | ⏳ **IN PROGRESS** | M19+ | — |
-| D | Data Expansion, Calibration & Quality | 🔜 Planned | M23+ | — |
+| C | Elo-Appropriate Coaching & Explanation | 🔒 **CLOSED** | M19–M22 | `docs/phases/PhaseC_closeout.md` |
+| D | Data Expansion, Calibration & Quality | ⏳ **IN PROGRESS** | M23+ | — |
 | E | Field Testing & Product Surfaces | 🔜 Planned | M31+ | — |
 
 ---
@@ -687,6 +727,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-02-01 (Phase C, M21 CLOSED — LLM Translation Harness, Phase C Core Complete)
+**Last Updated:** 2026-02-01 (Phase C CLOSED — M22 COACHING-SURFACE-CLI-001, Phase C Complete)
 
 

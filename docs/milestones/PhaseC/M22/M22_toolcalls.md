@@ -1,7 +1,7 @@
 # M22 Tool Calls Log
 
 **Milestone:** M22  
-**Status:** In Progress  
+**Status:** ✅ CLOSED  
 **Created:** 2026-02-01 (during M21 closeout)
 
 ---
@@ -52,4 +52,27 @@
 5. Fixed redundant local imports in cli.py (json, datetime)
 
 **Ready for:** PR creation and CI verification
+
+---
+
+## PR & CI
+
+| Timestamp | Action | Details |
+|-----------|--------|---------|
+| 2026-02-01 10:25 | Branch created | `m22-coaching-surface-cli` |
+| 2026-02-01 10:26 | Commit | `3419941` - 5 files, +1343/-9 lines |
+| 2026-02-01 10:27 | PR created | [#28](https://github.com/m-cahill/RenaceCHESS/pull/28) |
+| 2026-02-01 10:28 | CI checks (run 1) | ❌ Lint failed (N806, E501, F841) |
+| 2026-02-01 10:32 | Commit | `a923eb8` - Fix lint issues |
+| 2026-02-01 10:33 | CI checks (run 2) | ❌ Format check failed |
+| 2026-02-01 10:35 | Commit | `d486cba` - Format test file |
+| 2026-02-01 10:40 | CI checks (run 3) | ✅ All pass |
+| 2026-02-01 10:45 | write | Create M22_run1.md CI analysis | docs/milestones/PhaseC/M22/ | ✅ Complete |
+| 2026-02-01 11:00 | gh pr merge | Merge PR #28 to main | GitHub PR #28 | ✅ Complete (already merged) |
+| 2026-02-01 11:01 | write | Generate M22_audit.md | docs/milestones/PhaseC/M22/ | ✅ Complete |
+| 2026-02-01 11:02 | write | Generate M22_summary.md | docs/milestones/PhaseC/M22/ | ✅ Complete |
+| 2026-02-01 11:03 | write | Create M23 folder structure | docs/milestones/PhaseC/M23/ | ✅ Complete |
+| 2026-02-01 11:04 | write | Update renacechess.md | renacechess.md | ✅ Complete |
+| 2026-02-01 11:05 | write | Write Phase C closeout | docs/phases/PhaseC_closeout.md | ✅ Complete |
+| 2026-02-01 11:10 | git commit | Commit all closeout docs | All M22 closeout files | ⏳ Pending |
 
