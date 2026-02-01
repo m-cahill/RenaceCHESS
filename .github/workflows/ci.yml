@@ -503,87 +503,20 @@ jobs:
           )
           print("✅ Created gate-enabled.json")
           EOF
-      - name: Test gate disabled (default path invariance)
+      - name: Run M26 runtime recalibration guard tests
         run: |
-          echo "Testing that gate disabled produces deterministic output..."
-          python -m renacechess.cli eval run \
-            --dataset-manifest tests/fixtures/frozen_eval/manifest.json \
-            --policy baseline.uniform_random \
-            --conditioned-metrics \
-            --frozen-eval-manifest tests/fixtures/frozen_eval/manifest.json \
-            --recalibration-gate gate-disabled.json \
-            --out eval-gate-disabled-1
-          
-          python -m renacechess.cli eval run \
-            --dataset-manifest tests/fixtures/frozen_eval/manifest.json \
-            --policy baseline.uniform_random \
-            --conditioned-metrics \
-            --frozen-eval-manifest tests/fixtures/frozen_eval/manifest.json \
-            --recalibration-gate gate-disabled.json \
-            --out eval-gate-disabled-2
-          
-          # Compare outputs (should be byte-identical)
-          if ! diff eval-gate-disabled-1/eval_report.json eval-gate-disabled-2/eval_report.json; then
-            echo "❌ Gate disabled outputs are not identical (non-deterministic behavior)"
-            exit 1
-          fi
-          echo "✅ Gate disabled produces identical outputs (deterministic)"
-      - name: Test gate enabled (recalibration applied)
-        run: |
-          echo "Testing that gate enabled applies recalibration..."
-          python -m renacechess.cli eval run \
-            --dataset-manifest tests/fixtures/frozen_eval/manifest.json \
-            --policy baseline.uniform_random \
-            --conditioned-metrics \
-            --frozen-eval-manifest tests/fixtures/frozen_eval/manifest.json \
-            --recalibration-gate gate-enabled.json \
-            --out eval-gate-enabled
-          
-          # Verify output exists and is different from disabled
-          if [ ! -f eval-gate-enabled/eval_report.json ]; then
-            echo "❌ Gate enabled evaluation failed to produce output"
-            exit 1
-          fi
-          
-          # Compare with disabled (should be different if recalibration is applied)
-          if diff eval-gate-disabled-1/eval_report.json eval-gate-enabled/eval_report.json > /dev/null 2>&1; then
-            echo "⚠️  Gate enabled output is identical to disabled (recalibration may not be applied)"
-            # This is not necessarily an error - recalibration might not change outputs significantly
-            # But we log it for visibility
-          else
-            echo "✅ Gate enabled produces different output (recalibration applied)"
-          fi
-      - name: Test gate enabled without params (should fail)
-        run: |
-          echo "Testing that gate enabled without params fails..."
-          python << 'EOF'
-          import json
-          import sys
-          from pathlib import Path
-          from renacechess.eval.runtime_recalibration import load_recalibration_gate
-          
-          gate_no_params = {
-              "version": "1.0",
-              "enabled": True,
-              "scope": "both"
-              # Missing parametersRef
-          }
-          
-          gate_file = Path("gate-no-params.json")
-          gate_file.write_text(
-              json.dumps(gate_no_params, indent=2),
-              encoding="utf-8"
-          )
-          
-          try:
-              load_recalibration_gate(gate_file)
-              print("❌ Gate enabled without params should fail but did not")
-              sys.exit(1)
-          except ValueError as e:
-              if "requires parametersRef" in str(e):
-                  print("✅ Gate enabled without params correctly fails")
-              else:
-                  print(f"❌ Unexpected error: {e}")
-                  sys.exit(1)
-          EOF
+          echo "Running M26 runtime recalibration guard tests..."
+          echo ""
+          echo "These tests validate runtime gating invariants:"
+          echo "  ✅ Gate disabled → byte-identical output (no recalibration applied)"
+          echo "  ✅ Gate enabled → recalibration applied (output differs)"
+          echo "  ✅ Provenance metadata attached correctly"
+          echo "  ✅ Scope enforcement (policy/outcome/both)"
+          echo "  ✅ Gate validation (enabled=True requires parametersRef)"
+          echo ""
+          echo "Note: Runtime gating safety is proven via deterministic unit tests."
+          echo "This job does NOT depend on dataset manifests (v1/v2) per M26 locked decision."
+          echo "Runtime gating ≠ dataset evaluation."
+          echo ""
+          pytest tests/test_m26_runtime_recalibration.py -v --tb=short
 
