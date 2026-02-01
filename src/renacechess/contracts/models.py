@@ -956,8 +956,7 @@ class AccuracyMetrics(BaseModel):
     """Ground-truth accuracy metrics (computed only over labeled records)."""
 
     model_config = ConfigDict(
-        validate_by_alias=True,
-        validate_by_name=True,
+        populate_by_name=True,
         extra="allow",  # Allow dynamic top-K fields (top1, top3, top5, etc.)
     )
 
@@ -1851,9 +1850,7 @@ class AdviceFactsContextV1(BaseModel):
 
     model_config = ConfigDict(populate_by_name=True)
 
-    skill_bucket: str = Field(
-        ..., alias="skillBucket", description="Skill bucket identifier"
-    )
+    skill_bucket: str = Field(..., alias="skillBucket", description="Skill bucket identifier")
     time_control_bucket: str | None = Field(
         None, alias="timeControlBucket", description="Time control bucket"
     )
@@ -1869,9 +1866,7 @@ class AdviceFactsMoveV1(BaseModel):
 
     uci: str = Field(..., description="Move in UCI notation")
     san: str | None = Field(None, description="Move in SAN notation (optional)")
-    prob: float = Field(
-        ..., ge=0.0, le=1.0, description="Probability of this move (0-1)"
-    )
+    prob: float = Field(..., ge=0.0, le=1.0, description="Probability of this move (0-1)")
 
 
 class AdviceFactsPolicyV1(BaseModel):
@@ -1895,15 +1890,9 @@ class AdviceFactsOutcomeV1(BaseModel):
 
     model_config = ConfigDict(populate_by_name=True)
 
-    p_win: float = Field(
-        ..., alias="pWin", ge=0.0, le=1.0, description="Win probability"
-    )
-    p_draw: float = Field(
-        ..., alias="pDraw", ge=0.0, le=1.0, description="Draw probability"
-    )
-    p_loss: float = Field(
-        ..., alias="pLoss", ge=0.0, le=1.0, description="Loss probability"
-    )
+    p_win: float = Field(..., alias="pWin", ge=0.0, le=1.0, description="Win probability")
+    p_draw: float = Field(..., alias="pDraw", ge=0.0, le=1.0, description="Draw probability")
+    p_loss: float = Field(..., alias="pLoss", ge=0.0, le=1.0, description="Loss probability")
 
     @model_validator(mode="after")
     def validate_probabilities_sum(self) -> AdviceFactsOutcomeV1:
@@ -1996,9 +1985,7 @@ class AdviceFactsV1(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     version: Literal["1.0"] = Field("1.0", description="Schema version")
-    generated_at: datetime = Field(
-        ..., alias="generatedAt", description="ISO 8601 timestamp"
-    )
+    generated_at: datetime = Field(..., alias="generatedAt", description="ISO 8601 timestamp")
     position: AdviceFactsPositionV1 = Field(..., description="Chess position")
     context: AdviceFactsContextV1 = Field(..., description="Conditioning context")
     policy: AdviceFactsPolicyV1 = Field(..., description="Policy distribution")
@@ -2071,9 +2058,7 @@ class AdviceFactsInputsV1(BaseModel):
     # HDI
     hdi_value: float = Field(..., alias="hdiValue", ge=0.0, le=1.0)
     hdi_entropy: float | None = Field(None, alias="hdiEntropy", ge=0.0)
-    hdi_top_gap_inverted: float | None = Field(
-        None, alias="hdiTopGapInverted", ge=0.0, le=1.0
-    )
+    hdi_top_gap_inverted: float | None = Field(None, alias="hdiTopGapInverted", ge=0.0, le=1.0)
     hdi_legal_move_pressure: float | None = Field(
         None, alias="hdiLegalMovePressure", ge=0.0, le=1.0
     )

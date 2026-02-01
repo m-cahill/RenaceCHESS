@@ -214,7 +214,7 @@ class TestDeterminism:
     def test_float_precision_determinism(self) -> None:
         """Float rounding is deterministic."""
         # Values that might have floating-point representation issues
-        values = [0.1, 0.2, 0.3, 1/3, 0.123456789]
+        values = [0.1, 0.2, 0.3, 1 / 3, 0.123456789]
 
         for val in values:
             rounded1 = _round_float(val)
@@ -270,7 +270,7 @@ class TestMoveOrdering:
         fixed_timestamp: datetime,
     ) -> None:
         """Builder limits to TOP_K moves."""
-        many_moves = [(f"a{i}a{i+1}", 0.1 - i*0.01) for i in range(1, 8)]
+        many_moves = [(f"a{i}a{i + 1}", 0.1 - i * 0.01) for i in range(1, 8)]
         inputs = AdviceFactsInputsV1(
             fen="8/8/8/8/8/8/8/8 w - - 0 1",
             sideToMove="white",
@@ -473,4 +473,3 @@ class TestExplanationHints:
         """Explanation hints are not populated in M19."""
         facts = build_advice_facts_v1(minimal_inputs, generated_at=fixed_timestamp)
         assert facts.explanation_hints is None
-

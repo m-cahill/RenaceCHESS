@@ -247,9 +247,7 @@ def build_advice_facts_v1(
             "timePressureBucket": context.time_pressure_bucket,
         },
         "policy": {
-            "topMoves": [
-                {"uci": m.uci, "san": m.san, "prob": m.prob} for m in top_moves
-            ],
+            "topMoves": [{"uci": m.uci, "san": m.san, "prob": m.prob} for m in top_moves],
             "recommendedMove": {
                 "uci": recommended_move.uci,
                 "san": recommended_move.san,
@@ -303,4 +301,3 @@ def build_advice_facts_v1(
         determinism_hash=determinism_hash,
         source_contract_versions=source_contracts,
     )
-
