@@ -20,7 +20,16 @@
 | 2026-02-01T10:25:00Z | write | Create COACHING_TRANSLATION_PROMPT_v1.md | docs/contracts/COACHING_TRANSLATION_PROMPT_v1.md | ✅ completed |
 | 2026-02-01T10:30:00Z | write | Create test_m21_translation_harness.py | tests/test_m21_translation_harness.py | ✅ completed |
 | 2026-02-01T10:35:00Z | search_replace | Update coaching/__init__.py exports | src/renacechess/coaching/__init__.py | ✅ completed |
-| 2026-02-01T10:40:00Z | read_lints | Check for lint errors in new files | M21 files | pending |
+| 2026-02-01T10:40:00Z | read_lints | Check for lint errors in new files | M21 files | ✅ completed |
+| 2026-02-01T10:45:00Z | run_terminal_cmd | Run full test suite | pytest | ✅ 587 passed |
+| 2026-02-01T10:50:00Z | run_terminal_cmd | Run Ruff linter + formatter | ruff | ✅ passed |
+| 2026-02-01T10:55:00Z | run_terminal_cmd | Run MyPy type checking | mypy | ✅ passed |
+| 2026-02-01T11:00:00Z | run_terminal_cmd | Run import-linter | lint-imports | ✅ 3 contracts kept |
+| 2026-02-01T11:05:00Z | run_terminal_cmd | Create branch m21-llm-translation-harness-001 | git | ✅ completed |
+| 2026-02-01T11:10:00Z | run_terminal_cmd | Commit and push changes | git | ✅ 164e77e |
+| 2026-02-01T11:15:00Z | run_terminal_cmd | Create PR #27 | gh | ✅ created |
+| 2026-02-01T11:20:00Z | run_terminal_cmd | Check CI status | gh | ✅ all 3 jobs pass |
+| 2026-02-01T11:25:00Z | write | Create M21_run1.md analysis | docs/milestones/PhaseC/M21/M21_run1.md | ✅ completed |
 
 ---
 
