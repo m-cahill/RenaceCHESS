@@ -3138,8 +3138,7 @@ class CalibrationDeltaV1(BaseModel):
     improved: bool = Field(
         ...,
         description=(
-            "Whether recalibration improved this metric "
-            "(True if delta < 0 for ECE/NLL/Brier)"
+            "Whether recalibration improved this metric (True if delta < 0 for ECE/NLL/Brier)"
         ),
     )
 

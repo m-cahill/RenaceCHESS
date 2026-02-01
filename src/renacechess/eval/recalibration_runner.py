@@ -132,9 +132,7 @@ def _collect_predictions_for_fitting(
     }
     outcome_predictions: dict[
         str, list[tuple[float, float, float, Literal["win", "draw", "loss"]]]
-    ] = {
-        bucket: [] for bucket in canonical_buckets
-    }
+    ] = {bucket: [] for bucket in canonical_buckets}
 
     # Group records by shard
     records_by_shard: dict[str, list[dict]] = defaultdict(list)
@@ -734,4 +732,3 @@ def save_calibration_delta(delta: CalibrationDeltaArtifactV1, out_path: Path) ->
         canonical_json_dump(delta.model_dump(by_alias=True, mode="json")).decode("utf-8"),
         encoding="utf-8",
     )
-

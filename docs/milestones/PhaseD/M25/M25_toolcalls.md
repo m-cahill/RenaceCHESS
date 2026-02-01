@@ -20,6 +20,9 @@
 | 2026-02-01 | search_replace | Add recalibration CLI commands | cli.py | ✅ Complete |
 | 2026-02-01 | search_replace | Add recalibration-eval CI job | .github/workflows/ci.yml | ✅ Complete |
 | 2026-02-01 | write | Create comprehensive test suite | tests/test_m25_recalibration.py | ✅ Complete |
+| 2026-02-01 | search_replace | Fix lint errors, type errors, and CI job | Multiple files | ✅ Complete |
+| 2026-02-01 | search_replace | Fix datetime serialization and test paths | recalibration_runner.py, test_m25_recalibration.py | ✅ Complete |
+| 2026-02-01 | write | Generate M25_run1.md CI analysis | M25_run1.md | ✅ Complete |
 
 ---
 

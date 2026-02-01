@@ -479,3 +479,206 @@ class TestRecalibrationIO:
         assert loaded.version == delta.version
         assert len(loaded.by_elo_bucket) == len(delta.by_elo_bucket)
 
+
+class TestRecalibrationCLI:
+    """Test recalibration CLI command integration."""
+
+    @pytest.fixture
+    def frozen_eval_manifest_path(self) -> Path:
+        """Path to frozen eval manifest fixture."""
+        return Path(__file__).parent / "fixtures" / "frozen_eval" / "manifest.json"
+
+    def test_recalibration_fit_cli_requires_manifest(self, tmp_path: Path) -> None:
+        """Test that recalibration fit CLI fails fast if --manifest is missing."""
+        import subprocess
+        import sys
+
+        result = subprocess.run(
+            [sys.executable, "-m", "renacechess.cli", "recalibration", "fit"],
+            capture_output=True,
+            text=True,
+            cwd=tmp_path,
+        )
+
+        assert result.returncode != 0
+        assert "manifest" in result.stderr.lower() or "required" in result.stderr.lower()
+
+    def test_recalibration_fit_cli_with_fixture(
+        self, frozen_eval_manifest_path: Path, tmp_path: Path
+    ) -> None:
+        """Test recalibration fit CLI command with CI fixture."""
+        import subprocess
+        import sys
+
+        # First run calibration to get metrics
+        calibration_output = tmp_path / "calibration_metrics.json"
+        cal_result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "renacechess.cli",
+                "calibration",
+                "--manifest",
+                str(frozen_eval_manifest_path),
+                "--out",
+                str(calibration_output),
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        assert cal_result.returncode == 0, f"Calibration failed: {cal_result.stderr}"
+        assert calibration_output.exists()
+
+        # Now run recalibration fit
+        recal_output = tmp_path / "recalibration_params.json"
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "renacechess.cli",
+                "recalibration",
+                "fit",
+                "--manifest",
+                str(frozen_eval_manifest_path),
+                "--calibration-metrics",
+                str(calibration_output),
+                "--policy-id",
+                "baseline.uniform_random",
+                "--out",
+                str(recal_output),
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        assert result.returncode == 0, f"Recalibration fit failed: {result.stderr}"
+        assert recal_output.exists()
+
+        # Verify output is valid JSON
+        data = json.loads(recal_output.read_text(encoding="utf-8"))
+        assert data["version"] == "1.0"
+        assert "byEloBucket" in data
+
+    def test_recalibration_evaluate_cli_requires_params(self, tmp_path: Path) -> None:
+        """Test that recalibration evaluate CLI fails fast if --recalibration-params is missing."""
+        import subprocess
+        import sys
+
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "renacechess.cli",
+                "recalibration",
+                "evaluate",
+            ],
+            capture_output=True,
+            text=True,
+            cwd=tmp_path,
+        )
+
+        assert result.returncode != 0
+        assert (
+            "recalibration" in result.stderr.lower()
+            or "required" in result.stderr.lower()
+        )
+
+    def test_calibration_cli_with_recalibration_flag(
+        self, frozen_eval_manifest_path: Path, tmp_path: Path
+    ) -> None:
+        """Test calibration CLI with --with-recalibration flag (preview mode)."""
+        import subprocess
+        import sys
+
+        # First create recalibration parameters
+        calibration_output = tmp_path / "calibration_metrics.json"
+        cal_result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "renacechess.cli",
+                "calibration",
+                "--manifest",
+                str(frozen_eval_manifest_path),
+                "--out",
+                str(calibration_output),
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        assert cal_result.returncode == 0
+
+        recal_output = tmp_path / "recalibration_params.json"
+        fit_result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "renacechess.cli",
+                "recalibration",
+                "fit",
+                "--manifest",
+                str(frozen_eval_manifest_path),
+                "--calibration-metrics",
+                str(calibration_output),
+                "--policy-id",
+                "baseline.uniform_random",
+                "--out",
+                str(recal_output),
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        assert fit_result.returncode == 0
+
+        # Test calibration with --with-recalibration flag
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "renacechess.cli",
+                "calibration",
+                "--manifest",
+                str(frozen_eval_manifest_path),
+                "--with-recalibration",
+                str(recal_output),
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        # Should succeed and show before/after comparison
+        assert result.returncode == 0
+        assert "before" in result.stdout.lower() or "after" in result.stdout.lower()
+
+    def test_recalibration_fit_cli_manifest_not_found(self, tmp_path: Path) -> None:
+        """Test that recalibration fit CLI fails with clear error if manifest not found."""
+        import subprocess
+        import sys
+
+        fake_manifest = tmp_path / "nonexistent.json"
+        fake_metrics = tmp_path / "metrics.json"
+        fake_metrics.write_text("{}", encoding="utf-8")
+
+        result = subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "renacechess.cli",
+                "recalibration",
+                "fit",
+                "--manifest",
+                str(fake_manifest),
+                "--calibration-metrics",
+                str(fake_metrics),
+                "--out",
+                str(tmp_path / "out.json"),
+            ],
+            capture_output=True,
+            text=True,
+        )
+
+        assert result.returncode != 0
+        assert "not found" in result.stderr.lower() or "error" in result.stderr.lower()
