@@ -32,6 +32,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M21 | ✅ Closed (MERGED) | `m21-llm-translation-harness-001` → `main` | 2026-02-01 | LLM-TRANSLATION-HARNESS-001 — LLM Translation Harness + Coaching Evaluation (Phase C Core Complete) |
 | M22 | ✅ Closed (MERGED) | `m22-coaching-surface-cli` → `main` | 2026-02-01 | COACHING-SURFACE-CLI-001 — Coaching CLI Surface Exposure (Phase C Exit) |
 | M23 | ✅ Closed (MERGED) | `m23-phase-d-hardening-001` → `main` | 2026-02-01 | PHASE-D-HARDENING-001 — Security, Performance, Coverage, DX (Phase D Entry) |
+| M24 | ✅ Closed (MERGED) | `m24-phase-d-calibration-001` → `main` | 2026-02-01 | PHASE-D-CALIBRATION-001 — Calibration Metrics and Evaluation Runner |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
