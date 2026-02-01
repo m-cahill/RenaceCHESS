@@ -518,5 +518,5 @@ jobs:
           echo "This job does NOT depend on dataset manifests (v1/v2) per M26 locked decision."
           echo "Runtime gating ≠ dataset evaluation."
           echo ""
-          pytest tests/test_m26_runtime_recalibration.py -v --tb=short
+          pytest tests/test_m26_runtime_recalibration.py -v --tb=short --no-cov
 

@@ -149,7 +149,8 @@ class TestApplyRecalibrationIfEnabled:
             determinism_hash="sha256:" + "0" * 64,
         )
 
-        # Non-uniform probabilities (temperature scaling requires non-uniform input to observe changes)
+        # Non-uniform probabilities (temperature scaling requires non-uniform input
+        # to observe changes)
         probs = [0.4, 0.3, 0.2, 0.1]
 
         scaled_probs, metadata = apply_recalibration_if_enabled(probs, "1200-1400", gate, params)
@@ -228,7 +229,8 @@ class TestApplyRecalibrationIfEnabled:
             determinism_hash="sha256:" + "0" * 64,
         )
 
-        # Non-uniform probabilities (temperature scaling requires non-uniform input to observe changes)
+        # Non-uniform probabilities (temperature scaling requires non-uniform input
+        # to observe changes)
         probs = [0.4, 0.3, 0.2, 0.1]
 
         scaled_probs, metadata = apply_recalibration_if_enabled(probs, "1200-1400", gate, params)
