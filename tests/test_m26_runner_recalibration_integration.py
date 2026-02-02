@@ -307,7 +307,7 @@ class TestApplyRuntimeRecalibrationToPolicyMoves:
 
         assert was_applied is True
         # SAN fields should be preserved
-        assert result_moves[0].san == "e4" or result_moves[0].san == "d4" or result_moves[0].san == "Nf3" or result_moves[0].san == "c4"
+        assert result_moves[0].san in ("e4", "d4", "Nf3", "c4")
         # Find the move with UCI "e2e4" and verify its SAN
         e2e4_move = next((m for m in result_moves if m.uci == "e2e4"), None)
         assert e2e4_move is not None
