@@ -318,8 +318,10 @@ def generate_frozen_eval_v2(
             shard_lines.append(json.dumps(record_data, sort_keys=True))
 
         shard_content = "\n".join(shard_lines) + "\n"
-        shard_path.write_text(shard_content, encoding="utf-8")
-        shard_hashes[shard_id] = _compute_sha256(shard_content.encode("utf-8"))
+        # Write with explicit LF line endings (binary mode) for cross-platform consistency
+        shard_bytes = shard_content.encode("utf-8")
+        shard_path.write_bytes(shard_bytes)
+        shard_hashes[shard_id] = _compute_sha256(shard_bytes)
 
     # Create provenance artifact (construct model first, then compute hash from its serialization)
     provenance_without_hash = EvalSetProvenanceV1(

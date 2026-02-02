@@ -1,6 +1,13 @@
 # Enforce LF for Python across platforms
 *.py text eol=lf
 
+# Enforce LF for JSONL shard files (M30 frozen eval)
+*.jsonl text eol=lf
+
+# Enforce LF for JSON schema and data files
+*.json text eol=lf
+
+
 
 
 
