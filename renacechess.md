@@ -38,7 +38,8 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M27 | ✅ Closed (MERGED) | `m27-runtime-recalibration-eval` → `main` | 2026-02-02 | PHASE-D-RUNTIME-RECALIBRATION-EVALUATION-001 — Paired Recalibration Evaluation |
 | M28 | ✅ Closed (MERGED) | `m28-recalibration-activation-decision` → `main` | 2026-02-02 | PHASE-D-RECALIBRATION-ACTIVATION-DECISION-001 — Runtime Recalibration Decision Framework |
 | M29 | ✅ Closed | `m28-recalibration-activation-decision` | 2026-02-02 | GPU-BENCHMARKING-001 — RTX 5090 Blackwell Validation + Benchmark Infrastructure |
-| M30 | ✅ CI Green (Pending Merge) | `m30-frozen-eval-scaleset` → `main` | 2026-02-02 | FROZEN-EVAL-SCALESET-001 — 10k Synthetic Frozen Eval Set v2 |
+| M30 | ✅ Closed (MERGED) | `m30-frozen-eval-scaleset` → `main` | 2026-02-02 | FROZEN-EVAL-SCALESET-001 — 10k Synthetic Frozen Eval Set v2 |
+| M31 | 📋 Planning | — | TBD | FULL-TRAINING-RUN-001 — Full Training Run with Frozen Eval v2 |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -926,10 +927,11 @@ From M00 forward, RenaceCHESS guarantees:
 
 **M30 Details:**
 - **Objective:** Generate 10,000-position synthetic frozen eval set for release-grade calibration
-- **Status:** ✅ CI Green — Awaiting merge authorization
+- **Status:** ✅ Closed (MERGED)
 - **PR:** #35
 - **CI Run:** 21610395623 (all 10 jobs passed)
-- **Commit:** 473be1c (cross-platform line ending fix)
+- **Merge Commit:** 9fe6d84aa1517636ea1c1501b572b98f41eb287e
+- **Closed:** 2026-02-02
 - **CI Run:** Pending
 - **Key Files:**
   - `src/renacechess/contracts/models.py` — FrozenEvalManifestV2, EvalSetProvenanceV1, FrozenEvalRecordV2
@@ -954,6 +956,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-02-02 (Phase E — M30 FROZEN-EVAL-SCALESET-001 CI Green, Pending Merge)
+**Last Updated:** 2026-02-02 (Phase E — M30 FROZEN-EVAL-SCALESET-001 Closed, M31 Scaffolded)
 
 
