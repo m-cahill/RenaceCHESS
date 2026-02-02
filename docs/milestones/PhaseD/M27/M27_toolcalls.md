@@ -20,9 +20,18 @@ This file logs all tool invocations for M27 milestone execution.
 | 2026-02-02 | search_replace | Fix M25 Windows Unicode test | tests/test_m25_recalibration.py | ✅ Complete |
 | 2026-02-02 | search_replace | Fix runner determinism hash (exclude generatedAt) | runtime_recalibration_eval_runner.py | ✅ Complete |
 | 2026-02-02 | run_terminal_cmd | Run full test suite (791 passed, 90.12% coverage) | All tests | ✅ Complete |
-| 2026-02-02 | run_terminal_cmd | Create branch and PR | git | 🔄 In Progress |
+| 2026-02-02 | run_terminal_cmd | Create branch and PR (#33) | git | ✅ Complete |
+| 2026-02-02 | run_terminal_cmd | CI Run 1 - failed (MyPy/Ruff errors) | CI | ❌ Failed |
+| 2026-02-02 | search_replace | Fix variable shadowing (report→recal_report) | cli.py | ✅ Complete |
+| 2026-02-02 | search_replace | Fix line-too-long errors | cli.py, runner.py | ✅ Complete |
+| 2026-02-02 | run_terminal_cmd | Push fixes (commit 67d654b) | git | ✅ Complete |
+| 2026-02-02 | run_terminal_cmd | CI Run 2 - failed (Ruff format) | CI | ❌ Failed |
+| 2026-02-02 | run_terminal_cmd | CI Run 3 - failed (coverage regression cli.py) | CI | ❌ Failed |
+| 2026-02-02 | search_replace | Add direct CLI tests for coverage | tests/test_m27*.py | ✅ Complete |
+| 2026-02-02 | run_terminal_cmd | Push CLI tests (commit e5e7346) | git | ✅ Complete |
+| 2026-02-02 | run_terminal_cmd | CI Run 4 - SUCCESS ✅ | CI | ✅ Complete |
 
 ---
 
-**Last Updated:** 2026-02-02 (All tests passing, coverage ≥90%)
+**Last Updated:** 2026-02-02 (CI green, ready for merge approval)
 
