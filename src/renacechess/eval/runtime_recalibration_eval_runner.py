@@ -23,7 +23,6 @@ from typing import Any, Literal
 
 from renacechess.contracts.models import (
     BucketDeltaV1,
-    FrozenEvalManifestV1,
     MetricsDeltaV1,
     RecalibrationGateV1,
     RecalibrationParametersV1,
@@ -569,7 +568,9 @@ def run_runtime_recalibration_evaluation(
     if baseline_by_time:
         by_time_bucket = []
         for bucket_id in ["low", "normal", "trouble"]:
-            if bucket_id in baseline_by_time and baseline_by_time[bucket_id].positions_evaluated > 0:
+            in_bucket = bucket_id in baseline_by_time
+            has_samples = in_bucket and baseline_by_time[bucket_id].positions_evaluated > 0
+            if has_samples:
                 by_time_bucket.append(
                     BucketDeltaV1(
                         bucket_id=bucket_id,

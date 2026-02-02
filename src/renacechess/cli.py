@@ -35,8 +35,8 @@ from renacechess.ingest.ingest import ingest_from_lichess, ingest_from_url
 def resolve_recalibration_gate_from_args(
     args: argparse.Namespace,
 ) -> tuple[
-    "RecalibrationGateV1 | None",
-    "RecalibrationParametersV1 | None",
+    RecalibrationGateV1 | None,
+    RecalibrationParametersV1 | None,
 ]:
     """Resolve and validate recalibration gate and parameters from CLI arguments (M26).
 
@@ -55,10 +55,6 @@ def resolve_recalibration_gate_from_args(
     Raises:
         SystemExit: If gate file is invalid, missing, or parameters cannot be loaded.
     """
-    from renacechess.contracts.models import (
-        RecalibrationGateV1,
-        RecalibrationParametersV1,
-    )
     from renacechess.eval.recalibration_runner import load_recalibration_parameters
     from renacechess.eval.runtime_recalibration import load_recalibration_gate
 
@@ -959,7 +955,7 @@ def main() -> None:
                     )
                     sys.exit(1)
 
-                report, delta = run_runtime_recalibration_evaluation(
+                recal_report, recal_delta = run_runtime_recalibration_evaluation(
                     manifest_path=args.frozen_eval_manifest,
                     gate_path=args.gate,
                     params_path=args.params,
@@ -968,11 +964,11 @@ def main() -> None:
 
                 # Print summary
                 print("=== Runtime Recalibration Evaluation ===", file=sys.stderr)
-                print(f"  Total samples: {report.total_samples}", file=sys.stderr)
+                print(f"  Total samples: {recal_report.total_samples}", file=sys.stderr)
                 print("", file=sys.stderr)
 
                 print("Baseline Metrics:", file=sys.stderr)
-                bm = report.baseline_metrics
+                bm = recal_report.baseline_metrics
                 print(f"  Outcome ECE: {bm.outcome_ece:.4f}", file=sys.stderr)
                 print(f"  Outcome NLL: {bm.outcome_nll:.4f}", file=sys.stderr)
                 print(f"  Policy NLL: {bm.policy_nll:.4f}", file=sys.stderr)
@@ -980,7 +976,7 @@ def main() -> None:
                 print("", file=sys.stderr)
 
                 print("Recalibrated Metrics:", file=sys.stderr)
-                rm = report.recalibrated_metrics
+                rm = recal_report.recalibrated_metrics
                 print(f"  Outcome ECE: {rm.outcome_ece:.4f}", file=sys.stderr)
                 print(f"  Outcome NLL: {rm.outcome_nll:.4f}", file=sys.stderr)
                 print(f"  Policy NLL: {rm.policy_nll:.4f}", file=sys.stderr)
@@ -988,7 +984,7 @@ def main() -> None:
                 print("", file=sys.stderr)
 
                 print("Overall Deltas:", file=sys.stderr)
-                od = delta.overall
+                od = recal_delta.overall
                 ece_dir = "↓" if od.outcome_ece_delta < 0 else "↑"
                 print(
                     f"  Outcome ECE: {od.outcome_ece_delta:+.4f} {ece_dir}",
@@ -1003,10 +999,12 @@ def main() -> None:
                 print(f"  Top-3 Stability: {od.top3_stability:.1%}", file=sys.stderr)
                 print("", file=sys.stderr)
 
-                print(f"Report written to: {args.out / 'runtime-recalibration-report.json'}", file=sys.stderr)
-                print(f"Delta written to: {args.out / 'runtime-recalibration-delta.json'}", file=sys.stderr)
-                print(f"Report hash: {report.determinism_hash}", file=sys.stderr)
-                print(f"Delta hash: {delta.determinism_hash}", file=sys.stderr)
+                report_path = args.out / "runtime-recalibration-report.json"
+                delta_path = args.out / "runtime-recalibration-delta.json"
+                print(f"Report written to: {report_path}", file=sys.stderr)
+                print(f"Delta written to: {delta_path}", file=sys.stderr)
+                print(f"Report hash: {recal_report.determinism_hash}", file=sys.stderr)
+                print(f"Delta hash: {recal_delta.determinism_hash}", file=sys.stderr)
 
             except Exception as e:
                 print(f"Error: {e}", file=sys.stderr)
@@ -1314,9 +1312,9 @@ def main() -> None:
             # M25: Optional preview with recalibration
             if args.with_recalibration:
                 from renacechess.eval.recalibration_runner import (
+                    compute_calibration_delta,
                     load_recalibration_parameters,
                     run_calibration_evaluation_with_recalibration,
-                    compute_calibration_delta,
                 )
 
                 try:
@@ -1352,13 +1350,13 @@ def main() -> None:
     elif args.command == "recalibration":
         # M25: Recalibration commands
         from renacechess.eval.recalibration_runner import (
+            compute_calibration_delta,
             fit_recalibration_parameters,
             load_calibration_metrics,
-            save_recalibration_parameters,
             load_recalibration_parameters,
             run_calibration_evaluation_with_recalibration,
-            compute_calibration_delta,
             save_calibration_delta,
+            save_recalibration_parameters,
         )
 
         try:
