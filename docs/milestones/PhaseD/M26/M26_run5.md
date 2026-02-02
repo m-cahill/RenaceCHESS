@@ -220,17 +220,13 @@ The **coverage regression** is the only remaining blocker. The CLI/runner regres
    - Scope: New test file + coverage of CLI/runner integration paths
    - Milestone: M26 (current)
 
-2. **Investigate and fix lint failures** (Owner: AI/Cursor)
-   - Check specific lint violations
-   - Fix violations
-   - Scope: Files with lint errors
+2. **Investigate baseline_v1.py coverage regression** (Owner: AI/Cursor)
+   - Determine why `baseline_v1.py` lost coverage
+   - Check if this is related to M26 or a separate issue
+   - Add tests to restore coverage if needed
+   - Scope: `models/baseline_v1.py`
    - Milestone: M26 (current)
-
-3. **Investigate and fix guard job failure** (Owner: AI/Cursor)
-   - Check specific guard job failure
-   - Fix issue
-   - Scope: `.github/workflows/ci.yml` or test execution
-   - Milestone: M26 (current)
+   - **Status:** Pending investigation
 
 4. **Re-run CI after fixes** (Owner: GitHub Actions)
    - Verify all checks pass
