@@ -313,13 +313,11 @@ def run_conditioned_evaluation(
                     apply_runtime_recalibration_to_policy_moves,
                 )
 
-                predicted_moves, _recal_applied = (
-                    apply_runtime_recalibration_to_policy_moves(
-                        predicted_moves,
-                        skill_bucket_id,
-                        recalibration_gate,
-                        recalibration_params,
-                    )
+                predicted_moves, _recal_applied = apply_runtime_recalibration_to_policy_moves(
+                    predicted_moves,
+                    skill_bucket_id,
+                    recalibration_gate,
+                    recalibration_params,
                 )
 
                 policy_output = predicted_moves[0].uci if predicted_moves else None

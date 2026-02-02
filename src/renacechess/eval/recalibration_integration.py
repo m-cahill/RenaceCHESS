@@ -122,16 +122,13 @@ def apply_runtime_recalibration_to_outcome(
         return (p_win, p_draw, p_loss), False
 
     # Apply recalibration
-    (scaled_w, scaled_d, scaled_l), _metadata = (
-        apply_recalibration_to_outcome_if_enabled(
-            p_win,
-            p_draw,
-            p_loss,
-            skill_bucket_id,
-            gate,
-            params,
-        )
+    (scaled_w, scaled_d, scaled_l), _metadata = apply_recalibration_to_outcome_if_enabled(
+        p_win,
+        p_draw,
+        p_loss,
+        skill_bucket_id,
+        gate,
+        params,
     )
 
     return (scaled_w, scaled_d, scaled_l), True
-

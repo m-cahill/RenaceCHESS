@@ -116,9 +116,7 @@ def policy_moves() -> list[PolicyMove]:
 class TestApplyRuntimeRecalibrationToPolicyMoves:
     """Test apply_runtime_recalibration_to_policy_moves function."""
 
-    def test_no_gate_returns_unchanged(
-        self, policy_moves: list[PolicyMove]
-    ) -> None:
+    def test_no_gate_returns_unchanged(self, policy_moves: list[PolicyMove]) -> None:
         """No gate provided returns moves unchanged."""
         result_moves, was_applied = apply_runtime_recalibration_to_policy_moves(
             policy_moves, "lt_800", None, None
@@ -241,9 +239,10 @@ class TestApplyRuntimeRecalibrationToPolicyMoves:
                 None,  # params is None
             )
 
-        assert "RecalibrationParametersV1" in str(exc_info.value) or "parameters" in str(
-            exc_info.value
-        ).lower()
+        assert (
+            "RecalibrationParametersV1" in str(exc_info.value)
+            or "parameters" in str(exc_info.value).lower()
+        )
 
     def test_gate_enabled_but_bucket_not_found_raises(
         self,
@@ -261,9 +260,9 @@ class TestApplyRuntimeRecalibrationToPolicyMoves:
                 recalibration_parameters,
             )
 
-        assert "nonexistent_bucket" in str(exc_info.value) or "bucket" in str(
-            exc_info.value
-        ).lower()
+        assert (
+            "nonexistent_bucket" in str(exc_info.value) or "bucket" in str(exc_info.value).lower()
+        )
 
     def test_single_move_list_handled_correctly(
         self,
@@ -448,9 +447,10 @@ class TestApplyRuntimeRecalibrationToOutcome:
                 None,  # params is None
             )
 
-        assert "RecalibrationParametersV1" in str(exc_info.value) or "parameters" in str(
-            exc_info.value
-        ).lower()
+        assert (
+            "RecalibrationParametersV1" in str(exc_info.value)
+            or "parameters" in str(exc_info.value).lower()
+        )
 
     def test_gate_enabled_but_bucket_not_found_raises(
         self,
@@ -468,7 +468,6 @@ class TestApplyRuntimeRecalibrationToOutcome:
                 recalibration_parameters,
             )
 
-        assert "nonexistent_bucket" in str(exc_info.value) or "bucket" in str(
-            exc_info.value
-        ).lower()
-
+        assert (
+            "nonexistent_bucket" in str(exc_info.value) or "bucket" in str(exc_info.value).lower()
+        )
