@@ -35,8 +35,8 @@ from renacechess.ingest.ingest import ingest_from_lichess, ingest_from_url
 def resolve_recalibration_gate_from_args(
     args: argparse.Namespace,
 ) -> tuple[
-    "RecalibrationGateV1 | None",
-    "RecalibrationParametersV1 | None",
+    RecalibrationGateV1 | None,
+    RecalibrationParametersV1 | None,
 ]:
     """Resolve and validate recalibration gate and parameters from CLI arguments (M26).
 
@@ -55,10 +55,6 @@ def resolve_recalibration_gate_from_args(
     Raises:
         SystemExit: If gate file is invalid, missing, or parameters cannot be loaded.
     """
-    from renacechess.contracts.models import (
-        RecalibrationGateV1,
-        RecalibrationParametersV1,
-    )
     from renacechess.eval.recalibration_runner import load_recalibration_parameters
     from renacechess.eval.runtime_recalibration import load_recalibration_gate
 
@@ -305,6 +301,36 @@ def main() -> None:
         "--created-at",
         type=str,
         help="Override creation timestamp (ISO 8601 format, for testing only)",
+    )
+
+    # M27: Runtime recalibration evaluation command
+    runtime_recal_parser = eval_subparsers.add_parser(
+        "runtime-recalibration",
+        help="Evaluate impact of runtime recalibration (M27)",
+    )
+    runtime_recal_parser.add_argument(
+        "--gate",
+        type=Path,
+        required=True,
+        help="Path to RecalibrationGateV1 JSON file",
+    )
+    runtime_recal_parser.add_argument(
+        "--params",
+        type=Path,
+        required=True,
+        help="Path to RecalibrationParametersV1 JSON file",
+    )
+    runtime_recal_parser.add_argument(
+        "--frozen-eval-manifest",
+        type=Path,
+        required=True,
+        help="Path to FrozenEvalManifestV1 JSON file",
+    )
+    runtime_recal_parser.add_argument(
+        "--out",
+        type=Path,
+        required=True,
+        help="Output directory for report and delta artifacts",
     )
 
     # Train policy command
@@ -901,6 +927,88 @@ def main() -> None:
             except Exception as e:
                 print(f"Error: {e}", file=sys.stderr)
                 sys.exit(1)
+        elif args.eval_command == "runtime-recalibration":
+            # M27: Runtime recalibration evaluation
+            try:
+                from renacechess.eval.runtime_recalibration_eval_runner import (
+                    run_runtime_recalibration_evaluation,
+                )
+
+                if not args.gate.exists():
+                    print(
+                        f"Error: RecalibrationGateV1 not found: {args.gate}",
+                        file=sys.stderr,
+                    )
+                    sys.exit(1)
+
+                if not args.params.exists():
+                    print(
+                        f"Error: RecalibrationParametersV1 not found: {args.params}",
+                        file=sys.stderr,
+                    )
+                    sys.exit(1)
+
+                if not args.frozen_eval_manifest.exists():
+                    print(
+                        f"Error: FrozenEvalManifestV1 not found: {args.frozen_eval_manifest}",
+                        file=sys.stderr,
+                    )
+                    sys.exit(1)
+
+                recal_report, recal_delta = run_runtime_recalibration_evaluation(
+                    manifest_path=args.frozen_eval_manifest,
+                    gate_path=args.gate,
+                    params_path=args.params,
+                    output_dir=args.out,
+                )
+
+                # Print summary
+                print("=== Runtime Recalibration Evaluation ===", file=sys.stderr)
+                print(f"  Total samples: {recal_report.total_samples}", file=sys.stderr)
+                print("", file=sys.stderr)
+
+                print("Baseline Metrics:", file=sys.stderr)
+                bm = recal_report.baseline_metrics
+                print(f"  Outcome ECE: {bm.outcome_ece:.4f}", file=sys.stderr)
+                print(f"  Outcome NLL: {bm.outcome_nll:.4f}", file=sys.stderr)
+                print(f"  Policy NLL: {bm.policy_nll:.4f}", file=sys.stderr)
+                print(f"  Mean Entropy: {bm.mean_entropy:.4f}", file=sys.stderr)
+                print("", file=sys.stderr)
+
+                print("Recalibrated Metrics:", file=sys.stderr)
+                rm = recal_report.recalibrated_metrics
+                print(f"  Outcome ECE: {rm.outcome_ece:.4f}", file=sys.stderr)
+                print(f"  Outcome NLL: {rm.outcome_nll:.4f}", file=sys.stderr)
+                print(f"  Policy NLL: {rm.policy_nll:.4f}", file=sys.stderr)
+                print(f"  Mean Entropy: {rm.mean_entropy:.4f}", file=sys.stderr)
+                print("", file=sys.stderr)
+
+                print("Overall Deltas:", file=sys.stderr)
+                od = recal_delta.overall
+                ece_dir = "↓" if od.outcome_ece_delta < 0 else "↑"
+                print(
+                    f"  Outcome ECE: {od.outcome_ece_delta:+.4f} {ece_dir}",
+                    file=sys.stderr,
+                )
+                nll_dir = "↓" if od.outcome_nll_delta < 0 else "↑"
+                print(
+                    f"  Outcome NLL: {od.outcome_nll_delta:+.4f} {nll_dir}",
+                    file=sys.stderr,
+                )
+                print(f"  Top-1 Stability: {od.top1_stability:.1%}", file=sys.stderr)
+                print(f"  Top-3 Stability: {od.top3_stability:.1%}", file=sys.stderr)
+                print("", file=sys.stderr)
+
+                report_path = args.out / "runtime-recalibration-report.json"
+                delta_path = args.out / "runtime-recalibration-delta.json"
+                print(f"Report written to: {report_path}", file=sys.stderr)
+                print(f"Delta written to: {delta_path}", file=sys.stderr)
+                print(f"Report hash: {recal_report.determinism_hash}", file=sys.stderr)
+                print(f"Delta hash: {recal_delta.determinism_hash}", file=sys.stderr)
+
+            except Exception as e:
+                print(f"Error: {e}", file=sys.stderr)
+                sys.exit(1)
         else:
             eval_parser.print_help()
             sys.exit(1)
@@ -1204,9 +1312,9 @@ def main() -> None:
             # M25: Optional preview with recalibration
             if args.with_recalibration:
                 from renacechess.eval.recalibration_runner import (
+                    compute_calibration_delta,
                     load_recalibration_parameters,
                     run_calibration_evaluation_with_recalibration,
-                    compute_calibration_delta,
                 )
 
                 try:
@@ -1242,13 +1350,13 @@ def main() -> None:
     elif args.command == "recalibration":
         # M25: Recalibration commands
         from renacechess.eval.recalibration_runner import (
+            compute_calibration_delta,
             fit_recalibration_parameters,
             load_calibration_metrics,
-            save_recalibration_parameters,
             load_recalibration_parameters,
             run_calibration_evaluation_with_recalibration,
-            compute_calibration_delta,
             save_calibration_delta,
+            save_recalibration_parameters,
         )
 
         try:

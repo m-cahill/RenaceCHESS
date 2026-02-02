@@ -1,0 +1,69 @@
+{
+  "version": "1.0",
+  "generatedAt": "2026-01-15T12:00:00+00:00",
+  "sourceCalibrationMetricsHash": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "sourceManifestHash": "a6a50c6393f7502fbb7b7bed0b7934630131de942ff52c9f6ab9fdc38af22605",
+  "policyId": "baseline.uniform_random",
+  "outcomeHeadId": null,
+  "byEloBucket": [
+    {
+      "eloBucket": "lt_800",
+      "outcomeTemperature": 1.25,
+      "policyTemperature": 1.5,
+      "fitMethod": "grid_search",
+      "fitMetric": "nll"
+    },
+    {
+      "eloBucket": "800_999",
+      "outcomeTemperature": 1.25,
+      "policyTemperature": 1.25,
+      "fitMethod": "grid_search",
+      "fitMetric": "nll"
+    },
+    {
+      "eloBucket": "1000_1199",
+      "outcomeTemperature": 1.0,
+      "policyTemperature": 1.25,
+      "fitMethod": "grid_search",
+      "fitMetric": "nll"
+    },
+    {
+      "eloBucket": "1200_1399",
+      "outcomeTemperature": 1.0,
+      "policyTemperature": 1.0,
+      "fitMethod": "grid_search",
+      "fitMetric": "nll"
+    },
+    {
+      "eloBucket": "1400_1599",
+      "outcomeTemperature": 0.75,
+      "policyTemperature": 1.0,
+      "fitMethod": "grid_search",
+      "fitMetric": "nll"
+    },
+    {
+      "eloBucket": "1600_1799",
+      "outcomeTemperature": 0.75,
+      "policyTemperature": 0.75,
+      "fitMethod": "grid_search",
+      "fitMetric": "nll"
+    },
+    {
+      "eloBucket": "gte_1800",
+      "outcomeTemperature": 0.5,
+      "policyTemperature": 0.75,
+      "fitMethod": "grid_search",
+      "fitMetric": "nll"
+    },
+    {
+      "eloBucket": "unknown",
+      "outcomeTemperature": 1.0,
+      "policyTemperature": 1.0,
+      "fitMethod": "grid_search",
+      "fitMetric": "nll"
+    }
+  ],
+  "determinismHash": "sha256:1111111111111111111111111111111111111111111111111111111111111111"
+}
+
+

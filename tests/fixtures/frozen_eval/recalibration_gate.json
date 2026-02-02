@@ -1,0 +1,10 @@
+{
+  "version": "1.0",
+  "enabled": true,
+  "parametersRef": "tests/fixtures/frozen_eval/recalibration_params.json",
+  "scope": "both",
+  "appliedAt": null,
+  "notes": "M27 test fixture for runtime recalibration evaluation"
+}
+
+
