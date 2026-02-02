@@ -14,8 +14,21 @@ This file logs all tool invocations for M29 milestone execution.
 | 2026-02-02 | search_replace | Add compute_determinism_hash helper | src/renacechess/determinism.py | ✅ Complete |
 | 2026-02-02 | write | Create schema validation tests (41 tests) | tests/test_m29_benchmark_schema.py | ✅ Complete |
 | 2026-02-02 | run_terminal_cmd | Run M29 tests | pytest tests/test_m29_benchmark_schema.py | ✅ 41 passed |
+| 2026-02-02 | pip install | Upgrade PyTorch for Blackwell (SM120) | torch==2.10.0+cu128 | ✅ Complete |
+| 2026-02-02 | search_replace | Add --synthetic-mode flag | scripts/benchmark_training.py | ✅ Complete |
+| 2026-02-02 | run_terminal_cmd | Execute synthetic M29 benchmark | RTX 5090, 16 runs, all success | ✅ Complete |
+| 2026-02-02 | write | Generate benchmark artifact | benchmark_report.json | ✅ Complete |
 
 ---
 
-**Last Updated:** 2026-02-02 (M29 implementation complete, 41 tests passing, awaiting human benchmark execution)
+**Last Updated:** 2026-02-02
+
+## M29-SYNTHETIC-INFRA-PROBE Status: ✅ PASS
+
+Infrastructure validated on RTX 5090:
+- CUDA 12.8 / PyTorch 2.10.0+cu128 (Blackwell SM120 compatible)
+- 16 benchmark runs completed, no OOM, no errors
+- Determinism hash: `sha256:6bcb9f317465cc4a994e2d9366440f489d4067646f0e162c52bcea2386def8f5`
+
+**Next:** Awaiting v2 dataset manifest for real-data benchmark.
 
