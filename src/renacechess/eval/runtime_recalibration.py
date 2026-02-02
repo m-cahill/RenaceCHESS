@@ -22,7 +22,6 @@ from renacechess.contracts.models import (
 from renacechess.determinism import canonical_hash
 from renacechess.eval.recalibration_runner import (
     apply_temperature_scaling_to_probs,
-    load_recalibration_parameters,
 )
 
 

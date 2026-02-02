@@ -170,7 +170,7 @@ def generate_fixture() -> None:
     manifest_path = fixture_dir / "manifest.json"
     manifest_path.write_text(json.dumps(manifest, indent=2, sort_keys=True), encoding="utf-8")
 
-    print(f"Generated frozen eval fixture:")
+    print("Generated frozen eval fixture:")
     print(f"  - {len(all_records)} records")
     print(f"  - {len(SKILL_BUCKETS)} skill buckets")
     print(f"  - Shard: {shard_path}")

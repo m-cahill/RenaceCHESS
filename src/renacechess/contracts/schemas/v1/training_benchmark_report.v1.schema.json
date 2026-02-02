@@ -1,0 +1,356 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://renacechess.dev/schemas/v1/training_benchmark_report.v1.schema.json",
+  "title": "TrainingBenchmarkReportV1",
+  "description": "GPU training benchmark report for RenaceCHESS (M29). Captures hardware-specific training throughput to estimate time-to-train for full runs.",
+  "type": "object",
+  "required": [
+    "version",
+    "generatedAt",
+    "environment",
+    "runMatrix",
+    "determinismHash"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when report was generated"
+    },
+    "environment": {
+      "$ref": "#/$defs/EnvironmentMetadata",
+      "description": "Hardware and software environment metadata"
+    },
+    "datasetInfo": {
+      "$ref": "#/$defs/DatasetInfo",
+      "description": "Dataset manifest and shard information"
+    },
+    "runMatrix": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/BenchmarkRun"
+      },
+      "minItems": 1,
+      "description": "Array of benchmark runs with varying configurations"
+    },
+    "timeToTrainEstimate": {
+      "$ref": "#/$defs/TimeToTrainEstimate",
+      "description": "Derived time-to-train projections (optional, computed from runs)"
+    },
+    "warnings": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Non-fatal warnings encountered during benchmarking"
+    },
+    "determinismHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of canonical report content for reproducibility verification"
+    }
+  },
+  "$defs": {
+    "EnvironmentMetadata": {
+      "type": "object",
+      "required": [
+        "gpuName",
+        "vramGb",
+        "cudaVersion",
+        "torchVersion",
+        "pythonVersion",
+        "os"
+      ],
+      "properties": {
+        "gpuName": {
+          "type": "string",
+          "description": "GPU device name (e.g., 'NVIDIA GeForce RTX 5090')"
+        },
+        "vramGb": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Total VRAM in gigabytes"
+        },
+        "cudaVersion": {
+          "type": "string",
+          "description": "CUDA runtime version"
+        },
+        "driverVersion": {
+          "type": "string",
+          "description": "GPU driver version (optional)"
+        },
+        "torchVersion": {
+          "type": "string",
+          "description": "PyTorch version"
+        },
+        "pythonVersion": {
+          "type": "string",
+          "description": "Python version"
+        },
+        "os": {
+          "type": "string",
+          "description": "Operating system (e.g., 'Windows 10', 'Ubuntu 22.04')"
+        },
+        "cpuName": {
+          "type": "string",
+          "description": "CPU model name (optional)"
+        },
+        "cpuCores": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Number of CPU cores/threads available"
+        },
+        "ramGb": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Total system RAM in gigabytes (optional)"
+        }
+      }
+    },
+    "DatasetInfo": {
+      "type": "object",
+      "required": [
+        "manifestHash",
+        "frozenEvalManifestHash",
+        "overlapCheckPassed"
+      ],
+      "properties": {
+        "manifestHash": {
+          "type": "string",
+          "description": "SHA-256 hash of dataset manifest"
+        },
+        "manifestPath": {
+          "type": "string",
+          "description": "Path to dataset manifest (informational)"
+        },
+        "frozenEvalManifestHash": {
+          "type": "string",
+          "description": "SHA-256 hash of frozen eval manifest"
+        },
+        "overlapCheckPassed": {
+          "type": "boolean",
+          "description": "True if no overlap between training and frozen eval data"
+        },
+        "totalPositionsAvailable": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total positions available in dataset"
+        }
+      }
+    },
+    "BenchmarkRun": {
+      "type": "object",
+      "required": [
+        "runId",
+        "batchSize",
+        "sampleCount",
+        "precisionMode",
+        "modelHeads",
+        "metrics"
+      ],
+      "properties": {
+        "runId": {
+          "type": "string",
+          "description": "Unique identifier for this run (e.g., 'batch64_samples1000_fp32_policy')"
+        },
+        "batchSize": {
+          "type": "integer",
+          "enum": [64, 128, 256, 512],
+          "description": "Training batch size"
+        },
+        "sampleCount": {
+          "type": "integer",
+          "enum": [1000, 10000, 100000],
+          "description": "Number of positions used (sanity=1K, medium=10K, large=100K)"
+        },
+        "sampleCountLabel": {
+          "type": "string",
+          "enum": ["sanity", "medium", "large"],
+          "description": "Human-readable shard size label"
+        },
+        "precisionMode": {
+          "type": "string",
+          "enum": ["fp32", "amp"],
+          "description": "Training precision mode"
+        },
+        "modelHeads": {
+          "type": "string",
+          "enum": ["policy", "policy+outcome"],
+          "description": "Which model heads were trained"
+        },
+        "metrics": {
+          "$ref": "#/$defs/BenchmarkMetrics",
+          "description": "Measured performance metrics"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["success", "oom", "error", "skipped"],
+          "description": "Run completion status"
+        },
+        "errorMessage": {
+          "type": "string",
+          "description": "Error message if status is not 'success'"
+        }
+      }
+    },
+    "BenchmarkMetrics": {
+      "type": "object",
+      "required": [
+        "stepsCompleted",
+        "totalTimeSeconds"
+      ],
+      "properties": {
+        "stepsCompleted": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of training steps completed"
+        },
+        "samplesProcessed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total samples processed"
+        },
+        "totalTimeSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Total wall-clock time in seconds"
+        },
+        "stepsPerSecond": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Training steps per second"
+        },
+        "samplesPerSecond": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Samples processed per second"
+        },
+        "stepTimeMeanMs": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Mean time per step in milliseconds"
+        },
+        "stepTimeP95Ms": {
+          "type": "number",
+          "minimum": 0,
+          "description": "95th percentile step time in milliseconds"
+        },
+        "gpuUtilizationPercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Average GPU utilization percentage (optional)"
+        },
+        "vramPeakGb": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Peak VRAM usage in gigabytes"
+        },
+        "vramPeakPercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Peak VRAM as percentage of total"
+        },
+        "dataLoadTimePercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Percentage of time spent in data loading"
+        },
+        "forwardTimePercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Percentage of time spent in forward pass"
+        },
+        "backwardTimePercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Percentage of time spent in backward pass"
+        },
+        "optimizerTimePercent": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Percentage of time spent in optimizer step"
+        },
+        "powerDrawWatts": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Average GPU power draw in watts (optional, nice-to-have)"
+        }
+      }
+    },
+    "TimeToTrainEstimate": {
+      "type": "object",
+      "required": [
+        "estimateVersion",
+        "assumptions"
+      ],
+      "properties": {
+        "estimateVersion": {
+          "type": "string",
+          "const": "heuristic-v1",
+          "description": "Version of estimation method (explicitly labeled as heuristic)"
+        },
+        "assumptions": {
+          "type": "object",
+          "required": [
+            "targetDatasetSize",
+            "targetEpochs",
+            "batchSize",
+            "precisionMode"
+          ],
+          "properties": {
+            "targetDatasetSize": {
+              "type": "integer",
+              "description": "Target dataset size for full training (positions)"
+            },
+            "targetEpochs": {
+              "type": "integer",
+              "description": "Target number of epochs"
+            },
+            "batchSize": {
+              "type": "integer",
+              "description": "Assumed batch size for estimate"
+            },
+            "precisionMode": {
+              "type": "string",
+              "enum": ["fp32", "amp"],
+              "description": "Assumed precision mode"
+            }
+          }
+        },
+        "projectedTimeHours": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Projected wall-clock time for full training in hours"
+        },
+        "projectedTimeFormatted": {
+          "type": "string",
+          "description": "Human-readable time estimate (e.g., '2h 30m')"
+        },
+        "confidenceLevel": {
+          "type": "string",
+          "enum": ["low", "medium", "high"],
+          "description": "Confidence in estimate based on measurement quality"
+        },
+        "sensitivityNotes": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Notes about factors that could affect actual training time"
+        }
+      }
+    }
+  }
+}
+

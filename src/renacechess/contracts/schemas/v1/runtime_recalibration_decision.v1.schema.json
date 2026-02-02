@@ -1,0 +1,155 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://renacechess.dev/schemas/v1/runtime_recalibration_decision.v1.schema.json",
+  "title": "RuntimeRecalibrationDecisionV1",
+  "description": "Human-readable decision record for runtime recalibration activation (M28). Links a RuntimeRecalibrationActivationPolicyV1 to M27 evidence. This artifact is the authoritative record of why recalibration is or is not activated.",
+  "type": "object",
+  "required": [
+    "version",
+    "generatedAt",
+    "decisionOutcome",
+    "sourceReportHash",
+    "sourceDeltaHash",
+    "policyHash",
+    "bucketDecisions",
+    "determinismHash"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version identifier"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of decision generation"
+    },
+    "decisionOutcome": {
+      "type": "string",
+      "enum": ["rejected", "restricted", "activated"],
+      "description": "Overall decision outcome: rejected (no activation), restricted (some buckets), activated (all buckets)"
+    },
+    "sourceReportHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the RuntimeRecalibrationReportV1 artifact (M27 evidence)"
+    },
+    "sourceDeltaHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the RuntimeRecalibrationDeltaV1 artifact (M27 evidence)"
+    },
+    "policyHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the RuntimeRecalibrationActivationPolicyV1 artifact"
+    },
+    "activatedBucketCount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of Elo buckets with recalibration enabled"
+    },
+    "totalBucketCount": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total number of Elo buckets evaluated"
+    },
+    "bucketDecisions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/BucketDecisionV1"
+      },
+      "description": "Per-bucket decision details"
+    },
+    "validationResult": {
+      "$ref": "#/$defs/ValidationResultV1",
+      "description": "Result of validating policy against evidence"
+    },
+    "humanSummary": {
+      "type": "string",
+      "description": "Human-readable summary of the decision"
+    },
+    "determinismHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash for determinism verification of entire decision"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "BucketDecisionV1": {
+      "type": "object",
+      "required": ["bucketId", "enabled", "scope"],
+      "properties": {
+        "bucketId": {
+          "type": "string",
+          "description": "Elo bucket identifier"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether recalibration is enabled for this bucket"
+        },
+        "scope": {
+          "type": "string",
+          "enum": ["outcome", "policy", "both", "none"],
+          "description": "Which heads have recalibration enabled (none if disabled)"
+        },
+        "evidenceSummary": {
+          "type": ["string", "null"],
+          "description": "Summary of M27 evidence for this bucket"
+        },
+        "policyReason": {
+          "type": ["string", "null"],
+          "description": "Reason from policy (if override specified)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ValidationResultV1": {
+      "type": "object",
+      "required": ["valid", "checks"],
+      "properties": {
+        "valid": {
+          "type": "boolean",
+          "description": "Whether the policy is valid against evidence"
+        },
+        "checks": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ValidationCheckV1"
+          },
+          "description": "Individual validation checks performed"
+        },
+        "errors": {
+          "type": ["array", "null"],
+          "items": {
+            "type": "string"
+          },
+          "description": "Validation errors (if any)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "ValidationCheckV1": {
+      "type": "object",
+      "required": ["checkName", "passed"],
+      "properties": {
+        "checkName": {
+          "type": "string",
+          "description": "Name of the validation check"
+        },
+        "passed": {
+          "type": "boolean",
+          "description": "Whether the check passed"
+        },
+        "details": {
+          "type": ["string", "null"],
+          "description": "Additional details about the check result"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
+

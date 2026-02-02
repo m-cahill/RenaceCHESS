@@ -50,3 +50,18 @@ def canonical_hash(obj: Any) -> str:
         Hexadecimal hash string.
     """
     return stable_hash(canonical_json_dump(obj))
+
+
+def compute_determinism_hash(obj: Any) -> str:
+    """Compute determinism hash with sha256: prefix for contract artifacts.
+
+    This is the standard format used by all RenaceCHESS contract artifacts
+    for reproducibility verification.
+
+    Args:
+        obj: Object to hash (must be JSON-serializable).
+
+    Returns:
+        Hash string in format "sha256:<64-char-hex>".
+    """
+    return f"sha256:{canonical_hash(obj)}"

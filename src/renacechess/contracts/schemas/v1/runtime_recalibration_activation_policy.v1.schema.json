@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://renacechess.dev/schemas/v1/runtime_recalibration_activation_policy.v1.schema.json",
+  "title": "RuntimeRecalibrationActivationPolicyV1",
+  "description": "Declarative activation policy for runtime recalibration (M28). Defines per-bucket activation rules. Default is conservative: all buckets disabled. This policy, combined with RecalibrationGateV1, determines whether recalibration is applied at runtime.",
+  "type": "object",
+  "required": [
+    "version",
+    "defaultEnabled",
+    "bucketOverrides"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version identifier"
+    },
+    "defaultEnabled": {
+      "type": "boolean",
+      "description": "Default activation state for all buckets (false = conservative default)"
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["outcome", "policy", "both"],
+      "default": "both",
+      "description": "Which heads to apply recalibration to when enabled: outcome (W/D/L), policy (move probabilities), or both"
+    },
+    "bucketOverrides": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/BucketActivationOverrideV1"
+      },
+      "description": "Per-bucket overrides of the default activation state"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of policy creation"
+    },
+    "notes": {
+      "type": ["string", "null"],
+      "description": "Optional notes about this policy (for audit/debugging)"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "BucketActivationOverrideV1": {
+      "type": "object",
+      "required": ["bucketId", "enabled"],
+      "properties": {
+        "bucketId": {
+          "type": "string",
+          "enum": [
+            "lt_800",
+            "800_999",
+            "1000_1199",
+            "1200_1399",
+            "1400_1599",
+            "1600_1799",
+            "gte_1800",
+            "unknown"
+          ],
+          "description": "Elo bucket identifier (M06 canonical buckets)"
+        },
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether recalibration is enabled for this bucket"
+        },
+        "scope": {
+          "type": ["string", "null"],
+          "enum": ["outcome", "policy", "both", null],
+          "description": "Per-bucket scope override (null = use policy default)"
+        },
+        "reason": {
+          "type": ["string", "null"],
+          "description": "Optional justification for this override"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
+

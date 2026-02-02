@@ -21,13 +21,10 @@ from pathlib import Path
 from typing import Any, Literal
 
 from renacechess.contracts.models import (
-    CalibrationMetricsV1,
     CalibrationDeltaArtifactV1,
     CalibrationDeltaV1,
+    CalibrationMetricsV1,
     EloBucketCalibrationV1,
-    FrozenEvalManifestV1,
-    OutcomeCalibrationMetricsV1,
-    PolicyCalibrationMetricsV1,
     RecalibrationBucketParametersV1,
     RecalibrationParametersV1,
 )
@@ -37,7 +34,6 @@ from renacechess.eval.calibration_runner import (
     PolicyCalibrationAccumulator,
     get_canonical_skill_buckets,
     load_frozen_eval_manifest,
-    run_calibration_evaluation,
 )
 
 # Temperature grid for grid search (M25 locked decision)

@@ -6,7 +6,6 @@ from typing import Any
 
 from renacechess.contracts.models import (
     DatasetManifestV2,
-    PolicyMove,
     RecalibrationGateV1,
     RecalibrationParametersV1,
 )
