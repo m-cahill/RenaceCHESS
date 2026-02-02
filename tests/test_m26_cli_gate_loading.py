@@ -13,14 +13,10 @@ They test:
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
-
-from renacechess.contracts.models import RecalibrationGateV1, RecalibrationParametersV1
-
 
 # =============================================================================
 # Fixtures
@@ -244,7 +240,7 @@ class TestCLIRunnerGateHandoff:
             mock_runner.return_value = {"total_records": 0}
 
             # Call the runner with gate (as CLI does)
-            result = mock_runner(
+            mock_runner(
                 manifest_path=Path("dummy"),
                 policy_id="baseline.first_legal",
                 eval_config={},
@@ -278,7 +274,7 @@ class TestCLIRunnerGateHandoff:
             mock_runner.return_value = {"total_records": 0}
 
             # Call the runner with gate + params (as CLI does)
-            result = mock_runner(
+            mock_runner(
                 manifest_path=Path("dummy"),
                 policy_id="baseline.first_legal",
                 eval_config={},
@@ -301,7 +297,7 @@ class TestCLIRunnerGateHandoff:
             mock_runner.return_value = {"total_records": 0}
 
             # Call the runner without gate (as CLI does when gate not provided)
-            result = mock_runner(
+            mock_runner(
                 manifest_path=Path("dummy"),
                 policy_id="baseline.first_legal",
                 eval_config={},
