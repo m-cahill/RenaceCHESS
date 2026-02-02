@@ -326,7 +326,8 @@ def run_m29_benchmark_run(
     Returns:
         BenchmarkRunV1 model with results.
     """
-    run_id = f"batch{batch_size}_samples{sample_count}_{precision_mode}_{model_heads.replace('+', '_')}"
+    heads_str = model_heads.replace("+", "_")
+    run_id = f"batch{batch_size}_samples{sample_count}_{precision_mode}_{heads_str}"
 
     print(f"  [{run_id}]")
     print(f"    Batch size: {batch_size}, Samples: {sample_count} ({sample_count_label})")
@@ -374,7 +375,8 @@ def run_m29_benchmark_run(
 
         outcome_model: OutcomeHeadV1 | None = None
         if model_heads == "policy+outcome":
-            outcome_dataset = OutcomeDataset(manifest_path, frozen_eval_manifest_path, seed=seed)
+            _outcome_dataset = OutcomeDataset(manifest_path, frozen_eval_manifest_path, seed=seed)
+            del _outcome_dataset  # Silence F841; dataset loaded for side effects
             outcome_model = OutcomeHeadV1().to(device)
 
         # Training setup
@@ -445,9 +447,13 @@ def run_m29_benchmark_run(
 
                     # Outcome head if enabled
                     if outcome_model is not None and outcome_criterion is not None:
-                        outcome_class = sample.get("outcome_class", 1)  # Default to draw
-                        outcome_logits = outcome_model.forward_logits(fen, skill_bucket, time_control)
-                        outcome_target = torch.tensor(outcome_class, dtype=torch.long, device=device)
+                        outcome_class = sample.get("outcome_class", 1)  # draw
+                        outcome_logits = outcome_model.forward_logits(
+                            fen, skill_bucket, time_control
+                        )
+                        outcome_target = torch.tensor(
+                            outcome_class, dtype=torch.long, device=device
+                        )
                         outcome_loss = outcome_criterion(
                             outcome_logits.unsqueeze(0), outcome_target.unsqueeze(0)
                         )
@@ -502,7 +508,9 @@ def run_m29_benchmark_run(
         total_forward_time = sum(forward_times)
         total_backward_time = sum(backward_times)
         total_optimizer_time = sum(optimizer_times)
-        total_measured = total_data_time + total_forward_time + total_backward_time + total_optimizer_time
+        total_measured = (
+            total_data_time + total_forward_time + total_backward_time + total_optimizer_time
+        )
 
         metrics = BenchmarkMetricsV1(
             stepsCompleted=len(step_times),
@@ -528,7 +536,8 @@ def run_m29_benchmark_run(
             else 0,
         )
 
-        print(f"    [OK] {metrics.samples_per_second:.1f} samples/sec, VRAM peak: {vram_peak_gb:.1f} GB")
+        sps = metrics.samples_per_second
+        print(f"    [OK] {sps:.1f} samples/sec, VRAM peak: {vram_peak_gb:.1f} GB")
 
         return BenchmarkRunV1(
             runId=run_id,
@@ -657,13 +666,14 @@ def compute_time_to_train_estimate(
 
     sensitivity_notes = [
         f"Based on {best_run.sample_count} samples at batch size {best_run.batch_size}",
-        f"Actual time may vary with dataset size and I/O patterns",
-        f"Estimate assumes linear scaling (conservative)",
+        "Actual time may vary with dataset size and I/O patterns",
+        "Estimate assumes linear scaling (conservative)",
     ]
 
     if best_run.batch_size != preferred_batch_size:
+        actual_bs = best_run.batch_size
         sensitivity_notes.append(
-            f"Estimate based on batch size {best_run.batch_size}, not preferred {preferred_batch_size}"
+            f"Estimate based on batch size {actual_bs}, not preferred {preferred_batch_size}"
         )
 
     return TimeToTrainEstimateV1(
@@ -1022,7 +1032,8 @@ def run_synthetic_benchmark_run(
 
     Uses random tensors instead of real data to test infrastructure.
     """
-    run_id = f"batch{batch_size}_samples{sample_count}_{precision_mode}_{model_heads.replace('+', '_')}"
+    heads_str = model_heads.replace("+", "_")
+    run_id = f"batch{batch_size}_samples{sample_count}_{precision_mode}_{heads_str}"
 
     print(f"  [{run_id}]")
     print(f"    Batch size: {batch_size}, Samples: {sample_count} ({sample_count_label})")
@@ -1163,7 +1174,9 @@ def run_synthetic_benchmark_run(
         total_forward_time = sum(forward_times)
         total_backward_time = sum(backward_times)
         total_optimizer_time = sum(optimizer_times)
-        total_measured = total_data_time + total_forward_time + total_backward_time + total_optimizer_time
+        total_measured = (
+            total_data_time + total_forward_time + total_backward_time + total_optimizer_time
+        )
 
         metrics = BenchmarkMetricsV1(
             stepsCompleted=len(step_times),
@@ -1189,7 +1202,8 @@ def run_synthetic_benchmark_run(
             else 0,
         )
 
-        print(f"    [+] {metrics.samples_per_second:.1f} samples/sec, VRAM peak: {vram_peak_gb:.2f} GB")
+        sps = metrics.samples_per_second
+        print(f"    [+] {sps:.1f} samples/sec, VRAM peak: {vram_peak_gb:.2f} GB")
 
         return BenchmarkRunV1(
             runId=run_id,

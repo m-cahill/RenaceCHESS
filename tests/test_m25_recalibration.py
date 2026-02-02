@@ -1,7 +1,6 @@
 """Tests for M25 recalibration functionality."""
 
 import json
-import math
 from pathlib import Path
 
 import pytest
@@ -13,11 +12,11 @@ from renacechess.contracts.models import (
     RecalibrationBucketParametersV1,
     RecalibrationParametersV1,
 )
-from renacechess.determinism import canonical_hash
-from renacechess.eval.calibration_runner import run_calibration_evaluation
-from renacechess.eval.calibration_runner import get_canonical_skill_buckets
+from renacechess.eval.calibration_runner import (
+    get_canonical_skill_buckets,
+    run_calibration_evaluation,
+)
 from renacechess.eval.recalibration_runner import (
-    TEMPERATURE_GRID,
     TEMPERATURE_MAX,
     TEMPERATURE_MIN,
     apply_temperature_scaling_to_probs,

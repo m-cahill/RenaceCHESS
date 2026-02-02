@@ -19,7 +19,7 @@ import hashlib
 import json
 import random
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal
 
@@ -238,7 +238,7 @@ def generate_frozen_eval_v2(
         raise ValueError(msg)
 
     if created_at is None:
-        created_at = datetime.now(timezone.utc)
+        created_at = datetime.now(UTC)
 
     # Initialize deterministic RNG
     rng = random.Random(seed)
@@ -444,7 +444,7 @@ def verify_frozen_eval_v2(manifest_path: Path) -> bool:
         manifest_bytes = f.read()
 
     manifest_dict = json.loads(manifest_bytes)
-    stored_hash = manifest_dict.get("determinismHash")
+    stored_hash: str | None = manifest_dict.get("determinismHash")
 
     if not stored_hash:
         return False
@@ -456,5 +456,4 @@ def verify_frozen_eval_v2(manifest_path: Path) -> bool:
     recomputed_bytes = canonical_json_dump(manifest_dict_for_hash)
     recomputed_hash = _compute_determinism_hash(recomputed_bytes)
 
-    return stored_hash == recomputed_hash
-
+    return bool(stored_hash == recomputed_hash)

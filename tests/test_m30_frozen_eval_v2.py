@@ -14,7 +14,7 @@ from __future__ import annotations
 
 import json
 import tempfile
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -43,7 +43,7 @@ class TestFrozenEvalManifestV2Schema:
         """FrozenEvalManifestV2 model accepts valid data."""
         manifest = FrozenEvalManifestV2(
             schema_version=2,
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
             synthetic=True,
             selection_strategy="test_strategy",
             position_count=10000,
@@ -69,7 +69,7 @@ class TestFrozenEvalManifestV2Schema:
         with pytest.raises(Exception):  # Pydantic validation error
             FrozenEvalManifestV2(
                 schema_version=1,  # type: ignore[arg-type]
-                created_at=datetime.now(timezone.utc),
+                created_at=datetime.now(UTC),
                 synthetic=True,
                 selection_strategy="test",
                 position_count=100,
@@ -92,7 +92,7 @@ class TestFrozenEvalManifestV2Schema:
         with pytest.raises(Exception):
             FrozenEvalManifestV2(
                 schema_version=2,
-                created_at=datetime.now(timezone.utc),
+                created_at=datetime.now(UTC),
                 synthetic=False,  # type: ignore[arg-type]
                 selection_strategy="test",
                 position_count=100,
@@ -118,7 +118,7 @@ class TestEvalSetProvenanceV1Schema:
         """EvalSetProvenanceV1 model accepts valid data."""
         provenance = EvalSetProvenanceV1(
             version="1.0",
-            created_at=datetime.now(timezone.utc),
+            created_at=datetime.now(UTC),
             generator_version="v2.0.0",
             selection_seed=42,
             position_sources=["test_source"],
@@ -136,7 +136,7 @@ class TestEvalSetProvenanceV1Schema:
         with pytest.raises(Exception):
             EvalSetProvenanceV1(
                 version="1.0",
-                created_at=datetime.now(timezone.utc),
+                created_at=datetime.now(UTC),
                 generator_version="v2.0.0",
                 selection_seed=42,
                 position_sources=["test"],
@@ -280,7 +280,7 @@ class TestDeterminism:
 
     def test_same_seed_produces_same_manifest_hash(self) -> None:
         """Same seed + timestamp → identical manifest hash."""
-        fixed_time = datetime(2026, 2, 2, 12, 0, 0, tzinfo=timezone.utc)
+        fixed_time = datetime(2026, 2, 2, 12, 0, 0, tzinfo=UTC)
 
         with tempfile.TemporaryDirectory() as tmpdir1:
             output_dir1 = Path(tmpdir1)
@@ -306,7 +306,7 @@ class TestDeterminism:
 
     def test_different_seed_produces_different_hash(self) -> None:
         """Different seed → different manifest hash."""
-        fixed_time = datetime(2026, 2, 2, 12, 0, 0, tzinfo=timezone.utc)
+        fixed_time = datetime(2026, 2, 2, 12, 0, 0, tzinfo=UTC)
 
         with tempfile.TemporaryDirectory() as tmpdir1:
             output_dir1 = Path(tmpdir1)
@@ -405,9 +405,7 @@ class TestCommittedFrozenEvalV2:
         provenance = EvalSetProvenanceV1.model_validate(provenance_data)
         assert provenance.version == "1.0"
 
-    def test_committed_manifest_determinism_hash_valid(
-        self, frozen_eval_v2_path: Path
-    ) -> None:
+    def test_committed_manifest_determinism_hash_valid(self, frozen_eval_v2_path: Path) -> None:
         """Committed manifest's determinism hash is valid."""
         manifest_path = frozen_eval_v2_path / "manifest.json"
         assert verify_frozen_eval_v2(manifest_path) is True
@@ -456,4 +454,3 @@ class TestConstants:
         for fen in FEN_SEEDS:
             parts = fen.split(" ")
             assert len(parts) == 6, f"Invalid FEN: {fen}"
-

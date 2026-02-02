@@ -6,7 +6,6 @@ from pathlib import Path
 import pytest
 
 from renacechess.contracts.models import (
-    PolicyMove,
     RecalibrationBucketParametersV1,
     RecalibrationGateV1,
     RecalibrationParametersV1,

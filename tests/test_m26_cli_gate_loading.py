@@ -180,7 +180,6 @@ class TestCLIGateLoadingLogic:
     ) -> None:
         """Test CLI gate loading with enabled gate but no parametersRef raises."""
         import argparse
-        import sys
 
         from renacechess.cli import resolve_recalibration_gate_from_args
 
@@ -203,7 +202,6 @@ class TestCLIGateLoadingLogic:
     ) -> None:
         """Test CLI gate loading with enabled gate but missing params file raises."""
         import argparse
-        import sys
 
         from renacechess.cli import resolve_recalibration_gate_from_args
 
@@ -224,7 +222,6 @@ class TestCLIGateLoadingLogic:
     ) -> None:
         """Test CLI gate loading with invalid JSON raises."""
         import argparse
-        import sys
 
         from renacechess.cli import resolve_recalibration_gate_from_args
 
@@ -247,7 +244,6 @@ class TestCLIGateLoadingLogic:
     ) -> None:
         """Test CLI gate loading with missing file raises."""
         import argparse
-        import sys
 
         from renacechess.cli import resolve_recalibration_gate_from_args
 

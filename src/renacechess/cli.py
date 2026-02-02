@@ -333,6 +333,36 @@ def main() -> None:
         help="Output directory for report and delta artifacts",
     )
 
+    # M28: Runtime recalibration decision command
+    decision_parser = eval_subparsers.add_parser(
+        "runtime-recalibration-decision",
+        help="Generate recalibration activation decision from M27 evidence (M28)",
+    )
+    decision_parser.add_argument(
+        "--report",
+        type=Path,
+        required=True,
+        help="Path to RuntimeRecalibrationReportV1 JSON file",
+    )
+    decision_parser.add_argument(
+        "--delta",
+        type=Path,
+        required=True,
+        help="Path to RuntimeRecalibrationDeltaV1 JSON file",
+    )
+    decision_parser.add_argument(
+        "--policy",
+        type=Path,
+        required=True,
+        help="Path to RuntimeRecalibrationActivationPolicyV1 JSON file",
+    )
+    decision_parser.add_argument(
+        "--out",
+        type=Path,
+        required=True,
+        help="Output path for RuntimeRecalibrationDecisionV1 JSON file",
+    )
+
     # Train policy command
     train_parser = subparsers.add_parser(
         "train-policy", help="Train learned human policy baseline (M08)"
@@ -1005,6 +1035,42 @@ def main() -> None:
                 print(f"Delta written to: {delta_path}", file=sys.stderr)
                 print(f"Report hash: {recal_report.determinism_hash}", file=sys.stderr)
                 print(f"Delta hash: {recal_delta.determinism_hash}", file=sys.stderr)
+
+            except Exception as e:
+                print(f"Error: {e}", file=sys.stderr)
+                sys.exit(1)
+        elif args.eval_command == "runtime-recalibration-decision":
+            # M28: Runtime recalibration decision
+            try:
+                from renacechess.eval.recalibration_decision_runner import (
+                    run_recalibration_decision,
+                    save_decision,
+                )
+
+                if not args.report.exists():
+                    print(f"Error: Report file not found: {args.report}", file=sys.stderr)
+                    sys.exit(1)
+                if not args.delta.exists():
+                    print(f"Error: Delta file not found: {args.delta}", file=sys.stderr)
+                    sys.exit(1)
+                if not args.policy.exists():
+                    print(f"Error: Policy file not found: {args.policy}", file=sys.stderr)
+                    sys.exit(1)
+
+                decision = run_recalibration_decision(
+                    report_path=args.report,
+                    delta_path=args.delta,
+                    policy_path=args.policy,
+                )
+
+                # Ensure output directory exists
+                args.out.parent.mkdir(parents=True, exist_ok=True)
+
+                save_decision(decision, args.out)
+
+                print(f"Decision outcome: {decision.decision_outcome.upper()}", file=sys.stderr)
+                print(f"Decision written to: {args.out}", file=sys.stderr)
+                print(f"Decision hash: {decision.determinism_hash}", file=sys.stderr)
 
             except Exception as e:
                 print(f"Error: {e}", file=sys.stderr)

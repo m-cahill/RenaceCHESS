@@ -10,14 +10,9 @@ Pattern follows test_m24_calibration.py and test_m25_recalibration.py.
 from __future__ import annotations
 
 import json
-import sys
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
-
-from renacechess.cli import main
-
 
 # =============================================================================
 # Fixtures

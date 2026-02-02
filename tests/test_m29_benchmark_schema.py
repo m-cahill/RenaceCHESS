@@ -12,7 +12,7 @@ from __future__ import annotations
 import json
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Literal
+from typing import Literal
 
 import pytest
 
@@ -323,7 +323,9 @@ class TestBenchmarkRunV1:
 
     @pytest.mark.parametrize("heads", ["policy", "policy+outcome"])
     def test_valid_model_heads(
-        self, heads: Literal["policy", "policy+outcome"], valid_benchmark_metrics: BenchmarkMetricsV1
+        self,
+        heads: Literal["policy", "policy+outcome"],
+        valid_benchmark_metrics: BenchmarkMetricsV1,
     ) -> None:
         """Both model head configurations should be valid."""
         run = BenchmarkRunV1(
@@ -371,9 +373,7 @@ class TestTimeToTrainEstimateV1:
         assert valid_time_estimate.confidence_level == "medium"
 
     @pytest.mark.parametrize("confidence", ["low", "medium", "high"])
-    def test_valid_confidence_levels(
-        self, confidence: Literal["low", "medium", "high"]
-    ) -> None:
+    def test_valid_confidence_levels(self, confidence: Literal["low", "medium", "high"]) -> None:
         """All confidence levels should be valid."""
         estimate = TimeToTrainEstimateV1(
             assumptions=TimeToTrainAssumptionsV1(
@@ -534,9 +534,7 @@ class TestDeterminism:
 class TestValidationErrors:
     """Test that invalid inputs are rejected."""
 
-    def test_invalid_batch_size_rejected(
-        self, valid_benchmark_metrics: BenchmarkMetricsV1
-    ) -> None:
+    def test_invalid_batch_size_rejected(self, valid_benchmark_metrics: BenchmarkMetricsV1) -> None:
         """Invalid batch sizes should be rejected."""
         with pytest.raises(Exception):  # Pydantic ValidationError
             BenchmarkRunV1(
@@ -576,4 +574,3 @@ class TestValidationErrors:
                 runMatrix=[],  # Empty not allowed
                 determinismHash="sha256:" + "0" * 64,
             )
-
