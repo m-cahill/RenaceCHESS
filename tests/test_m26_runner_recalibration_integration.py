@@ -226,6 +226,116 @@ class TestApplyRuntimeRecalibrationToPolicyMoves:
         assert was_applied is False
         assert result_moves == empty_moves
 
+    def test_gate_enabled_but_params_none_raises(
+        self,
+        policy_moves: list[PolicyMove],
+        recalibration_gate_enabled_policy_only: RecalibrationGateV1,
+    ) -> None:
+        """Gate enabled but params None raises ValueError."""
+        # This exercises the error path in apply_recalibration_if_enabled
+        with pytest.raises(ValueError) as exc_info:
+            apply_runtime_recalibration_to_policy_moves(
+                policy_moves,
+                "lt_800",
+                recalibration_gate_enabled_policy_only,
+                None,  # params is None
+            )
+
+        assert "RecalibrationParametersV1" in str(exc_info.value) or "parameters" in str(
+            exc_info.value
+        ).lower()
+
+    def test_gate_enabled_but_bucket_not_found_raises(
+        self,
+        policy_moves: list[PolicyMove],
+        recalibration_gate_enabled_policy_only: RecalibrationGateV1,
+        recalibration_parameters: RecalibrationParametersV1,
+    ) -> None:
+        """Gate enabled but bucket not in params raises ValueError."""
+        # Use a bucket that doesn't exist in params
+        with pytest.raises(ValueError) as exc_info:
+            apply_runtime_recalibration_to_policy_moves(
+                policy_moves,
+                "nonexistent_bucket",  # Not in recalibration_parameters
+                recalibration_gate_enabled_policy_only,
+                recalibration_parameters,
+            )
+
+        assert "nonexistent_bucket" in str(exc_info.value) or "bucket" in str(
+            exc_info.value
+        ).lower()
+
+    def test_single_move_list_handled_correctly(
+        self,
+        recalibration_gate_enabled_policy_only: RecalibrationGateV1,
+        recalibration_parameters: RecalibrationParametersV1,
+    ) -> None:
+        """Single move in list is handled correctly."""
+        single_move = [PolicyMove(uci="e2e4", p=1.0)]
+        result_moves, was_applied = apply_runtime_recalibration_to_policy_moves(
+            single_move,
+            "lt_800",
+            recalibration_gate_enabled_policy_only,
+            recalibration_parameters,
+        )
+
+        assert was_applied is True
+        assert len(result_moves) == 1
+        assert result_moves[0].uci == "e2e4"
+        # With temperature=2.0, even a single move's probability might change slightly
+        # (though with only one move, it should remain 1.0)
+        assert abs(result_moves[0].p - 1.0) < 0.001
+
+    def test_san_field_preserved_after_recalibration(
+        self,
+        recalibration_gate_enabled_policy_only: RecalibrationGateV1,
+        recalibration_parameters: RecalibrationParametersV1,
+    ) -> None:
+        """SAN field is preserved after recalibration."""
+        moves_with_san = [
+            PolicyMove(uci="e2e4", san="e4", p=0.4),
+            PolicyMove(uci="d2d4", san="d4", p=0.3),
+            PolicyMove(uci="g1f3", san="Nf3", p=0.2),
+            PolicyMove(uci="c2c4", san="c4", p=0.1),
+        ]
+        result_moves, was_applied = apply_runtime_recalibration_to_policy_moves(
+            moves_with_san,
+            "lt_800",
+            recalibration_gate_enabled_policy_only,
+            recalibration_parameters,
+        )
+
+        assert was_applied is True
+        # SAN fields should be preserved
+        assert result_moves[0].san == "e4" or result_moves[0].san == "d4" or result_moves[0].san == "Nf3" or result_moves[0].san == "c4"
+        # Find the move with UCI "e2e4" and verify its SAN
+        e2e4_move = next((m for m in result_moves if m.uci == "e2e4"), None)
+        assert e2e4_move is not None
+        assert e2e4_move.san == "e4"
+
+    def test_san_none_preserved_after_recalibration(
+        self,
+        recalibration_gate_enabled_policy_only: RecalibrationGateV1,
+        recalibration_parameters: RecalibrationParametersV1,
+    ) -> None:
+        """SAN=None is preserved after recalibration."""
+        moves_without_san = [
+            PolicyMove(uci="e2e4", san=None, p=0.4),
+            PolicyMove(uci="d2d4", san=None, p=0.3),
+        ]
+        result_moves, was_applied = apply_runtime_recalibration_to_policy_moves(
+            moves_without_san,
+            "lt_800",
+            recalibration_gate_enabled_policy_only,
+            recalibration_parameters,
+        )
+
+        assert was_applied is True
+        # SAN=None should be preserved
+        e2e4_move = next((m for m in result_moves if m.uci == "e2e4"), None)
+        assert e2e4_move is not None
+        assert e2e4_move.san is None
+
 
 # =============================================================================
 # Outcome Integration Tests
@@ -322,4 +432,43 @@ class TestApplyRuntimeRecalibrationToOutcome:
 
         assert was_applied is False
         assert result_probs == (0.4, 0.3, 0.3)
+
+    def test_gate_enabled_but_params_none_raises(
+        self,
+        recalibration_gate_enabled_outcome_only: RecalibrationGateV1,
+    ) -> None:
+        """Gate enabled but params None raises ValueError."""
+        with pytest.raises(ValueError) as exc_info:
+            apply_runtime_recalibration_to_outcome(
+                0.4,
+                0.3,
+                0.3,
+                "lt_800",
+                recalibration_gate_enabled_outcome_only,
+                None,  # params is None
+            )
+
+        assert "RecalibrationParametersV1" in str(exc_info.value) or "parameters" in str(
+            exc_info.value
+        ).lower()
+
+    def test_gate_enabled_but_bucket_not_found_raises(
+        self,
+        recalibration_gate_enabled_outcome_only: RecalibrationGateV1,
+        recalibration_parameters: RecalibrationParametersV1,
+    ) -> None:
+        """Gate enabled but bucket not in params raises ValueError."""
+        with pytest.raises(ValueError) as exc_info:
+            apply_runtime_recalibration_to_outcome(
+                0.4,
+                0.3,
+                0.3,
+                "nonexistent_bucket",  # Not in recalibration_parameters
+                recalibration_gate_enabled_outcome_only,
+                recalibration_parameters,
+            )
+
+        assert "nonexistent_bucket" in str(exc_info.value) or "bucket" in str(
+            exc_info.value
+        ).lower()
 
