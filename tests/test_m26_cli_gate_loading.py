@@ -113,20 +113,42 @@ def recalibration_gate_enabled_missing_params(tmp_path: Path) -> Path:
 
 
 class TestCLIGateLoadingLogic:
-    """Test CLI gate loading logic directly (cli.py lines 639-700)."""
+    """Test CLI gate loading logic directly (cli.py resolve_recalibration_gate_from_args)."""
+
+    def test_cli_gate_loading_no_gate_provided(self) -> None:
+        """Test CLI gate loading when no gate is provided."""
+        import argparse
+
+        from renacechess.cli import resolve_recalibration_gate_from_args
+
+        # Create mock args with no gate
+        args = argparse.Namespace()
+        args.recalibration_gate = None
+
+        gate, params = resolve_recalibration_gate_from_args(args)
+
+        assert gate is None
+        assert params is None
 
     def test_cli_gate_loading_disabled_gate(
         self, recalibration_gate_disabled_json: Path, capsys: pytest.CaptureFixture[str]
     ) -> None:
         """Test CLI gate loading with disabled gate."""
-        from renacechess.eval.runtime_recalibration import load_recalibration_gate
+        import argparse
 
-        # This exercises the CLI code path: load_recalibration_gate(args.recalibration_gate)
-        gate = load_recalibration_gate(recalibration_gate_disabled_json)
+        from renacechess.cli import resolve_recalibration_gate_from_args
 
+        # Create mock args with disabled gate
+        args = argparse.Namespace()
+        args.recalibration_gate = recalibration_gate_disabled_json
+
+        gate, params = resolve_recalibration_gate_from_args(args)
+
+        assert gate is not None
         assert gate.enabled is False
         assert gate.version == "1.0"
         assert gate.parameters_ref is None
+        assert params is None
 
     def test_cli_gate_loading_enabled_gate_with_params(
         self,
@@ -134,20 +156,20 @@ class TestCLIGateLoadingLogic:
         recalibration_parameters_json: Path,
     ) -> None:
         """Test CLI gate loading with enabled gate and valid parameters."""
-        from renacechess.eval.recalibration_runner import load_recalibration_parameters
-        from renacechess.eval.runtime_recalibration import load_recalibration_gate
+        import argparse
 
-        # Exercise CLI code path: load_recalibration_gate(args.recalibration_gate)
-        gate = load_recalibration_gate(recalibration_gate_enabled_json)
+        from renacechess.cli import resolve_recalibration_gate_from_args
 
+        # Create mock args with enabled gate
+        args = argparse.Namespace()
+        args.recalibration_gate = recalibration_gate_enabled_json
+
+        gate, params = resolve_recalibration_gate_from_args(args)
+
+        assert gate is not None
         assert gate.enabled is True
         assert gate.parameters_ref is not None
-
-        # Exercise CLI code path: load_recalibration_parameters(params_path)
-        params_path = Path(gate.parameters_ref)
-        assert params_path.exists()
-
-        params = load_recalibration_parameters(params_path)
+        assert params is not None
         assert params.version == "1.0"
         assert len(params.by_elo_bucket) > 0
 
@@ -157,15 +179,22 @@ class TestCLIGateLoadingLogic:
         capsys: pytest.CaptureFixture[str],
     ) -> None:
         """Test CLI gate loading with enabled gate but no parametersRef raises."""
-        from renacechess.eval.runtime_recalibration import load_recalibration_gate
+        import argparse
+        import sys
 
-        # The model validator catches this at load time (exercises CLI exception handling)
-        # This is what CLI does (lines 679-684): catches ValidationError and exits
-        with pytest.raises(ValueError) as exc_info:
-            load_recalibration_gate(recalibration_gate_enabled_no_params_ref)
+        from renacechess.cli import resolve_recalibration_gate_from_args
 
-        # Verify the error message matches what CLI would print
-        assert "parametersRef" in str(exc_info.value) or "parameters_ref" in str(exc_info.value)
+        # Create mock args with enabled gate but no params ref
+        args = argparse.Namespace()
+        args.recalibration_gate = recalibration_gate_enabled_no_params_ref
+
+        # The model validator catches this at load time, CLI exits with error
+        with pytest.raises(SystemExit) as exc_info:
+            resolve_recalibration_gate_from_args(args)
+
+        assert exc_info.value.code == 1
+        captured = capsys.readouterr()
+        assert "parametersRef" in captured.err or "parameters_ref" in captured.err
 
     def test_cli_gate_loading_enabled_gate_missing_params_file_raises(
         self,
@@ -173,49 +202,67 @@ class TestCLIGateLoadingLogic:
         capsys: pytest.CaptureFixture[str],
     ) -> None:
         """Test CLI gate loading with enabled gate but missing params file raises."""
-        from renacechess.eval.runtime_recalibration import load_recalibration_gate
+        import argparse
+        import sys
 
-        # Load gate (this succeeds)
-        gate = load_recalibration_gate(recalibration_gate_enabled_missing_params)
+        from renacechess.cli import resolve_recalibration_gate_from_args
 
-        assert gate.enabled is True
-        assert gate.parameters_ref is not None
+        # Create mock args with enabled gate but missing params file
+        args = argparse.Namespace()
+        args.recalibration_gate = recalibration_gate_enabled_missing_params
 
-        # Exercise CLI code path: params_path.exists() check (line 666)
-        params_path = Path(gate.parameters_ref)
-        assert not params_path.exists()
+        # CLI code checks params_path.exists() and exits with error
+        with pytest.raises(SystemExit) as exc_info:
+            resolve_recalibration_gate_from_args(args)
 
-        # The CLI code checks this and exits with error (lines 670-678)
-        if not params_path.exists():
-            error_msg = f"Error: RecalibrationParametersV1 not found at: {params_path}"
-            assert "not found" in error_msg
+        assert exc_info.value.code == 1
+        captured = capsys.readouterr()
+        assert "not found" in captured.err
 
     def test_cli_gate_loading_invalid_json_raises(
         self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
     ) -> None:
         """Test CLI gate loading with invalid JSON raises."""
-        from renacechess.eval.runtime_recalibration import load_recalibration_gate
+        import argparse
+        import sys
+
+        from renacechess.cli import resolve_recalibration_gate_from_args
 
         invalid_gate_path = tmp_path / "invalid_gate.json"
         invalid_gate_path.write_text("not valid json {{{", encoding="utf-8")
 
-        # Exercise CLI code path: exception handling (lines 679-684)
-        with pytest.raises(ValueError) as exc_info:
-            load_recalibration_gate(invalid_gate_path)
+        args = argparse.Namespace()
+        args.recalibration_gate = invalid_gate_path
 
-        assert "Invalid" in str(exc_info.value) or "invalid" in str(exc_info.value).lower()
+        # Exercise CLI code path: exception handling
+        with pytest.raises(SystemExit) as exc_info:
+            resolve_recalibration_gate_from_args(args)
+
+        assert exc_info.value.code == 1
+        captured = capsys.readouterr()
+        assert "Failed to load" in captured.err or "Error" in captured.err
 
     def test_cli_gate_loading_missing_file_raises(
         self, tmp_path: Path, capsys: pytest.CaptureFixture[str]
     ) -> None:
         """Test CLI gate loading with missing file raises."""
-        from renacechess.eval.runtime_recalibration import load_recalibration_gate
+        import argparse
+        import sys
+
+        from renacechess.cli import resolve_recalibration_gate_from_args
 
         nonexistent_gate = tmp_path / "nonexistent_gate.json"
 
-        # Exercise CLI code path: exception handling (lines 679-684)
-        with pytest.raises(FileNotFoundError):
-            load_recalibration_gate(nonexistent_gate)
+        args = argparse.Namespace()
+        args.recalibration_gate = nonexistent_gate
+
+        # Exercise CLI code path: exception handling
+        with pytest.raises(SystemExit) as exc_info:
+            resolve_recalibration_gate_from_args(args)
+
+        assert exc_info.value.code == 1
+        captured = capsys.readouterr()
+        assert "Failed to load" in captured.err or "Error" in captured.err
 
 
 # =============================================================================

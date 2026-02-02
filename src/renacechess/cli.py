@@ -23,6 +23,78 @@ from renacechess.frozen_eval import generate_frozen_eval_manifest, write_frozen_
 from renacechess.ingest.ingest import ingest_from_lichess, ingest_from_url
 
 
+def resolve_recalibration_gate_from_args(
+    args: argparse.Namespace,
+) -> tuple[
+    "RecalibrationGateV1 | None",
+    "RecalibrationParametersV1 | None",
+]:
+    """Resolve and validate recalibration gate and parameters from CLI arguments (M26).
+
+    This function handles loading the gate file, validating it, and loading
+    associated parameters if the gate is enabled. It does not execute evaluation.
+
+    Args:
+        args: Parsed CLI arguments (must have `recalibration_gate` attribute).
+
+    Returns:
+        Tuple of (gate, params):
+        - If no gate provided: (None, None)
+        - If gate disabled: (gate, None)
+        - If gate enabled: (gate, params)
+
+    Raises:
+        SystemExit: If gate file is invalid, missing, or parameters cannot be loaded.
+    """
+    from renacechess.contracts.models import (
+        RecalibrationGateV1,
+        RecalibrationParametersV1,
+    )
+    from renacechess.eval.recalibration_runner import load_recalibration_parameters
+    from renacechess.eval.runtime_recalibration import load_recalibration_gate
+
+    if not args.recalibration_gate:
+        return None, None
+
+    try:
+        recalibration_gate = load_recalibration_gate(args.recalibration_gate)
+        # If gate is enabled, load parameters
+        if recalibration_gate.enabled:
+            if not recalibration_gate.parameters_ref:
+                print(
+                    (
+                        "Error: RecalibrationGateV1.enabled=True "
+                        "requires parametersRef to be set"
+                    ),
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+            # Try to load parameters from path
+            # (parameters_ref can be path or hash)
+            params_path = Path(recalibration_gate.parameters_ref)
+            if params_path.exists():
+                recalibration_params = load_recalibration_parameters(params_path)
+            else:
+                print(
+                    (
+                        f"Error: RecalibrationParametersV1 "
+                        f"not found at: {params_path}"
+                    ),
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+        else:
+            recalibration_params = None
+
+        return recalibration_gate, recalibration_params
+    except Exception as e:
+        print(
+            f"Error: Failed to load recalibration gate: {e}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+
+
 def main() -> None:
     """Main CLI entry point."""
     parser = argparse.ArgumentParser(
@@ -637,51 +709,9 @@ def main() -> None:
                         sys.exit(1)
 
                     # M26: Load recalibration gate if provided
-                    recalibration_gate = None
-                    recalibration_params = None
-                    if args.recalibration_gate:
-                        from renacechess.eval.runtime_recalibration import (
-                            load_recalibration_gate,
-                        )
-                        from renacechess.eval.recalibration_runner import (
-                            load_recalibration_parameters,
-                        )
-
-                        try:
-                            recalibration_gate = load_recalibration_gate(args.recalibration_gate)
-                            # If gate is enabled, load parameters
-                            if recalibration_gate.enabled:
-                                if not recalibration_gate.parameters_ref:
-                                    print(
-                                        (
-                                            "Error: RecalibrationGateV1.enabled=True "
-                                            "requires parametersRef to be set"
-                                        ),
-                                        file=sys.stderr,
-                                    )
-                                    sys.exit(1)
-                                # Try to load parameters from path
-                                # (parameters_ref can be path or hash)
-                                params_path = Path(recalibration_gate.parameters_ref)
-                                if params_path.exists():
-                                    recalibration_params = load_recalibration_parameters(
-                                        params_path
-                                    )
-                                else:
-                                    print(
-                                        (
-                                            f"Error: RecalibrationParametersV1 "
-                                            f"not found at: {params_path}"
-                                        ),
-                                        file=sys.stderr,
-                                    )
-                                    sys.exit(1)
-                        except Exception as e:
-                            print(
-                                f"Error: Failed to load recalibration gate: {e}",
-                                file=sys.stderr,
-                            )
-                            sys.exit(1)
+                    recalibration_gate, recalibration_params = (
+                        resolve_recalibration_gate_from_args(args)
+                    )
 
                     # Run conditioned evaluation (M07, M09, M26)
                     outcome_head_path = getattr(args, "outcome_head_path", None)
