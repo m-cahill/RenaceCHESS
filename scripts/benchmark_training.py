@@ -854,6 +854,391 @@ def run_m29_benchmark(
     return report
 
 
+# --- Synthetic Benchmark Mode (for testing without real data) ---
+
+
+def run_synthetic_m29_benchmark(
+    output_path: Path,
+    batch_sizes: list[Literal[64, 128, 256, 512]] | None = None,
+    sample_counts: list[Literal[1000, 10000, 100000]] | None = None,
+    precision_modes: list[Literal["fp32", "amp"]] | None = None,
+    model_heads_list: list[Literal["policy", "policy+outcome"]] | None = None,
+    target_dataset_size: int = 10_000_000,
+    target_epochs: int = 10,
+    seed: int = 42,
+) -> TrainingBenchmarkReportV1:
+    """Run M29 benchmark with synthetic data (for testing infrastructure).
+
+    This mode uses randomly generated data to test the benchmark pipeline
+    without requiring a real dataset manifest.
+
+    Args:
+        output_path: Path to write JSON results.
+        batch_sizes: List of batch sizes to test.
+        sample_counts: List of sample counts to test.
+        precision_modes: List of precision modes to test.
+        model_heads_list: List of head configurations to test.
+        target_dataset_size: Target dataset size for time estimate.
+        target_epochs: Target epochs for time estimate.
+        seed: Random seed for determinism.
+
+    Returns:
+        TrainingBenchmarkReportV1 model.
+    """
+    # Use defaults if not specified
+    if batch_sizes is None:
+        batch_sizes = M29_BATCH_SIZES
+    if sample_counts is None:
+        sample_counts = list(M29_SAMPLE_COUNTS.values())
+    if precision_modes is None:
+        precision_modes = M29_PRECISION_MODES
+    if model_heads_list is None:
+        model_heads_list = M29_MODEL_HEADS
+
+    print("=" * 70)
+    print("RenaceCHESS GPU Training Benchmark (M29) - SYNTHETIC MODE")
+    print("=" * 70)
+    print("WARNING: Using synthetic data for testing. Results not for production.")
+    print()
+
+    warnings: list[str] = ["SYNTHETIC MODE - results based on random data, not real dataset"]
+
+    # 1. Detect environment
+    print("[1/3] Detecting environment...")
+    try:
+        environment = detect_environment_metadata()
+        print(f"  GPU: {environment.gpu_name}")
+        print(f"  VRAM: {environment.vram_gb} GB")
+        print(f"  CUDA: {environment.cuda_version}")
+        print(f"  PyTorch: {environment.torch_version}")
+    except RuntimeError as e:
+        print(f"  [ERROR] {e}")
+        raise
+    print()
+
+    # Synthetic dataset info
+    dataset_info = DatasetInfoV1(
+        manifestHash="sha256:synthetic_" + "0" * 56,
+        manifestPath="synthetic://test",
+        frozenEvalManifestHash="sha256:synthetic_" + "0" * 56,
+        overlapCheckPassed=True,
+    )
+
+    # 2. Run benchmark matrix
+    print("[2/3] Running benchmark matrix with synthetic data...")
+    print(f"  Batch sizes: {batch_sizes}")
+    print(f"  Sample counts: {sample_counts}")
+    print(f"  Precision modes: {precision_modes}")
+    print(f"  Model heads: {model_heads_list}")
+    print()
+
+    runs: list[BenchmarkRunV1] = []
+
+    # Set seeds for determinism
+    torch.manual_seed(seed)
+    random.seed(seed)
+
+    for model_heads in model_heads_list:
+        for precision_mode in precision_modes:
+            for sample_count in sample_counts:
+                # Get label for sample count
+                sample_label: Literal["sanity", "medium", "large"]
+                if sample_count == 1000:
+                    sample_label = "sanity"
+                elif sample_count == 10000:
+                    sample_label = "medium"
+                else:
+                    sample_label = "large"
+
+                for batch_size in batch_sizes:
+                    run = run_synthetic_benchmark_run(
+                        batch_size=batch_size,
+                        sample_count=sample_count,
+                        sample_count_label=sample_label,
+                        precision_mode=precision_mode,
+                        model_heads=model_heads,
+                        seed=seed,
+                    )
+                    runs.append(run)
+
+                    # Clear GPU cache between runs
+                    if torch.cuda.is_available():
+                        torch.cuda.empty_cache()
+
+    # 3. Compute time-to-train estimate
+    print()
+    print("[3/3] Computing time-to-train estimate...")
+    estimate = compute_time_to_train_estimate(
+        runs=runs,
+        target_dataset_size=target_dataset_size,
+        target_epochs=target_epochs,
+        preferred_batch_size=256,
+        preferred_precision="fp32",
+    )
+    print(f"  Projected time: {estimate.projected_time_formatted}")
+    print(f"  Confidence: {estimate.confidence_level}")
+    print()
+
+    # Build report
+    report = TrainingBenchmarkReportV1(
+        version="1.0",
+        generatedAt=datetime.now(UTC),
+        environment=environment,
+        datasetInfo=dataset_info,
+        runMatrix=runs,
+        timeToTrainEstimate=estimate,
+        warnings=warnings,
+        determinismHash="sha256:" + "0" * 64,  # Placeholder
+    )
+
+    # Compute determinism hash
+    report_dict = report.model_dump(mode="json", by_alias=True, exclude={"determinism_hash"})
+    determinism_hash = compute_determinism_hash(report_dict)
+    report = report.model_copy(update={"determinism_hash": determinism_hash})
+
+    # Write output
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with output_path.open("w", encoding="utf-8") as f:
+        json.dump(report.model_dump(mode="json", by_alias=True), f, indent=2)
+    print(f"Results written to: {output_path}")
+
+    print()
+    print("=" * 70)
+    print("M29 Synthetic Benchmark complete!")
+    print("=" * 70)
+
+    return report
+
+
+def run_synthetic_benchmark_run(
+    batch_size: Literal[64, 128, 256, 512],
+    sample_count: Literal[1000, 10000, 100000],
+    sample_count_label: Literal["sanity", "medium", "large"],
+    precision_mode: Literal["fp32", "amp"],
+    model_heads: Literal["policy", "policy+outcome"],
+    seed: int = 42,
+) -> BenchmarkRunV1:
+    """Execute a single synthetic benchmark run.
+
+    Uses random tensors instead of real data to test infrastructure.
+    """
+    run_id = f"batch{batch_size}_samples{sample_count}_{precision_mode}_{model_heads.replace('+', '_')}"
+
+    print(f"  [{run_id}]")
+    print(f"    Batch size: {batch_size}, Samples: {sample_count} ({sample_count_label})")
+    print(f"    Precision: {precision_mode}, Heads: {model_heads}")
+
+    # Set seeds for determinism
+    torch.manual_seed(seed)
+    random.seed(seed)
+
+    # Reset GPU memory stats
+    if torch.cuda.is_available():
+        torch.cuda.reset_peak_memory_stats()
+        torch.cuda.empty_cache()
+
+    device = torch.device("cuda")
+
+    try:
+        # Create synthetic model (simple MLP to simulate policy head)
+        input_size = 768  # Typical chess position embedding size
+        hidden_size = 512
+        output_size = 1968  # Max legal moves in chess
+
+        policy_model = torch.nn.Sequential(
+            torch.nn.Linear(input_size, hidden_size),
+            torch.nn.ReLU(),
+            torch.nn.Linear(hidden_size, hidden_size),
+            torch.nn.ReLU(),
+            torch.nn.Linear(hidden_size, output_size),
+        ).to(device)
+
+        outcome_model: torch.nn.Module | None = None
+        if model_heads == "policy+outcome":
+            outcome_model = torch.nn.Sequential(
+                torch.nn.Linear(input_size, hidden_size),
+                torch.nn.ReLU(),
+                torch.nn.Linear(hidden_size, 3),  # Win/Draw/Loss
+            ).to(device)
+
+        # Training setup
+        policy_criterion = torch.nn.CrossEntropyLoss()
+        policy_optimizer = torch.optim.Adam(policy_model.parameters(), lr=0.001)
+
+        outcome_criterion: torch.nn.CrossEntropyLoss | None = None
+        outcome_optimizer: torch.optim.Adam | None = None
+        if outcome_model is not None:
+            outcome_criterion = torch.nn.CrossEntropyLoss()
+            outcome_optimizer = torch.optim.Adam(outcome_model.parameters(), lr=0.001)
+
+        # AMP setup
+        use_amp = precision_mode == "amp"
+        scaler = torch.amp.GradScaler("cuda") if use_amp else None
+
+        # Calculate steps (limit to avoid very long runs)
+        actual_samples = min(sample_count, 10000)  # Cap at 10K for synthetic
+        num_steps = actual_samples // batch_size
+        if num_steps == 0:
+            num_steps = 1
+
+        # Timing metrics
+        step_times: list[float] = []
+        data_load_times: list[float] = []
+        forward_times: list[float] = []
+        backward_times: list[float] = []
+        optimizer_times: list[float] = []
+
+        samples_processed = 0
+
+        policy_model.train()
+        if outcome_model is not None:
+            outcome_model.train()
+
+        start_time = time.perf_counter()
+
+        for step in range(num_steps):
+            step_start = time.perf_counter()
+
+            # Synthetic data generation (simulates data loading)
+            data_start = time.perf_counter()
+            inputs = torch.randn(batch_size, input_size, device=device)
+            policy_targets = torch.randint(0, output_size, (batch_size,), device=device)
+            outcome_targets = torch.randint(0, 3, (batch_size,), device=device)
+            data_load_times.append(time.perf_counter() - data_start)
+
+            # Forward pass
+            forward_start = time.perf_counter()
+            with torch.amp.autocast("cuda", enabled=use_amp):
+                policy_logits = policy_model(inputs)
+                policy_loss = policy_criterion(policy_logits, policy_targets)
+
+                if outcome_model is not None and outcome_criterion is not None:
+                    outcome_logits = outcome_model(inputs)
+                    outcome_loss = outcome_criterion(outcome_logits, outcome_targets)
+                    total_loss = policy_loss + outcome_loss
+                else:
+                    total_loss = policy_loss
+            forward_times.append(time.perf_counter() - forward_start)
+
+            # Backward pass
+            backward_start = time.perf_counter()
+            policy_optimizer.zero_grad()
+            if outcome_optimizer is not None:
+                outcome_optimizer.zero_grad()
+
+            if scaler is not None:
+                scaler.scale(total_loss).backward()
+            else:
+                total_loss.backward()
+            backward_times.append(time.perf_counter() - backward_start)
+
+            # Optimizer step
+            optimizer_start = time.perf_counter()
+            if scaler is not None:
+                scaler.step(policy_optimizer)
+                if outcome_optimizer is not None:
+                    scaler.step(outcome_optimizer)
+                scaler.update()
+            else:
+                policy_optimizer.step()
+                if outcome_optimizer is not None:
+                    outcome_optimizer.step()
+            optimizer_times.append(time.perf_counter() - optimizer_start)
+
+            samples_processed += batch_size
+            step_times.append((time.perf_counter() - step_start) * 1000)  # ms
+
+        total_time = time.perf_counter() - start_time
+
+        # Compute statistics
+        step_times_sorted = sorted(step_times)
+        p95_idx = int(len(step_times_sorted) * 0.95) if step_times_sorted else 0
+
+        # GPU metrics
+        vram_peak_gb = torch.cuda.max_memory_allocated() / (1024**3)
+        vram_total_gb = torch.cuda.get_device_properties(0).total_memory / (1024**3)
+
+        # Time breakdown percentages
+        total_data_time = sum(data_load_times)
+        total_forward_time = sum(forward_times)
+        total_backward_time = sum(backward_times)
+        total_optimizer_time = sum(optimizer_times)
+        total_measured = total_data_time + total_forward_time + total_backward_time + total_optimizer_time
+
+        metrics = BenchmarkMetricsV1(
+            stepsCompleted=len(step_times),
+            samplesProcessed=samples_processed,
+            totalTimeSeconds=round(total_time, 3),
+            stepsPerSecond=round(len(step_times) / total_time, 2) if total_time > 0 else 0,
+            samplesPerSecond=round(samples_processed / total_time, 2) if total_time > 0 else 0,
+            stepTimeMeanMs=round(sum(step_times) / len(step_times), 2) if step_times else 0,
+            stepTimeP95Ms=round(step_times_sorted[p95_idx], 2) if step_times_sorted else 0,
+            vramPeakGb=round(vram_peak_gb, 2),
+            vramPeakPercent=round((vram_peak_gb / vram_total_gb) * 100, 1),
+            dataLoadTimePercent=round((total_data_time / total_measured) * 100, 1)
+            if total_measured > 0
+            else 0,
+            forwardTimePercent=round((total_forward_time / total_measured) * 100, 1)
+            if total_measured > 0
+            else 0,
+            backwardTimePercent=round((total_backward_time / total_measured) * 100, 1)
+            if total_measured > 0
+            else 0,
+            optimizerTimePercent=round((total_optimizer_time / total_measured) * 100, 1)
+            if total_measured > 0
+            else 0,
+        )
+
+        print(f"    [+] {metrics.samples_per_second:.1f} samples/sec, VRAM peak: {vram_peak_gb:.2f} GB")
+
+        return BenchmarkRunV1(
+            runId=run_id,
+            batchSize=batch_size,
+            sampleCount=sample_count,
+            sampleCountLabel=sample_count_label,
+            precisionMode=precision_mode,
+            modelHeads=model_heads,
+            metrics=metrics,
+            status="success",
+        )
+
+    except torch.cuda.OutOfMemoryError as e:
+        print(f"    [-] OOM: {e}")
+        metrics = BenchmarkMetricsV1(
+            stepsCompleted=0,
+            totalTimeSeconds=0,
+        )
+        return BenchmarkRunV1(
+            runId=run_id,
+            batchSize=batch_size,
+            sampleCount=sample_count,
+            sampleCountLabel=sample_count_label,
+            precisionMode=precision_mode,
+            modelHeads=model_heads,
+            metrics=metrics,
+            status="oom",
+            errorMessage=str(e),
+        )
+
+    except Exception as e:
+        print(f"    [-] ERROR: {e}")
+        metrics = BenchmarkMetricsV1(
+            stepsCompleted=0,
+            totalTimeSeconds=0,
+        )
+        return BenchmarkRunV1(
+            runId=run_id,
+            batchSize=batch_size,
+            sampleCount=sample_count,
+            sampleCountLabel=sample_count_label,
+            precisionMode=precision_mode,
+            modelHeads=model_heads,
+            metrics=metrics,
+            status="error",
+            errorMessage=str(e),
+        )
+
+
 # --- M14 Legacy Functions (preserved for backward compatibility) ---
 
 
@@ -1366,6 +1751,11 @@ It does NOT produce production models and is excluded from CI.
         action="store_true",
         help="Skip outcome head benchmark (M14 mode)",
     )
+    parser.add_argument(
+        "--synthetic-mode",
+        action="store_true",
+        help="Run synthetic benchmark without real dataset (M29 testing only)",
+    )
 
     args = parser.parse_args()
 
@@ -1375,18 +1765,31 @@ It does NOT produce production models and is excluded from CI.
             if args.output is None:
                 parser.error("--output is required for M29 mode")
 
-            run_m29_benchmark(
-                manifest_path=args.manifest,
-                frozen_eval_manifest_path=args.frozen_eval_manifest,
-                output_path=args.output,
-                batch_sizes=args.batch_sizes,
-                sample_counts=args.sample_counts,
-                precision_modes=args.precision_modes,
-                model_heads_list=args.model_heads,
-                target_dataset_size=args.target_dataset_size,
-                target_epochs=args.target_epochs,
-                seed=args.seed,
-            )
+            if args.synthetic_mode:
+                # Synthetic mode: test infrastructure without real data
+                run_synthetic_m29_benchmark(
+                    output_path=args.output,
+                    batch_sizes=args.batch_sizes,
+                    sample_counts=args.sample_counts,
+                    precision_modes=args.precision_modes,
+                    model_heads_list=args.model_heads,
+                    target_dataset_size=args.target_dataset_size,
+                    target_epochs=args.target_epochs,
+                    seed=args.seed,
+                )
+            else:
+                run_m29_benchmark(
+                    manifest_path=args.manifest,
+                    frozen_eval_manifest_path=args.frozen_eval_manifest,
+                    output_path=args.output,
+                    batch_sizes=args.batch_sizes,
+                    sample_counts=args.sample_counts,
+                    precision_modes=args.precision_modes,
+                    model_heads_list=args.model_heads,
+                    target_dataset_size=args.target_dataset_size,
+                    target_epochs=args.target_epochs,
+                    seed=args.seed,
+                )
         else:
             # M14 legacy mode
             run_benchmark(
