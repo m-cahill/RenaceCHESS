@@ -333,36 +333,6 @@ def main() -> None:
         help="Output directory for report and delta artifacts",
     )
 
-    # M28: Runtime recalibration decision command
-    decision_parser = eval_subparsers.add_parser(
-        "runtime-recalibration-decision",
-        help="Validate recalibration activation policy against M27 evidence (M28)",
-    )
-    decision_parser.add_argument(
-        "--report",
-        type=Path,
-        required=True,
-        help="Path to RuntimeRecalibrationReportV1 JSON file (M27)",
-    )
-    decision_parser.add_argument(
-        "--delta",
-        type=Path,
-        required=True,
-        help="Path to RuntimeRecalibrationDeltaV1 JSON file (M27)",
-    )
-    decision_parser.add_argument(
-        "--policy",
-        type=Path,
-        required=True,
-        help="Path to RuntimeRecalibrationActivationPolicyV1 JSON file",
-    )
-    decision_parser.add_argument(
-        "--out",
-        type=Path,
-        required=True,
-        help="Output path for decision artifact JSON",
-    )
-
     # Train policy command
     train_parser = subparsers.add_parser(
         "train-policy", help="Train learned human policy baseline (M08)"
@@ -1035,70 +1005,6 @@ def main() -> None:
                 print(f"Delta written to: {delta_path}", file=sys.stderr)
                 print(f"Report hash: {recal_report.determinism_hash}", file=sys.stderr)
                 print(f"Delta hash: {recal_delta.determinism_hash}", file=sys.stderr)
-
-            except Exception as e:
-                print(f"Error: {e}", file=sys.stderr)
-                sys.exit(1)
-        elif args.eval_command == "runtime-recalibration-decision":
-            # M28: Runtime recalibration decision
-            try:
-                from renacechess.eval.recalibration_decision_runner import (
-                    run_recalibration_decision,
-                    save_decision,
-                )
-
-                if not args.report.exists():
-                    print(
-                        f"Error: RuntimeRecalibrationReportV1 not found: {args.report}",
-                        file=sys.stderr,
-                    )
-                    sys.exit(1)
-
-                if not args.delta.exists():
-                    print(
-                        f"Error: RuntimeRecalibrationDeltaV1 not found: {args.delta}",
-                        file=sys.stderr,
-                    )
-                    sys.exit(1)
-
-                if not args.policy.exists():
-                    print(
-                        f"Error: RuntimeRecalibrationActivationPolicyV1 not found: {args.policy}",
-                        file=sys.stderr,
-                    )
-                    sys.exit(1)
-
-                decision = run_recalibration_decision(
-                    report_path=args.report,
-                    delta_path=args.delta,
-                    policy_path=args.policy,
-                )
-
-                # Ensure output directory exists
-                args.out.parent.mkdir(parents=True, exist_ok=True)
-
-                save_decision(decision, args.out)
-
-                print("Runtime Recalibration Decision (M28)", file=sys.stderr)
-                print(f"  Decision Outcome: {decision.decision_outcome.upper()}")
-                print(
-                    f"  Activated Buckets: "
-                    f"{decision.activated_bucket_count}/{decision.total_bucket_count}"
-                )
-                print(f"  Validation: {'VALID' if decision.validation_result.valid else 'INVALID'}")
-                print("", file=sys.stderr)
-                print("Per-Bucket Decisions:", file=sys.stderr)
-                for bd in decision.bucket_decisions:
-                    status = "✓" if bd.enabled else "✗"
-                    print(
-                        f"  [{status}] {bd.bucket_id}: scope={bd.scope}",
-                        file=sys.stderr,
-                    )
-                print("", file=sys.stderr)
-                print(f"Summary: {decision.human_summary}", file=sys.stderr)
-                print("", file=sys.stderr)
-                print(f"Decision written to: {args.out}", file=sys.stderr)
-                print(f"Decision hash: {decision.determinism_hash}", file=sys.stderr)
 
             except Exception as e:
                 print(f"Error: {e}", file=sys.stderr)
