@@ -536,6 +536,154 @@ class TestEdgeCases:
         assert result == top_moves
 
 
+class TestRuntimeRecalibrationCLI:
+    """Tests for CLI integration with direct main() calls for coverage."""
+
+    def test_cli_runtime_recalibration_success_direct(self) -> None:
+        """Test CLI command by calling main() directly for coverage."""
+        import sys
+        import tempfile
+        from io import StringIO
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            test_args = [
+                "renacechess",
+                "eval",
+                "runtime-recalibration",
+                "--gate",
+                str(GATE_PATH),
+                "--params",
+                str(PARAMS_PATH),
+                "--frozen-eval-manifest",
+                str(MANIFEST_PATH),
+                "--out",
+                tmpdir,
+            ]
+
+            stderr_capture = StringIO()
+            with (
+                patch.object(sys, "argv", test_args),
+                patch.object(sys, "stderr", stderr_capture),
+            ):
+                from renacechess.cli import main
+
+                main()  # Should not raise
+
+            stderr_output = stderr_capture.getvalue()
+            assert "Runtime Recalibration Evaluation" in stderr_output
+            assert "Total samples:" in stderr_output
+            assert "Baseline Metrics:" in stderr_output
+            assert "Recalibrated Metrics:" in stderr_output
+            assert "Overall Deltas:" in stderr_output
+            assert "Report hash:" in stderr_output
+
+    def test_cli_runtime_recalibration_missing_gate_direct(self) -> None:
+        """Test CLI fails gracefully when gate file missing (direct call)."""
+        import sys
+        import tempfile
+        from io import StringIO
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            test_args = [
+                "renacechess",
+                "eval",
+                "runtime-recalibration",
+                "--gate",
+                "nonexistent_gate.json",
+                "--params",
+                str(PARAMS_PATH),
+                "--frozen-eval-manifest",
+                str(MANIFEST_PATH),
+                "--out",
+                tmpdir,
+            ]
+
+            stderr_capture = StringIO()
+            with (
+                patch.object(sys, "argv", test_args),
+                patch.object(sys, "stderr", stderr_capture),
+                pytest.raises(SystemExit) as exc_info,
+            ):
+                from renacechess.cli import main
+
+                main()
+
+            assert exc_info.value.code == 1
+            assert "RecalibrationGateV1 not found" in stderr_capture.getvalue()
+
+    def test_cli_runtime_recalibration_missing_params_direct(self) -> None:
+        """Test CLI fails gracefully when params file missing (direct call)."""
+        import sys
+        import tempfile
+        from io import StringIO
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            test_args = [
+                "renacechess",
+                "eval",
+                "runtime-recalibration",
+                "--gate",
+                str(GATE_PATH),
+                "--params",
+                "nonexistent_params.json",
+                "--frozen-eval-manifest",
+                str(MANIFEST_PATH),
+                "--out",
+                tmpdir,
+            ]
+
+            stderr_capture = StringIO()
+            with (
+                patch.object(sys, "argv", test_args),
+                patch.object(sys, "stderr", stderr_capture),
+                pytest.raises(SystemExit) as exc_info,
+            ):
+                from renacechess.cli import main
+
+                main()
+
+            assert exc_info.value.code == 1
+            assert "RecalibrationParametersV1 not found" in stderr_capture.getvalue()
+
+    def test_cli_runtime_recalibration_missing_manifest_direct(self) -> None:
+        """Test CLI fails gracefully when manifest file missing (direct call)."""
+        import sys
+        import tempfile
+        from io import StringIO
+        from unittest.mock import patch
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            test_args = [
+                "renacechess",
+                "eval",
+                "runtime-recalibration",
+                "--gate",
+                str(GATE_PATH),
+                "--params",
+                str(PARAMS_PATH),
+                "--frozen-eval-manifest",
+                "nonexistent_manifest.json",
+                "--out",
+                tmpdir,
+            ]
+
+            stderr_capture = StringIO()
+            with (
+                patch.object(sys, "argv", test_args),
+                patch.object(sys, "stderr", stderr_capture),
+                pytest.raises(SystemExit) as exc_info,
+            ):
+                from renacechess.cli import main
+
+                main()
+
+            assert exc_info.value.code == 1
+            assert "FrozenEvalManifestV1 not found" in stderr_capture.getvalue()
+
+
 class TestRuntimeCalibrationSnapshotV1:
     """Tests for RuntimeCalibrationSnapshotV1."""
 
