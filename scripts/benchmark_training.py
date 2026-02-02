@@ -528,7 +528,7 @@ def run_m29_benchmark_run(
             else 0,
         )
 
-        print(f"    ✅ {metrics.samples_per_second:.1f} samples/sec, VRAM peak: {vram_peak_gb:.1f} GB")
+        print(f"    [OK] {metrics.samples_per_second:.1f} samples/sec, VRAM peak: {vram_peak_gb:.1f} GB")
 
         return BenchmarkRunV1(
             runId=run_id,
@@ -542,7 +542,7 @@ def run_m29_benchmark_run(
         )
 
     except torch.cuda.OutOfMemoryError as e:
-        print(f"    ❌ OOM: {e}")
+        print(f"    [OOM] {e}")
         # Create minimal metrics for OOM case
         metrics = BenchmarkMetricsV1(
             stepsCompleted=0,
@@ -561,7 +561,7 @@ def run_m29_benchmark_run(
         )
 
     except Exception as e:
-        print(f"    ❌ Error: {e}")
+        print(f"    [ERROR] {e}")
         metrics = BenchmarkMetricsV1(
             stepsCompleted=0,
             totalTimeSeconds=0,
@@ -735,7 +735,7 @@ def run_m29_benchmark(
         print(f"  CUDA: {environment.cuda_version}")
         print(f"  PyTorch: {environment.torch_version}")
     except RuntimeError as e:
-        print(f"  ❌ {e}")
+        print(f"  [ERROR] {e}")
         raise
     print()
 
@@ -757,10 +757,10 @@ def run_m29_benchmark(
     is_clean, overlapping_keys = check_frozen_eval_overlap(manifest_path, frozen_eval_manifest_path)
 
     if not is_clean:
-        print(f"  ❌ CONTAMINATION DETECTED: {len(overlapping_keys)} overlapping records!")
+        print(f"  [FAIL] CONTAMINATION DETECTED: {len(overlapping_keys)} overlapping records!")
         raise ValueError(f"Frozen eval contamination: {len(overlapping_keys)} records overlap.")
     else:
-        print("  ✅ No overlap detected")
+        print("  [OK] No overlap detected")
 
     dataset_info = DatasetInfoV1(
         manifestHash=manifest_hash,
@@ -1144,14 +1144,14 @@ def run_benchmark(
     is_clean, overlapping_keys = check_frozen_eval_overlap(manifest_path, frozen_eval_manifest_path)
 
     if not is_clean:
-        print(f"  ❌ CONTAMINATION DETECTED: {len(overlapping_keys)} overlapping records!")
+        print(f"  [FAIL] CONTAMINATION DETECTED: {len(overlapping_keys)} overlapping records!")
         print("  Benchmark aborted to protect scientific integrity.")
         raise ValueError(
             f"Frozen eval contamination detected: {len(overlapping_keys)} records overlap. "
             "This would compromise training integrity. Aborting."
         )
     else:
-        print("  ✅ No overlap detected - frozen eval is protected")
+        print("  [OK] No overlap detected - frozen eval is protected")
     print()
 
     # 4. Run benchmarks
@@ -1172,13 +1172,13 @@ def run_benchmark(
                 max_steps=max_steps,
                 seed=seed,
             )
-            print(f"  ✅ Completed: {policy_result['samples_per_second']:.1f} samples/sec")
+            print(f"  [OK] Completed: {policy_result['samples_per_second']:.1f} samples/sec")
             print(f"     Step time (mean): {policy_result['step_time_mean_ms']:.2f} ms")
             print(f"     Step time (p95):  {policy_result['step_time_p95_ms']:.2f} ms")
             if policy_result["gpu_memory_peak_mb"]:
                 print(f"     GPU memory peak:  {policy_result['gpu_memory_peak_mb']:.1f} MB")
         except Exception as e:
-            print(f"  ❌ Failed: {e}")
+            print(f"  [FAIL] {e}")
             warnings.append(f"Policy benchmark failed: {e}")
         print()
 
@@ -1193,13 +1193,13 @@ def run_benchmark(
                 max_steps=max_steps,
                 seed=seed,
             )
-            print(f"  ✅ Completed: {outcome_result['samples_per_second']:.1f} samples/sec")
+            print(f"  [OK] Completed: {outcome_result['samples_per_second']:.1f} samples/sec")
             print(f"     Step time (mean): {outcome_result['step_time_mean_ms']:.2f} ms")
             print(f"     Step time (p95):  {outcome_result['step_time_p95_ms']:.2f} ms")
             if outcome_result["gpu_memory_peak_mb"]:
                 print(f"     GPU memory peak:  {outcome_result['gpu_memory_peak_mb']:.1f} MB")
         except Exception as e:
-            print(f"  ❌ Failed: {e}")
+            print(f"  [FAIL] {e}")
             warnings.append(f"Outcome benchmark failed: {e}")
         print()
 
