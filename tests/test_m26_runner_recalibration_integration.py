@@ -8,7 +8,6 @@ See docs/milestones/PhaseD/M26/M26_plan.md for the governing plan.
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
 
 import pytest
@@ -22,7 +21,6 @@ from renacechess.eval.recalibration_integration import (
     apply_runtime_recalibration_to_outcome,
     apply_runtime_recalibration_to_policy_moves,
 )
-
 
 # =============================================================================
 # Fixtures
@@ -279,7 +277,12 @@ class TestApplyRuntimeRecalibrationToOutcome:
         # With temperature=1.0 for outcome, probabilities should remain similar
         # but the function should still be called
         result_probs, was_applied = apply_runtime_recalibration_to_outcome(
-            0.4, 0.3, 0.3, "lt_800", recalibration_gate_enabled_outcome_only, recalibration_parameters
+            0.4,
+            0.3,
+            0.3,
+            "lt_800",
+            recalibration_gate_enabled_outcome_only,
+            recalibration_parameters,
         )
 
         assert was_applied is True
@@ -309,7 +312,12 @@ class TestApplyRuntimeRecalibrationToOutcome:
     ) -> None:
         """Enabled gate with policy-only scope does not affect outcome."""
         result_probs, was_applied = apply_runtime_recalibration_to_outcome(
-            0.4, 0.3, 0.3, "lt_800", recalibration_gate_enabled_policy_only, recalibration_parameters
+            0.4,
+            0.3,
+            0.3,
+            "lt_800",
+            recalibration_gate_enabled_policy_only,
+            recalibration_parameters,
         )
 
         assert was_applied is False

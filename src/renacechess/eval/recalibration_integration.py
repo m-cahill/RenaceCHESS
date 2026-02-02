@@ -41,7 +41,7 @@ def apply_runtime_recalibration_to_policy_moves(
         Tuple of (recalibrated_policy_moves, was_applied):
         - If gate is None or disabled: returns input moves unchanged, was_applied=False
         - If gate is enabled and scoped to policy/both: returns scaled moves, was_applied=True
-        - If gate is enabled but scope is outcome-only: returns input moves unchanged, was_applied=False
+        - If gate enabled but scope is outcome-only: returns input unchanged, was_applied=False
     """
     from renacechess.eval.runtime_recalibration import (
         apply_recalibration_if_enabled,
@@ -106,8 +106,8 @@ def apply_runtime_recalibration_to_outcome(
     Returns:
         Tuple of ((p_win, p_draw, p_loss), was_applied):
         - If gate is None or disabled: returns input probabilities unchanged, was_applied=False
-        - If gate is enabled and scoped to outcome/both: returns scaled probabilities, was_applied=True
-        - If gate is enabled but scope is policy-only: returns input probabilities unchanged, was_applied=False
+        - If gate enabled and scoped to outcome/both: returns scaled probabilities, was_applied=True
+        - If gate enabled but scope is policy-only: returns input unchanged, was_applied=False
     """
     from renacechess.eval.runtime_recalibration import (
         apply_recalibration_to_outcome_if_enabled,
