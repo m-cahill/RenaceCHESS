@@ -38,6 +38,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M27 | ✅ Closed (MERGED) | `m27-runtime-recalibration-eval` → `main` | 2026-02-02 | PHASE-D-RUNTIME-RECALIBRATION-EVALUATION-001 — Paired Recalibration Evaluation |
 | M28 | ✅ Closed (MERGED) | `m28-recalibration-activation-decision` → `main` | 2026-02-02 | PHASE-D-RECALIBRATION-ACTIVATION-DECISION-001 — Runtime Recalibration Decision Framework |
 | M29 | ✅ Closed | `m28-recalibration-activation-decision` | 2026-02-02 | GPU-BENCHMARKING-001 — RTX 5090 Blackwell Validation + Benchmark Infrastructure |
+| M30 | 🔄 In Progress | `m30-frozen-eval-scaleset` | TBD | FROZEN-EVAL-SCALESET-001 — 10k Synthetic Frozen Eval Set v2 |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -568,6 +569,16 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 - **Pydantic Model:** `renacechess.contracts.models.FrozenEvalManifestV1`
 - **Status:** ✅ Complete and validated (immutable evaluation set with hash verification)
 
+### Frozen Eval Manifest Schema (v2)
+- **Location:** `src/renacechess/contracts/schemas/v1/frozen_eval_manifest.v2.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.FrozenEvalManifestV2`
+- **Status:** ✅ Complete and validated (M30 synthetic release-grade eval set, 10k positions)
+
+### Eval Set Provenance Schema (v1)
+- **Location:** `src/renacechess/contracts/schemas/v1/eval_set_provenance.v1.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.EvalSetProvenanceV1`
+- **Status:** ✅ Complete and validated (M30 provenance artifact for synthetic eval set)
+
 ### Context Bridge Schema (v1) — Extended
 - **Location:** `src/renacechess/contracts/schemas/v1/context_bridge.schema.json`
 - **Pydantic Model:** `renacechess.contracts.models.ContextBridgePayload`
@@ -896,8 +907,50 @@ From M00 forward, RenaceCHESS guarantees:
   - Evidence-based decisions (M27 report hash referenced)
   - Framework only — actual activation requires explicit policy
 
+**M29 Details:**
+- **Objective:** Establish GPU training benchmark infrastructure for RTX 5090 Blackwell validation
+- **Status:** ✅ Closed — Synthetic benchmark complete, real-data benchmark deferred to M31
+- **Final Coverage:** 91%+ (exceeds 90% threshold)
+- **Audit:** `docs/milestones/PhaseE/M29/M29_audit.md`
+- **Summary:** `docs/milestones/PhaseE/M29/M29_summary.md`
+- **Key Files:**
+  - `scripts/benchmark_training.py` — Extended with GPU detection
+  - `src/renacechess/contracts/models.py` — TrainingBenchmarkReportV1, EnvironmentMetadataV1
+  - `src/renacechess/contracts/schemas/v1/training_benchmark_report.v1.schema.json` — Benchmark report schema
+- **Notable Features:**
+  - RTX 5090 Blackwell compatibility validated (no OOM, determinism preserved)
+  - Synthetic benchmark mode (no production dataset required)
+  - Time-to-train estimation (heuristic-v1, explicitly labeled)
+  - Real-data benchmark intentionally deferred to M31 (no production v2 dataset manifest)
+- **Phase E Status:** First Phase E milestone complete; benchmark infrastructure ready
+
+**M30 Details:**
+- **Objective:** Generate 10,000-position synthetic frozen eval set for release-grade calibration
+- **Status:** 🔄 In Progress — Implementation complete, pending PR
+- **CI Run:** Pending
+- **Key Files:**
+  - `src/renacechess/contracts/models.py` — FrozenEvalManifestV2, EvalSetProvenanceV1, FrozenEvalRecordV2
+  - `src/renacechess/contracts/schemas/v1/frozen_eval_manifest.v2.schema.json` — V2 manifest schema
+  - `src/renacechess/contracts/schemas/v1/eval_set_provenance.v1.schema.json` — Provenance schema
+  - `src/renacechess/frozen_eval/generator_v2.py` — Deterministic synthetic position generator
+  - `data/frozen_eval_v2/manifest.json` — 10k-position frozen eval manifest
+  - `data/frozen_eval_v2/provenance.json` — Provenance artifact
+  - `data/frozen_eval_v2/shard_*.jsonl` — 10 data shards (1000 positions each)
+  - `tests/test_m30_frozen_eval_v2.py` — 29 comprehensive tests
+  - `.github/workflows/ci.yml` — Frozen Eval V2 Validation job
+- **Notable Features:**
+  - FrozenEvalManifestV2: Breaking schema (not backward-compatible with V1)
+  - Synthetic positions: Chess-valid, algorithmically generated (not random tensors)
+  - 7 skill buckets: Minimum 1,000 positions each (1,428-1,429 actual)
+  - Deterministic generation: Fixed seed (42), reproducible across runs
+  - Provenance artifact: Full lineage and audit notes
+  - CI validation: Schema, hash, shard integrity, bucket minimums, position count
+- **Audit Statement:**
+  > "Frozen eval v2 is synthetic but chess-valid, and is intended for *relative* evaluation and calibration stability, not absolute strength claims."
+- **Phase E Status:** Frozen eval ruler established; ready for M31 training and M32 evaluation
+
 ---
 
-**Last Updated:** 2026-02-02 (Phase D CLOSED — M28 PHASE-D-RECALIBRATION-ACTIVATION-DECISION-001 Complete)
+**Last Updated:** 2026-02-02 (Phase E — M30 FROZEN-EVAL-SCALESET-001 In Progress)
 
 

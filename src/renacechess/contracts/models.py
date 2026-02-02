@@ -4128,3 +4128,247 @@ class TrainingBenchmarkReportV1(BaseModel):
         pattern=r"^sha256:[a-f0-9]{64}$",
         description="SHA-256 hash of canonical report content for reproducibility verification",
     )
+
+
+# =============================================================================
+# M30: Frozen Evaluation Set v2 Models (Phase E — Scale Set)
+# =============================================================================
+
+
+class EvalSetProvenanceV1(BaseModel):
+    """Provenance metadata for frozen evaluation set v2 (M30).
+
+    Documents the origin, selection logic, and reproducibility guarantees
+    for synthetic frozen eval data. This is a governance artifact.
+
+    See docs/milestones/PhaseE/M30/M30_plan.md for the governing specification.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    version: Literal["1.0"] = Field(
+        "1.0",
+        description="Provenance schema version",
+    )
+    created_at: datetime = Field(
+        ...,
+        alias="createdAt",
+        description="ISO 8601 timestamp of provenance artifact creation",
+    )
+    generator_version: str = Field(
+        ...,
+        alias="generatorVersion",
+        description="Version of the frozen eval generator used (e.g., 'v2.0.0')",
+    )
+    selection_seed: int = Field(
+        ...,
+        alias="selectionSeed",
+        description="Random seed used for deterministic selection (fixed for reproducibility)",
+    )
+    position_sources: list[str] = Field(
+        ...,
+        alias="positionSources",
+        min_length=1,
+        description="List of sources for chess positions (e.g., 'algorithmic_fen_seeds_v1')",
+    )
+    skill_bucket_strategy: str = Field(
+        ...,
+        alias="skillBucketStrategy",
+        description="Strategy used for skill bucket assignment (e.g., 'uniform_synthetic')",
+    )
+    time_control_strategy: str = Field(
+        ...,
+        alias="timeControlStrategy",
+        description="Strategy used for time control assignment (e.g., 'random_uniform')",
+    )
+    time_pressure_strategy: str = Field(
+        ...,
+        alias="timePressureStrategy",
+        description="Strategy used for time pressure assignment (e.g., 'random_uniform')",
+    )
+    audit_notes: str = Field(
+        ...,
+        alias="auditNotes",
+        description=(
+            "Explicit audit statement about the synthetic nature of this eval set. "
+            "Required for governance clarity."
+        ),
+    )
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of canonical provenance content",
+    )
+
+
+class FrozenEvalRecordV2(BaseModel):
+    """Record in frozen eval manifest v2 (M30).
+
+    Each record represents one chess position in the frozen evaluation set
+    with full conditioning metadata and shard location.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    record_key: str = Field(
+        ...,
+        alias="recordKey",
+        description="Unique record identifier (format: 'FEN:index')",
+    )
+    shard_id: str = Field(
+        ...,
+        alias="shardId",
+        description="Shard identifier containing this record (e.g., 'shard_000')",
+    )
+    skill_bucket_id: Literal[
+        "lt_800",
+        "800_999",
+        "1000_1199",
+        "1200_1399",
+        "1400_1599",
+        "1600_1799",
+        "gte_1800",
+    ] = Field(
+        ...,
+        alias="skillBucketId",
+        description="Skill bucket ID for this record (M06 canonical buckets)",
+    )
+    time_control_class: Literal["bullet", "blitz", "rapid", "classical"] = Field(
+        ...,
+        alias="timeControlClass",
+        description="Time control class for this record",
+    )
+    time_pressure_bucket: Literal["normal", "low", "trouble"] = Field(
+        ...,
+        alias="timePressureBucket",
+        description="Time pressure bucket for this record",
+    )
+
+
+class FrozenEvalStratificationV2(BaseModel):
+    """Stratification configuration for frozen eval set v2 (M30).
+
+    Documents the target counts and minimum guarantees per bucket.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    total_positions: int = Field(
+        ...,
+        alias="totalPositions",
+        ge=1000,
+        description="Total target position count (locked: 10,000 for M30)",
+    )
+    min_per_skill_bucket: int = Field(
+        ...,
+        alias="minPerSkillBucket",
+        ge=100,
+        description="Minimum positions per skill bucket (locked: 1,000 for M30)",
+    )
+    skill_bucket_count: int = Field(
+        7,
+        alias="skillBucketCount",
+        description="Number of canonical skill buckets (fixed: 7)",
+    )
+
+
+class FrozenEvalManifestV2(BaseModel):
+    """Frozen evaluation manifest v2 (M30) — Release-grade synthetic eval set.
+
+    A deterministic, immutable evaluation artifact for Phase E scale testing.
+    This is NOT a backward-compatible extension of v1; it is a clean replacement
+    designed for release-grade evaluation.
+
+    Key differences from V1:
+    - Synthetic-only (no sourceManifestRef to production data)
+    - Explicit synthetic flag for audit clarity
+    - Selection strategy documented
+    - Separate provenance artifact for lineage
+    - Explicit position count
+
+    Audit statement:
+    > "Frozen eval v2 is synthetic but chess-valid, and is intended for
+    > *relative* evaluation and calibration stability, not absolute strength claims."
+
+    See docs/milestones/PhaseE/M30/M30_plan.md for the governing specification.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    schema_version: Literal[2] = Field(
+        2,
+        alias="schemaVersion",
+        description="Schema version (2 = M30 release-grade)",
+    )
+    created_at: datetime = Field(
+        ...,
+        alias="createdAt",
+        description="ISO 8601 timestamp of manifest creation",
+    )
+    synthetic: Literal[True] = Field(
+        True,
+        description=(
+            "Explicit flag indicating this is a synthetic eval set. "
+            "Always True for v2 manifests generated by M30."
+        ),
+    )
+    selection_strategy: str = Field(
+        ...,
+        alias="selectionStrategy",
+        description=(
+            "Human-readable description of position selection strategy "
+            "(e.g., 'deterministic_fen_seeds_stratified_by_skill')"
+        ),
+    )
+    position_count: int = Field(
+        ...,
+        alias="positionCount",
+        ge=1,
+        description="Total number of positions in this frozen eval set",
+    )
+    provenance_ref: str = Field(
+        ...,
+        alias="provenanceRef",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="Determinism hash of the EvalSetProvenanceV1 artifact for this set",
+    )
+    stratification: FrozenEvalStratificationV2 = Field(
+        ...,
+        description="Stratification configuration used for this eval set",
+    )
+    counts_by_skill_bucket_id: dict[str, int] = Field(
+        ...,
+        alias="countsBySkillBucketId",
+        description="Position counts by skill bucket ID (keyed by canonical bucket ID)",
+    )
+    counts_by_time_control_class: dict[str, int] = Field(
+        ...,
+        alias="countsByTimeControlClass",
+        description="Position counts by time control class",
+    )
+    counts_by_time_pressure_bucket: dict[str, int] = Field(
+        ...,
+        alias="countsByTimePressureBucket",
+        description="Position counts by time pressure bucket",
+    )
+    shard_refs: list[str] = Field(
+        ...,
+        alias="shardRefs",
+        min_length=1,
+        description="List of shard file paths relative to manifest directory",
+    )
+    shard_hashes: dict[str, str] = Field(
+        ...,
+        alias="shardHashes",
+        description="SHA-256 hashes of each shard file (keyed by shard_id)",
+    )
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description=(
+            "SHA-256 hash of canonical manifest JSON (excluding this field) "
+            "for determinism verification"
+        ),
+    )
