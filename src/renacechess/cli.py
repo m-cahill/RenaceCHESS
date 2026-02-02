@@ -1,10 +1,13 @@
 """CLI entry point for RenaceCHESS."""
 
+from __future__ import annotations
+
 import argparse
 import json
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from renacechess.contracts.models import (
     AdviceFactsV1,
@@ -13,6 +16,12 @@ from renacechess.contracts.models import (
     EloBucketDeltaFactsV1,
     FrozenEvalManifestV1,
 )
+
+if TYPE_CHECKING:
+    from renacechess.contracts.models import (
+        RecalibrationGateV1,
+        RecalibrationParametersV1,
+    )
 from renacechess.dataset.builder import build_dataset
 from renacechess.dataset.config import DatasetBuildConfig
 from renacechess.demo.pgn_overlay import generate_demo_payload
