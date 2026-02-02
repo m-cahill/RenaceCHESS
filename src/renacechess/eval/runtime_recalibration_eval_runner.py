@@ -648,5 +648,3 @@ def run_runtime_recalibration_evaluation(
     )
 
     return report, delta
-
-

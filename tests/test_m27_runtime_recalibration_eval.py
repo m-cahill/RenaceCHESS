@@ -517,15 +517,17 @@ class TestEdgeCases:
         )
 
         # Create minimal params without "unknown_bucket"
-        params = RecalibrationParametersV1.model_validate({
-            "version": "1.0",
-            "generatedAt": "2026-01-01T00:00:00Z",
-            "sourceCalibrationMetricsHash": "sha256:" + "0" * 64,
-            "sourceManifestHash": "0" * 64,
-            "policyId": "test",
-            "byEloBucket": [],
-            "determinismHash": "sha256:" + "0" * 64,
-        })
+        params = RecalibrationParametersV1.model_validate(
+            {
+                "version": "1.0",
+                "generatedAt": "2026-01-01T00:00:00Z",
+                "sourceCalibrationMetricsHash": "sha256:" + "0" * 64,
+                "sourceManifestHash": "0" * 64,
+                "policyId": "test",
+                "byEloBucket": [],
+                "determinismHash": "sha256:" + "0" * 64,
+            }
+        )
 
         top_moves = [("e2e4", 0.5), ("d2d4", 0.3)]
 
@@ -591,4 +593,3 @@ class TestRuntimeCalibrationSnapshotV1:
         assert "policyNll" in dumped
         assert "policyTop1Ece" in dumped
         assert "meanEntropy" in dumped
-
