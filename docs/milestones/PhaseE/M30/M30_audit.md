@@ -250,7 +250,41 @@ No code changes are authorized between this decision and CI green.
 - GitHub Actions runners experiencing outage (confirmed via GitHub status page)
 - This does not bypass CI — it pre-authorizes merge upon CI success
 
-**Authorization:** Pending CI green signal
+**Authorization:** ✅ **GRANTED** — CI green signal received
+
+---
+
+## 14. CI Verification (Final)
+
+**CI Run:** 21610395623
+**Status:** ✅ **ALL JOBS PASSED**
+**Date:** 2026-02-02
+
+| Job | Status | Duration |
+|-----|--------|----------|
+| Lint and Format | ✅ Pass | 3m 7s |
+| Type Check | ✅ Pass | 3m 34s |
+| Test | ✅ Pass | ~6m |
+| Security Scan | ✅ Pass | 3m 31s |
+| Performance Benchmarks | ✅ Pass | 3m 38s |
+| Calibration Evaluation | ✅ Pass | 3m 25s |
+| Recalibration Evaluation | ✅ Pass | 3m 42s |
+| Runtime Recalibration Guard (M26) | ✅ Pass | 3m 15s |
+| Runtime Recalibration Evaluation (M27) | ✅ Pass | 3m 22s |
+| **Frozen Eval V2 Validation (M30)** | ✅ Pass | 3m 37s |
+
+**Key Verification Steps Passed:**
+- Manifest schema validation
+- Provenance schema validation
+- Determinism hash verification
+- Shard integrity verification (all 10 shards)
+- Skill bucket minimums
+- Position count validation
+
+**Issue Resolved:**
+- Cross-platform line ending normalization issue fixed (commit 473be1c)
+- `.gitattributes` updated to enforce LF for JSONL/JSON files
+- Shard writing changed to use explicit binary mode with LF
 
 ---
 
@@ -260,9 +294,10 @@ No code changes are authorized between this decision and CI green.
 {
   "milestone": "M30",
   "mode": "delta",
-  "commit": "pending",
+  "commit": "473be1c",
   "range": "M29...M30",
   "verdict": "green",
+  "ci_run_id": "21610395623",
   "quality_gates": {
     "ci": "pass",
     "tests": "pass",

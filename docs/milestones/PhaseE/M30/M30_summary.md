@@ -4,7 +4,7 @@
 **Phase:** Phase E (Scale, Proof & Release Lock)  
 **Milestone:** M30 — FROZEN-EVAL-SCALESET-001 (10k Synthetic Frozen Eval Set v2)  
 **Timeframe:** 2026-02-02 → 2026-02-02  
-**Status:** In Progress (pending PR)  
+**Status:** ✅ Closed (CI Green — Pending Merge Authorization)  
 
 ---
 
@@ -130,9 +130,11 @@ M30 establishes a **release-grade frozen evaluation set** for Phase E scale test
 ### Determinism Verification
 
 ```
-Manifest hash: sha256:a5f4e5b8d10154ca11ea026862efda0ac03f32a94f67e98b0067130749939ba7
+Manifest hash: sha256:00a13e916d6b0a8770688e8623097f67b3224c4b32c64ce133785fda0a58e11f
 verify_frozen_eval_v2() → True
 ```
+
+**Note:** Hash regenerated after cross-platform line ending fix (commit 473be1c).
 
 ### Lint & Type Check
 
@@ -225,7 +227,10 @@ ruff check → All checks passed!
 
 ## 10. Final Verdict
 
-**Milestone objectives met. Implementation complete, pending PR creation and CI verification.**
+**✅ Milestone objectives met. CI verification complete. Awaiting merge authorization.**
+
+**CI Run:** 21610395623  
+**All 10 jobs passed**, including the new `frozen-eval-v2-validation` job.
 
 The frozen eval v2 set is:
 - Correctly sized (10,000 positions)
@@ -239,9 +244,9 @@ The frozen eval v2 set is:
 ## 11. Authorized Next Step
 
 **Immediate:**
-- Create PR for M30 branch
-- Monitor CI run
-- Await merge authorization (per workflow rules)
+- ✅ PR created (#35)
+- ✅ CI run completed (21610395623)
+- ⏳ Await merge authorization (per workflow rules)
 
 **After M30 closure:**
 - M31 (FULL-TRAINING-RUN-001) — Use frozen eval v2 as the calibration ruler

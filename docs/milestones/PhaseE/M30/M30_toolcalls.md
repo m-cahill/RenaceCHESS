@@ -33,6 +33,10 @@ This file logs all tool invocations for M30 milestone execution.
 | 2026-02-02 | search_replace | Fix shard writing to use write_bytes | src/renacechess/frozen_eval/generator_v2.py | ✅ Complete |
 | 2026-02-02 | run_terminal_cmd | Regenerate shards with consistent line endings | data/frozen_eval_v2/ | ✅ Complete |
 | 2026-02-02 | run_terminal_cmd | Push fix for cross-platform line endings | commit 473be1c | ✅ Complete |
+| 2026-02-02 | gh run view | Monitor CI run 21610395623 | m30-frozen-eval-scaleset | ✅ All 10 jobs passed |
+| 2026-02-02 | search_replace | Update M30_audit.md with CI verification | docs/milestones/PhaseE/M30/M30_audit.md | ✅ Complete |
+| 2026-02-02 | search_replace | Update M30_summary.md status | docs/milestones/PhaseE/M30/M30_summary.md | ✅ Complete |
+| 2026-02-02 | search_replace | Update renacechess.md | renacechess.md | ✅ Complete |
 
 ---
 
@@ -54,5 +58,5 @@ This does **not replace CI verification** and is recorded only as interim eviden
 
 ---
 
-**Last Updated:** 2026-02-02 (Local CI-equivalence complete — awaiting GitHub Actions recovery)
+**Last Updated:** 2026-02-02 (CI Green — Awaiting merge authorization)
 
