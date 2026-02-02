@@ -28,7 +28,11 @@ This file logs all tool invocations for M30 milestone execution.
 | 2026-02-02 | run_terminal_cmd | Local CI-equivalent dry run | Full suite | ✅ Complete |
 | 2026-02-02 | search_replace | Add conditional merge authorization | docs/milestones/PhaseE/M30/M30_audit.md | ✅ Complete |
 | 2026-02-02 | run_terminal_cmd | Push conditional merge update | commit 3f97920 | ✅ Complete |
-| 2026-02-02 | gh run list | Monitor CI run 21609851725 | m30-frozen-eval-scaleset | ⏳ Queued |
+| 2026-02-02 | gh run list | Monitor CI run 21609851725 | m30-frozen-eval-scaleset | ❌ Failed (shard hash mismatch) |
+| 2026-02-02 | search_replace | Fix .gitattributes for JSONL/JSON line endings | .gitattributes | ✅ Complete |
+| 2026-02-02 | search_replace | Fix shard writing to use write_bytes | src/renacechess/frozen_eval/generator_v2.py | ✅ Complete |
+| 2026-02-02 | run_terminal_cmd | Regenerate shards with consistent line endings | data/frozen_eval_v2/ | ✅ Complete |
+| 2026-02-02 | run_terminal_cmd | Push fix for cross-platform line endings | commit 473be1c | ✅ Complete |
 
 ---
 
