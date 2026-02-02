@@ -36,8 +36,6 @@ def sample_pgn_path() -> Path:
     return Path(__file__).parent / "data" / "sample.pgn"
 
 
-
-
 @pytest.fixture
 def recalibration_gate_disabled(tmp_path: Path) -> Path:
     """Create a disabled recalibration gate artifact."""
@@ -125,9 +123,7 @@ def recalibration_gate_enabled(tmp_path: Path, recalibration_parameters: Path) -
 
 
 @pytest.fixture
-def recalibration_gate_enabled_policy_only(
-    tmp_path: Path, recalibration_parameters: Path
-) -> Path:
+def recalibration_gate_enabled_policy_only(tmp_path: Path, recalibration_parameters: Path) -> Path:
     """Create an enabled recalibration gate artifact with policy-only scope."""
     gate_data = {
         "version": "1.0",
@@ -159,9 +155,7 @@ class TestCLIGateLoading:
     to ensure the CLI code paths are covered.
     """
 
-    def test_cli_gate_loading_disabled(
-        self, recalibration_gate_disabled: Path
-    ) -> None:
+    def test_cli_gate_loading_disabled(self, recalibration_gate_disabled: Path) -> None:
         """Test CLI gate loading with disabled gate."""
         from renacechess.eval.runtime_recalibration import load_recalibration_gate
 
@@ -217,13 +211,9 @@ class TestCLIGateLoading:
 # =============================================================================
 
 
-
-
 # =============================================================================
 # CLI Validation Tests
 # =============================================================================
-
-
 
 
 # =============================================================================
@@ -255,9 +245,7 @@ class TestRunnerRecalibrationApply:
         probs = [0.4, 0.3, 0.2, 0.1]
 
         # Apply recalibration
-        result_probs, metadata = apply_recalibration_if_enabled(
-            probs, "lt_800", gate, params
-        )
+        result_probs, metadata = apply_recalibration_if_enabled(probs, "lt_800", gate, params)
 
         # With temperature=2.0, probabilities should be flattened
         assert metadata.applied is True
@@ -329,4 +317,3 @@ class TestRunnerRecalibrationApply:
             apply_recalibration_if_enabled(probs, "nonexistent_bucket", gate, params)
 
         assert "nonexistent_bucket" in str(exc_info.value)
-

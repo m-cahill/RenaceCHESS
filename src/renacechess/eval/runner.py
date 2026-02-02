@@ -309,31 +309,18 @@ def run_conditioned_evaluation(
                 predicted_moves = policy.predict(record)
 
                 # Apply recalibration if gate is enabled (M26)
-                if (
-                    recalibration_gate is not None
-                    and recalibration_gate.enabled
-                    and skill_bucket_id
-                ):
-                    from renacechess.eval.runtime_recalibration import (
-                        apply_recalibration_if_enabled,
-                    )
+                from renacechess.eval.recalibration_integration import (
+                    apply_runtime_recalibration_to_policy_moves,
+                )
 
-                    # Extract probabilities from PolicyMove list
-                    move_probs = [move.p for move in predicted_moves]
-                    if move_probs:
-                        scaled_probs, _metadata = apply_recalibration_if_enabled(
-                            move_probs,
-                            skill_bucket_id,
-                            recalibration_gate,
-                            recalibration_params,
-                        )
-                        # Update PolicyMove probabilities
-                        predicted_moves = [
-                            PolicyMove(uci=move.uci, san=move.san, p=scaled_probs[i])
-                            for i, move in enumerate(predicted_moves)
-                        ]
-                        # Re-sort by probability (descending)
-                        predicted_moves.sort(key=lambda x: x.p, reverse=True)
+                predicted_moves, _recal_applied = (
+                    apply_runtime_recalibration_to_policy_moves(
+                        predicted_moves,
+                        skill_bucket_id,
+                        recalibration_gate,
+                        recalibration_params,
+                    )
+                )
 
                 policy_output = predicted_moves[0].uci if predicted_moves else None
 
@@ -363,26 +350,21 @@ def run_conditioned_evaluation(
                         predicted_wdl = outcome_head.predict(record)
 
                         # Apply recalibration if gate is enabled (M26)
-                        if (
-                            recalibration_gate is not None
-                            and recalibration_gate.enabled
-                            and skill_bucket_id
-                        ):
-                            from renacechess.eval.runtime_recalibration import (
-                                apply_recalibration_to_outcome_if_enabled,
-                            )
+                        from renacechess.eval.recalibration_integration import (
+                            apply_runtime_recalibration_to_outcome,
+                        )
 
-                            (scaled_w, scaled_d, scaled_l), _metadata = (
-                                apply_recalibration_to_outcome_if_enabled(
-                                    predicted_wdl["w"],
-                                    predicted_wdl["d"],
-                                    predicted_wdl["l"],
-                                    skill_bucket_id,
-                                    recalibration_gate,
-                                    recalibration_params,
-                                )
+                        (scaled_w, scaled_d, scaled_l), _recal_applied = (
+                            apply_runtime_recalibration_to_outcome(
+                                predicted_wdl["w"],
+                                predicted_wdl["d"],
+                                predicted_wdl["l"],
+                                skill_bucket_id,
+                                recalibration_gate,
+                                recalibration_params,
                             )
-                            predicted_wdl = {"w": scaled_w, "d": scaled_d, "l": scaled_l}
+                        )
+                        predicted_wdl = {"w": scaled_w, "d": scaled_d, "l": scaled_l}
 
                         # Add to overall accumulator
                         outcome_accumulator.add_prediction(predicted_wdl, game_result)

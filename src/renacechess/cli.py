@@ -71,10 +71,7 @@ def resolve_recalibration_gate_from_args(
         if recalibration_gate.enabled:
             if not recalibration_gate.parameters_ref:
                 print(
-                    (
-                        "Error: RecalibrationGateV1.enabled=True "
-                        "requires parametersRef to be set"
-                    ),
+                    ("Error: RecalibrationGateV1.enabled=True requires parametersRef to be set"),
                     file=sys.stderr,
                 )
                 sys.exit(1)
@@ -85,10 +82,7 @@ def resolve_recalibration_gate_from_args(
                 recalibration_params = load_recalibration_parameters(params_path)
             else:
                 print(
-                    (
-                        f"Error: RecalibrationParametersV1 "
-                        f"not found at: {params_path}"
-                    ),
+                    (f"Error: RecalibrationParametersV1 not found at: {params_path}"),
                     file=sys.stderr,
                 )
                 sys.exit(1)
@@ -718,8 +712,8 @@ def main() -> None:
                         sys.exit(1)
 
                     # M26: Load recalibration gate if provided
-                    recalibration_gate, recalibration_params = (
-                        resolve_recalibration_gate_from_args(args)
+                    recalibration_gate, recalibration_params = resolve_recalibration_gate_from_args(
+                        args
                     )
 
                     # Run conditioned evaluation (M07, M09, M26)
