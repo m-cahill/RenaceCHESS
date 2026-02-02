@@ -1,8 +1,10 @@
 # M29 Summary: GPU Benchmarking & Training Time Estimation
 
-**Status:** IN PROGRESS  
+**Status:** ✅ CLOSED  
 **Phase:** E (Release)  
-**ADR Reference:** GPU-BENCHMARKING-001
+**ADR Reference:** GPU-BENCHMARKING-001  
+**Completion Date:** 2026-02-02  
+**Verdict:** Infrastructure-validated; real-data benchmark intentionally deferred to M31
 
 ---
 
@@ -106,14 +108,27 @@ CPU: AMD64 Family 26 Model 68 (8 cores)
 
 ---
 
-## Next Steps
+## Closeout Verdict
 
-1. ⏳ Provide path to real v2 dataset manifest
-2. ⏳ Execute single real-data benchmark (2 configs)
-3. ⏳ Update M29 summary with real-data results
-4. ⏳ Generate M29 audit and closeout
+> **M29 — GPU-BENCHMARKING-001 is CLOSED.**
+>
+> This milestone validated Blackwell (RTX 5090) compatibility, training-loop execution, memory headroom, and benchmark instrumentation using a synthetic workload.
+>
+> No production v2 dataset manifest exists yet; therefore, real-data benchmarking was intentionally deferred to M31, where it naturally coincides with full training.
+>
+> Synthetic results are explicitly labeled low-confidence and were used only to validate feasibility and unblock Phase E progression.
 
 ---
 
-**Last Updated:** 2026-02-02
+## What This Unlocks
+
+- ✅ **M30** — Frozen eval scale planning (uses synthetic throughput as conservative baseline)
+- ✅ **M31** — Full training (first real-data touchpoint, includes real-data benchmark)
+- ❌ No fake "benchmark dataset" needed
+- ❌ No retroactive data archaeology
+
+---
+
+**Last Updated:** 2026-02-02  
+**Closed By:** RediAI Audit Lead
 

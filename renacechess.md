@@ -37,6 +37,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M26 | ✅ Closed (MERGED) | `m26-phase-d-runtime-gating-001` → `main` | 2026-02-01 | PHASE-D-RUNTIME-GATING-001 — Runtime Recalibration Gating |
 | M27 | ✅ Closed (MERGED) | `m27-runtime-recalibration-eval` → `main` | 2026-02-02 | PHASE-D-RUNTIME-RECALIBRATION-EVALUATION-001 — Paired Recalibration Evaluation |
 | M28 | ✅ Closed (MERGED) | `m28-recalibration-activation-decision` → `main` | 2026-02-02 | PHASE-D-RECALIBRATION-ACTIVATION-DECISION-001 — Runtime Recalibration Decision Framework |
+| M29 | ✅ Closed | `m28-recalibration-activation-decision` | 2026-02-02 | GPU-BENCHMARKING-001 — RTX 5090 Blackwell Validation + Benchmark Infrastructure |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)

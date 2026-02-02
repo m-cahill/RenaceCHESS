@@ -30,5 +30,14 @@ Infrastructure validated on RTX 5090:
 - 16 benchmark runs completed, no OOM, no errors
 - Determinism hash: `sha256:6bcb9f317465cc4a994e2d9366440f489d4067646f0e162c52bcea2386def8f5`
 
-**Next:** Awaiting v2 dataset manifest for real-data benchmark.
+**Next:** M29 CLOSED. Real-data benchmark deferred to M31.
+
+## Closeout Tool Calls
+
+| Date | Tool | Purpose | Files/Target | Status |
+|------|------|---------|--------------|--------|
+| 2026-02-02 | write | Generate M29 audit | docs/milestones/PhaseE/M29/M29_audit.md | ✅ Complete |
+| 2026-02-02 | search_replace | Update M29 summary with closure | docs/milestones/PhaseE/M29/M29_summary.md | ✅ Complete |
+| 2026-02-02 | search_replace | Add M29 to milestone table | renacechess.md | ✅ Complete |
+| 2026-02-02 | write | Initialize M30 folder | docs/milestones/PhaseE/M30/ | ✅ Complete |
 
