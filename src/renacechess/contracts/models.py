@@ -3737,3 +3737,394 @@ class RuntimeRecalibrationDecisionV1(BaseModel):
         pattern=r"^sha256:[a-f0-9]{64}$",
         description="SHA-256 hash for determinism verification of entire decision",
     )
+
+
+# =============================================================================
+# M29: GPU Training Benchmark Models (Phase E)
+# =============================================================================
+
+
+class EnvironmentMetadataV1(BaseModel):
+    """Hardware and software environment metadata for GPU training benchmarks.
+
+    Captures all relevant details about the execution environment to ensure
+    reproducibility and enable cross-hardware comparison.
+
+    See docs/milestones/PhaseE/M29/M29_plan.md for the governing specification.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    gpu_name: str = Field(
+        ...,
+        alias="gpuName",
+        description="GPU device name (e.g., 'NVIDIA GeForce RTX 5090')",
+    )
+    vram_gb: float = Field(
+        ...,
+        alias="vramGb",
+        ge=0,
+        description="Total VRAM in gigabytes",
+    )
+    cuda_version: str = Field(
+        ...,
+        alias="cudaVersion",
+        description="CUDA runtime version",
+    )
+    driver_version: str | None = Field(
+        None,
+        alias="driverVersion",
+        description="GPU driver version (optional)",
+    )
+    torch_version: str = Field(
+        ...,
+        alias="torchVersion",
+        description="PyTorch version",
+    )
+    python_version: str = Field(
+        ...,
+        alias="pythonVersion",
+        description="Python version",
+    )
+    os: str = Field(
+        ...,
+        description="Operating system (e.g., 'Windows 10', 'Ubuntu 22.04')",
+    )
+    cpu_name: str | None = Field(
+        None,
+        alias="cpuName",
+        description="CPU model name (optional)",
+    )
+    cpu_cores: int | None = Field(
+        None,
+        alias="cpuCores",
+        ge=1,
+        description="Number of CPU cores/threads available",
+    )
+    ram_gb: float | None = Field(
+        None,
+        alias="ramGb",
+        ge=0,
+        description="Total system RAM in gigabytes (optional)",
+    )
+
+
+class DatasetInfoV1(BaseModel):
+    """Dataset manifest and shard information for benchmark context.
+
+    Records provenance information about the dataset used for benchmarking.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    manifest_hash: str = Field(
+        ...,
+        alias="manifestHash",
+        description="SHA-256 hash of dataset manifest",
+    )
+    manifest_path: str | None = Field(
+        None,
+        alias="manifestPath",
+        description="Path to dataset manifest (informational)",
+    )
+    frozen_eval_manifest_hash: str = Field(
+        ...,
+        alias="frozenEvalManifestHash",
+        description="SHA-256 hash of frozen eval manifest",
+    )
+    overlap_check_passed: bool = Field(
+        ...,
+        alias="overlapCheckPassed",
+        description="True if no overlap between training and frozen eval data",
+    )
+    total_positions_available: int | None = Field(
+        None,
+        alias="totalPositionsAvailable",
+        ge=0,
+        description="Total positions available in dataset",
+    )
+
+
+class BenchmarkMetricsV1(BaseModel):
+    """Measured performance metrics for a single benchmark run.
+
+    Captures throughput, timing breakdowns, and resource utilization.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    steps_completed: int = Field(
+        ...,
+        alias="stepsCompleted",
+        ge=0,
+        description="Number of training steps completed",
+    )
+    samples_processed: int | None = Field(
+        None,
+        alias="samplesProcessed",
+        ge=0,
+        description="Total samples processed",
+    )
+    total_time_seconds: float = Field(
+        ...,
+        alias="totalTimeSeconds",
+        ge=0,
+        description="Total wall-clock time in seconds",
+    )
+    steps_per_second: float | None = Field(
+        None,
+        alias="stepsPerSecond",
+        ge=0,
+        description="Training steps per second",
+    )
+    samples_per_second: float | None = Field(
+        None,
+        alias="samplesPerSecond",
+        ge=0,
+        description="Samples processed per second",
+    )
+    step_time_mean_ms: float | None = Field(
+        None,
+        alias="stepTimeMeanMs",
+        ge=0,
+        description="Mean time per step in milliseconds",
+    )
+    step_time_p95_ms: float | None = Field(
+        None,
+        alias="stepTimeP95Ms",
+        ge=0,
+        description="95th percentile step time in milliseconds",
+    )
+    gpu_utilization_percent: float | None = Field(
+        None,
+        alias="gpuUtilizationPercent",
+        ge=0,
+        le=100,
+        description="Average GPU utilization percentage (optional)",
+    )
+    vram_peak_gb: float | None = Field(
+        None,
+        alias="vramPeakGb",
+        ge=0,
+        description="Peak VRAM usage in gigabytes",
+    )
+    vram_peak_percent: float | None = Field(
+        None,
+        alias="vramPeakPercent",
+        ge=0,
+        le=100,
+        description="Peak VRAM as percentage of total",
+    )
+    data_load_time_percent: float | None = Field(
+        None,
+        alias="dataLoadTimePercent",
+        ge=0,
+        le=100,
+        description="Percentage of time spent in data loading",
+    )
+    forward_time_percent: float | None = Field(
+        None,
+        alias="forwardTimePercent",
+        ge=0,
+        le=100,
+        description="Percentage of time spent in forward pass",
+    )
+    backward_time_percent: float | None = Field(
+        None,
+        alias="backwardTimePercent",
+        ge=0,
+        le=100,
+        description="Percentage of time spent in backward pass",
+    )
+    optimizer_time_percent: float | None = Field(
+        None,
+        alias="optimizerTimePercent",
+        ge=0,
+        le=100,
+        description="Percentage of time spent in optimizer step",
+    )
+    power_draw_watts: float | None = Field(
+        None,
+        alias="powerDrawWatts",
+        ge=0,
+        description="Average GPU power draw in watts (optional, nice-to-have)",
+    )
+
+
+class BenchmarkRunV1(BaseModel):
+    """A single benchmark run with specific configuration.
+
+    Each run varies one axis at a time to isolate performance characteristics.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    run_id: str = Field(
+        ...,
+        alias="runId",
+        description="Unique identifier for this run (e.g., 'batch64_samples1000_fp32_policy')",
+    )
+    batch_size: Literal[64, 128, 256, 512] = Field(
+        ...,
+        alias="batchSize",
+        description="Training batch size",
+    )
+    sample_count: Literal[1000, 10000, 100000] = Field(
+        ...,
+        alias="sampleCount",
+        description="Number of positions used (sanity=1K, medium=10K, large=100K)",
+    )
+    sample_count_label: Literal["sanity", "medium", "large"] = Field(
+        ...,
+        alias="sampleCountLabel",
+        description="Human-readable shard size label",
+    )
+    precision_mode: Literal["fp32", "amp"] = Field(
+        ...,
+        alias="precisionMode",
+        description="Training precision mode",
+    )
+    model_heads: Literal["policy", "policy+outcome"] = Field(
+        ...,
+        alias="modelHeads",
+        description="Which model heads were trained",
+    )
+    metrics: BenchmarkMetricsV1 = Field(
+        ...,
+        description="Measured performance metrics",
+    )
+    status: Literal["success", "oom", "error", "skipped"] = Field(
+        "success",
+        description="Run completion status",
+    )
+    error_message: str | None = Field(
+        None,
+        alias="errorMessage",
+        description="Error message if status is not 'success'",
+    )
+
+
+class TimeToTrainAssumptionsV1(BaseModel):
+    """Assumptions underlying a time-to-train estimate.
+
+    These must be explicitly stated so the estimate can be validated.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    target_dataset_size: int = Field(
+        ...,
+        alias="targetDatasetSize",
+        gt=0,
+        description="Target dataset size for full training (positions)",
+    )
+    target_epochs: int = Field(
+        ...,
+        alias="targetEpochs",
+        gt=0,
+        description="Target number of epochs",
+    )
+    batch_size: int = Field(
+        ...,
+        alias="batchSize",
+        gt=0,
+        description="Assumed batch size for estimate",
+    )
+    precision_mode: Literal["fp32", "amp"] = Field(
+        ...,
+        alias="precisionMode",
+        description="Assumed precision mode",
+    )
+
+
+class TimeToTrainEstimateV1(BaseModel):
+    """Derived time-to-train projection from benchmark runs.
+
+    Explicitly labeled as heuristic, not a guarantee.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    estimate_version: Literal["heuristic-v1"] = Field(
+        "heuristic-v1",
+        alias="estimateVersion",
+        description="Version of estimation method (explicitly labeled as heuristic)",
+    )
+    assumptions: TimeToTrainAssumptionsV1 = Field(
+        ...,
+        description="Assumptions underlying the estimate",
+    )
+    projected_time_hours: float = Field(
+        ...,
+        alias="projectedTimeHours",
+        ge=0,
+        description="Projected wall-clock time for full training in hours",
+    )
+    projected_time_formatted: str = Field(
+        ...,
+        alias="projectedTimeFormatted",
+        description="Human-readable time estimate (e.g., '2h 30m')",
+    )
+    confidence_level: Literal["low", "medium", "high"] = Field(
+        ...,
+        alias="confidenceLevel",
+        description="Confidence in estimate based on measurement quality",
+    )
+    sensitivity_notes: list[str] = Field(
+        default_factory=list,
+        alias="sensitivityNotes",
+        description="Notes about factors that could affect actual training time",
+    )
+
+
+class TrainingBenchmarkReportV1(BaseModel):
+    """GPU training benchmark report for RenaceCHESS (M29).
+
+    Captures hardware-specific training throughput to estimate time-to-train
+    for full runs. This is a measurement-only artifact — it does not alter
+    model architectures, hyperparameters, or CI pipelines.
+
+    See docs/milestones/PhaseE/M29/M29_plan.md for the governing specification.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    version: Literal["1.0"] = Field(
+        "1.0",
+        description="Schema version identifier",
+    )
+    generated_at: datetime = Field(
+        ...,
+        alias="generatedAt",
+        description="ISO 8601 timestamp when report was generated",
+    )
+    environment: EnvironmentMetadataV1 = Field(
+        ...,
+        description="Hardware and software environment metadata",
+    )
+    dataset_info: DatasetInfoV1 | None = Field(
+        None,
+        alias="datasetInfo",
+        description="Dataset manifest and shard information",
+    )
+    run_matrix: list[BenchmarkRunV1] = Field(
+        ...,
+        alias="runMatrix",
+        min_length=1,
+        description="Array of benchmark runs with varying configurations",
+    )
+    time_to_train_estimate: TimeToTrainEstimateV1 | None = Field(
+        None,
+        alias="timeToTrainEstimate",
+        description="Derived time-to-train projections (optional, computed from runs)",
+    )
+    warnings: list[str] = Field(
+        default_factory=list,
+        description="Non-fatal warnings encountered during benchmarking",
+    )
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of canonical report content for reproducibility verification",
+    )
