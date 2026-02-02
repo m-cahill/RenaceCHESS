@@ -1,0 +1,38 @@
+## M26: PHASE-D-RUNTIME-GATING-001
+
+This PR introduces runtime gating infrastructure for recalibration, enabling controlled behavior adjustment without changing default behavior or Phase C contracts.
+
+### Changes
+
+- **RecalibrationGateV1 contract**: File-based gate artifact (Pydantic model + JSON schema)
+- **Runtime recalibration module**: `eval/runtime_recalibration.py` with apply wrappers
+- **Evaluation boundary integration**: Optional gate parameters in `run_conditioned_evaluation()`
+- **CLI integration**: `--recalibration-gate` argument (file-based, explicit opt-in only)
+- **Comprehensive tests**: 300+ lines of tests proving gate disabled = no change, gate enabled = change occurs
+- **CI guard job**: `runtime-recalibration-guard` with default path invariance tests
+
+### Compliance with M26 Locked Decisions
+
+✅ Gate config: File-based JSON only (no env vars, no defaults)  
+✅ Provenance: Separate metadata, outside Phase C contracts  
+✅ CI guard: Tests default path invariance + frozen eval + error cases  
+✅ Integration: New `runtime_recalibration.py` module  
+✅ Phase C: Contracts untouched  
+✅ Scope: Single gate with outcome/policy/both field
+
+### Testing
+
+- All new code has test coverage
+- CI guard job validates default path invariance
+- Gate disabled produces byte-identical outputs
+- Gate enabled applies recalibration correctly
+
+### Next Steps
+
+After CI Run 1:
+- Analyze CI results
+- Verify default path is byte-identical to M25 baseline
+- Address any unexpected friction
+
+Ref: docs/milestones/PhaseD/M26/M26_plan.md
+

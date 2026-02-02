@@ -1,10 +1,13 @@
 """CLI entry point for RenaceCHESS."""
 
+from __future__ import annotations
+
 import argparse
 import json
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 from renacechess.contracts.models import (
     AdviceFactsV1,
@@ -13,6 +16,12 @@ from renacechess.contracts.models import (
     EloBucketDeltaFactsV1,
     FrozenEvalManifestV1,
 )
+
+if TYPE_CHECKING:
+    from renacechess.contracts.models import (
+        RecalibrationGateV1,
+        RecalibrationParametersV1,
+    )
 from renacechess.dataset.builder import build_dataset
 from renacechess.dataset.config import DatasetBuildConfig
 from renacechess.demo.pgn_overlay import generate_demo_payload
@@ -21,6 +30,72 @@ from renacechess.eval.report import build_eval_report, build_eval_report_v2, wri
 from renacechess.eval.runner import run_conditioned_evaluation, run_evaluation
 from renacechess.frozen_eval import generate_frozen_eval_manifest, write_frozen_eval_manifest
 from renacechess.ingest.ingest import ingest_from_lichess, ingest_from_url
+
+
+def resolve_recalibration_gate_from_args(
+    args: argparse.Namespace,
+) -> tuple[
+    "RecalibrationGateV1 | None",
+    "RecalibrationParametersV1 | None",
+]:
+    """Resolve and validate recalibration gate and parameters from CLI arguments (M26).
+
+    This function handles loading the gate file, validating it, and loading
+    associated parameters if the gate is enabled. It does not execute evaluation.
+
+    Args:
+        args: Parsed CLI arguments (must have `recalibration_gate` attribute).
+
+    Returns:
+        Tuple of (gate, params):
+        - If no gate provided: (None, None)
+        - If gate disabled: (gate, None)
+        - If gate enabled: (gate, params)
+
+    Raises:
+        SystemExit: If gate file is invalid, missing, or parameters cannot be loaded.
+    """
+    from renacechess.contracts.models import (
+        RecalibrationGateV1,
+        RecalibrationParametersV1,
+    )
+    from renacechess.eval.recalibration_runner import load_recalibration_parameters
+    from renacechess.eval.runtime_recalibration import load_recalibration_gate
+
+    if not args.recalibration_gate:
+        return None, None
+
+    try:
+        recalibration_gate = load_recalibration_gate(args.recalibration_gate)
+        # If gate is enabled, load parameters
+        if recalibration_gate.enabled:
+            if not recalibration_gate.parameters_ref:
+                print(
+                    ("Error: RecalibrationGateV1.enabled=True requires parametersRef to be set"),
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+            # Try to load parameters from path
+            # (parameters_ref can be path or hash)
+            params_path = Path(recalibration_gate.parameters_ref)
+            if params_path.exists():
+                recalibration_params = load_recalibration_parameters(params_path)
+            else:
+                print(
+                    (f"Error: RecalibrationParametersV1 not found at: {params_path}"),
+                    file=sys.stderr,
+                )
+                sys.exit(1)
+        else:
+            recalibration_params = None
+
+        return recalibration_gate, recalibration_params
+    except Exception as e:
+        print(
+            f"Error: Failed to load recalibration gate: {e}",
+            file=sys.stderr,
+        )
+        sys.exit(1)
 
 
 def main() -> None:
@@ -190,6 +265,11 @@ def main() -> None:
         "--frozen-eval-manifest",
         type=Path,
         help="Path to frozen eval manifest (M07, REQUIRED when --conditioned-metrics is used)",
+    )
+    run_parser.add_argument(
+        "--recalibration-gate",
+        type=Path,
+        help="Path to RecalibrationGateV1 JSON file (M26, optional, explicit file-based gate only)",
     )
 
     # M06: Frozen eval generation command
@@ -631,7 +711,12 @@ def main() -> None:
                         )
                         sys.exit(1)
 
-                    # Run conditioned evaluation (M07, M09)
+                    # M26: Load recalibration gate if provided
+                    recalibration_gate, recalibration_params = resolve_recalibration_gate_from_args(
+                        args
+                    )
+
+                    # Run conditioned evaluation (M07, M09, M26)
                     outcome_head_path = getattr(args, "outcome_head_path", None)
                     eval_results = run_conditioned_evaluation(
                         manifest_path=args.dataset_manifest,
@@ -643,6 +728,8 @@ def main() -> None:
                         frozen_eval_manifest_hash=frozen_eval_manifest_hash,
                         model_path=getattr(args, "model_path", None),
                         outcome_head_path=outcome_head_path,
+                        recalibration_gate=recalibration_gate,
+                        recalibration_params=recalibration_params,
                     )
 
                     # Validate frozen eval manifest hash matches (if provided in results)
