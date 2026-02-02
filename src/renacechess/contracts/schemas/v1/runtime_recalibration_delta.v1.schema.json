@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://renacechess.dev/schemas/v1/runtime_recalibration_delta.v1.schema.json",
+  "title": "RuntimeRecalibrationDeltaV1",
+  "description": "Per-bucket delta artifact showing impact of runtime recalibration (M27). Contains calibration metric deltas plus policy-specific stability metrics.",
+  "type": "object",
+  "required": [
+    "version",
+    "generatedAt",
+    "sourceReportHash",
+    "byEloBucket",
+    "byTimePressureBucket",
+    "overall",
+    "determinismHash"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version identifier"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of delta generation"
+    },
+    "sourceReportHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the RuntimeRecalibrationReportV1 artifact used"
+    },
+    "byEloBucket": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/BucketDeltaV1"
+      },
+      "description": "Delta metrics per Elo bucket (always present)"
+    },
+    "byTimePressureBucket": {
+      "type": ["array", "null"],
+      "items": {
+        "$ref": "#/$defs/BucketDeltaV1"
+      },
+      "description": "Delta metrics per time pressure bucket (null if not present in dataset)"
+    },
+    "overall": {
+      "$ref": "#/$defs/MetricsDeltaV1",
+      "description": "Overall delta metrics aggregated across all buckets"
+    },
+    "determinismHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash for determinism verification"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "BucketDeltaV1": {
+      "type": "object",
+      "required": ["bucketId", "samples", "metrics"],
+      "properties": {
+        "bucketId": {
+          "type": "string",
+          "description": "Bucket identifier (Elo bucket or time pressure bucket)"
+        },
+        "samples": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of samples in this bucket"
+        },
+        "metrics": {
+          "$ref": "#/$defs/MetricsDeltaV1",
+          "description": "Delta metrics for this bucket"
+        }
+      },
+      "additionalProperties": false
+    },
+    "MetricsDeltaV1": {
+      "type": "object",
+      "required": [
+        "outcomeEceDelta",
+        "outcomeNllDelta",
+        "outcomeBrierDelta",
+        "policyNllDelta",
+        "policyTop1EceDelta",
+        "entropyDelta",
+        "top1Stability",
+        "top3Stability",
+        "top1FlipRate"
+      ],
+      "properties": {
+        "outcomeEceDelta": {
+          "type": "number",
+          "description": "Change in outcome ECE (negative = improvement)"
+        },
+        "outcomeNllDelta": {
+          "type": "number",
+          "description": "Change in outcome NLL (negative = improvement)"
+        },
+        "outcomeBrierDelta": {
+          "type": "number",
+          "description": "Change in outcome Brier score (negative = improvement)"
+        },
+        "policyNllDelta": {
+          "type": "number",
+          "description": "Change in policy NLL (negative = improvement)"
+        },
+        "policyTop1EceDelta": {
+          "type": "number",
+          "description": "Change in policy top-1 ECE (negative = improvement)"
+        },
+        "entropyDelta": {
+          "type": "number",
+          "description": "Change in mean policy entropy"
+        },
+        "top1Stability": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Fraction of positions where top-1 move unchanged after recalibration"
+        },
+        "top3Stability": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Fraction of positions where top-3 moves unchanged after recalibration"
+        },
+        "top1FlipRate": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Fraction of positions where top-1 move changed (1 - top1Stability)"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
+
+

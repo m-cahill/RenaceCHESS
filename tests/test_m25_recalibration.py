@@ -650,7 +650,14 @@ class TestRecalibrationCLI:
         assert result.returncode == 0
         # Preview output goes to stderr, not stdout
         assert "recalibration preview" in result.stderr.lower()
-        assert "→" in result.stderr or "delta" in result.stderr.lower()
+        # Check for arrow (→), delta symbol (Δ), or "delta" text
+        # Windows may show escaped Unicode (\\u2192, \\u0394)
+        assert (
+            "→" in result.stderr
+            or "\\u2192" in result.stderr
+            or "delta" in result.stderr.lower()
+            or "Δ" in result.stderr
+        )
 
     def test_recalibration_fit_cli_manifest_not_found(self, tmp_path: Path) -> None:
         """Test that recalibration fit CLI fails with clear error if manifest not found."""

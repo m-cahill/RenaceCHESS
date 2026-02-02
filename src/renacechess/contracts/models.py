@@ -3254,3 +3254,254 @@ class RecalibrationGateV1(BaseModel):
             msg = "RecalibrationGateV1.enabled=True requires parametersRef to be set"
             raise ValueError(msg)
         return self
+
+
+# =============================================================================
+# M27 — Runtime Recalibration Evaluation (Phase D Runtime Evaluation)
+# =============================================================================
+
+
+class RuntimeCalibrationSnapshotV1(BaseModel):
+    """Calibration metrics snapshot for a single evaluation run.
+
+    Contains outcome and policy calibration metrics from either baseline
+    (gate disabled) or recalibrated (gate enabled) evaluation.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    outcome_ece: float = Field(
+        ...,
+        alias="outcomeEce",
+        ge=0.0,
+        le=1.0,
+        description="Expected Calibration Error for outcome predictions",
+    )
+    outcome_nll: float = Field(
+        ...,
+        alias="outcomeNll",
+        ge=0.0,
+        description="Negative log-likelihood for outcome predictions",
+    )
+    outcome_brier: float = Field(
+        ...,
+        alias="outcomeBrier",
+        ge=0.0,
+        le=1.0,
+        description="Brier score for outcome predictions",
+    )
+    policy_nll: float = Field(
+        ...,
+        alias="policyNll",
+        ge=0.0,
+        description="Negative log-likelihood for policy predictions",
+    )
+    policy_top1_ece: float = Field(
+        ...,
+        alias="policyTop1Ece",
+        ge=0.0,
+        le=1.0,
+        description="Expected Calibration Error for top-1 move confidence",
+    )
+    mean_entropy: float = Field(
+        ...,
+        alias="meanEntropy",
+        ge=0.0,
+        description="Mean entropy of policy distribution",
+    )
+
+
+class RuntimeRecalibrationReportV1(BaseModel):
+    """Paired runtime evaluation report comparing baseline vs recalibrated (M27).
+
+    This artifact is evaluation-only and does not change default runtime behavior.
+    Compares predictions with gate disabled (baseline) vs gate enabled (recalibrated).
+
+    See docs/milestones/PhaseD/M27/M27_plan.md for the governing plan.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    version: Literal["1.0"] = Field(
+        "1.0",
+        description="Schema version identifier",
+    )
+    generated_at: datetime = Field(
+        ...,
+        alias="generatedAt",
+        description="ISO 8601 timestamp of report generation",
+    )
+    gate_ref: str = Field(
+        ...,
+        alias="gateRef",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of the RecalibrationGateV1 artifact used",
+    )
+    parameters_ref: str = Field(
+        ...,
+        alias="parametersRef",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of the RecalibrationParametersV1 artifact used",
+    )
+    dataset_ref: str = Field(
+        ...,
+        alias="datasetRef",
+        pattern=r"^[a-f0-9]{64}$",
+        description="SHA-256 hash of the frozen eval manifest used",
+    )
+    total_samples: int = Field(
+        ...,
+        alias="totalSamples",
+        ge=0,
+        description="Total number of samples evaluated",
+    )
+    baseline_metrics: RuntimeCalibrationSnapshotV1 = Field(
+        ...,
+        alias="baselineMetrics",
+        description="Metrics from baseline run (gate disabled)",
+    )
+    recalibrated_metrics: RuntimeCalibrationSnapshotV1 = Field(
+        ...,
+        alias="recalibratedMetrics",
+        description="Metrics from recalibrated run (gate enabled)",
+    )
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash for determinism verification of entire report",
+    )
+
+
+class MetricsDeltaV1(BaseModel):
+    """Delta metrics comparing baseline vs recalibrated predictions.
+
+    Contains calibration metric deltas plus policy-specific stability metrics.
+    Negative deltas indicate improvement (lower ECE/NLL/Brier is better).
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    outcome_ece_delta: float = Field(
+        ...,
+        alias="outcomeEceDelta",
+        description="Change in outcome ECE (negative = improvement)",
+    )
+    outcome_nll_delta: float = Field(
+        ...,
+        alias="outcomeNllDelta",
+        description="Change in outcome NLL (negative = improvement)",
+    )
+    outcome_brier_delta: float = Field(
+        ...,
+        alias="outcomeBrierDelta",
+        description="Change in outcome Brier score (negative = improvement)",
+    )
+    policy_nll_delta: float = Field(
+        ...,
+        alias="policyNllDelta",
+        description="Change in policy NLL (negative = improvement)",
+    )
+    policy_top1_ece_delta: float = Field(
+        ...,
+        alias="policyTop1EceDelta",
+        description="Change in policy top-1 ECE (negative = improvement)",
+    )
+    entropy_delta: float = Field(
+        ...,
+        alias="entropyDelta",
+        description="Change in mean policy entropy",
+    )
+    top1_stability: float = Field(
+        ...,
+        alias="top1Stability",
+        ge=0.0,
+        le=1.0,
+        description="Fraction of positions where top-1 move unchanged after recalibration",
+    )
+    top3_stability: float = Field(
+        ...,
+        alias="top3Stability",
+        ge=0.0,
+        le=1.0,
+        description="Fraction of positions where top-3 moves unchanged after recalibration",
+    )
+    top1_flip_rate: float = Field(
+        ...,
+        alias="top1FlipRate",
+        ge=0.0,
+        le=1.0,
+        description="Fraction of positions where top-1 move changed (1 - top1Stability)",
+    )
+
+
+class BucketDeltaV1(BaseModel):
+    """Delta metrics for a single bucket (Elo or time pressure).
+
+    Contains the bucket identifier, sample count, and delta metrics.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    bucket_id: str = Field(
+        ...,
+        alias="bucketId",
+        description="Bucket identifier (Elo bucket or time pressure bucket)",
+    )
+    samples: int = Field(
+        ...,
+        ge=0,
+        description="Number of samples in this bucket",
+    )
+    metrics: MetricsDeltaV1 = Field(
+        ...,
+        description="Delta metrics for this bucket",
+    )
+
+
+class RuntimeRecalibrationDeltaV1(BaseModel):
+    """Per-bucket delta artifact showing impact of runtime recalibration (M27).
+
+    Contains calibration metric deltas plus policy-specific stability metrics,
+    stratified by Elo bucket and optionally by time pressure bucket.
+
+    See docs/milestones/PhaseD/M27/M27_plan.md for the governing plan.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    version: Literal["1.0"] = Field(
+        "1.0",
+        description="Schema version identifier",
+    )
+    generated_at: datetime = Field(
+        ...,
+        alias="generatedAt",
+        description="ISO 8601 timestamp of delta generation",
+    )
+    source_report_hash: str = Field(
+        ...,
+        alias="sourceReportHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of the RuntimeRecalibrationReportV1 artifact used",
+    )
+    by_elo_bucket: list[BucketDeltaV1] = Field(
+        ...,
+        alias="byEloBucket",
+        description="Delta metrics per Elo bucket (always present)",
+    )
+    by_time_pressure_bucket: list[BucketDeltaV1] | None = Field(
+        None,
+        alias="byTimePressureBucket",
+        description="Delta metrics per time pressure bucket (null if not present in dataset)",
+    )
+    overall: MetricsDeltaV1 = Field(
+        ...,
+        description="Overall delta metrics aggregated across all buckets",
+    )
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash for determinism verification",
+    )

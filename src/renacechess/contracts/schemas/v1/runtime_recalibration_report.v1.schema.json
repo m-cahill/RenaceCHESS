@@ -1,0 +1,108 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://renacechess.dev/schemas/v1/runtime_recalibration_report.v1.schema.json",
+  "title": "RuntimeRecalibrationReportV1",
+  "description": "Paired runtime evaluation report comparing baseline (gate disabled) vs recalibrated (gate enabled) predictions (M27). This artifact is evaluation-only and does not change default runtime behavior.",
+  "type": "object",
+  "required": [
+    "version",
+    "generatedAt",
+    "gateRef",
+    "parametersRef",
+    "datasetRef",
+    "totalSamples",
+    "baselineMetrics",
+    "recalibratedMetrics",
+    "determinismHash"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version identifier"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of report generation"
+    },
+    "gateRef": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the RecalibrationGateV1 artifact used"
+    },
+    "parametersRef": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the RecalibrationParametersV1 artifact used"
+    },
+    "datasetRef": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the frozen eval manifest used"
+    },
+    "totalSamples": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total number of samples evaluated"
+    },
+    "baselineMetrics": {
+      "$ref": "#/$defs/RuntimeCalibrationSnapshotV1",
+      "description": "Metrics from baseline run (gate disabled)"
+    },
+    "recalibratedMetrics": {
+      "$ref": "#/$defs/RuntimeCalibrationSnapshotV1",
+      "description": "Metrics from recalibrated run (gate enabled)"
+    },
+    "determinismHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash for determinism verification of entire report"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "RuntimeCalibrationSnapshotV1": {
+      "type": "object",
+      "required": ["outcomeEce", "outcomeNll", "outcomeBrier", "policyNll", "policyTop1Ece", "meanEntropy"],
+      "properties": {
+        "outcomeEce": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Expected Calibration Error for outcome predictions"
+        },
+        "outcomeNll": {
+          "type": "number",
+          "minimum": 0.0,
+          "description": "Negative log-likelihood for outcome predictions"
+        },
+        "outcomeBrier": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Brier score for outcome predictions"
+        },
+        "policyNll": {
+          "type": "number",
+          "minimum": 0.0,
+          "description": "Negative log-likelihood for policy predictions"
+        },
+        "policyTop1Ece": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Expected Calibration Error for top-1 move confidence"
+        },
+        "meanEntropy": {
+          "type": "number",
+          "minimum": 0.0,
+          "description": "Mean entropy of policy distribution"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
+
+
