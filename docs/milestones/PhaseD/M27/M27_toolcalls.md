@@ -31,8 +31,12 @@ This file logs all tool invocations for M27 milestone execution.
 | 2026-02-02 | run_terminal_cmd | Push CLI tests (commit e5e7346) | git | ✅ Complete |
 | 2026-02-02 | run_terminal_cmd | CI Run 4 - SUCCESS ✅ | CI | ✅ Complete |
 | 2026-02-02 | write | Generate M27_run4.md analysis | docs/milestones/PhaseD/M27/ | ✅ Complete |
+| 2026-02-02 | write | Generate M27_audit.md | docs/milestones/PhaseD/M27/M27_audit.md | ✅ Complete |
+| 2026-02-02 | write | Generate M27_summary.md | docs/milestones/PhaseD/M27/M27_summary.md | ✅ Complete |
+| 2026-02-02 | search_replace | Update renacechess.md with M27 entry | renacechess.md | ✅ Complete |
+| 2026-02-02 | write | Create M28 folder and seed files | docs/milestones/PhaseD/M28/ | ✅ Complete |
 
 ---
 
-**Last Updated:** 2026-02-02 (Run analysis complete, awaiting merge permission)
+**Last Updated:** 2026-02-02 (M27 CLOSED — All artifacts generated, M28 folder seeded)
 

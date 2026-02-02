@@ -35,6 +35,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M24 | ✅ Closed (MERGED) | `m24-phase-d-calibration-001` → `main` | 2026-02-01 | PHASE-D-CALIBRATION-001 — Calibration Metrics and Evaluation Runner |
 | M25 | ✅ Closed (MERGED) | `m25-phase-d-recalibration-001` → `main` | 2026-02-01 | PHASE-D-RECALIBRATION-001 — Temperature-Based Probability Recalibration |
 | M26 | ✅ Closed (MERGED) | `m26-phase-d-runtime-gating-001` → `main` | 2026-02-01 | PHASE-D-RUNTIME-GATING-001 — Runtime Recalibration Gating |
+| M27 | ✅ Closed (MERGED) | `m27-runtime-recalibration-eval` → `main` | 2026-02-02 | PHASE-D-RUNTIME-RECALIBRATION-EVALUATION-001 — Paired Recalibration Evaluation |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -836,8 +837,37 @@ From M00 forward, RenaceCHESS guarantees:
   - Coverage regression accepted: -1.28% in `eval/runner.py` (structural call sites, documented in COV-M26-001)
   - All quality gates passing (coverage regression accepted)
 
+**M27 Details:**
+- **Objective:** Evaluate real-world impact of runtime recalibration under controlled conditions — evidence generation only
+- **CI Runs:** 4 runs (3 failures addressing MyPy, Ruff format, coverage; 1 success)
+- **Final CI Run:** 21576813444 (SUCCESS - All checks passing)
+- **Final Coverage:** 90.90% (exceeds 90% threshold)
+- **Test Count:** 795 passed, 1 skipped (25 new M27 tests)
+- **PR:** #33 (merged)
+- **Final Commit:** `e5e7346`
+- **Audit:** `docs/milestones/PhaseD/M27/M27_audit.md`
+- **Summary:** `docs/milestones/PhaseD/M27/M27_summary.md`
+- **Key Files:**
+  - `src/renacechess/eval/runtime_recalibration_eval_runner.py` — Paired evaluation runner
+  - `src/renacechess/contracts/schemas/v1/runtime_recalibration_report.v1.schema.json` — Report schema
+  - `src/renacechess/contracts/schemas/v1/runtime_recalibration_delta.v1.schema.json` — Delta schema
+  - `src/renacechess/contracts/models.py` — 12 new Pydantic models
+  - `tests/test_m27_runtime_recalibration_eval.py` — 25 comprehensive tests
+- **Notable Features:**
+  - RuntimeRecalibrationReportV1: Full paired evaluation result with metadata
+  - RuntimeRecalibrationDeltaV1: Human-readable deltas with directionality
+  - Paired evaluation: Baseline (gate disabled) vs recalibrated (gate enabled)
+  - Per-bucket metrics: ECE, Brier, NLL (outcome) + entropy, rank stability (policy)
+  - Deterministic outputs: SHA-256 hashes stable across runs
+  - CI job validates artifacts and determinism
+- **Governance:**
+  - No Phase C contract changes (AdviceFactsV1, EloBucketDeltaFactsV1, CoachingDraftV1 untouched)
+  - Default behavior unchanged (M26 guard job passes)
+  - Recalibration opt-in only: Gate must be explicitly provided
+  - Evaluation-only: No runtime activation (decision deferred to M28+)
+
 ---
 
-**Last Updated:** 2026-02-01 (Phase D IN PROGRESS — M26 PHASE-D-RUNTIME-GATING-001 Complete)
+**Last Updated:** 2026-02-02 (Phase D IN PROGRESS — M27 PHASE-D-RUNTIME-RECALIBRATION-EVALUATION-001 Complete)
 
 
