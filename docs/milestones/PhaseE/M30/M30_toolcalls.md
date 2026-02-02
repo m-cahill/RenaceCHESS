@@ -26,6 +26,7 @@ This file logs all tool invocations for M30 milestone execution.
 | 2026-02-02 | git merge | Resolve merge conflicts with origin/main | Multiple files | ✅ Complete |
 | 2026-02-02 | run_terminal_cmd | Fix lint/type errors from merge | scripts/, tests/, src/ | ✅ Complete |
 | 2026-02-02 | run_terminal_cmd | Local CI-equivalent dry run | Full suite | ✅ Complete |
+| 2026-02-02 | search_replace | Add conditional merge authorization | docs/milestones/PhaseE/M30/M30_audit.md | ✅ Complete |
 
 ---
 

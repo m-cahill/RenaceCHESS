@@ -238,6 +238,22 @@ None — no secrets in generated data.
 
 ---
 
+## 13. Conditional Merge Authorization (Pending CI)
+
+**Decision Date:** 2026-02-02
+
+M30 is approved for merge contingent on a successful GitHub Actions CI run.
+No code changes are authorized between this decision and CI green.
+
+**Rationale:**
+- All local CI-equivalent checks passed (lint, format, type check, tests, M30 verification)
+- GitHub Actions runners experiencing outage (confirmed via GitHub status page)
+- This does not bypass CI — it pre-authorizes merge upon CI success
+
+**Authorization:** Pending CI green signal
+
+---
+
 ## Machine-Readable Appendix (JSON)
 
 ```json
