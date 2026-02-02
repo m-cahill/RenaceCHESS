@@ -3505,3 +3505,235 @@ class RuntimeRecalibrationDeltaV1(BaseModel):
         pattern=r"^sha256:[a-f0-9]{64}$",
         description="SHA-256 hash for determinism verification",
     )
+
+
+# =============================================================================
+# M28 — Runtime Recalibration Decision Models
+# =============================================================================
+
+
+class BucketActivationOverrideV1(BaseModel):
+    """Per-bucket activation override for recalibration policy.
+
+    Allows enabling or disabling recalibration for specific Elo buckets,
+    overriding the policy's defaultEnabled setting.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    bucket_id: str = Field(
+        ...,
+        alias="bucketId",
+        description="Elo bucket identifier (M06 canonical buckets)",
+    )
+    enabled: bool = Field(
+        ...,
+        description="Whether recalibration is enabled for this bucket",
+    )
+    scope: Literal["outcome", "policy", "both"] | None = Field(
+        None,
+        description="Per-bucket scope override (null = use policy default)",
+    )
+    reason: str | None = Field(
+        None,
+        description="Optional justification for this override",
+    )
+
+
+class RuntimeRecalibrationActivationPolicyV1(BaseModel):
+    """Declarative activation policy for runtime recalibration (M28).
+
+    Defines per-bucket activation rules. Default is conservative: all buckets
+    disabled. This policy, combined with RecalibrationGateV1, determines
+    whether recalibration is applied at runtime.
+
+    See docs/milestones/PhaseD/M28/M28_plan.md for the governing plan.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    version: Literal["1.0"] = Field(
+        "1.0",
+        description="Schema version identifier",
+    )
+    default_enabled: bool = Field(
+        ...,
+        alias="defaultEnabled",
+        description="Default activation state for all buckets (false = conservative default)",
+    )
+    scope: Literal["outcome", "policy", "both"] = Field(
+        "both",
+        description="Which heads to apply recalibration to when enabled",
+    )
+    bucket_overrides: list[BucketActivationOverrideV1] = Field(
+        ...,
+        alias="bucketOverrides",
+        description="Per-bucket overrides of the default activation state",
+    )
+    created_at: datetime | None = Field(
+        None,
+        alias="createdAt",
+        description="ISO 8601 timestamp of policy creation",
+    )
+    notes: str | None = Field(
+        None,
+        description="Optional notes about this policy (for audit/debugging)",
+    )
+
+
+class ValidationCheckV1(BaseModel):
+    """Individual validation check result.
+
+    Records the outcome of a single validation check performed during
+    policy-to-evidence validation.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    check_name: str = Field(
+        ...,
+        alias="checkName",
+        description="Name of the validation check",
+    )
+    passed: bool = Field(
+        ...,
+        description="Whether the check passed",
+    )
+    details: str | None = Field(
+        None,
+        description="Additional details about the check result",
+    )
+
+
+class ValidationResultV1(BaseModel):
+    """Result of validating policy against evidence.
+
+    Contains the overall validation status and individual check results.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    valid: bool = Field(
+        ...,
+        description="Whether the policy is valid against evidence",
+    )
+    checks: list[ValidationCheckV1] = Field(
+        ...,
+        description="Individual validation checks performed",
+    )
+    errors: list[str] | None = Field(
+        None,
+        description="Validation errors (if any)",
+    )
+
+
+class BucketDecisionV1(BaseModel):
+    """Per-bucket decision details.
+
+    Records the activation decision for a single Elo bucket, including
+    the scope and evidence summary.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    bucket_id: str = Field(
+        ...,
+        alias="bucketId",
+        description="Elo bucket identifier",
+    )
+    enabled: bool = Field(
+        ...,
+        description="Whether recalibration is enabled for this bucket",
+    )
+    scope: Literal["outcome", "policy", "both", "none"] = Field(
+        ...,
+        description="Which heads have recalibration enabled (none if disabled)",
+    )
+    evidence_summary: str | None = Field(
+        None,
+        alias="evidenceSummary",
+        description="Summary of M27 evidence for this bucket",
+    )
+    policy_reason: str | None = Field(
+        None,
+        alias="policyReason",
+        description="Reason from policy (if override specified)",
+    )
+
+
+class RuntimeRecalibrationDecisionV1(BaseModel):
+    """Human-readable decision record for runtime recalibration activation (M28).
+
+    Links a RuntimeRecalibrationActivationPolicyV1 to M27 evidence. This artifact
+    is the authoritative record of why recalibration is or is not activated.
+
+    See docs/milestones/PhaseD/M28/M28_plan.md for the governing plan.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    version: Literal["1.0"] = Field(
+        "1.0",
+        description="Schema version identifier",
+    )
+    generated_at: datetime = Field(
+        ...,
+        alias="generatedAt",
+        description="ISO 8601 timestamp of decision generation",
+    )
+    decision_outcome: Literal["rejected", "restricted", "activated"] = Field(
+        ...,
+        alias="decisionOutcome",
+        description="Overall decision outcome: rejected, restricted, or activated",
+    )
+    source_report_hash: str = Field(
+        ...,
+        alias="sourceReportHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of the RuntimeRecalibrationReportV1 artifact",
+    )
+    source_delta_hash: str = Field(
+        ...,
+        alias="sourceDeltaHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of the RuntimeRecalibrationDeltaV1 artifact",
+    )
+    policy_hash: str = Field(
+        ...,
+        alias="policyHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of the RuntimeRecalibrationActivationPolicyV1 artifact",
+    )
+    activated_bucket_count: int = Field(
+        ...,
+        alias="activatedBucketCount",
+        ge=0,
+        description="Number of Elo buckets with recalibration enabled",
+    )
+    total_bucket_count: int = Field(
+        ...,
+        alias="totalBucketCount",
+        ge=0,
+        description="Total number of Elo buckets evaluated",
+    )
+    bucket_decisions: list[BucketDecisionV1] = Field(
+        ...,
+        alias="bucketDecisions",
+        description="Per-bucket decision details",
+    )
+    validation_result: ValidationResultV1 = Field(
+        ...,
+        alias="validationResult",
+        description="Result of validating policy against evidence",
+    )
+    human_summary: str = Field(
+        ...,
+        alias="humanSummary",
+        description="Human-readable summary of the decision",
+    )
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash for determinism verification of entire decision",
+    )

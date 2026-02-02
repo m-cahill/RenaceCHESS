@@ -1,100 +1,212 @@
-# M28 Plan — PHASE-D-RECALIBRATION-ACTIVATION-DECISION-001
-
-**Status:** Pending  
-**Audience:** Cursor / AI agent  
-**Phase:** Phase D (Data Expansion, Calibration & Quality)  
-**Predecessor:** M27 (Runtime Recalibration Evaluation)
+You’re right — **M27 is fully done and cleanly closed** (audit + summary attached, CI green). Let’s answer both parts crisply and then move forward.
 
 ---
 
-## 🎯 M28 Objective (Single Sentence)
+## How many milestones remain in **Phase D**?
 
-> **Decide whether to activate runtime recalibration** based on M27 evaluation data, and implement the chosen activation strategy (or document the decision to abandon/defer).
+Based on how Phase D has unfolded and the governance posture you’ve enforced, Phase D now looks **nearly complete**.
 
----
+### Phase D original intent
 
-## 📋 Prerequisites
+**Phase D = Data Expansion, Calibration & Quality**
 
-M28 cannot begin until:
+> Measure, correct, gate, and *evaluate* probabilistic quality — without changing default behavior.
 
-1. ✅ M27 merged to main
-2. ✅ M27 evaluation artifacts reviewed
-3. ⏳ Activation decision made (enabled globally / restricted / abandoned)
+You have now delivered:
 
----
+| Milestone | Purpose                                         | Status   |
+| --------- | ----------------------------------------------- | -------- |
+| M23       | Hardening runway (security, perf, CLI coverage) | ✅ Closed |
+| M24       | Calibration metrics (ECE, Brier, NLL)           | ✅ Closed |
+| M25       | Offline recalibration fitting                   | ✅ Closed |
+| M26       | Runtime recalibration gating                    | ✅ Closed |
+| M27       | Runtime recalibration evaluation                | ✅ Closed |
 
-## 🔒 Hard Constraints (Non-Negotiable)
+### What remains in Phase D?
 
-1. **Phase C contracts frozen** — No changes to AdviceFactsV1, EloBucketDeltaFactsV1, CoachingDraftV1
-2. **Default path governed** — Any activation must pass M26 guard job (byte-identical default when gate disabled)
-3. **Evidence-based decision** — Activation decision must cite M27 evaluation data
-4. **Deterministic outputs** — All artifacts must be reproducible
+**Only ONE truly Phase-D-legitimate milestone remains:**
 
----
+> **M28 — Recalibration Activation Decision**
 
-## 🎯 Possible Outcomes
+After M28, anything else would either be:
 
-Based on M27 evaluation data, M28 will implement one of:
+* **Phase E (Productization / UX / Human-in-the-loop)**, or
+* A *new* Phase D+ extension you’d explicitly define.
 
-### Option A: Enable Globally
+### ✅ Phase D remaining milestone count
 
-- Recalibration enabled for all Elo buckets
-- Gate becomes opt-out (default enabled)
-- Update CLI defaults
+**Answer:**
+👉 **Exactly 1 remaining milestone (M28)**
 
-### Option B: Enable Selectively
-
-- Recalibration enabled for specific Elo buckets (e.g., only where improvement observed)
-- Gate configuration specifies scope
-- Bucket-level activation map
-
-### Option C: Defer/Abandon
-
-- Evaluation shows no clear benefit or regressions
-- Document decision and rationale
-- No code changes (governance-only milestone)
+Phase D is otherwise **complete in substance**.
 
 ---
 
-## 📦 Deliverables (Depends on Decision)
+## M28 — PHASE-D-RECALIBRATION-ACTIVATION-DECISION-001
 
-| Decision | Deliverables |
-|----------|--------------|
-| Option A | Updated gate defaults, CLI changes, updated docs |
-| Option B | Bucket-scoped gate configuration, selective activation |
-| Option C | Decision document only, no code changes |
+### (Plan to hand off to Cursor)
 
----
+### 🔑 Core purpose of M28
 
-## 🧪 Tests (If Code Changes)
+M28 is **not engineering-first** — it is a **governed decision milestone**.
 
-- Unit tests for new activation logic
-- Integration tests for CLI defaults
-- Regression tests for default path
-- M26 guard job must pass
+> **Question M28 answers:**
+> *Given M27’s evidence, should runtime recalibration be activated — and if so, where, how, and with what constraints?*
 
 ---
 
-## 📈 Success Criteria
+## M28 Scope Definition
+
+### ✅ In Scope
+
+1. **Decision artifact**
+
+   * Explicitly records whether recalibration is:
+
+     * ❌ Rejected
+     * ⚠️ Restricted (specific Elo buckets / scopes)
+     * ✅ Activated (policy, outcome, or both)
+
+2. **Activation policy schema**
+
+   * `RuntimeRecalibrationPolicyV1`
+   * Declarative rules, not code switches
+
+3. **Evidence linkage**
+
+   * References **M27 RuntimeRecalibrationReportV1**
+   * Records justification per bucket
+
+4. **Runtime wiring (minimal)**
+
+   * If activated, wiring is **policy-driven**, not hard-coded
+   * Gate + policy both required
+   * Default path remains unchanged unless policy allows
+
+5. **CI enforcement**
+
+   * CI job asserts:
+
+     * Policy + gate consistency
+     * No activation without explicit policy
+     * M26 guard still holds for disabled cases
+
+---
+
+### ❌ Explicitly Out of Scope
+
+* Retraining
+* Parameter tuning
+* UI/UX changes
+* Human feedback loops
+* Coaching behavior changes
+* Any automatic activation
+
+M28 **decides**, it does not iterate.
+
+---
+
+## M28 Deliverables
+
+### 1. New Schemas
+
+| Schema                           | Purpose                        |
+| -------------------------------- | ------------------------------ |
+| `RuntimeRecalibrationPolicyV1`   | Declarative activation rules   |
+| `RuntimeRecalibrationDecisionV1` | Human-readable decision record |
+
+---
+
+### 2. Decision Runner
+
+* Reads:
+
+  * M27 report
+  * Proposed policy
+* Emits:
+
+  * Decision artifact
+  * Validation verdict (consistent / inconsistent)
+
+No math, no fitting — **pure governance logic**.
+
+---
+
+### 3. Runtime Integration (If Activated)
+
+* **Only applied if BOTH exist:**
+
+  1. RecalibrationGateV1 (M26)
+  2. RuntimeRecalibrationPolicyV1 (M28)
+
+* Supports:
+
+  * Per-Elo bucket activation
+  * Per-scope activation (`policy`, `outcome`, `both`)
+
+---
+
+### 4. CLI Command
+
+```bash
+renacechess eval runtime-recalibration-decision \
+  --report runtime_recalibration_report.json \
+  --policy runtime_recalibration_policy.json
+```
+
+Outputs:
+
+* Decision artifact
+* Human-readable summary
+
+---
+
+### 5. CI Jobs
+
+| Job                               | Purpose                        |
+| --------------------------------- | ------------------------------ |
+| `runtime-recalibration-decision`  | Validate policy vs evidence    |
+| `runtime-recalibration-guard-m28` | Ensure default path still safe |
+
+All deterministic, all schema-validated.
+
+---
+
+## M28 Exit Criteria (Very Important)
 
 M28 is complete when:
 
-1. ✅ Decision documented with M27 evidence
-2. ✅ If code changes: All CI jobs pass
-3. ✅ If code changes: Coverage ≥ 90%
-4. ✅ M26 guard job still passes (default path byte-identical)
-5. ✅ Audit and summary generated
+* [ ] A **clear decision** is recorded
+* [ ] The decision is **traceable to M27 evidence**
+* [ ] Runtime behavior is **unchanged unless explicitly allowed**
+* [ ] CI enforces the decision
+* [ ] Phase D can be formally closed
 
 ---
 
-## 🚫 Explicit Non-Goals
+## After M28
 
-- Adding new model heads
-- Changing Phase C contracts
-- Retraining models
-- Adding new calibration methods
+Once M28 closes, you have three clean options:
+
+1. **Phase E — Human Evaluation & UX**
+2. **Phase E — Coaching Quality & Presentation**
+3. **Phase E — External Demo / Paper / Partner Review**
+
+But **Phase D itself will be DONE**.
 
 ---
 
-*This plan will be refined once M27 merge is complete and evaluation data is reviewed.*
+## Summary
 
+* **Remaining Phase D milestones:** **1**
+* **That milestone:** **M28**
+* **Nature of M28:** Decision + governance, not experimentation
+* **Phase D after M28:** Complete and defensible
+
+If you want, next I can:
+
+* Draft `M28_plan.md` verbatim for Cursor, or
+* Help you pre-decide likely activation policies based on M27 patterns, or
+* Sketch the Phase D → Phase E transition doc
+
+Just say the word.
