@@ -1,0 +1,40 @@
+## M28 — PHASE-D-RECALIBRATION-ACTIVATION-DECISION-001
+
+### Summary
+Introduces the decision framework for runtime recalibration activation, consuming M27 evidence and producing governed decision artifacts.
+
+### New Artifacts
+- RuntimeRecalibrationActivationPolicyV1 — Declarative activation policy
+- RuntimeRecalibrationDecisionV1 — Human-readable decision record
+- 6 supporting Pydantic models
+
+### Implementation
+- recalibration_decision_runner.py — Decision runner with validation
+- CLI command: renacechess eval runtime-recalibration-decision
+- CI job: runtime-recalibration-decision (depends on M27)
+- 36 comprehensive tests
+
+### Key Design Decisions
+- Conservative default policy (all buckets disabled)
+- Evidence-based decisions (references M27 report + delta hashes)
+- Three outcomes: rejected, restricted, activated
+- Deterministic hashing (excludes timestamp)
+
+### Governance
+- Framework only — decision comes via policy artifact
+- Per-Elo bucket and per-scope granularity only
+- Phase C contracts remain frozen
+- Default behavior unchanged
+
+### Checklist
+- [x] Schemas created
+- [x] Pydantic models added
+- [x] Decision runner implemented
+- [x] CLI command added
+- [x] CI job added
+- [x] Tests (36 passing)
+- [ ] CI green
+- [ ] Audit + summary
+- [ ] Phase D closeout
+
+

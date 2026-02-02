@@ -1,97 +1,350 @@
-# M29 Milestone Plan — Phase E Entry
+Perfect — this is exactly the right moment to be precise and boring in the _good_ way 😄  
+Below is a **Cursor-ready, enterprise-grade milestone plan for M29**, written to slot cleanly into your governance workflow and hand off without ambiguity.
 
+* * *
+
+**M29_plan — GPU-BENCHMARKING-001**
+===================================
+
+**Phase:** Phase E — Scale, Proof & Release  
 **Milestone ID:** M29  
-**Phase:** E — Field Testing & Product Surfaces  
-**Status:** 📋 PLANNED  
-**Priority:** Next  
+**Title:** GPU Benchmarking & Training Time Estimation  
+**Status:** Planned  
+**Owner:** Human (local execution) + Cursor (docs + tooling)  
+**CI Impact:** **None (local-only execution)**
 
----
+* * *
 
-## 1. Phase E Context
+1. Milestone Intent
 
-Phase E follows the successful completion of Phase D (Calibration & Quality).
+-------------------
 
-**Phase D established:**
-- Calibration observability (M24)
-- Offline recalibration fitting (M25)
-- Governed runtime gating (M26)
-- Paired evaluation (M27)
-- Evidence-based activation decisions (M28)
+Establish **empirical, hardware-specific training performance characteristics** for RenaceCHESS on the **RTX 5090**, sufficient to:
 
-**Phase E focuses on:**
-- Training throughput benchmarking
-- Full-scale training feasibility
-- Production-readiness considerations
-- Field testing infrastructure
+1. Estimate **full training wall-clock time** for realistic dataset sizes
 
----
+2. Validate **training feasibility** under Phase E scope
 
-## 2. M29 Objective
+3. Produce **reproducible benchmark artifacts** suitable for external proof packs
 
-*To be defined after Phase E planning is complete.*
+4. Inform go/no-go decisions for M31 (full training run)
 
-Potential M29 directions (pending confirmation):
+This milestone is **measurement-only**.  
+It introduces **no new modeling ideas**, **no runtime behavior changes**, and **no CI gating**.
 
-1. **Training Throughput Benchmarking (RTX 5090)**
-   - Measure training speed on target hardware
-   - Establish baseline samples/second
-   - Identify bottlenecks
+* * *
 
-2. **Full-Scale Training Feasibility**
-   - Scale from synthetic fixtures to real datasets
-   - Validate memory requirements
-   - Establish checkpoint cadence
+2. Explicit Non-Goals (Hard Constraints)
 
-3. **Production Readiness Assessment**
-   - Identify gaps for deployment
-   - Security hardening for production
-   - Monitoring and observability
+----------------------------------------
 
----
+M29 explicitly does **not**:
 
-## 3. Success Criteria
+* modify model architectures
 
-*To be defined based on M29 objective selection.*
+* tune hyperparameters for quality
 
----
+* introduce new loss functions or heads
 
-## 4. Exit Criteria
+* change dataset semantics
 
-*To be defined based on M29 objective selection.*
+* alter CI pipelines or thresholds
 
----
+* perform full training
 
-## 5. Dependencies
+This milestone answers **“How long will this take?”**, not **“How good is it?”**.
 
-| Dependency | Status |
-|------------|--------|
-| Phase D complete | ✅ M28 merged |
-| Calibration infrastructure | ✅ Available |
-| Training infrastructure (M14) | ✅ Available |
-| RTX 5090 hardware | ⏳ Pending |
+* * *
 
----
+3. Scope of Measurement
 
-## 6. Constraints
+-----------------------
 
-- Must not modify Phase C contracts
-- Must not modify Phase D contracts
-- CI gates must remain truthful
-- Coverage ≥90% must be maintained
+### 3.1 Hardware & Environment
 
----
+Benchmarks must capture and record:
 
-## 7. Authorization
+* GPU: **RTX 5090**
 
-M29 planning requires explicit authorization before implementation begins.
+* VRAM size
 
-**Status:** Awaiting Phase E kickoff authorization
+* Driver version
 
----
+* CUDA version
 
-## Document History
+* PyTorch version
 
-| Date | Change |
-|------|--------|
-| 2026-02-02 | M29 folder seeded, placeholder plan created |
+* OS + Python version
 
+* CPU + RAM (for data loader context)
+
+All environment metadata must be emitted into the benchmark artifact.
+
+* * *
+
+### 3.2 Training Axes to Measure
+
+Each benchmark run should explicitly vary **one axis at a time** while holding others constant:
+
+| Axis                           | Values                             |
+| ------------------------------ | ---------------------------------- |
+| Batch size                     | e.g. 64 / 128 / 256                |
+| Sequence length / feature size | current frozen model input         |
+| Dataset shard size             | small (sanity), medium, large      |
+| Precision                      | FP32 vs AMP (if already supported) |
+| Heads                          | policy only vs policy + outcome    |
+
+> ⚠️ No speculative features. Only configurations already supported in main.
+
+* * *
+
+### 3.3 Core Metrics to Capture
+
+Each run must report:
+
+* steps/sec
+
+* samples/sec
+
+* GPU utilization %
+
+* VRAM peak usage
+
+* per-epoch wall time
+
+* time spent in:
+  
+  * data loading
+  
+  * forward pass
+  
+  * backward pass
+  
+  * optimizer step
+
+Optional (nice-to-have, not required):
+
+* power draw (if easily accessible)
+
+* CPU bottlenecks
+
+* * *
+
+4. Deliverables
+
+---------------
+
+### 4.1 Benchmark Artifact (Required)
+
+Produce a **versioned, schema-validated artifact**, e.g.:
+    TrainingBenchmarkReportV1
+
+Minimum required fields:
+
+* environment metadata
+
+* model config hash
+
+* dataset manifest hash
+
+* run matrix
+
+* raw measurements
+
+* derived estimates:
+  
+  * time / epoch
+  
+  * time / N samples
+  
+  * projected full training time
+
+Artifacts must be deterministic **given identical inputs**.
+
+* * *
+
+### 4.2 Time-to-Train Estimator (Required)
+
+From empirical data, derive:
+
+* projected wall-clock time for:
+  
+  * M31 single full training run
+  
+  * optional re-runs (best-of-N)
+
+* sensitivity analysis:
+  
+  * batch size vs memory ceiling
+  
+  * diminishing returns curves
+
+Estimator must be **explicitly labeled heuristic**, not a guarantee.
+
+* * *
+
+### 4.3 Documentation (Required)
+
+Add:
+
+* `docs/milestones/PhaseE/M29/M29_summary.md`
+
+* `docs/milestones/PhaseE/M29/M29_audit.md`
+
+Audit must explicitly state:
+
+* what was measured
+
+* what was not measured
+
+* sources of uncertainty
+
+* assumptions carried forward to M31
+
+* * *
+
+5. Execution Model
+
+------------------
+
+### 5.1 Where This Runs
+
+* **Local only**
+
+* Never in CI
+
+* CI responsibility ends at:
+  
+  * schema validation
+  
+  * artifact parsing
+  
+  * estimator sanity checks (if applicable)
+
+* * *
+
+### 5.2 Cursor Responsibilities
+
+Cursor should:
+
+1. Add or refine benchmark runner scripts (if needed)
+
+2. Define the benchmark artifact schema
+
+3. Ensure deterministic logging and hashing
+
+4. Prepare doc templates
+
+5. Ensure **no CI regression risk**
+
+Cursor must **not** attempt to execute benchmarks.
+
+* * *
+
+### 5.3 Human Responsibilities
+
+You will:
+
+1. Execute benchmark commands locally
+
+2. Upload artifacts into the repo
+
+3. Validate results against expectations
+
+4. Decide whether results justify proceeding to M31
+
+* * *
+
+6. Guardrails & Governance
+
+--------------------------
+
+### 6.1 CI Guardrails
+
+* No new CI jobs
+
+* No GPU assumptions in CI
+
+* Any accidental CI coupling → immediate rollback
+
+* * *
+
+### 6.2 Audit Posture
+
+M29 audit must answer:
+
+> “Do we now have enough evidence to responsibly commit to full training?”
+
+Possible audit outcomes:
+
+* **Proceed to M31**
+
+* **Proceed with constraints** (e.g. reduced dataset)
+
+* **Pause Phase E** pending resource change
+
+All are valid outcomes.
+
+* * *
+
+7. Exit Criteria (Binary)
+
+-------------------------
+
+M29 is considered **complete** when:
+
+* ✅ Benchmark artifact exists and validates
+
+* ✅ Time-to-train estimate is documented
+
+* ✅ Environment is fully recorded
+
+* ✅ No CI changes occurred
+
+* ✅ Audit explicitly recommends or rejects M31
+
+* * *
+
+8. Next Milestone Dependencies
+
+------------------------------
+
+| Milestone | Dependency on M29                      |
+| --------- | -------------------------------------- |
+| **M30**   | Uses estimator to size frozen eval set |
+| **M31**   | Requires M29 go-decision               |
+| **M33**   | Consumes benchmark artifacts           |
+
+* * *
+
+9. Open Questions (for Cursor Clarification Pass)
+
+-------------------------------------------------
+
+Cursor should ask (expected):
+
+1. Exact batch sizes to test
+
+2. Whether AMP is enabled by default
+
+3. Dataset shard sizes to include
+
+4. Preferred naming for benchmark artifact
+
+5. Whether power metrics are required
+
+These are **expected clarifications**, not gaps.
+
+* * *
+
+### ✅ Ready for Cursor Handoff
+
+If you want, next we can:
+
+* Pre-answer likely Cursor clarifying questions
+
+* Draft the **benchmark artifact schema** up front
+
+* Decide whether to pre-declare M29.5 (docs-only contingency)
+
+You’re doing this _exactly_ the right way: measure first, commit later.
