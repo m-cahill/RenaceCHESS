@@ -36,6 +36,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M25 | ✅ Closed (MERGED) | `m25-phase-d-recalibration-001` → `main` | 2026-02-01 | PHASE-D-RECALIBRATION-001 — Temperature-Based Probability Recalibration |
 | M26 | ✅ Closed (MERGED) | `m26-phase-d-runtime-gating-001` → `main` | 2026-02-01 | PHASE-D-RUNTIME-GATING-001 — Runtime Recalibration Gating |
 | M27 | ✅ Closed (MERGED) | `m27-runtime-recalibration-eval` → `main` | 2026-02-02 | PHASE-D-RUNTIME-RECALIBRATION-EVALUATION-001 — Paired Recalibration Evaluation |
+| M28 | ✅ Closed (MERGED) | `m28-recalibration-activation-decision` → `main` | 2026-02-02 | PHASE-D-RECALIBRATION-ACTIVATION-DECISION-001 — Runtime Recalibration Decision Framework |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -714,8 +715,8 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | A | Post-PoC Hardening & Training Readiness | 🔒 **CLOSED** | M12–M14 | `docs/phases/PhaseA_closeout.md` |
 | B | Personality Framework & Style Modulation | 🔒 **CLOSED** | M15–M18 | `docs/phases/PhaseB_closeout.md` |
 | C | Elo-Appropriate Coaching & Explanation | 🔒 **CLOSED** | M19–M22 | `docs/phases/PhaseC_closeout.md` |
-| D | Data Expansion, Calibration & Quality | ⏳ **IN PROGRESS** | M23+ | — |
-| E | Field Testing & Product Surfaces | 🔜 Planned | M31+ | — |
+| D | Data Expansion, Calibration & Quality | 🔒 **CLOSED** | M23–M28 | `docs/phases/PhaseD_closeout.md` |
+| E | Field Testing & Product Surfaces | 🔜 Planned | M29+ | — |
 
 ---
 
@@ -866,8 +867,36 @@ From M00 forward, RenaceCHESS guarantees:
   - Recalibration opt-in only: Gate must be explicitly provided
   - Evaluation-only: No runtime activation (decision deferred to M28+)
 
+**M28 Details:**
+- **Objective:** Introduce governed decision framework for runtime recalibration activation
+- **CI Runs:** 2 runs (1 transient coverage flake, 1 success)
+- **Final CI Run:** 21578177807 (SUCCESS - All checks passing)
+- **Final Coverage:** 91.10% (exceeds 90% threshold)
+- **Test Count:** 831 passed, 1 skipped (36 new M28 tests)
+- **PR:** #34 (merged)
+- **Final Commit:** `003f712`
+- **Audit:** `docs/milestones/PhaseD/M28/M28_audit.md`
+- **Summary:** `docs/milestones/PhaseD/M28/M28_summary.md`
+- **Key Files:**
+  - `src/renacechess/eval/recalibration_decision_runner.py` — Decision runner
+  - `src/renacechess/contracts/schemas/v1/runtime_recalibration_activation_policy.v1.schema.json` — Policy schema
+  - `src/renacechess/contracts/schemas/v1/runtime_recalibration_decision.v1.schema.json` — Decision schema
+  - `src/renacechess/contracts/models.py` — 8 new Pydantic models
+  - `tests/test_m28_recalibration_decision.py` — 36 comprehensive tests
+- **Notable Features:**
+  - RuntimeRecalibrationActivationPolicyV1: Declarative activation policy with bucket/scope overrides
+  - RuntimeRecalibrationDecisionV1: Human-readable decision artifact with evidence lineage
+  - Three decision outcomes: rejected, restricted, activated
+  - Conservative default (all buckets disabled)
+  - CI job validates decision generation
+- **Governance:**
+  - No Phase C contract changes (AdviceFactsV1, EloBucketDeltaFactsV1, CoachingDraftV1 untouched)
+  - Default behavior unchanged (M26 guard job passes)
+  - Evidence-based decisions (M27 report hash referenced)
+  - Framework only — actual activation requires explicit policy
+
 ---
 
-**Last Updated:** 2026-02-02 (Phase D IN PROGRESS — M27 PHASE-D-RUNTIME-RECALIBRATION-EVALUATION-001 Complete)
+**Last Updated:** 2026-02-02 (Phase D CLOSED — M28 PHASE-D-RECALIBRATION-ACTIVATION-DECISION-001 Complete)
 
 
