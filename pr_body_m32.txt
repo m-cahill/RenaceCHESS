@@ -1,0 +1,104 @@
+## M32: POST-TRAIN-EVAL-PACK-001 — Post-Training Evaluation Infrastructure
+
+**Phase:** E (Scale Proof, Training Run, Release Lock)
+**Predecessor:** M31 (Full Training Run ✅)
+**Successor:** M33 (External Proof Pack)
+
+---
+
+### Single Objective
+
+Implement read-only evaluation infrastructure for M31 trained checkpoints against frozen eval v2, comparing them to fresh-init baselines to measure training effect.
+
+---
+
+### What This PR Delivers
+
+| Category | Artifact | Lines |
+|----------|----------|-------|
+| **Schemas** | `post_train_eval_report.v1.schema.json` | 200 |
+| **Schemas** | `policy_eval_metrics.v1.schema.json` | 90 |
+| **Schemas** | `outcome_eval_metrics.v1.schema.json` | 100 |
+| **Schemas** | `delta_metrics.v1.schema.json` | 130 |
+| **Models** | 13 new Pydantic models in `contracts/models.py` | +500 |
+| **Orchestrator** | `src/renacechess/eval/post_train_eval.py` | 600 |
+| **Tests** | `tests/test_m32_post_train_eval.py` | 650 |
+| **CI** | `m32-eval-pack-validation` job | +130 |
+
+---
+
+### Locked Decisions Applied
+
+| Decision | Implementation |
+|----------|----------------|
+| **Baseline = fresh init + seed 1337** | `M32_EVAL_BASELINE_SEED = 1337` constant |
+| **Reuse existing modules** | Extended calibration_runner patterns |
+| **CI validates only artifacts** | No checkpoint loading in CI |
+| **Two-phase flow** | Implementation first, execution after merge |
+
+---
+
+### Key Features
+
+- **PostTrainEvalReportV1**: Canonical evaluation report with trained vs baseline comparison
+- **Delta metrics**: Measures training effect with `improved`/`degraded`/`unchanged` direction
+- **Per-skill bucket breakdown**: Stratified evaluation by skill level
+- **Frozen eval integrity proof**: Documents evaluation ruler and no-overlap verification
+- **Determinism hash**: SHA-256 verification for reproducibility
+
+---
+
+### Test Results
+
+```
+36 passed in 4.48s
+- Schema existence: 4 tests
+- Pydantic models: 12 tests
+- Delta computation: 5 tests
+- Accumulators: 5 tests
+- Standalone artifacts: 3 tests
+- Constants verification: 2 tests
+- Skill bucket models: 3 tests
+- Determinism: 2 tests
+```
+
+---
+
+### CI Job Added
+
+**`m32-eval-pack-validation`**
+- Validates all M32 schemas exist and are valid JSON
+- Validates Pydantic models match schemas
+- Runs M32 unit tests
+- Verifies delta computation logic
+- Does NOT load checkpoints or run evaluation
+
+---
+
+### Exit Criteria
+
+- [x] All 4 M32 schemas exist and validate
+- [x] Pydantic models created and tested
+- [x] Evaluation orchestrator implemented
+- [x] Delta computation logic verified
+- [x] CI validation job added
+- [ ] CI green (awaiting run)
+
+---
+
+### What Comes Next (After Merge)
+
+**Execution Phase (Local GPU):**
+1. Load M31 trained checkpoints
+2. Load frozen eval v2 (10k positions)
+3. Evaluate trained models
+4. Create fresh-init baseline (seed 1337)
+5. Evaluate baseline
+6. Compute deltas
+7. Emit `post_train_eval_report.json`
+8. Commit artifact (JSON only, no checkpoints)
+
+---
+
+**Governance:** Per M32 plan, this is Phase 1 (Implementation). Actual evaluation execution is a separate governance step after this PR merges.
+

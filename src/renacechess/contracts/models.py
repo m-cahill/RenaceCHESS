@@ -5687,3 +5687,289 @@ class DeltaMetricsArtifactV1(BaseModel):
         alias="determinismHash",
         pattern=r"^sha256:[a-f0-9]{64}$",
     )
+
+
+# =============================================================================
+# External Proof Pack Models (M33)
+# =============================================================================
+
+
+class CheckpointMetadataV1(BaseModel):
+    """Checkpoint metadata for proof pack (files not included, external storage)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    hash: str = Field(
+        ...,
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of checkpoint file",
+    )
+    file_size_bytes: int = Field(
+        ...,
+        alias="fileSizeBytes",
+        ge=0,
+        description="Size of checkpoint file in bytes",
+    )
+    expected_filename: str = Field(
+        ...,
+        alias="expectedFilename",
+        description="Expected filename of checkpoint (informational)",
+    )
+    external_storage: Literal[True] = Field(
+        True,
+        alias="externalStorage",
+        description="Flag indicating checkpoint is stored externally, not in proof pack",
+    )
+
+
+class FrozenEvalArtifactsV1(BaseModel):
+    """Frozen evaluation set artifacts (M30)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    manifest_path: str = Field(
+        ...,
+        alias="manifestPath",
+        description="Relative path to frozen eval v2 manifest within proof pack",
+    )
+    provenance_path: str = Field(
+        ...,
+        alias="provenancePath",
+        description="Relative path to frozen eval v2 provenance artifact",
+    )
+    manifest_hash: str = Field(
+        ...,
+        alias="manifestHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of frozen eval manifest",
+    )
+    provenance_hash: str = Field(
+        ...,
+        alias="provenanceHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of frozen eval provenance",
+    )
+
+
+class TrainingArtifactsV1(BaseModel):
+    """Training artifacts (M31)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    config_lock_path: str = Field(
+        ...,
+        alias="configLockPath",
+        description="Relative path to training config lock within proof pack",
+    )
+    run_report_path: str = Field(
+        ...,
+        alias="runReportPath",
+        description="Relative path to training run report within proof pack",
+    )
+    config_lock_hash: str = Field(
+        ...,
+        alias="configLockHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of training config lock",
+    )
+    run_report_hash: str = Field(
+        ...,
+        alias="runReportHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of training run report",
+    )
+    checkpoints: dict[Literal["policy", "outcome"], CheckpointMetadataV1] = Field(
+        ...,
+        description="Checkpoint metadata (files not included, external storage)",
+    )
+
+
+class EvaluationArtifactsV1(BaseModel):
+    """Post-training evaluation artifacts (M32)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    report_path: str = Field(
+        ...,
+        alias="reportPath",
+        description="Relative path to post-train eval report within proof pack",
+    )
+    report_hash: str = Field(
+        ...,
+        alias="reportHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of post-train eval report",
+    )
+
+
+class ArtifactsV1(BaseModel):
+    """References to all artifacts included in the proof pack."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    frozen_eval: FrozenEvalArtifactsV1 = Field(
+        ...,
+        alias="frozenEval",
+        description="Frozen evaluation set artifacts (M30)",
+    )
+    training: TrainingArtifactsV1 = Field(
+        ...,
+        description="Training artifacts (M31)",
+    )
+    evaluation: EvaluationArtifactsV1 = Field(
+        ...,
+        description="Post-training evaluation artifacts (M32)",
+    )
+
+
+class HashChainV1(BaseModel):
+    """Hash chain proving artifact integrity and causal relationships."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    frozen_eval_manifest_hash: str = Field(
+        ...,
+        alias="frozenEvalManifestHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of frozen eval v2 manifest (M30)",
+    )
+    training_config_lock_hash: str = Field(
+        ...,
+        alias="trainingConfigLockHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of training config lock (M31)",
+    )
+    training_run_report_hash: str = Field(
+        ...,
+        alias="trainingRunReportHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of training run report (M31)",
+    )
+    post_train_eval_report_hash: str = Field(
+        ...,
+        alias="postTrainEvalReportHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of post-train eval report (M32)",
+    )
+
+
+class TrainingVocabularyLimitationV1(BaseModel):
+    """Training vocabulary constraints."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    move_count: int = Field(
+        ...,
+        alias="moveCount",
+        ge=1,
+        description="Number of moves in training vocabulary",
+    )
+    explanation: str = Field(
+        ...,
+        description="Explanation of vocabulary constraint and its impact on metrics",
+    )
+
+
+class SyntheticEvalSetLimitationV1(BaseModel):
+    """Synthetic evaluation set limitations."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    is_synthetic: Literal[True] = Field(
+        True,
+        alias="isSynthetic",
+        description="Flag indicating eval set is synthetic",
+    )
+    explanation: str = Field(
+        ...,
+        description="Explanation of synthetic nature and intended use",
+    )
+
+
+class ScopeLimitationV1(BaseModel):
+    """Scope boundaries of what this proof pack demonstrates."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    proven: list[str] = Field(
+        ...,
+        description="List of claims that are proven by this pack",
+    )
+    not_proven: list[str] = Field(
+        ...,
+        alias="notProven",
+        description="List of claims that are explicitly NOT proven",
+    )
+
+
+class LimitationsV1(BaseModel):
+    """Explicit limitations and constraints of this proof pack."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    training_vocabulary: TrainingVocabularyLimitationV1 = Field(
+        ...,
+        alias="trainingVocabulary",
+        description="Training vocabulary constraints",
+    )
+    synthetic_eval_set: SyntheticEvalSetLimitationV1 = Field(
+        ...,
+        alias="syntheticEvalSet",
+        description="Synthetic evaluation set limitations",
+    )
+    scope: ScopeLimitationV1 = Field(
+        ...,
+        description="Scope boundaries of what this proof pack demonstrates",
+    )
+
+
+class ExternalProofPackV1(BaseModel):
+    """Self-contained proof bundle demonstrating RenaceCHESS end-to-end integrity (M33).
+
+    This manifest serves as the index for external auditors to verify all claims
+    without trusting the codebase. The proof pack contains all artifacts, schemas,
+    and hashes necessary for independent verification.
+
+    See docs/milestones/PhaseE/M33/M33_plan.md for the governing specification.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    schema_version: Literal[1] = Field(
+        1,
+        alias="schemaVersion",
+        description="Schema version",
+    )
+    project: Literal["RenaceCHESS"] = Field(
+        "RenaceCHESS",
+        description="Project name",
+    )
+    phase: Literal["E"] = Field(
+        "E",
+        description="Phase identifier",
+    )
+    included_milestones: list[str] = Field(
+        ...,
+        alias="includedMilestones",
+        min_length=1,
+        description="List of milestone identifiers included in this proof pack",
+    )
+    artifacts: ArtifactsV1 = Field(
+        ...,
+        description="References to all artifacts included in the proof pack",
+    )
+    hash_chain: HashChainV1 = Field(
+        ...,
+        alias="hashChain",
+        description="Hash chain proving artifact integrity and causal relationships",
+    )
+    limitations: LimitationsV1 = Field(
+        ...,
+        description="Explicit limitations and constraints of this proof pack",
+    )
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of this manifest computed from canonical JSON representation",
+    )

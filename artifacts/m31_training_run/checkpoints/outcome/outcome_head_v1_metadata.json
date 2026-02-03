@@ -1,0 +1,10 @@
+{
+  "batch_size": 32,
+  "epochs": 10,
+  "frozen_eval_manifest_path": "data\\frozen_eval_v2\\manifest.json",
+  "learning_rate": 0.001,
+  "loss_function": "CrossEntropyLoss",
+  "manifest_path": "artifacts\\m31_training_run\\training_dataset_v2\\manifest.json",
+  "model_type": "OutcomeHeadV1",
+  "seed": 42
+}

@@ -1,0 +1,314 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://renacechess.dev/schemas/v1/external_proof_pack.v1.schema.json",
+  "title": "ExternalProofPackV1",
+  "description": "Self-contained proof bundle demonstrating RenaceCHESS end-to-end integrity, determinism, and scientific honesty (M33). This manifest serves as the index for external auditors to verify all claims without trusting the codebase.",
+  "type": "object",
+  "required": [
+    "schemaVersion",
+    "project",
+    "phase",
+    "includedMilestones",
+    "artifacts",
+    "hashChain",
+    "limitations",
+    "determinismHash"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "type": "integer",
+      "const": 1,
+      "description": "Schema version"
+    },
+    "project": {
+      "type": "string",
+      "const": "RenaceCHESS",
+      "description": "Project name"
+    },
+    "phase": {
+      "type": "string",
+      "const": "E",
+      "description": "Phase identifier"
+    },
+    "includedMilestones": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "description": "List of milestone identifiers included in this proof pack (e.g., [\"M30\", \"M31\", \"M32\"])"
+    },
+    "artifacts": {
+      "type": "object",
+      "description": "References to all artifacts included in the proof pack",
+      "required": [
+        "frozenEval",
+        "training",
+        "evaluation"
+      ],
+      "properties": {
+        "frozenEval": {
+          "type": "object",
+          "description": "Frozen evaluation set artifacts (M30)",
+          "required": [
+            "manifestPath",
+            "provenancePath",
+            "manifestHash",
+            "provenanceHash"
+          ],
+          "properties": {
+            "manifestPath": {
+              "type": "string",
+              "description": "Relative path to frozen eval v2 manifest within proof pack"
+            },
+            "provenancePath": {
+              "type": "string",
+              "description": "Relative path to frozen eval v2 provenance artifact"
+            },
+            "manifestHash": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$",
+              "description": "SHA-256 hash of frozen eval manifest"
+            },
+            "provenanceHash": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$",
+              "description": "SHA-256 hash of frozen eval provenance"
+            }
+          }
+        },
+        "training": {
+          "type": "object",
+          "description": "Training artifacts (M31)",
+          "required": [
+            "configLockPath",
+            "runReportPath",
+            "configLockHash",
+            "runReportHash",
+            "checkpoints"
+          ],
+          "properties": {
+            "configLockPath": {
+              "type": "string",
+              "description": "Relative path to training config lock within proof pack"
+            },
+            "runReportPath": {
+              "type": "string",
+              "description": "Relative path to training run report within proof pack"
+            },
+            "configLockHash": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$",
+              "description": "SHA-256 hash of training config lock"
+            },
+            "runReportHash": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$",
+              "description": "SHA-256 hash of training run report"
+            },
+            "checkpoints": {
+              "type": "object",
+              "description": "Checkpoint metadata (files not included, external storage)",
+              "required": [
+                "policy",
+                "outcome"
+              ],
+              "properties": {
+                "policy": {
+                  "type": "object",
+                  "description": "Policy checkpoint metadata",
+                  "required": [
+                    "hash",
+                    "fileSizeBytes",
+                    "expectedFilename"
+                  ],
+                  "properties": {
+                    "hash": {
+                      "type": "string",
+                      "pattern": "^sha256:[a-f0-9]{64}$",
+                      "description": "SHA-256 hash of policy checkpoint file"
+                    },
+                    "fileSizeBytes": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Size of checkpoint file in bytes"
+                    },
+                    "expectedFilename": {
+                      "type": "string",
+                      "description": "Expected filename of checkpoint (informational)"
+                    },
+                    "externalStorage": {
+                      "type": "boolean",
+                      "const": true,
+                      "description": "Flag indicating checkpoint is stored externally, not in proof pack"
+                    }
+                  }
+                },
+                "outcome": {
+                  "type": "object",
+                  "description": "Outcome checkpoint metadata",
+                  "required": [
+                    "hash",
+                    "fileSizeBytes",
+                    "expectedFilename"
+                  ],
+                  "properties": {
+                    "hash": {
+                      "type": "string",
+                      "pattern": "^sha256:[a-f0-9]{64}$",
+                      "description": "SHA-256 hash of outcome checkpoint file"
+                    },
+                    "fileSizeBytes": {
+                      "type": "integer",
+                      "minimum": 0,
+                      "description": "Size of checkpoint file in bytes"
+                    },
+                    "expectedFilename": {
+                      "type": "string",
+                      "description": "Expected filename of checkpoint (informational)"
+                    },
+                    "externalStorage": {
+                      "type": "boolean",
+                      "const": true,
+                      "description": "Flag indicating checkpoint is stored externally, not in proof pack"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "evaluation": {
+          "type": "object",
+          "description": "Post-training evaluation artifacts (M32)",
+          "required": [
+            "reportPath",
+            "reportHash"
+          ],
+          "properties": {
+            "reportPath": {
+              "type": "string",
+              "description": "Relative path to post-train eval report within proof pack"
+            },
+            "reportHash": {
+              "type": "string",
+              "pattern": "^sha256:[a-f0-9]{64}$",
+              "description": "SHA-256 hash of post-train eval report"
+            }
+          }
+        }
+      }
+    },
+    "hashChain": {
+      "type": "object",
+      "description": "Hash chain proving artifact integrity and causal relationships",
+      "required": [
+        "frozenEvalManifestHash",
+        "trainingConfigLockHash",
+        "trainingRunReportHash",
+        "postTrainEvalReportHash"
+      ],
+      "properties": {
+        "frozenEvalManifestHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "description": "SHA-256 hash of frozen eval v2 manifest (M30)"
+        },
+        "trainingConfigLockHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "description": "SHA-256 hash of training config lock (M31)"
+        },
+        "trainingRunReportHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "description": "SHA-256 hash of training run report (M31)"
+        },
+        "postTrainEvalReportHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "description": "SHA-256 hash of post-train eval report (M32)"
+        }
+      }
+    },
+    "limitations": {
+      "type": "object",
+      "description": "Explicit limitations and constraints of this proof pack",
+      "required": [
+        "trainingVocabulary",
+        "syntheticEvalSet",
+        "scope"
+      ],
+      "properties": {
+        "trainingVocabulary": {
+          "type": "object",
+          "description": "Training vocabulary constraints",
+          "required": [
+            "moveCount",
+            "explanation"
+          ],
+          "properties": {
+            "moveCount": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Number of moves in training vocabulary"
+            },
+            "explanation": {
+              "type": "string",
+              "description": "Explanation of vocabulary constraint and its impact on metrics"
+            }
+          }
+        },
+        "syntheticEvalSet": {
+          "type": "object",
+          "description": "Synthetic evaluation set limitations",
+          "required": [
+            "isSynthetic",
+            "explanation"
+          ],
+          "properties": {
+            "isSynthetic": {
+              "type": "boolean",
+              "const": true,
+              "description": "Flag indicating eval set is synthetic"
+            },
+            "explanation": {
+              "type": "string",
+              "description": "Explanation of synthetic nature and intended use"
+            }
+          }
+        },
+        "scope": {
+          "type": "object",
+          "description": "Scope boundaries of what this proof pack demonstrates",
+          "required": [
+            "proven",
+            "notProven"
+          ],
+          "properties": {
+            "proven": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "List of claims that are proven by this pack"
+            },
+            "notProven": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "List of claims that are explicitly NOT proven"
+            }
+          }
+        }
+      }
+    },
+    "determinismHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of this manifest computed from canonical JSON representation"
+    }
+  }
+}
+

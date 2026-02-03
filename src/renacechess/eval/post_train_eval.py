@@ -367,9 +367,7 @@ def evaluate_models(  # pragma: no cover
         # Extract labels - chosenMove is at top level in frozen eval v2
         chosen_move = record.get("chosenMove")
         # gameResult may be at top level or in meta
-        game_result = record.get("gameResult") or record.get("meta", {}).get(
-            "gameResult"
-        )
+        game_result = record.get("gameResult") or record.get("meta", {}).get("gameResult")
 
         bucket_counts[skill_bucket] += 1
 
