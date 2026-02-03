@@ -113,4 +113,3 @@ def _load_v2_record_keys(manifest_dict: dict, manifest_path: Path) -> FrozenEval
         schema_version=2,
         source_path=manifest_path,
     )
-

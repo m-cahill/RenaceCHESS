@@ -87,9 +87,7 @@ class TestProductionFrozenEvalV2:
         from renacechess.models.training import PolicyDataset
 
         frozen_eval_path = Path("data/frozen_eval_v2/manifest.json")
-        training_dataset_path = Path(
-            "artifacts/m31_training_run/training_dataset_v2/manifest.json"
-        )
+        training_dataset_path = Path("artifacts/m31_training_run/training_dataset_v2/manifest.json")
 
         if not frozen_eval_path.exists() or not training_dataset_path.exists():
             pytest.skip("Production data not available")
@@ -102,4 +100,3 @@ class TestProductionFrozenEvalV2:
 
         # Verify frozen eval keys were loaded
         assert len(dataset.frozen_eval_keys) >= 10000
-
