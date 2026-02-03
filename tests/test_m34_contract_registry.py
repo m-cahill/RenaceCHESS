@@ -117,13 +117,24 @@ class TestRegistryFunctions:
         assert all(s.name.endswith(".schema.json") for s in schemas)
         # Should include dataset_manifest.v2 (it's a v1 contract, just named v2)
         # But should exclude other v2+ schemas
-        v2_plus = [s for s in schemas if (".v2." in s.name or ".v3." in s.name or ".v4." in s.name or ".v5." in s.name) and s.name != "dataset_manifest.v2.schema.json"]
+        v2_plus = [
+            s
+            for s in schemas
+            if (".v2." in s.name or ".v3." in s.name or ".v4." in s.name or ".v5." in s.name)
+            and s.name != "dataset_manifest.v2.schema.json"
+        ]
         # Note: context_bridge.v2.schema.json is also a v1 contract (M11)
         v2_plus = [s for s in v2_plus if s.name != "context_bridge.v2.schema.json"]
         # These should be minimal (only legacy v2 naming, not actual v2+ contracts)
         assert len(v2_plus) == 0, f"Found unexpected v2+ schemas: {[s.name for s in v2_plus]}"
         # Should include v1 schemas
-        v1_schemas = [s for s in schemas if ".v1." in s.name or s.name.startswith("context_bridge") or s.name.startswith("dataset_manifest")]
+        v1_schemas = [
+            s
+            for s in schemas
+            if ".v1." in s.name
+            or s.name.startswith("context_bridge")
+            or s.name.startswith("dataset_manifest")
+        ]
         assert len(v1_schemas) > 0
 
     def test_generate_contract_registry(self, tmp_path: Path) -> None:

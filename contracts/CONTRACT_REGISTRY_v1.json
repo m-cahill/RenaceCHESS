@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "frozenAt": "2026-02-03T08:54:21.375629Z",
+  "frozenAt": "2026-02-03T09:16:28.603817Z",
   "contracts": [
     {
       "filename": "advice_facts.v1.schema.json",
@@ -95,7 +95,7 @@
     },
     {
       "filename": "eval_set_provenance.v1.schema.json",
-      "schemaHash": "dd1ac75422290d5e447ccdc66ad179a1289a9a229c67d1c63108a763b307b7e7",
+      "schemaHash": "f175ba805746c7cd3d670a9bcdeb2ed00681f0975a879157424d2e222692cac2",
       "introducedMilestone": "M30",
       "purpose": "Evaluation set provenance artifact",
       "pydanticModel": "EvalSetProvenanceV1"

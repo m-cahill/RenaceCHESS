@@ -19,8 +19,8 @@ def compute_file_hash(file_path: Path) -> str:
 
 def discover_v1_schemas(schemas_dir: Path) -> list[Path]:
     """Discover all v1 schema files in the schemas directory.
-    
-    Note: Some schemas are named .v2 but are actually v1 contracts (e.g., 
+
+    Note: Some schemas are named .v2 but are actually v1 contracts (e.g.,
     dataset_manifest.v2.schema.json, context_bridge.v2.schema.json). These
     are included because they are part of the v1 contract set.
     """
@@ -57,12 +57,12 @@ def generate_contract_registry(
     frozen_at: datetime | None = None,
 ) -> ContractRegistryV1:
     """Generate contract registry from discovered v1 schemas.
-    
+
     Args:
         schemas_dir: Directory containing v1 schema files
         registry_output: Path where registry JSON will be written
         frozen_at: Timestamp for freezing (defaults to now)
-    
+
     Returns:
         ContractRegistryV1 registry object
     """
@@ -147,7 +147,9 @@ def generate_contract_registry(
         "recalibration_gate.v1.schema.json": "RecalibrationGateV1",
         "runtime_recalibration_report.v1.schema.json": "RuntimeRecalibrationReportV1",
         "runtime_recalibration_delta.v1.schema.json": "RuntimeRecalibrationDeltaV1",
-        "runtime_recalibration_activation_policy.v1.schema.json": "RuntimeRecalibrationActivationPolicyV1",
+        "runtime_recalibration_activation_policy.v1.schema.json": (
+            "RuntimeRecalibrationActivationPolicyV1"
+        ),
         "runtime_recalibration_decision.v1.schema.json": "RuntimeRecalibrationDecisionV1",
         "training_benchmark_report.v1.schema.json": "TrainingBenchmarkReportV1",
         "training_config_lock.v1.schema.json": "TrainingConfigLockV1",
@@ -236,11 +238,11 @@ def generate_contract_registry(
 
 def validate_contract_registry(registry_path: Path, schemas_dir: Path) -> bool:
     """Validate that contract registry matches current schema files.
-    
+
     Args:
         registry_path: Path to registry JSON file
         schemas_dir: Directory containing v1 schema files
-    
+
     Returns:
         True if validation passes, False otherwise
     """
@@ -274,7 +276,10 @@ def validate_contract_registry(registry_path: Path, schemas_dir: Path) -> bool:
         
         current_hash = compute_file_hash(schema_path)
         if current_hash != contract.schema_hash:
-            print(f"ERROR: Hash mismatch for {contract.filename}: expected {contract.schema_hash}, got {current_hash}")
+            print(
+                f"ERROR: Hash mismatch for {contract.filename}: "
+                f"expected {contract.schema_hash}, got {current_hash}"
+            )
             return False
     
     print("SUCCESS: Contract registry validation passed")

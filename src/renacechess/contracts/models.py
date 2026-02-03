@@ -5985,7 +5985,9 @@ class ContractEntryV1(BaseModel):
 
     model_config = ConfigDict(populate_by_name=True)
 
-    filename: str = Field(..., description="Schema filename (e.g., 'frozen_eval_manifest.v2.schema.json')")
+    filename: str = Field(
+        ..., description="Schema filename (e.g., 'frozen_eval_manifest.v2.schema.json')"
+    )
     schema_hash: str = Field(
         ...,
         alias="schemaHash",
@@ -6011,5 +6013,7 @@ class ContractRegistryV1(BaseModel):
     model_config = ConfigDict(populate_by_name=True)
 
     schema_version: int = Field(1, alias="schemaVersion", description="Registry schema version")
-    frozen_at: datetime = Field(..., alias="frozenAt", description="ISO 8601 timestamp when registry was frozen")
+    frozen_at: datetime = Field(
+        ..., alias="frozenAt", description="ISO 8601 timestamp when registry was frozen"
+    )
     contracts: list[ContractEntryV1] = Field(..., description="List of all v1 contracts")
