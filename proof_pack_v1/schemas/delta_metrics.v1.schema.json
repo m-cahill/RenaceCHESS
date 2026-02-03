@@ -1,0 +1,151 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://renacechess.dev/schemas/v1/delta_metrics.v1.schema.json",
+  "title": "DeltaMetricsV1",
+  "description": "Trained vs baseline delta metrics artifact (M32). Measures effect of training.",
+  "type": "object",
+  "required": [
+    "version",
+    "generatedAt",
+    "baselineModelId",
+    "trainedModelId",
+    "evalBaselineSeed",
+    "policyDelta",
+    "outcomeDelta",
+    "determinismHash"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version identifier"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of evaluation"
+    },
+    "sourceManifestHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of frozen eval manifest used"
+    },
+    "baselineModelId": {
+      "type": "string",
+      "description": "Baseline model identifier (e.g., 'baseline-1337')"
+    },
+    "trainedModelId": {
+      "type": "string",
+      "description": "Trained model identifier"
+    },
+    "evalBaselineSeed": {
+      "type": "integer",
+      "description": "Fixed seed used for baseline model initialization"
+    },
+    "policyDelta": {
+      "$ref": "#/$defs/HeadDeltaV1",
+      "description": "Delta metrics for policy head"
+    },
+    "outcomeDelta": {
+      "$ref": "#/$defs/HeadDeltaV1",
+      "description": "Delta metrics for outcome head"
+    },
+    "bySkillBucket": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/SkillBucketDeltaV1"
+      },
+      "description": "Per-skill bucket delta breakdown"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Human-readable summary of training effect"
+    },
+    "determinismHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash for determinism verification"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "HeadDeltaV1": {
+      "type": "object",
+      "required": ["primaryMetric", "primaryMetricDelta", "direction"],
+      "properties": {
+        "primaryMetric": {
+          "type": "string",
+          "description": "Name of primary metric (e.g., 'top1Accuracy', 'accuracy')"
+        },
+        "primaryMetricBaseline": {
+          "type": "number",
+          "description": "Baseline value of primary metric"
+        },
+        "primaryMetricTrained": {
+          "type": "number",
+          "description": "Trained value of primary metric"
+        },
+        "primaryMetricDelta": {
+          "type": "number",
+          "description": "Delta: trained - baseline"
+        },
+        "direction": {
+          "type": "string",
+          "enum": ["improved", "degraded", "unchanged"],
+          "description": "Direction of change"
+        },
+        "percentageChange": {
+          "type": ["number", "null"],
+          "description": "Percentage change from baseline"
+        },
+        "isSignificant": {
+          "type": "boolean",
+          "description": "Whether delta exceeds significance threshold"
+        },
+        "allMetricDeltas": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "number"
+          },
+          "description": "All metric deltas (trained - baseline)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SkillBucketDeltaV1": {
+      "type": "object",
+      "required": ["skillBucket", "samples", "policyDelta", "outcomeDelta"],
+      "properties": {
+        "skillBucket": {
+          "type": "string",
+          "enum": [
+            "lt_800",
+            "800_999",
+            "1000_1199",
+            "1200_1399",
+            "1400_1599",
+            "1600_1799",
+            "gte_1800",
+            "unknown"
+          ],
+          "description": "Skill bucket ID"
+        },
+        "samples": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of samples in this bucket"
+        },
+        "policyDelta": {
+          "$ref": "#/$defs/HeadDeltaV1",
+          "description": "Policy delta for this bucket"
+        },
+        "outcomeDelta": {
+          "$ref": "#/$defs/HeadDeltaV1",
+          "description": "Outcome delta for this bucket"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
+

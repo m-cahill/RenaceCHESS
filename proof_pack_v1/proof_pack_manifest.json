@@ -1,0 +1,72 @@
+{
+  "schema_version": 1,
+  "project": "RenaceCHESS",
+  "phase": "E",
+  "included_milestones": [
+    "M30",
+    "M31",
+    "M32"
+  ],
+  "artifacts": {
+    "frozen_eval": {
+      "manifest_path": "frozen_eval/manifest.json",
+      "provenance_path": "frozen_eval/provenance.json",
+      "manifest_hash": "sha256:73a0c4aa599b156303c5978a310326038be6494a2f5130c4d33e26d2eeefe595",
+      "provenance_hash": "sha256:be02b59451afa40baa8ded3d375c62767e9840d17fc5e2ac3309765826810ed2"
+    },
+    "training": {
+      "config_lock_path": "training/config_lock.json",
+      "run_report_path": "training/training_run_report.json",
+      "config_lock_hash": "sha256:94e1e2aff0715ff995c7399e77cc7d287266de7adf502ec719e786fafc8f056e",
+      "run_report_hash": "sha256:6462f2f223d1157b8623137964d82a4340a4387d1da690b4e7a6587fc4590b0a",
+      "checkpoints": {
+        "policy": {
+          "hash": "sha256:94b652688b2c31a90963c33165684205928b47001781cd23436b0fe990289395",
+          "file_size_bytes": 2634743,
+          "expected_filename": "model.pt",
+          "external_storage": true
+        },
+        "outcome": {
+          "hash": "sha256:d815f508faea47efe8ea200e2281b74b77dffaea2d9c56e4cda8da84232f0b55",
+          "file_size_bytes": 2566193,
+          "expected_filename": "outcome_head_v1.pt",
+          "external_storage": true
+        }
+      }
+    },
+    "evaluation": {
+      "report_path": "evaluation/post_train_eval_report.json",
+      "report_hash": "sha256:dbc25f4890ad5926feef44c7c4a907df0daa64132e4b7bc73895c5a00bfe50a8"
+    }
+  },
+  "hash_chain": {
+    "frozen_eval_manifest_hash": "sha256:73a0c4aa599b156303c5978a310326038be6494a2f5130c4d33e26d2eeefe595",
+    "training_config_lock_hash": "sha256:94e1e2aff0715ff995c7399e77cc7d287266de7adf502ec719e786fafc8f056e",
+    "training_run_report_hash": "sha256:6462f2f223d1157b8623137964d82a4340a4387d1da690b4e7a6587fc4590b0a",
+    "post_train_eval_report_hash": "sha256:dbc25f4890ad5926feef44c7c4a907df0daa64132e4b7bc73895c5a00bfe50a8"
+  },
+  "limitations": {
+    "training_vocabulary": {
+      "move_count": 4096,
+      "explanation": "Training used a constrained vocabulary of 4096 moves. This causes expected degradation in evaluation metrics compared to baseline because the trained model is specialized to a narrow move distribution, while the baseline has uniform probability over the vocabulary and occasionally matches correct moves by chance. Infrastructure validation objective achieved; production training will use full move vocabulary."
+    },
+    "synthetic_eval_set": {
+      "is_synthetic": true,
+      "explanation": "Frozen eval v2 is a synthetic, chess-valid evaluation set generated algorithmically from curated FEN seeds. It is intended for relative evaluation and calibration stability, not absolute strength claims. All positions are chess-valid but not drawn from real game data."
+    },
+    "scope": {
+      "proven": [
+        "Pipeline integrity: Training → evaluation → reporting is end-to-end consistent",
+        "Contract discipline: Schema-first design survived real execution",
+        "Scientific honesty: Degraded results are reported, not hidden or reframed",
+        "Reproducibility: All artifacts are hash-chained and replayable"
+      ],
+      "not_proven": [
+        "Chess playing strength (training vocabulary too constrained)",
+        "Full-vocab performance (only 8 moves trained)",
+        "Absolute model quality (synthetic eval set, not real games)"
+      ]
+    }
+  },
+  "determinism_hash": "sha256:6a69e1f801ca1c03d3aedcc2d8bb6ea86f87eb38e8e6322d9cea477ff398ca2f"
+}

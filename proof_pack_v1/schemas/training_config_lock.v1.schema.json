@@ -1,0 +1,263 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://renacechess.dev/schemas/v1/training_config_lock.v1.schema.json",
+  "title": "TrainingConfigLockV1",
+  "description": "Immutable training configuration lock for RenaceCHESS (M31). Proves training config immutability and provides full audit trail for reproducibility.",
+  "type": "object",
+  "required": [
+    "version",
+    "createdAt",
+    "codeCommitSha",
+    "datasetManifestHash",
+    "frozenEvalManifestHash",
+    "policyConfig",
+    "outcomeConfig",
+    "determinismHash"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version"
+    },
+    "createdAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when config was locked"
+    },
+    "codeCommitSha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$",
+      "description": "Full 40-character git commit SHA of the code used for training"
+    },
+    "datasetManifestHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the training dataset manifest"
+    },
+    "datasetManifestPath": {
+      "type": "string",
+      "description": "Path to training dataset manifest (informational)"
+    },
+    "frozenEvalManifestHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of frozen eval manifest (must NOT be used for training)"
+    },
+    "frozenEvalManifestPath": {
+      "type": "string",
+      "description": "Path to frozen eval manifest (informational)"
+    },
+    "policyConfig": {
+      "$ref": "#/$defs/HeadConfig",
+      "description": "Policy head training configuration"
+    },
+    "outcomeConfig": {
+      "$ref": "#/$defs/HeadConfig",
+      "description": "Outcome head training configuration"
+    },
+    "environmentRequirements": {
+      "$ref": "#/$defs/EnvironmentRequirements",
+      "description": "Required environment for training (optional but recommended)"
+    },
+    "checkpointPolicy": {
+      "$ref": "#/$defs/CheckpointPolicy",
+      "description": "Policy for saving checkpoints during training"
+    },
+    "sourceTemplates": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/SourceTemplate"
+      },
+      "description": "Reference to source template files used to generate this config"
+    },
+    "auditNotes": {
+      "type": "string",
+      "description": "Optional notes for governance/audit purposes"
+    },
+    "determinismHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of canonical config content for reproducibility verification"
+    }
+  },
+  "$defs": {
+    "HeadConfig": {
+      "type": "object",
+      "required": [
+        "modelType",
+        "epochs",
+        "batchSize",
+        "learningRate",
+        "seed"
+      ],
+      "properties": {
+        "modelType": {
+          "type": "string",
+          "description": "Model class name (e.g., 'BaselinePolicyV1', 'OutcomeHeadV1')"
+        },
+        "epochs": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000,
+          "description": "Number of training epochs"
+        },
+        "batchSize": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Training batch size"
+        },
+        "learningRate": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Optimizer learning rate"
+        },
+        "seed": {
+          "type": "integer",
+          "description": "Random seed for reproducibility"
+        },
+        "optimizer": {
+          "$ref": "#/$defs/OptimizerConfig",
+          "description": "Optimizer configuration"
+        },
+        "scheduler": {
+          "$ref": "#/$defs/SchedulerConfig",
+          "description": "Learning rate scheduler configuration (optional)"
+        },
+        "lossFunction": {
+          "type": "string",
+          "default": "CrossEntropyLoss",
+          "description": "Loss function name"
+        },
+        "moveVocabSize": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Move vocabulary size (policy head only)"
+        }
+      }
+    },
+    "OptimizerConfig": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["Adam", "AdamW", "SGD"],
+          "description": "Optimizer type"
+        },
+        "weightDecay": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Weight decay (L2 regularization)"
+        },
+        "betas": {
+          "type": "array",
+          "items": {"type": "number"},
+          "minItems": 2,
+          "maxItems": 2,
+          "description": "Adam beta parameters [beta1, beta2]"
+        },
+        "momentum": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "SGD momentum (SGD only)"
+        }
+      }
+    },
+    "SchedulerConfig": {
+      "type": "object",
+      "required": ["enabled"],
+      "properties": {
+        "enabled": {
+          "type": "boolean",
+          "description": "Whether scheduler is enabled"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["StepLR", "CosineAnnealingLR", "ReduceLROnPlateau"],
+          "description": "Scheduler type"
+        },
+        "stepSize": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Step size for StepLR"
+        },
+        "gamma": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1,
+          "description": "Multiplicative factor for LR decay"
+        }
+      }
+    },
+    "EnvironmentRequirements": {
+      "type": "object",
+      "properties": {
+        "device": {
+          "type": "string",
+          "enum": ["auto", "cuda", "cpu"],
+          "description": "Target device for training"
+        },
+        "mixedPrecision": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether AMP is enabled (M31: must be false)"
+        },
+        "deterministic": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether deterministic mode is enabled"
+        },
+        "numWorkers": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of data loader workers"
+        },
+        "pinMemory": {
+          "type": "boolean",
+          "description": "Whether to pin memory for CUDA"
+        }
+      }
+    },
+    "CheckpointPolicy": {
+      "type": "object",
+      "required": ["saveMidpoint", "saveFinal"],
+      "properties": {
+        "saveMidpoint": {
+          "type": "boolean",
+          "description": "Whether to save a midpoint checkpoint"
+        },
+        "saveFinal": {
+          "type": "boolean",
+          "description": "Whether to save final checkpoint"
+        },
+        "saveEveryNEpochs": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Save checkpoint every N epochs (optional, not for M31)"
+        },
+        "outputDir": {
+          "type": "string",
+          "description": "Directory for checkpoint output (relative or absolute)"
+        }
+      }
+    },
+    "SourceTemplate": {
+      "type": "object",
+      "required": ["path", "hash"],
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "Path to source template file"
+        },
+        "hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "description": "SHA-256 hash of template file content"
+        }
+      }
+    }
+  }
+}
+

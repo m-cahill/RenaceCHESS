@@ -1,0 +1,311 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://renacechess.dev/schemas/v1/training_run_report.v1.schema.json",
+  "title": "TrainingRunReportV1",
+  "description": "Canonical summary of a training run execution for RenaceCHESS (M31). Captures metrics, checkpoints, and execution metadata for downstream evaluation and external proof.",
+  "type": "object",
+  "required": [
+    "version",
+    "runId",
+    "startedAt",
+    "completedAt",
+    "status",
+    "configLockHash",
+    "environment",
+    "policyRunSummary",
+    "outcomeRunSummary",
+    "checkpoints",
+    "determinismHash"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version"
+    },
+    "runId": {
+      "type": "string",
+      "description": "Unique identifier for this training run (e.g., 'm31-training-run-001')"
+    },
+    "startedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when training started"
+    },
+    "completedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp when training completed (or aborted)"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["success", "aborted", "failed", "timeout"],
+      "description": "Final status of the training run"
+    },
+    "configLockHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the TrainingConfigLockV1 used for this run"
+    },
+    "configLockPath": {
+      "type": "string",
+      "description": "Path to the config lock file (informational)"
+    },
+    "environment": {
+      "$ref": "#/$defs/ExecutionEnvironment",
+      "description": "Actual execution environment metadata"
+    },
+    "policyRunSummary": {
+      "$ref": "#/$defs/HeadRunSummary",
+      "description": "Policy head training summary"
+    },
+    "outcomeRunSummary": {
+      "$ref": "#/$defs/HeadRunSummary",
+      "description": "Outcome head training summary"
+    },
+    "checkpoints": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/CheckpointReference"
+      },
+      "minItems": 1,
+      "description": "References to saved checkpoints (hashes, not files)"
+    },
+    "metricsLogPath": {
+      "type": "string",
+      "description": "Path to detailed training_metrics.jsonl file"
+    },
+    "totalWallClockSeconds": {
+      "type": "number",
+      "minimum": 0,
+      "description": "Total wall-clock time for the entire training run in seconds"
+    },
+    "totalWallClockFormatted": {
+      "type": "string",
+      "description": "Human-readable duration (e.g., '2h 15m 30s')"
+    },
+    "warnings": {
+      "type": "array",
+      "items": {"type": "string"},
+      "description": "Non-fatal warnings encountered during training"
+    },
+    "failureNotes": {
+      "type": "string",
+      "description": "Explanation if status is not 'success' (nullable)"
+    },
+    "auditNotes": {
+      "type": "string",
+      "description": "Optional notes for governance/audit purposes"
+    },
+    "determinismHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of canonical report content for reproducibility verification"
+    }
+  },
+  "$defs": {
+    "ExecutionEnvironment": {
+      "type": "object",
+      "required": [
+        "gpuName",
+        "cudaVersion",
+        "torchVersion",
+        "pythonVersion",
+        "os"
+      ],
+      "properties": {
+        "gpuName": {
+          "type": "string",
+          "description": "GPU device name (e.g., 'NVIDIA GeForce RTX 5090')"
+        },
+        "vramGb": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Total VRAM in gigabytes"
+        },
+        "cudaVersion": {
+          "type": "string",
+          "description": "CUDA runtime version"
+        },
+        "driverVersion": {
+          "type": "string",
+          "description": "GPU driver version"
+        },
+        "torchVersion": {
+          "type": "string",
+          "description": "PyTorch version"
+        },
+        "pythonVersion": {
+          "type": "string",
+          "description": "Python version"
+        },
+        "os": {
+          "type": "string",
+          "description": "Operating system"
+        },
+        "hostname": {
+          "type": "string",
+          "description": "Machine hostname (optional)"
+        }
+      }
+    },
+    "HeadRunSummary": {
+      "type": "object",
+      "required": [
+        "headType",
+        "epochsCompleted",
+        "epochsTarget",
+        "finalLoss",
+        "status"
+      ],
+      "properties": {
+        "headType": {
+          "type": "string",
+          "enum": ["policy", "outcome"],
+          "description": "Which head this summary is for"
+        },
+        "epochsCompleted": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of epochs actually completed"
+        },
+        "epochsTarget": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Target number of epochs from config"
+        },
+        "finalLoss": {
+          "type": "number",
+          "description": "Loss value at final epoch"
+        },
+        "initialLoss": {
+          "type": "number",
+          "description": "Loss value at first epoch"
+        },
+        "lossHistory": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/EpochMetrics"
+          },
+          "description": "Per-epoch loss and metrics (optional, can be in separate file)"
+        },
+        "samplesProcessed": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total samples processed across all epochs"
+        },
+        "trainingTimeSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Wall-clock time for this head's training"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["success", "aborted", "failed"],
+          "description": "Training status for this head"
+        },
+        "errorMessage": {
+          "type": "string",
+          "description": "Error message if status is not 'success'"
+        }
+      }
+    },
+    "EpochMetrics": {
+      "type": "object",
+      "required": ["epoch", "loss"],
+      "properties": {
+        "epoch": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Epoch number (1-indexed)"
+        },
+        "loss": {
+          "type": "number",
+          "description": "Average loss for this epoch"
+        },
+        "accuracy": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1,
+          "description": "Accuracy for this epoch (if applicable)"
+        },
+        "learningRate": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "description": "Learning rate at this epoch"
+        },
+        "wallClockSeconds": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Wall-clock time for this epoch"
+        },
+        "vramPeakGb": {
+          "type": "number",
+          "minimum": 0,
+          "description": "Peak VRAM usage during this epoch"
+        }
+      }
+    },
+    "CheckpointReference": {
+      "type": "object",
+      "required": [
+        "checkpointId",
+        "checkpointType",
+        "epoch",
+        "fileHash",
+        "fileSizeBytes",
+        "createdAt"
+      ],
+      "properties": {
+        "checkpointId": {
+          "type": "string",
+          "description": "Unique identifier for this checkpoint"
+        },
+        "checkpointType": {
+          "type": "string",
+          "enum": ["midpoint", "final", "epoch"],
+          "description": "Type of checkpoint"
+        },
+        "headType": {
+          "type": "string",
+          "enum": ["policy", "outcome", "combined"],
+          "description": "Which model head(s) this checkpoint contains"
+        },
+        "epoch": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Epoch at which checkpoint was saved"
+        },
+        "step": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Training step at which checkpoint was saved"
+        },
+        "fileHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "description": "SHA-256 hash of checkpoint file content"
+        },
+        "fileSizeBytes": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Size of checkpoint file in bytes"
+        },
+        "fileSizeFormatted": {
+          "type": "string",
+          "description": "Human-readable file size (e.g., '145.2 MB')"
+        },
+        "filePath": {
+          "type": "string",
+          "description": "Path or URI where checkpoint is stored (external, not in repo)"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "ISO 8601 timestamp when checkpoint was created"
+        }
+      }
+    }
+  }
+}
+
