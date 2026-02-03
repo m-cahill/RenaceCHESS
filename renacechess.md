@@ -41,6 +41,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M30 | ✅ Closed (MERGED) | `m30-frozen-eval-scaleset` → `main` | 2026-02-02 | FROZEN-EVAL-SCALESET-001 — 10k Synthetic Frozen Eval Set v2 |
 | M31 | ✅ Closed — Training Executed | `579cd2d` | 2026-02-03 | FULL-TRAINING-RUN-001 — Training completed (25m 26s, 10 epochs each, 2 checkpoints) |
 | M32 | ✅ Closed — Evaluation Executed | `89b9a4c` | 2026-02-03 | POST-TRAIN-EVAL-PACK-001 — Evaluated 10k positions, delta metrics computed |
+| M33 | ✅ Closed (MERGED) | `m33-external-proof-pack` → `main` | 2026-02-03 | EXTERNAL-PROOF-PACK-001 — Self-contained proof bundle with M30-M32 artifacts |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -1043,8 +1044,38 @@ From M00 forward, RenaceCHESS guarantees:
   - TrainingRunReportV1 — `artifacts/m31_training_run/training_run_report.json`
   - FrozenEvalManifestV2 — `data/frozen_eval_v2/manifest.json`
 
+**M33 Details:**
+- **Objective:** Produce a self-contained, auditor-friendly proof bundle demonstrating RenaceCHESS end-to-end integrity
+- **Status:** ✅ Closed (MERGED)
+- **PR:** #39 (merged)
+- **Final Commit:** `4390d3c`
+- **CI Runs:**
+  - Run 1: 21620100537 (FAILURE - 3 jobs: lint, type check, CI test data)
+  - Run 2: 21620697685 (FAILURE - 3 jobs: formatting, type annotation, CI test data)
+  - Run 3: 21621142522 (SUCCESS - All 13 jobs passing)
+- **Key Files:**
+  - `src/renacechess/contracts/schemas/v1/external_proof_pack.v1.schema.json` — ExternalProofPackV1 schema
+  - `src/renacechess/proof_pack/build_proof_pack.py` — Proof pack builder
+  - `src/renacechess/proof_pack/verify_proof_pack.py` — Proof pack verifier
+  - `src/renacechess/proof_pack/README_TEMPLATE.md` — README template
+  - `tests/test_m33_proof_pack.py` — 12 comprehensive tests
+- **Artifacts Produced:**
+  - `proof_pack_v1/` — Complete proof bundle directory
+  - `proof_pack_v1/proof_pack_manifest.json` — ExternalProofPackV1 manifest
+  - `proof_pack_v1/README.md` — Executive summary and technical verification guide
+  - All M30-M32 artifacts copied with hash verification
+  - All required schemas included
+- **Determinism Hash:** `sha256:6a69e1f801ca1c03d3aedcc2d8bb6ea86f87eb38e8e6322d9cea477ff398ca2f`
+- **Referenced Artifacts:**
+  - ExternalProofPackV1 — `proof_pack_v1/proof_pack_manifest.json`
+  - FrozenEvalManifestV2 — `proof_pack_v1/frozen_eval/manifest.json`
+  - EvalSetProvenanceV1 — `proof_pack_v1/frozen_eval/provenance.json`
+  - TrainingConfigLockV1 — `proof_pack_v1/training/config_lock.json`
+  - TrainingRunReportV1 — `proof_pack_v1/training/training_run_report.json`
+  - PostTrainEvalReportV1 — `proof_pack_v1/evaluation/post_train_eval_report.json`
+
 ---
 
-**Last Updated:** 2026-02-03 (Phase E — M32 POST-TRAIN-EVAL-PACK-001 Closed)
+**Last Updated:** 2026-02-03 (Phase E — M33 EXTERNAL-PROOF-PACK-001 Closed)
 
 
