@@ -60,7 +60,13 @@ All M31 artifacts have been created:
 
 | Date | Tool | Purpose | Files/Target | Status |
 |------|------|---------|--------------|--------|
-| 2026-02-03 11:30 | git | Create PR for M31 implementation | GitHub | 🔄 In Progress |
+| 2026-02-03 11:30 | git checkout | Create M31 branch | m31-full-training-run | ✅ Complete |
+| 2026-02-03 11:31 | git commit | Commit M31 implementation | 11 files | ✅ Complete |
+| 2026-02-03 11:32 | git push | Push branch to origin | origin/m31-full-training-run | ✅ Complete |
+| 2026-02-03 11:33 | gh pr create | Create PR #36 | PR #36 | ✅ Complete |
+| 2026-02-03 11:34 | gh run watch | Monitor CI | PR #36 | 🔄 In Progress |
+
+**PR:** https://github.com/m-cahill/RenaceCHESS/pull/36
 
 ---
 
