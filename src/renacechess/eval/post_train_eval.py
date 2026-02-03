@@ -24,6 +24,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
 
+import chess
 import torch
 
 from renacechess.conditioning.buckets import SkillBucketId
@@ -357,25 +358,34 @@ def evaluate_models(  # pragma: no cover
         # Extract position data
         position = record.get("position", {})
         fen = position.get("fen", "")
-        legal_moves = position.get("legalMoves", [])
 
         # Extract conditioning
         conditioning = record.get("conditioning", {})
         skill_bucket = conditioning.get("skillBucketId", "unknown")
         time_control = conditioning.get("timeControlClass")
 
-        # Extract labels
-        meta = record.get("meta", {})
-        chosen_move = meta.get("chosenMove")
-        game_result = meta.get("gameResult")
+        # Extract labels - chosenMove is at top level in frozen eval v2
+        chosen_move = record.get("chosenMove")
+        # gameResult may be at top level or in meta
+        game_result = record.get("gameResult") or record.get("meta", {}).get(
+            "gameResult"
+        )
 
         bucket_counts[skill_bucket] += 1
 
         # Policy evaluation
-        if chosen_move and legal_moves:
-            with torch.no_grad():
-                move_probs = policy_model(fen, skill_bucket, time_control, legal_moves)
-            policy_acc.add(move_probs, chosen_move)
+        if chosen_move and fen:
+            try:
+                # Compute legal moves from FEN
+                board = chess.Board(fen)
+                legal_moves = [move.uci() for move in board.legal_moves]
+
+                with torch.no_grad():
+                    move_probs = policy_model(fen, skill_bucket, time_control, legal_moves)
+                policy_acc.add(move_probs, chosen_move)
+            except (ValueError, chess.InvalidMoveError):
+                # Skip invalid FENs
+                pass
 
         # Outcome evaluation
         if game_result in ("win", "draw", "loss"):
@@ -455,7 +465,15 @@ def run_post_train_evaluation(  # pragma: no cover
     # =========================================================================
     # Evaluate TRAINED models
     # =========================================================================
-    trained_policy = BaselinePolicyV1()
+    # Load policy metadata to get correct vocabulary size
+    policy_metadata_path = policy_checkpoint_path.parent / "model_metadata.json"
+    if policy_metadata_path.exists():
+        policy_metadata = json.loads(policy_metadata_path.read_text(encoding="utf-8"))
+        move_vocab_size = policy_metadata.get("move_vocab_size", 1000)
+    else:
+        move_vocab_size = 1000
+
+    trained_policy = BaselinePolicyV1(move_vocab_size=move_vocab_size)
     trained_policy.load_state_dict(
         torch.load(policy_checkpoint_path, map_location="cpu", weights_only=True)
     )
@@ -478,7 +496,8 @@ def run_post_train_evaluation(  # pragma: no cover
     # =========================================================================
     _set_deterministic_seed(eval_baseline_seed)
 
-    baseline_policy = BaselinePolicyV1()
+    # Use same vocabulary size as trained model for fair comparison
+    baseline_policy = BaselinePolicyV1(move_vocab_size=move_vocab_size)
     baseline_policy.eval()
 
     baseline_outcome = OutcomeHeadV1()

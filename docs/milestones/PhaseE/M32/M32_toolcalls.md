@@ -2,8 +2,9 @@
 
 **Milestone:** M32 — POST-TRAIN-EVAL-PACK-001  
 **Phase:** E (Scale Proof, Training Run, Release Lock)  
-**Status:** ✅ CI GREEN — Awaiting Merge Permission  
-**PR:** #38  
+**Status:** 🔄 EXECUTION PHASE — Running Evaluation  
+**PR:** #38 ✅ MERGED  
+**Merge Commit:** 698d242  
 **CI Run 1:** 21615933043 (failed: lint error + coverage)  
 **CI Run 2:** 21616239642 (failed: format check)  
 **CI Run 3:** 21616461957 (failed: coverage 89.53%)  
