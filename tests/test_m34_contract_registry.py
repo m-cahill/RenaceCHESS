@@ -141,25 +141,25 @@ class TestRegistryFunctions:
         """Test contract registry generation."""
         schemas_dir = Path("src/renacechess/contracts/schemas/v1")
         registry_output = tmp_path / "CONTRACT_REGISTRY_v1.json"
-        
+
         registry = generate_contract_registry(
             schemas_dir=schemas_dir,
             registry_output=registry_output,
             frozen_at=datetime(2026, 2, 3, 12, 0, 0),
         )
-        
+
         # Check registry was created
         assert registry_output.exists()
         assert registry.schema_version == 1
         assert len(registry.contracts) > 0
-        
+
         # Check all contracts have required fields
         for contract in registry.contracts:
             assert contract.filename
             assert len(contract.schema_hash) == 64
             assert contract.introduced_milestone
             assert contract.purpose
-        
+
         # Check JSON is valid
         registry_data = json.loads(registry_output.read_text(encoding="utf-8"))
         assert registry_data["schemaVersion"] == 1
@@ -169,13 +169,13 @@ class TestRegistryFunctions:
         """Test contract registry validation."""
         schemas_dir = Path("src/renacechess/contracts/schemas/v1")
         registry_output = tmp_path / "CONTRACT_REGISTRY_v1.json"
-        
+
         # Generate registry
         generate_contract_registry(
             schemas_dir=schemas_dir,
             registry_output=registry_output,
         )
-        
+
         # Validate should pass
         assert validate_contract_registry(registry_output, schemas_dir) is True
 
@@ -183,21 +183,20 @@ class TestRegistryFunctions:
         """Test validation fails on hash mismatch."""
         schemas_dir = Path("src/renacechess/contracts/schemas/v1")
         registry_output = tmp_path / "CONTRACT_REGISTRY_v1.json"
-        
+
         # Generate registry
         generate_contract_registry(
             schemas_dir=schemas_dir,
             registry_output=registry_output,
         )
-        
+
         # Modify a schema file
         first_schema = discover_v1_schemas(schemas_dir)[0]
         original_content = first_schema.read_text(encoding="utf-8")
         first_schema.write_text(original_content + "\n", encoding="utf-8")
-        
+
         # Validation should fail
         assert validate_contract_registry(registry_output, schemas_dir) is False
-        
+
         # Restore original
         first_schema.write_text(original_content, encoding="utf-8")
-

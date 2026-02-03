@@ -25,28 +25,28 @@ def discover_v1_schemas(schemas_dir: Path) -> list[Path]:
     are included because they are part of the v1 contract set.
     """
     v1_schemas: list[Path] = []
-    
+
     # Legacy v2-named schemas that are actually v1 contracts
     legacy_v2_contracts = {
         "dataset_manifest.v2.schema.json",
         "context_bridge.v2.schema.json",
     }
-    
+
     # Find all .schema.json files
     for schema_file in schemas_dir.glob("*.schema.json"):
         filename = schema_file.name
-        
+
         # Include legacy v2-named contracts
         if filename in legacy_v2_contracts:
             v1_schemas.append(schema_file)
             continue
-        
+
         # Include files that are explicitly v1 or legacy (no version in name)
         # Exclude v2+ schemas (except the legacy ones above)
         if ".v2." in filename or ".v3." in filename or ".v4." in filename or ".v5." in filename:
             continue
         v1_schemas.append(schema_file)
-    
+
     # Sort for deterministic output
     return sorted(v1_schemas)
 
@@ -68,13 +68,13 @@ def generate_contract_registry(
     """
     if frozen_at is None:
         frozen_at = datetime.now(UTC)
-    
+
     # Discover all v1 schemas
     schema_files = discover_v1_schemas(schemas_dir)
-    
+
     # Build contract entries
     contracts: list[ContractEntryV1] = []
-    
+
     # Milestone mapping (manually curated based on renacechess.md)
     milestone_map: dict[str, str] = {
         "context_bridge.schema.json": "M04",
@@ -116,7 +116,7 @@ def generate_contract_registry(
         "delta_metrics.v1.schema.json": "M32",
         "external_proof_pack.v1.schema.json": "M33",
     }
-    
+
     # Model name mapping (manually curated)
     model_map: dict[str, str] = {
         "context_bridge.schema.json": "ContextBridgePayload",
@@ -160,7 +160,7 @@ def generate_contract_registry(
         "delta_metrics.v1.schema.json": "DeltaMetricsV1",
         "external_proof_pack.v1.schema.json": "ExternalProofPackV1",
     }
-    
+
     # Purpose mapping (manually curated)
     purpose_map: dict[str, str] = {
         "context_bridge.schema.json": "Context Bridge payload for LLM grounding (v1)",
@@ -202,14 +202,14 @@ def generate_contract_registry(
         "delta_metrics.v1.schema.json": "Delta metrics (trained vs baseline)",
         "external_proof_pack.v1.schema.json": "External proof pack manifest",
     }
-    
+
     for schema_file in schema_files:
         filename = schema_file.name
         schema_hash = compute_file_hash(schema_file)
         milestone = milestone_map.get(filename, "UNKNOWN")
         model_name = model_map.get(filename)
         purpose = purpose_map.get(filename, f"Schema: {filename}")
-        
+
         contracts.append(
             ContractEntryV1(
                 filename=filename,
@@ -219,20 +219,20 @@ def generate_contract_registry(
                 pydantic_model=model_name,
             )
         )
-    
+
     # Create registry
     registry = ContractRegistryV1(
         frozen_at=frozen_at,
         contracts=contracts,
     )
-    
+
     # Write registry with pretty formatting
     json_str = registry.model_dump_json(by_alias=True)
     # Parse and re-serialize with proper indentation
     json_data = json.loads(json_str)
     formatted_json = json.dumps(json_data, indent=2, ensure_ascii=False, sort_keys=False)
     registry_output.write_text(formatted_json, encoding="utf-8")
-    
+
     return registry
 
 
@@ -249,31 +249,31 @@ def validate_contract_registry(registry_path: Path, schemas_dir: Path) -> bool:
     # Load registry
     registry_data = json.loads(registry_path.read_text(encoding="utf-8"))
     registry = ContractRegistryV1.model_validate(registry_data)
-    
+
     # Discover current schemas
     current_schemas = discover_v1_schemas(schemas_dir)
     current_filenames = {s.name for s in current_schemas}
     registry_filenames = {c.filename for c in registry.contracts}
-    
+
     # Check for missing schemas
     missing = current_filenames - registry_filenames
     if missing:
         print(f"ERROR: Missing schemas in registry: {missing}")
         return False
-    
+
     # Check for extra schemas in registry
     extra = registry_filenames - current_filenames
     if extra:
         print(f"ERROR: Extra schemas in registry: {extra}")
         return False
-    
+
     # Validate hashes
     for contract in registry.contracts:
         schema_path = schemas_dir / contract.filename
         if not schema_path.exists():
             print(f"ERROR: Schema file not found: {contract.filename}")
             return False
-        
+
         current_hash = compute_file_hash(schema_path)
         if current_hash != contract.schema_hash:
             print(
@@ -281,7 +281,6 @@ def validate_contract_registry(registry_path: Path, schemas_dir: Path) -> bool:
                 f"expected {contract.schema_hash}, got {current_hash}"
             )
             return False
-    
+
     print("SUCCESS: Contract registry validation passed")
     return True
-
