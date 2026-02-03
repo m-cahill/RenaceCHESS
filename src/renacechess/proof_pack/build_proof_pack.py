@@ -8,6 +8,7 @@ import hashlib
 import json
 import shutil
 from pathlib import Path
+from typing import Any
 
 from renacechess.contracts.models import (
     ArtifactsV1,
@@ -65,7 +66,7 @@ def _copy_file_to_pack(
     return dest_path, hash_value
 
 
-def _load_json(path: Path) -> dict[str, object]:
+def _load_json(path: Path) -> dict[str, Any]:
     """Load JSON file.
 
     Args:
@@ -111,7 +112,6 @@ def build_proof_pack(
 
     # Load artifacts to extract checkpoint metadata
     training_run_report = _load_json(training_run_report_path)
-    post_train_eval_report = _load_json(post_train_eval_report_path)
 
     # Extract checkpoint metadata from training run report
     checkpoints_data = training_run_report.get("checkpoints", [])
@@ -292,7 +292,9 @@ def _generate_readme(output_dir: Path, manifest: ExternalProofPackV1, move_vocab
     readme_template = readme_template_path.read_text(encoding="utf-8")
 
     # Replace placeholders (using string replacement to avoid brace escaping issues)
-    readme_content = readme_template.replace("{generated_date}", datetime.now().strftime("%Y-%m-%d"))
+    readme_content = readme_template.replace(
+        "{generated_date}", datetime.now().strftime("%Y-%m-%d")
+    )
     readme_content = readme_content.replace("{move_vocab_size}", str(move_vocab_size))
 
     readme_path = output_dir / "README.md"

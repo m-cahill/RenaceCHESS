@@ -1221,14 +1221,14 @@ jobs:
                   ),
                   evaluation=EvaluationArtifactsV1(
                       report_path="evaluation/post_train_eval_report.json",
-                      report_hash="sha256:" + "g" * 64,
+                      report_hash="sha256:" + "a" * 64,
                   ),
               ),
               hash_chain=HashChainV1(
                   frozen_eval_manifest_hash="sha256:" + "a" * 64,
                   training_config_lock_hash="sha256:" + "c" * 64,
                   training_run_report_hash="sha256:" + "d" * 64,
-                  post_train_eval_report_hash="sha256:" + "g" * 64,
+                  post_train_eval_report_hash="sha256:" + "a" * 64,
               ),
               limitations=LimitationsV1(
                   training_vocabulary=TrainingVocabularyLimitationV1(

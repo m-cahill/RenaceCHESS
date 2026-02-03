@@ -1,6 +1,5 @@
 """Tests for M33 external proof pack builder and verifier."""
 
-import json
 from pathlib import Path
 
 import pytest
@@ -8,7 +7,6 @@ import pytest
 from renacechess.contracts.models import ExternalProofPackV1
 from renacechess.proof_pack.build_proof_pack import build_proof_pack
 from renacechess.proof_pack.verify_proof_pack import (
-    ProofPackVerificationError,
     verify_proof_pack,
 )
 
@@ -55,7 +53,7 @@ class TestBuildProofPack:
         """Test that build_proof_pack copies all artifacts."""
         output_dir = tmp_path / "proof_pack_v1"
 
-        manifest = build_proof_pack(
+        build_proof_pack(
             output_dir=output_dir,
             frozen_eval_manifest_path=frozen_eval_manifest_path,
             frozen_eval_provenance_path=frozen_eval_provenance_path,
