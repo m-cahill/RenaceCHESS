@@ -172,6 +172,18 @@ manifestHash
 - Add tests for both V1 and V2
 - No changes to model architecture, hyperparameters, frozen eval v2, or training semantics
 
+### Implementation
+
+| Date | Tool | Purpose | Files/Target | Status |
+|------|------|---------|--------------|--------|
+| 2026-02-03 17:45 | write | Create frozen_eval/compat.py | FrozenEval compat loader | ✅ Complete |
+| 2026-02-03 17:46 | search_replace | Update frozen_eval/__init__.py | Export new functions | ✅ Complete |
+| 2026-02-03 17:47 | search_replace | Patch training.py | Use compat loader | ✅ Complete |
+| 2026-02-03 17:47 | search_replace | Patch training_outcome.py | Use compat loader | ✅ Complete |
+| 2026-02-03 17:48 | write | Create test_frozen_eval_compat.py | Compatibility tests | ✅ Complete |
+| 2026-02-03 17:50 | pytest | Run tests | 927 passed, 1 skipped | ✅ Complete |
+| 2026-02-03 17:50 | ruff/mypy | Lint and type check | Clean | ✅ Complete |
+
 ---
 
 **Last Updated:** 2026-02-03
