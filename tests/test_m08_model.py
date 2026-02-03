@@ -342,3 +342,41 @@ def test_baseline_policy_v1_forward_uniform_distribution_guaranteed() -> None:
     # Probabilities must sum to 1.0
     total = sum(move_probs.values())
     assert abs(total - 1.0) < 1e-6
+
+
+def test_baseline_policy_v1_forward_mixed_vocab_coverage() -> None:
+    """Test forward when some legal moves are in vocab and some are not.
+
+    This test deterministically covers lines 274-278 in BaselinePolicyV1.forward():
+    - Some legal moves ARE in the vocabulary (get logits)
+    - Some legal moves are NOT (get uniform probability from remaining_moves)
+
+    This ensures 100% coverage of the forward() function.
+    """
+    # Use a vocab size of 10 so we have room for specific moves
+    model = BaselinePolicyV1(move_vocab_size=10)
+    model.eval()
+
+    # Add a specific move to the vocab
+    model.add_move_to_vocab("e2e4")
+
+    fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    # Legal moves include "e2e4" (in vocab) and others (not in vocab)
+    legal_moves = ["e2e4", "d2d4", "g1f3"]
+
+    # Verify that "e2e4" is in vocab and returns an index
+    assert model.get_move_index("e2e4") is not None
+
+    # Call forward to trigger the mixed vocab path
+    move_probs = model(fen, "1200_1399", "blitz", legal_moves)
+
+    # All legal moves should have probabilities
+    assert len(move_probs) == len(legal_moves)
+
+    # Probabilities must sum to 1.0
+    total = sum(move_probs.values())
+    assert abs(total - 1.0) < 1e-6, f"Probabilities sum to {total}, expected 1.0"
+
+    # All probabilities should be positive
+    for move, prob in move_probs.items():
+        assert prob >= 0.0, f"Probability for {move} is negative: {prob}"

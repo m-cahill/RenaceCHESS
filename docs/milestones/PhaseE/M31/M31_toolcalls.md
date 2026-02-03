@@ -126,5 +126,72 @@ All M31 artifacts have been created:
 
 ---
 
+## M31 Execution Attempt #1 — ABORTED
+
+| Date | Tool | Purpose | Files/Target | Status |
+|------|------|---------|--------------|--------|
+| 2026-02-03 17:35 | python --version | Environment capture | Phase 1 | ✅ Complete |
+| 2026-02-03 17:35 | pip freeze | Environment capture | pip_freeze.txt | ✅ Complete |
+| 2026-02-03 17:35 | nvidia-smi | GPU verification | RTX 5090 confirmed | ✅ Complete |
+| 2026-02-03 17:35 | env.json | Environment JSON | env.json | ✅ Complete |
+| 2026-02-03 17:36 | generate_training_dataset_v2 | Create training data | 10 shards, 100k positions | ✅ Complete |
+| 2026-02-03 17:36 | verify_training_dataset_v2 | Verify manifest | PASS | ✅ Complete |
+| 2026-02-03 17:37 | create_config_lock | Lock training config | config_lock.json | ✅ Complete |
+| 2026-02-03 17:38 | run_training | Execute training | FAILED | ❌ Aborted |
+
+### Failure Details
+
+**Error:** Schema version mismatch — training loaders expect FrozenEvalManifestV1, but M30 produced V2
+
+```
+4 validation errors for FrozenEvalManifestV1
+schemaVersion
+  Input should be 1 [type=literal_error, input_value=2, input_type=int]
+sourceManifestRef
+  Field required
+records
+  Field required
+manifestHash
+  Field required
+```
+
+**Root Cause:** `train_baseline_policy` and `train_outcome_head` use `FrozenEvalManifestV1.model_validate_json()` but M30's frozen eval manifest is V2.
+
+**Action:** Execution aborted per protocol. Corrective patch required.
+
+---
+
+## M31 Run Fix 1 — FROZEN-EVAL-V2-TRAINING-COMPAT-001
+
+**Objective:** Add FrozenEval manifest compatibility loader supporting both V1 and V2
+
+**Scope:**
+- Add `load_frozen_eval_manifest()` that supports V1 and V2
+- Normalize to shared internal record stream type
+- Patch training functions to use the loader
+- Add tests for both V1 and V2
+- No changes to model architecture, hyperparameters, frozen eval v2, or training semantics
+
+### Implementation
+
+| Date | Tool | Purpose | Files/Target | Status |
+|------|------|---------|--------------|--------|
+| 2026-02-03 17:45 | write | Create frozen_eval/compat.py | FrozenEval compat loader | ✅ Complete |
+| 2026-02-03 17:46 | search_replace | Update frozen_eval/__init__.py | Export new functions | ✅ Complete |
+| 2026-02-03 17:47 | search_replace | Patch training.py | Use compat loader | ✅ Complete |
+| 2026-02-03 17:47 | search_replace | Patch training_outcome.py | Use compat loader | ✅ Complete |
+| 2026-02-03 17:48 | write | Create test_frozen_eval_compat.py | Compatibility tests | ✅ Complete |
+| 2026-02-03 17:50 | pytest | Run tests | 927 passed, 1 skipped | ✅ Complete |
+| 2026-02-03 17:50 | ruff/mypy | Lint and type check | Clean | ✅ Complete |
+| 2026-02-03 17:52 | git commit | Commit fix | fe2725c | ✅ Complete |
+| 2026-02-03 17:53 | gh pr create | Create PR #37 | m31-frozen-eval-compat | ✅ Complete |
+| 2026-02-03 17:55 | gh pr checks | CI Run 1 (Lint fail) | formatting fix needed | ✅ Complete |
+| 2026-02-03 18:00 | ruff format | Apply formatting | 2 files | ✅ Complete |
+| 2026-02-03 18:05 | gh pr checks | CI Run 2 (Test fail) | coverage regression | ✅ Complete |
+| 2026-02-03 18:10 | write test | Add mixed vocab coverage test | lines 274-278 | ✅ Complete |
+| 2026-02-03 18:15 | gh pr checks | CI Run 3 | 🟢 All 11 jobs pass | ✅ Complete |
+
+---
+
 **Last Updated:** 2026-02-03
 
