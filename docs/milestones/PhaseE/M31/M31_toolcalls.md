@@ -183,6 +183,13 @@ manifestHash
 | 2026-02-03 17:48 | write | Create test_frozen_eval_compat.py | Compatibility tests | ✅ Complete |
 | 2026-02-03 17:50 | pytest | Run tests | 927 passed, 1 skipped | ✅ Complete |
 | 2026-02-03 17:50 | ruff/mypy | Lint and type check | Clean | ✅ Complete |
+| 2026-02-03 17:52 | git commit | Commit fix | fe2725c | ✅ Complete |
+| 2026-02-03 17:53 | gh pr create | Create PR #37 | m31-frozen-eval-compat | ✅ Complete |
+| 2026-02-03 17:55 | gh pr checks | CI Run 1 (Lint fail) | formatting fix needed | ✅ Complete |
+| 2026-02-03 18:00 | ruff format | Apply formatting | 2 files | ✅ Complete |
+| 2026-02-03 18:05 | gh pr checks | CI Run 2 (Test fail) | coverage regression | ✅ Complete |
+| 2026-02-03 18:10 | write test | Add mixed vocab coverage test | lines 274-278 | ✅ Complete |
+| 2026-02-03 18:15 | gh pr checks | CI Run 3 | 🟢 All 11 jobs pass | ✅ Complete |
 
 ---
 
