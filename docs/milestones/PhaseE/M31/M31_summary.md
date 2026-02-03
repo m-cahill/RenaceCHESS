@@ -2,9 +2,9 @@
 
 **Project:** RenaceCHESS  
 **Phase:** Phase E (Scale Proof, Training Run, Release Lock)  
-**Milestone:** M31 — Full Training Run Infrastructure & Schemas  
+**Milestone:** M31 — Full Training Run Infrastructure & Execution  
 **Timeframe:** 2026-02-03 → 2026-02-03  
-**Status:** MERGED — Ready for Execution  
+**Status:** ✅ CLOSED — TRAINING EXECUTED SUCCESSFULLY  
 
 ---
 
@@ -231,4 +231,72 @@ M31 implementation is complete and validated. All artifacts are in place for a f
 | `ea8a792` | M31: Add robust test for baseline_v1.py coverage |
 | `7d91c7d` | M31: Fix line too long in test |
 | `ef730b1` | M31: Update toolcalls with CI results |
+| `c9c3e4e` | M31 Run Fix 1: FrozenEval V2 Compatibility Loader (PR #37) |
+| `579cd2d` | M31: Training execution SUCCESS (Attempt #2) |
+
+---
+
+## 13. Execution Phase
+
+### Execution Attempts
+
+| Attempt | Date | Result | Cause / Notes |
+|---------|------|--------|---------------|
+| #1 | 2026-02-03 | ❌ Failed | Schema mismatch: training loaders expected FrozenEvalManifestV1, but M30 produced V2 |
+| #2 | 2026-02-03 | ✅ **SUCCESS** | FrozenEval V2 compatibility loader implemented (PR #37) |
+
+### Execution Attempt #1 — Failure Analysis
+
+**Error:** `ValidationError for FrozenEvalManifestV1` — `schemaVersion` input was 2, expected 1
+
+**Root Cause:** The training functions (`train_baseline_policy`, `train_outcome_head`) were hard-coded to use `FrozenEvalManifestV1.model_validate()`, but M30 produced `FrozenEvalManifestV2`.
+
+**Resolution:** Implemented `load_frozen_eval_record_keys()` in `frozen_eval/compat.py` to support both V1 and V2 manifests via schema version detection.
+
+**Governance:** Failure was documented, artifacts preserved, corrective fix merged via PR #37 before retry.
+
+### Execution Attempt #2 — Success
+
+| Metric | Value |
+|--------|-------|
+| **Status** | ✅ SUCCESS |
+| Run ID | `m31-training-run-001` |
+| Commit SHA | `c9c3e4e8aac38dc13a9f3d4219172de8632c2b5d` |
+| Total Runtime | 25m 26s |
+| Policy Epochs | 10/10 complete |
+| Outcome Epochs | 10/10 complete |
+| Policy Final Loss | 0.0000 |
+| Outcome Final Loss | 1.0833 |
+
+### Training Observations
+
+- **Policy head:** Loss converged to 0.0 (expected with synthetic uniform data)
+- **Outcome head:** Loss decreased steadily from 1.1295 → 1.0833 (healthy gradient descent)
+- **FrozenEval V2:** Correctly loaded via compatibility layer, used for exclusion
+- **Determinism:** Seed 42 used throughout for reproducibility
+- **No errors or warnings** during execution
+
+### Checkpoint References
+
+| Head | File Path | Metadata |
+|------|-----------|----------|
+| Policy | `artifacts/m31_training_run/checkpoints/policy/model.pt` | `model_metadata.json` |
+| Outcome | `artifacts/m31_training_run/checkpoints/outcome/outcome_head_v1.pt` | `outcome_head_v1_metadata.json` |
+
+**Note:** Checkpoint files (`.pt`) are stored externally and NOT committed to the repository. Only metadata and hashes are committed.
+
+---
+
+## 14. Final Statement
+
+> **M31 demonstrates successful full training execution against FrozenEval v2.**
+
+This milestone proves that RenaceCHESS can:
+1. Generate a deterministic training dataset causally separated from evaluation data
+2. Lock training configuration immutably before execution
+3. Execute full training runs (10 epochs each for policy and outcome heads)
+4. Produce versioned, auditable training reports
+5. Handle schema evolution gracefully (V1 → V2 compatibility)
+
+**M31 is CLOSED. Training has been executed. The project is ready for post-train evaluation (M32).**
 
