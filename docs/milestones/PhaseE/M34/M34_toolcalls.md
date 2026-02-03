@@ -20,6 +20,13 @@
 | 2026-02-03 | search_replace | Fix Unicode encoding in validation | src/renacechess/contracts/registry.py | ✅ Complete |
 | 2026-02-03 | search_replace | Fix datetime deprecation warning | src/renacechess/contracts/registry.py | ✅ Complete |
 | 2026-02-03 | search_replace | Include legacy v2-named schemas | src/renacechess/contracts/registry.py | ✅ Complete |
+| 2026-02-03 | run_terminal_cmd | Create branch m34-release-lock | git | ✅ Complete |
+| 2026-02-03 | run_terminal_cmd | Commit M34 changes | git | ✅ Complete (b480f1c) |
+| 2026-02-03 | run_terminal_cmd | Push branch and create PR | git, gh CLI | ✅ Complete (PR #40) |
+| 2026-02-03 | write | Create release notes | RELEASE_NOTES_v1.md | ✅ Complete |
+| 2026-02-03 | write | Create Phase E closeout | docs/phases/PhaseE_closeout.md | ✅ Complete |
+| 2026-02-03 | search_replace | Update README with "What this is/is not" | README.md | ✅ Complete |
+| 2026-02-03 | search_replace | Update renacechess.md with M34 entry | renacechess.md | ✅ Complete |
 
 ---
 
