@@ -4372,3 +4372,601 @@ class FrozenEvalManifestV2(BaseModel):
             "for determinism verification"
         ),
     )
+
+
+# =============================================================================
+# M31: Training Config Lock and Training Run Report
+# =============================================================================
+
+
+class OptimizerConfigV1(BaseModel):
+    """Optimizer configuration for training (M31)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    type: Literal["Adam", "AdamW", "SGD"] = Field(
+        ...,
+        description="Optimizer type",
+    )
+    weight_decay: float = Field(
+        0.0,
+        alias="weightDecay",
+        ge=0,
+        description="Weight decay (L2 regularization)",
+    )
+    betas: tuple[float, float] | None = Field(
+        None,
+        description="Adam beta parameters [beta1, beta2]",
+    )
+    momentum: float | None = Field(
+        None,
+        ge=0,
+        le=1,
+        description="SGD momentum (SGD only)",
+    )
+
+
+class SchedulerConfigV1(BaseModel):
+    """Learning rate scheduler configuration (M31)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    enabled: bool = Field(
+        ...,
+        description="Whether scheduler is enabled",
+    )
+    type: Literal["StepLR", "CosineAnnealingLR", "ReduceLROnPlateau"] | None = Field(
+        None,
+        description="Scheduler type",
+    )
+    step_size: int | None = Field(
+        None,
+        alias="stepSize",
+        ge=1,
+        description="Step size for StepLR",
+    )
+    gamma: float | None = Field(
+        None,
+        gt=0,
+        le=1,
+        description="Multiplicative factor for LR decay",
+    )
+
+
+class HeadConfigV1(BaseModel):
+    """Training configuration for a single model head (M31)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    model_type: str = Field(
+        ...,
+        alias="modelType",
+        description="Model class name (e.g., 'BaselinePolicyV1', 'OutcomeHeadV1')",
+    )
+    epochs: int = Field(
+        ...,
+        ge=1,
+        le=1000,
+        description="Number of training epochs",
+    )
+    batch_size: int = Field(
+        ...,
+        alias="batchSize",
+        ge=1,
+        description="Training batch size",
+    )
+    learning_rate: float = Field(
+        ...,
+        alias="learningRate",
+        gt=0,
+        description="Optimizer learning rate",
+    )
+    seed: int = Field(
+        ...,
+        description="Random seed for reproducibility",
+    )
+    optimizer: OptimizerConfigV1 | None = Field(
+        None,
+        description="Optimizer configuration",
+    )
+    scheduler: SchedulerConfigV1 | None = Field(
+        None,
+        description="Learning rate scheduler configuration",
+    )
+    loss_function: str = Field(
+        "CrossEntropyLoss",
+        alias="lossFunction",
+        description="Loss function name",
+    )
+    move_vocab_size: int | None = Field(
+        None,
+        alias="moveVocabSize",
+        ge=1,
+        description="Move vocabulary size (policy head only)",
+    )
+
+
+class EnvironmentRequirementsV1(BaseModel):
+    """Environment requirements for training (M31)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    device: Literal["auto", "cuda", "cpu"] = Field(
+        "auto",
+        description="Target device for training",
+    )
+    mixed_precision: bool = Field(
+        False,
+        alias="mixedPrecision",
+        description="Whether AMP is enabled (M31: must be false)",
+    )
+    deterministic: bool = Field(
+        True,
+        description="Whether deterministic mode is enabled",
+    )
+    num_workers: int = Field(
+        4,
+        alias="numWorkers",
+        ge=0,
+        description="Number of data loader workers",
+    )
+    pin_memory: bool = Field(
+        True,
+        alias="pinMemory",
+        description="Whether to pin memory for CUDA",
+    )
+
+
+class CheckpointPolicyV1(BaseModel):
+    """Policy for saving checkpoints during training (M31)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    save_midpoint: bool = Field(
+        ...,
+        alias="saveMidpoint",
+        description="Whether to save a midpoint checkpoint",
+    )
+    save_final: bool = Field(
+        ...,
+        alias="saveFinal",
+        description="Whether to save final checkpoint",
+    )
+    save_every_n_epochs: int | None = Field(
+        None,
+        alias="saveEveryNEpochs",
+        ge=1,
+        description="Save checkpoint every N epochs (optional)",
+    )
+    output_dir: str = Field(
+        "training_output",
+        alias="outputDir",
+        description="Directory for checkpoint output",
+    )
+
+
+class SourceTemplateV1(BaseModel):
+    """Reference to a source template file (M31)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    path: str = Field(
+        ...,
+        description="Path to source template file",
+    )
+    hash: str = Field(
+        ...,
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of template file content",
+    )
+
+
+class TrainingConfigLockV1(BaseModel):
+    """Immutable training configuration lock (M31).
+
+    Proves training config immutability and provides full audit trail
+    for reproducibility. This artifact is created BEFORE training begins
+    and is never modified during execution.
+
+    Key guarantees:
+    - codeCommitSha ties the model to specific code
+    - datasetManifestHash ties the model to specific data
+    - frozenEvalManifestHash ensures eval set is excluded from training
+    - determinismHash enables verification of config immutability
+
+    See docs/milestones/PhaseE/M31/M31_plan.md for the governing specification.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    version: Literal["1.0"] = Field(
+        "1.0",
+        description="Schema version",
+    )
+    created_at: datetime = Field(
+        ...,
+        alias="createdAt",
+        description="ISO 8601 timestamp when config was locked",
+    )
+    code_commit_sha: str = Field(
+        ...,
+        alias="codeCommitSha",
+        pattern=r"^[a-f0-9]{40}$",
+        description="Full 40-character git commit SHA of the code used for training",
+    )
+    dataset_manifest_hash: str = Field(
+        ...,
+        alias="datasetManifestHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of the training dataset manifest",
+    )
+    dataset_manifest_path: str | None = Field(
+        None,
+        alias="datasetManifestPath",
+        description="Path to training dataset manifest (informational)",
+    )
+    frozen_eval_manifest_hash: str = Field(
+        ...,
+        alias="frozenEvalManifestHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of frozen eval manifest (must NOT be used for training)",
+    )
+    frozen_eval_manifest_path: str | None = Field(
+        None,
+        alias="frozenEvalManifestPath",
+        description="Path to frozen eval manifest (informational)",
+    )
+    policy_config: HeadConfigV1 = Field(
+        ...,
+        alias="policyConfig",
+        description="Policy head training configuration",
+    )
+    outcome_config: HeadConfigV1 = Field(
+        ...,
+        alias="outcomeConfig",
+        description="Outcome head training configuration",
+    )
+    environment_requirements: EnvironmentRequirementsV1 | None = Field(
+        None,
+        alias="environmentRequirements",
+        description="Required environment for training",
+    )
+    checkpoint_policy: CheckpointPolicyV1 | None = Field(
+        None,
+        alias="checkpointPolicy",
+        description="Policy for saving checkpoints during training",
+    )
+    source_templates: list[SourceTemplateV1] | None = Field(
+        None,
+        alias="sourceTemplates",
+        description="Reference to source template files used to generate this config",
+    )
+    audit_notes: str | None = Field(
+        None,
+        alias="auditNotes",
+        description="Optional notes for governance/audit purposes",
+    )
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of canonical config content for reproducibility",
+    )
+
+
+class ExecutionEnvironmentV1(BaseModel):
+    """Actual execution environment metadata (M31)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    gpu_name: str = Field(
+        ...,
+        alias="gpuName",
+        description="GPU device name (e.g., 'NVIDIA GeForce RTX 5090')",
+    )
+    vram_gb: float | None = Field(
+        None,
+        alias="vramGb",
+        ge=0,
+        description="Total VRAM in gigabytes",
+    )
+    cuda_version: str = Field(
+        ...,
+        alias="cudaVersion",
+        description="CUDA runtime version",
+    )
+    driver_version: str | None = Field(
+        None,
+        alias="driverVersion",
+        description="GPU driver version",
+    )
+    torch_version: str = Field(
+        ...,
+        alias="torchVersion",
+        description="PyTorch version",
+    )
+    python_version: str = Field(
+        ...,
+        alias="pythonVersion",
+        description="Python version",
+    )
+    os: str = Field(
+        ...,
+        description="Operating system",
+    )
+    hostname: str | None = Field(
+        None,
+        description="Machine hostname (optional)",
+    )
+
+
+class EpochMetricsV1(BaseModel):
+    """Metrics for a single training epoch (M31)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    epoch: int = Field(
+        ...,
+        ge=1,
+        description="Epoch number (1-indexed)",
+    )
+    loss: float = Field(
+        ...,
+        description="Average loss for this epoch",
+    )
+    accuracy: float | None = Field(
+        None,
+        ge=0,
+        le=1,
+        description="Accuracy for this epoch (if applicable)",
+    )
+    learning_rate: float | None = Field(
+        None,
+        alias="learningRate",
+        gt=0,
+        description="Learning rate at this epoch",
+    )
+    wall_clock_seconds: float | None = Field(
+        None,
+        alias="wallClockSeconds",
+        ge=0,
+        description="Wall-clock time for this epoch",
+    )
+    vram_peak_gb: float | None = Field(
+        None,
+        alias="vramPeakGb",
+        ge=0,
+        description="Peak VRAM usage during this epoch",
+    )
+
+
+class HeadRunSummaryV1(BaseModel):
+    """Training summary for a single model head (M31)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    head_type: Literal["policy", "outcome"] = Field(
+        ...,
+        alias="headType",
+        description="Which head this summary is for",
+    )
+    epochs_completed: int = Field(
+        ...,
+        alias="epochsCompleted",
+        ge=0,
+        description="Number of epochs actually completed",
+    )
+    epochs_target: int = Field(
+        ...,
+        alias="epochsTarget",
+        ge=1,
+        description="Target number of epochs from config",
+    )
+    final_loss: float = Field(
+        ...,
+        alias="finalLoss",
+        description="Loss value at final epoch",
+    )
+    initial_loss: float | None = Field(
+        None,
+        alias="initialLoss",
+        description="Loss value at first epoch",
+    )
+    loss_history: list[EpochMetricsV1] | None = Field(
+        None,
+        alias="lossHistory",
+        description="Per-epoch loss and metrics",
+    )
+    samples_processed: int | None = Field(
+        None,
+        alias="samplesProcessed",
+        ge=0,
+        description="Total samples processed across all epochs",
+    )
+    training_time_seconds: float | None = Field(
+        None,
+        alias="trainingTimeSeconds",
+        ge=0,
+        description="Wall-clock time for this head's training",
+    )
+    status: Literal["success", "aborted", "failed"] = Field(
+        ...,
+        description="Training status for this head",
+    )
+    error_message: str | None = Field(
+        None,
+        alias="errorMessage",
+        description="Error message if status is not 'success'",
+    )
+
+
+class CheckpointReferenceV1(BaseModel):
+    """Reference to a saved checkpoint (M31).
+
+    Checkpoints are stored externally (not in repo). This model
+    captures hashes and metadata for verification and audit.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    checkpoint_id: str = Field(
+        ...,
+        alias="checkpointId",
+        description="Unique identifier for this checkpoint",
+    )
+    checkpoint_type: Literal["midpoint", "final", "epoch"] = Field(
+        ...,
+        alias="checkpointType",
+        description="Type of checkpoint",
+    )
+    head_type: Literal["policy", "outcome", "combined"] | None = Field(
+        None,
+        alias="headType",
+        description="Which model head(s) this checkpoint contains",
+    )
+    epoch: int = Field(
+        ...,
+        ge=0,
+        description="Epoch at which checkpoint was saved",
+    )
+    step: int | None = Field(
+        None,
+        ge=0,
+        description="Training step at which checkpoint was saved",
+    )
+    file_hash: str = Field(
+        ...,
+        alias="fileHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of checkpoint file content",
+    )
+    file_size_bytes: int = Field(
+        ...,
+        alias="fileSizeBytes",
+        ge=0,
+        description="Size of checkpoint file in bytes",
+    )
+    file_size_formatted: str | None = Field(
+        None,
+        alias="fileSizeFormatted",
+        description="Human-readable file size (e.g., '145.2 MB')",
+    )
+    file_path: str | None = Field(
+        None,
+        alias="filePath",
+        description="Path or URI where checkpoint is stored (external, not in repo)",
+    )
+    created_at: datetime = Field(
+        ...,
+        alias="createdAt",
+        description="ISO 8601 timestamp when checkpoint was created",
+    )
+
+
+class TrainingRunReportV1(BaseModel):
+    """Canonical summary of a training run execution (M31).
+
+    Captures metrics, checkpoints, and execution metadata for downstream
+    evaluation and external proof. This is the primary artifact proving
+    that training was executed correctly.
+
+    Key guarantees:
+    - configLockHash ties this run to immutable config
+    - checkpoints array contains hashes (not files) for verification
+    - status indicates completion state with explanation for non-success
+    - determinismHash enables verification of report integrity
+
+    See docs/milestones/PhaseE/M31/M31_plan.md for the governing specification.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    version: Literal["1.0"] = Field(
+        "1.0",
+        description="Schema version",
+    )
+    run_id: str = Field(
+        ...,
+        alias="runId",
+        description="Unique identifier for this training run",
+    )
+    started_at: datetime = Field(
+        ...,
+        alias="startedAt",
+        description="ISO 8601 timestamp when training started",
+    )
+    completed_at: datetime = Field(
+        ...,
+        alias="completedAt",
+        description="ISO 8601 timestamp when training completed (or aborted)",
+    )
+    status: Literal["success", "aborted", "failed", "timeout"] = Field(
+        ...,
+        description="Final status of the training run",
+    )
+    config_lock_hash: str = Field(
+        ...,
+        alias="configLockHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of the TrainingConfigLockV1 used for this run",
+    )
+    config_lock_path: str | None = Field(
+        None,
+        alias="configLockPath",
+        description="Path to the config lock file (informational)",
+    )
+    environment: ExecutionEnvironmentV1 = Field(
+        ...,
+        description="Actual execution environment metadata",
+    )
+    policy_run_summary: HeadRunSummaryV1 = Field(
+        ...,
+        alias="policyRunSummary",
+        description="Policy head training summary",
+    )
+    outcome_run_summary: HeadRunSummaryV1 = Field(
+        ...,
+        alias="outcomeRunSummary",
+        description="Outcome head training summary",
+    )
+    checkpoints: list[CheckpointReferenceV1] = Field(
+        ...,
+        min_length=1,
+        description="References to saved checkpoints (hashes, not files)",
+    )
+    metrics_log_path: str | None = Field(
+        None,
+        alias="metricsLogPath",
+        description="Path to detailed training_metrics.jsonl file",
+    )
+    total_wall_clock_seconds: float | None = Field(
+        None,
+        alias="totalWallClockSeconds",
+        ge=0,
+        description="Total wall-clock time for the entire training run in seconds",
+    )
+    total_wall_clock_formatted: str | None = Field(
+        None,
+        alias="totalWallClockFormatted",
+        description="Human-readable duration (e.g., '2h 15m 30s')",
+    )
+    warnings: list[str] | None = Field(
+        None,
+        description="Non-fatal warnings encountered during training",
+    )
+    failure_notes: str | None = Field(
+        None,
+        alias="failureNotes",
+        description="Explanation if status is not 'success'",
+    )
+    audit_notes: str | None = Field(
+        None,
+        alias="auditNotes",
+        description="Optional notes for governance/audit purposes",
+    )
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of canonical report content for reproducibility",
+    )
