@@ -42,7 +42,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M31 | ✅ Closed — Training Executed | `579cd2d` | 2026-02-03 | FULL-TRAINING-RUN-001 — Training completed (25m 26s, 10 epochs each, 2 checkpoints) |
 | M32 | ✅ Closed — Evaluation Executed | `89b9a4c` | 2026-02-03 | POST-TRAIN-EVAL-PACK-001 — Evaluated 10k positions, delta metrics computed |
 | M33 | ✅ Closed (MERGED) | `m33-external-proof-pack` → `main` | 2026-02-03 | EXTERNAL-PROOF-PACK-001 — Self-contained proof bundle with M30-M32 artifacts |
-| M34 | ✅ Closed (MERGED) | `m34-release-lock` → `main` | 2026-02-03 | RELEASE-LOCK-001 — Contract registry, CI release gates, v1.0.0 tag |
+| M34 | ✅ Closed (MERGED) | `m34-release-lock` → `main` | 2026-02-03 | RELEASE-LOCK-001 — Contract registry, CI release gates, Phase E closeout |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
