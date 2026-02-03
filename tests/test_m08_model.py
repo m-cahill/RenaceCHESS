@@ -298,3 +298,47 @@ def test_baseline_policy_v1_forward_no_legal_moves_in_vocab() -> None:
     # All probabilities should be non-negative
     for prob in move_probs.values():
         assert prob >= 0.0
+
+
+def test_baseline_policy_v1_forward_uniform_distribution_guaranteed() -> None:
+    """Test uniform distribution when vocab is full and all legal moves hash-conflict.
+
+    This test uses move_vocab_size=1 to GUARANTEE all non-vocab moves
+    hash to slot 0 (since hash(x) % 1 == 0 for all x). This forces the
+    else branch in forward() that produces uniform distributions.
+
+    This is a robust test that doesn't depend on non-deterministic hash behavior.
+    """
+    model = BaselinePolicyV1(move_vocab_size=1)
+    model.eval()
+
+    # Fill the ONLY vocab slot with a specific move
+    model.add_move_to_vocab("e2e4")  # Takes slot 0
+
+    # Verify slot 0 is occupied
+    assert model.move_vocab_inv[0] == "e2e4"
+
+    fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+    # Use legal moves that are NOT "e2e4"
+    # All of these will hash to slot 0 (since hash(x) % 1 == 0)
+    # And slot 0 has "e2e4", so get_move_index returns None for all
+    legal_moves = ["d2d4", "g1f3", "b1c3"]
+
+    # Verify get_move_index returns None for all these moves
+    for move in legal_moves:
+        assert model.get_move_index(move) is None, f"Expected None for {move}"
+
+    # This should trigger the else branch (lines 293-297)
+    move_probs = model(fen, "1200_1399", "blitz", legal_moves)
+
+    # Should return uniform distribution
+    assert len(move_probs) == len(legal_moves)
+    expected_prob = 1.0 / len(legal_moves)
+    for move, prob in move_probs.items():
+        assert abs(prob - expected_prob) < 1e-6, (
+            f"Expected uniform {expected_prob}, got {prob} for {move}"
+        )
+
+    # Probabilities must sum to 1.0
+    total = sum(move_probs.values())
+    assert abs(total - 1.0) < 1e-6

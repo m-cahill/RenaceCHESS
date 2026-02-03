@@ -39,7 +39,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M28 | ✅ Closed (MERGED) | `m28-recalibration-activation-decision` → `main` | 2026-02-02 | PHASE-D-RECALIBRATION-ACTIVATION-DECISION-001 — Runtime Recalibration Decision Framework |
 | M29 | ✅ Closed | `m28-recalibration-activation-decision` | 2026-02-02 | GPU-BENCHMARKING-001 — RTX 5090 Blackwell Validation + Benchmark Infrastructure |
 | M30 | ✅ Closed (MERGED) | `m30-frozen-eval-scaleset` → `main` | 2026-02-02 | FROZEN-EVAL-SCALESET-001 — 10k Synthetic Frozen Eval Set v2 |
-| M31 | 📋 Planning | — | TBD | FULL-TRAINING-RUN-001 — Full Training Run with Frozen Eval v2 |
+| M31 | 🚧 Implementation | `m31-full-training-run` | TBD | FULL-TRAINING-RUN-001 — Full Training Run with Frozen Eval v2 |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -718,6 +718,38 @@ This document tracks milestones, schema, migrations, and governance decisions fo
   - determinismHash: SHA-256 for reproducibility
 - **Purpose:** Minimal, stable output shape for CLI to render coaching information
 
+### Training Config Lock Schema (v1) — M31
+- **Location:** `src/renacechess/contracts/schemas/v1/training_config_lock.v1.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.TrainingConfigLockV1`
+- **Status:** ✅ NEW (Phase E M31 — config immutability proof)
+- **Key Fields:**
+  - codeCommitSha: Git commit SHA of training code
+  - datasetManifestHash: SHA-256 of training dataset manifest
+  - frozenEvalManifestHash: SHA-256 of frozen eval manifest (must NOT be used for training)
+  - policyConfig / outcomeConfig: HeadConfigV1 with epochs, batch_size, learning_rate, seed
+  - environmentRequirements: Device, precision, deterministic mode
+  - checkpointPolicy: Save midpoint/final, output directory
+  - sourceTemplates: References to template files with hashes
+  - determinismHash: SHA-256 for reproducibility
+- **Purpose:** Proves training config immutability; establishes hash chain from code → data → config
+
+### Training Run Report Schema (v1) — M31
+- **Location:** `src/renacechess/contracts/schemas/v1/training_run_report.v1.schema.json`
+- **Pydantic Model:** `renacechess.contracts.models.TrainingRunReportV1`
+- **Status:** ✅ NEW (Phase E M31 — execution summary)
+- **Key Fields:**
+  - runId: Unique training run identifier
+  - startedAt / completedAt: ISO 8601 timestamps
+  - status: success | aborted | failed | timeout
+  - configLockHash: Reference to TrainingConfigLockV1
+  - environment: ExecutionEnvironmentV1 (GPU, CUDA, PyTorch, Python, OS)
+  - policyRunSummary / outcomeRunSummary: HeadRunSummaryV1 with epochs, loss, status
+  - checkpoints: CheckpointReferenceV1 array (hashes, sizes, paths)
+  - totalWallClockSeconds / totalWallClockFormatted: Duration
+  - failureNotes: Explanation if status != success
+  - determinismHash: SHA-256 for reproducibility
+- **Purpose:** Canonical summary of training execution for downstream evaluation and external proof
+
 ---
 
 ## Phase Status
@@ -953,6 +985,37 @@ From M00 forward, RenaceCHESS guarantees:
 - **Audit Statement:**
   > "Frozen eval v2 is synthetic but chess-valid, and is intended for *relative* evaluation and calibration stability, not absolute strength claims."
 - **Phase E Status:** Frozen eval ruler established; ready for M31 training and M32 evaluation
+
+**M31 Details:**
+- **Objective:** Execute one full, end-to-end training run producing reproducible checkpoints and metrics
+- **Status:** 🚧 Implementation (artifacts created, awaiting execution)
+- **Branch:** `m31-full-training-run`
+- **Locked Decisions:**
+  - Training data: ~100k positions (real chess data, NOT frozen eval v2)
+  - Epochs: 10 (locked)
+  - Precision: FP32 only (no AMP)
+  - Checkpoints: Midpoint + final (hashes committed, files external)
+  - Timeout: 12 hours hard limit
+- **Key Files:**
+  - `src/renacechess/contracts/schemas/v1/training_config_lock.v1.schema.json` — TrainingConfigLockV1 schema
+  - `src/renacechess/contracts/schemas/v1/training_run_report.v1.schema.json` — TrainingRunReportV1 schema
+  - `src/renacechess/contracts/models.py` — TrainingConfigLockV1, TrainingRunReportV1 Pydantic models
+  - `src/renacechess/dataset/training_dataset_v2.py` — Production training dataset generator (~100k positions)
+  - `src/renacechess/models/m31_training_runner.py` — M31 training execution module
+  - `tests/test_m31_training_run.py` — Comprehensive M31 test suite
+  - `.github/workflows/ci.yml` — M31 Schema Validation CI job
+- **Notable Features:**
+  - TrainingConfigLockV1: Immutable config proof with hash chain (code → data → config)
+  - TrainingRunReportV1: Execution summary with checkpoint references (hashes, not files)
+  - Training/Eval separation: Training data is disjoint from frozen eval v2 (different seeds, prefixes)
+  - Determinism: Fixed seeds, canonical JSON, reproducible outputs
+  - CI validation: Schema validation, unit tests, generator verification
+- **Artifacts to Produce (during execution):**
+  - `config_lock.json` — Locked training configuration
+  - `training_run_report.json` — Execution summary
+  - Policy checkpoint (external) + hash
+  - Outcome checkpoint (external) + hash
+- **Phase E Status:** Schemas and infrastructure ready; awaiting execution approval
 
 ---
 

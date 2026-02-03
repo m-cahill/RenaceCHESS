@@ -1,0 +1,43 @@
+## M31 — Full Training Run Infrastructure & Schemas
+
+Implements the complete M31 training infrastructure for the first full training run. **This is implementation only — no training has been executed yet.**
+
+### Key Artifacts
+
+| Artifact | Path | Purpose |
+|----------|------|---------|
+| TrainingConfigLockV1 Schema | `schemas/v1/training_config_lock.v1.schema.json` | Config immutability proof |
+| TrainingRunReportV1 Schema | `schemas/v1/training_run_report.v1.schema.json` | Execution summary |
+| Pydantic Models | `contracts/models.py` | 12 new models |
+| Training Dataset Generator | `dataset/training_dataset_v2.py` | ~100k synthetic positions |
+| Training Runner | `models/m31_training_runner.py` | Execution module |
+| Test Suite | `tests/test_m31_training_run.py` | 19 tests |
+
+### Locked Decisions Implemented
+
+- ✅ Training/eval separation (different seeds, FEN sets, prefixes)
+- ✅ FP32 only (no AMP)
+- ✅ 10 epochs locked
+- ✅ Checkpoints: external storage, hashes committed
+- ✅ Midpoint + final checkpoints only
+
+### CI Changes
+
+- Added `m31-schema-validation` job (validation only, no training)
+
+### Test Results
+
+- M31 tests: 19 passed
+- M30 tests: 29 passed (no regressions)
+- Total: 48 passed
+
+### What This PR Does NOT Do
+
+- ❌ Execute any training
+- ❌ Generate actual training data
+- ❌ Produce checkpoints
+
+Training execution is a **separate governance step** after merge.
+
+See `docs/milestones/PhaseE/M31/M31_plan.md` for governing specification.
+
