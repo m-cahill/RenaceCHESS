@@ -82,5 +82,23 @@ All M31 artifacts have been created:
 
 ---
 
+---
+
+## CI Fix: Coverage Regression
+
+| Date | Tool | Purpose | Files/Target | Status |
+|------|------|---------|--------------|--------|
+| 2026-02-03 12:00 | gh pr checks | Check CI status | PR #36 | ✅ Complete |
+| 2026-02-03 12:01 | gh run view | Analyze Test job failure | CI logs | ✅ Complete |
+| 2026-02-03 12:05 | search_replace | Add robust coverage test | test_m08_model.py | ✅ Complete |
+| 2026-02-03 12:06 | pytest | Verify new test passes | test_m08_model.py | ✅ Complete |
+
+**Issue:** CI showed coverage regression in `models/baseline_v1.py` (100% → 96.49%)
+**Root cause:** Python's non-deterministic `hash()` function caused test flakiness
+**Fix:** Added `test_baseline_policy_v1_forward_uniform_distribution_guaranteed` that uses
+       `move_vocab_size=1` to guarantee hash collisions regardless of PYTHONHASHSEED
+
+---
+
 **Last Updated:** 2026-02-03
 
