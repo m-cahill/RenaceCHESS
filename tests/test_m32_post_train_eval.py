@@ -35,7 +35,6 @@ from renacechess.contracts.models import (
 )
 from renacechess.determinism import canonical_json_dump
 
-
 # =============================================================================
 # Schema Path Helpers
 # =============================================================================
@@ -743,7 +742,7 @@ class TestDeterminism:
         """Pydantic model dump should be deterministic."""
         import hashlib
 
-        now = datetime.now(UTC)
+        # Note: datetime not needed for this test - just testing model serialization
         metrics = PolicyEvalMetricsInlineV1(
             top1_accuracy=0.25,
             top3_accuracy=0.45,
@@ -760,3 +759,391 @@ class TestDeterminism:
 
         assert hash1 == hash2
 
+
+# =============================================================================
+# TESTS: post_train_eval.py module functions (Coverage)
+# =============================================================================
+
+
+class TestPostTrainEvalModuleFunctions:
+    """Tests for functions in post_train_eval.py module."""
+
+    def test_compute_sha256_bytes_basic(self) -> None:
+        """Test SHA256 computation for bytes."""
+        from renacechess.eval.post_train_eval import _compute_sha256_bytes
+
+        result = _compute_sha256_bytes(b"hello world")
+        assert isinstance(result, str)
+        # Format is "sha256:<64-char-hex>" = 7 + 64 = 71 chars
+        assert result.startswith("sha256:")
+        assert len(result) == 71
+        # Known hash for "hello world"
+        expected = "sha256:b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
+        assert result == expected
+
+    def test_compute_sha256_bytes_empty(self) -> None:
+        """Test SHA256 computation for empty bytes."""
+        from renacechess.eval.post_train_eval import _compute_sha256_bytes
+
+        result = _compute_sha256_bytes(b"")
+        assert isinstance(result, str)
+        assert result.startswith("sha256:")
+        assert len(result) == 71
+        # Known hash for empty string
+        expected = "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+        assert result == expected
+
+    def test_compute_sha256_bytes_deterministic(self) -> None:
+        """SHA256 computation should be deterministic."""
+        from renacechess.eval.post_train_eval import _compute_sha256_bytes
+
+        data = b"test data for hashing"
+        hash1 = _compute_sha256_bytes(data)
+        hash2 = _compute_sha256_bytes(data)
+        assert hash1 == hash2
+
+    def test_set_deterministic_seed(self) -> None:
+        """Test deterministic seed setting."""
+        import torch
+
+        from renacechess.eval.post_train_eval import _set_deterministic_seed
+
+        _set_deterministic_seed(42)
+
+        # Verify we can generate consistent random numbers
+        rand1 = torch.rand(3).tolist()
+
+        _set_deterministic_seed(42)
+        rand2 = torch.rand(3).tolist()
+
+        assert rand1 == rand2
+
+    def test_set_deterministic_seed_different_seeds(self) -> None:
+        """Different seeds should produce different outputs."""
+        import torch
+
+        from renacechess.eval.post_train_eval import _set_deterministic_seed
+
+        _set_deterministic_seed(42)
+        rand1 = torch.rand(3).tolist()
+
+        _set_deterministic_seed(1337)
+        rand2 = torch.rand(3).tolist()
+
+        assert rand1 != rand2
+
+
+class TestPolicyMetricsAccumulatorModule:
+    """Tests for PolicyMetricsAccumulator class from module."""
+
+    def test_accumulator_initialization(self) -> None:
+        """Test accumulator initializes with empty state."""
+        from renacechess.eval.post_train_eval import PolicyMetricsAccumulator
+
+        acc = PolicyMetricsAccumulator()
+        metrics = acc.compute()
+
+        assert metrics.top1_accuracy == 0.0
+        assert metrics.top3_accuracy == 0.0
+        assert metrics.top5_accuracy == 0.0
+        assert metrics.samples_evaluated == 0
+
+    def test_accumulator_add_single(self) -> None:
+        """Test accumulator with single add."""
+        from renacechess.eval.post_train_eval import PolicyMetricsAccumulator
+
+        acc = PolicyMetricsAccumulator()
+
+        # Move probabilities dict, chosen move is top-1
+        move_probs = {"e2e4": 0.5, "d2d4": 0.2, "g1f3": 0.15, "c2c4": 0.1, "b1c3": 0.05}
+        chosen_move = "e2e4"
+
+        acc.add(move_probs, chosen_move)
+        metrics = acc.compute()
+
+        # Chosen move is top-1, so all accuracies should be 1.0
+        assert metrics.top1_accuracy == 1.0
+        assert metrics.top3_accuracy == 1.0
+        assert metrics.top5_accuracy == 1.0
+        assert metrics.samples_evaluated == 1
+
+    def test_accumulator_add_batch(self) -> None:
+        """Test accumulator with multiple adds."""
+        from renacechess.eval.post_train_eval import PolicyMetricsAccumulator
+
+        acc = PolicyMetricsAccumulator()
+
+        # First: chosen move is top-1
+        acc.add({"e2e4": 0.5, "d2d4": 0.3, "g1f3": 0.2}, "e2e4")
+        # Second: chosen move is top-1
+        acc.add({"d2d4": 0.6, "e2e4": 0.25, "c2c4": 0.15}, "d2d4")
+
+        metrics = acc.compute()
+
+        assert metrics.top1_accuracy == 1.0
+        assert metrics.samples_evaluated == 2
+
+    def test_accumulator_nll_computation(self) -> None:
+        """Test NLL is computed correctly."""
+        from renacechess.eval.post_train_eval import PolicyMetricsAccumulator
+
+        acc = PolicyMetricsAccumulator()
+
+        # Chosen move has 0.5 probability
+        move_probs = {"e2e4": 0.5, "d2d4": 0.3, "g1f3": 0.2}
+        acc.add(move_probs, "e2e4")
+        metrics = acc.compute()
+
+        # NLL = -log(0.5) ≈ 0.693
+        assert 0.6 < metrics.nll < 0.8
+
+
+class TestOutcomeMetricsAccumulatorModule:
+    """Tests for OutcomeMetricsAccumulator class from module."""
+
+    def test_accumulator_initialization(self) -> None:
+        """Test accumulator initializes with empty state."""
+        from renacechess.eval.post_train_eval import OutcomeMetricsAccumulator
+
+        acc = OutcomeMetricsAccumulator()
+        metrics = acc.compute()
+
+        assert metrics.accuracy == 0.0
+        assert metrics.samples_evaluated == 0
+
+    def test_accumulator_add_single(self) -> None:
+        """Test accumulator with single add."""
+        from renacechess.eval.post_train_eval import OutcomeMetricsAccumulator
+
+        acc = OutcomeMetricsAccumulator()
+
+        # WDL probs dict: w=win, d=draw, l=loss
+        wdl_probs = {"w": 0.7, "d": 0.2, "l": 0.1}
+        acc.add(wdl_probs, "win")
+
+        metrics = acc.compute()
+
+        assert metrics.accuracy == 1.0
+        assert metrics.samples_evaluated == 1
+
+    def test_accumulator_brier_score(self) -> None:
+        """Test Brier score computation."""
+        from renacechess.eval.post_train_eval import OutcomeMetricsAccumulator
+
+        acc = OutcomeMetricsAccumulator()
+
+        # Perfect prediction
+        wdl_probs = {"w": 1.0, "d": 0.0, "l": 0.0}
+        acc.add(wdl_probs, "win")
+
+        metrics = acc.compute()
+
+        # Perfect prediction should have Brier score = 0
+        assert metrics.brier_score == 0.0
+
+    def test_accumulator_calibration_ece(self) -> None:
+        """Test ECE computation."""
+        from renacechess.eval.post_train_eval import OutcomeMetricsAccumulator
+
+        acc = OutcomeMetricsAccumulator()
+
+        # Add some predictions
+        acc.add({"w": 0.9, "d": 0.05, "l": 0.05}, "win")
+        acc.add({"w": 0.4, "d": 0.3, "l": 0.3}, "win")
+
+        metrics = acc.compute()
+
+        # Should have some calibration data (attribute is 'ece')
+        assert isinstance(metrics.ece, float)
+        assert metrics.ece >= 0.0
+
+
+class TestComputeDeltaModule:
+    """Tests for compute_delta function from module."""
+
+    def test_compute_delta_improvement(self) -> None:
+        """Test delta computation for improvement."""
+        from renacechess.eval.post_train_eval import compute_delta
+
+        # Create baseline and trained metrics
+        baseline = PolicyEvalMetricsInlineV1(
+            top1_accuracy=0.6, top3_accuracy=0.7, top5_accuracy=0.8, nll=1.5, entropy=2.0
+        )
+        trained = PolicyEvalMetricsInlineV1(
+            top1_accuracy=0.8, top3_accuracy=0.85, top5_accuracy=0.9, nll=1.2, entropy=1.8
+        )
+
+        delta = compute_delta(baseline, trained, "top1_accuracy", higher_is_better=True)
+
+        assert delta.primary_metric == "top1_accuracy"
+        assert delta.primary_metric_trained == pytest.approx(0.8)
+        assert delta.primary_metric_baseline == pytest.approx(0.6)
+        assert delta.primary_metric_delta == pytest.approx(0.2)
+        assert delta.direction == "improved"
+
+    def test_compute_delta_degradation(self) -> None:
+        """Test delta computation for degradation."""
+        from renacechess.eval.post_train_eval import compute_delta
+
+        baseline = PolicyEvalMetricsInlineV1(
+            top1_accuracy=0.7, top3_accuracy=0.8, top5_accuracy=0.9, nll=1.0, entropy=1.5
+        )
+        trained = PolicyEvalMetricsInlineV1(
+            top1_accuracy=0.5, top3_accuracy=0.6, top5_accuracy=0.7, nll=1.5, entropy=2.0
+        )
+
+        delta = compute_delta(baseline, trained, "top1_accuracy", higher_is_better=True)
+
+        assert delta.primary_metric_delta == pytest.approx(-0.2)
+        assert delta.direction == "degraded"
+
+    def test_compute_delta_unchanged(self) -> None:
+        """Test delta computation for unchanged values."""
+        from renacechess.eval.post_train_eval import compute_delta
+
+        baseline = PolicyEvalMetricsInlineV1(
+            top1_accuracy=0.7, top3_accuracy=0.8, top5_accuracy=0.9, nll=1.0, entropy=1.5
+        )
+        trained = PolicyEvalMetricsInlineV1(
+            top1_accuracy=0.7, top3_accuracy=0.8, top5_accuracy=0.9, nll=1.0, entropy=1.5
+        )
+
+        delta = compute_delta(baseline, trained, "top1_accuracy", higher_is_better=True)
+
+        assert delta.primary_metric_delta == 0.0
+        assert delta.direction == "unchanged"
+
+    def test_compute_delta_lower_is_better(self) -> None:
+        """Test delta for metrics where lower is better (e.g., NLL)."""
+        from renacechess.eval.post_train_eval import compute_delta
+
+        baseline = PolicyEvalMetricsInlineV1(
+            top1_accuracy=0.6, top3_accuracy=0.7, top5_accuracy=0.8, nll=2.0, entropy=2.5
+        )
+        trained = PolicyEvalMetricsInlineV1(
+            top1_accuracy=0.7, top3_accuracy=0.8, top5_accuracy=0.9, nll=1.5, entropy=2.0
+        )
+
+        delta = compute_delta(baseline, trained, "nll", higher_is_better=False)
+
+        assert delta.primary_metric_baseline == pytest.approx(2.0)
+        assert delta.primary_metric_trained == pytest.approx(1.5)
+        assert delta.primary_metric_delta == pytest.approx(-0.5)
+        assert delta.direction == "improved"  # Lower NLL is better
+
+    def test_compute_delta_percentage_change(self) -> None:
+        """Test relative percentage computation."""
+        from renacechess.eval.post_train_eval import compute_delta
+
+        baseline = PolicyEvalMetricsInlineV1(
+            top1_accuracy=0.4, top3_accuracy=0.5, top5_accuracy=0.6, nll=1.0, entropy=1.5
+        )
+        trained = PolicyEvalMetricsInlineV1(
+            top1_accuracy=0.8, top3_accuracy=0.85, top5_accuracy=0.9, nll=0.8, entropy=1.2
+        )
+
+        delta = compute_delta(baseline, trained, "top1_accuracy", higher_is_better=True)
+
+        # Relative change: (0.8 - 0.4) / 0.4 = 1.0 = 100%
+        assert delta.percentage_change == pytest.approx(100.0)
+
+    def test_compute_delta_zero_baseline(self) -> None:
+        """Test delta when baseline is zero (edge case)."""
+        from renacechess.eval.post_train_eval import compute_delta
+
+        baseline = PolicyEvalMetricsInlineV1(
+            top1_accuracy=0.0, top3_accuracy=0.0, top5_accuracy=0.0, nll=0.0, entropy=0.0
+        )
+        trained = PolicyEvalMetricsInlineV1(
+            top1_accuracy=0.5, top3_accuracy=0.6, top5_accuracy=0.7, nll=1.0, entropy=1.5
+        )
+
+        delta = compute_delta(baseline, trained, "top1_accuracy", higher_is_better=True)
+
+        # With zero baseline, relative percent should be None
+        assert delta.primary_metric_delta == pytest.approx(0.5)
+        assert delta.percentage_change is None
+
+
+class TestLoadFrozenEvalV2RecordsModule:
+    """Tests for loading frozen eval v2 records from module."""
+
+    def test_load_frozen_eval_v2_records_file_not_found(
+        self, tmp_path: Path
+    ) -> None:
+        """Test error handling for missing manifest."""
+        from renacechess.eval.post_train_eval import load_frozen_eval_v2_records
+
+        with pytest.raises(FileNotFoundError):
+            load_frozen_eval_v2_records(tmp_path / "nonexistent.json")
+
+    def test_load_frozen_eval_v2_records_from_manifest(
+        self, tmp_path: Path
+    ) -> None:
+        """Test loading records from manifest."""
+        import json
+
+        from renacechess.eval.post_train_eval import load_frozen_eval_v2_records
+
+        # Create a shard file first
+        shard_path = tmp_path / "shard_000.jsonl"
+        with open(shard_path, "w") as f:
+            f.write(
+                '{"fen": "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", '
+                '"skill_bucket": 1000}\n'
+            )
+            f.write(
+                '{"fen": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR b KQkq e3 0 1", '
+                '"skill_bucket": 1200}\n'
+            )
+
+        # Create manifest with shardRefs pointing to the shard
+        manifest = {
+            "schemaVersion": "FrozenEvalManifestV2",
+            "shardRefs": ["shard_000.jsonl"],
+            "totalPositions": 2,
+        }
+
+        manifest_path = tmp_path / "manifest.json"
+        with open(manifest_path, "w") as f:
+            json.dump(manifest, f)
+
+        records = load_frozen_eval_v2_records(manifest_path)
+
+        assert len(records) == 2
+        assert records[0]["skill_bucket"] == 1000
+        assert records[1]["skill_bucket"] == 1200
+
+
+class TestGetGitCommitShaModule:
+    """Tests for git commit SHA retrieval from module."""
+
+    def test_get_git_commit_sha_returns_string(self) -> None:
+        """Test that git commit SHA returns a string."""
+        from renacechess.eval.post_train_eval import _get_git_commit_sha
+
+        result = _get_git_commit_sha()
+        assert isinstance(result, str)
+        # Should be either a valid SHA or "unknown"
+        assert len(result) == 40 or result == "unknown"
+
+
+class TestComputeSha256FileModule:
+    """Tests for file SHA256 computation from module."""
+
+    def test_compute_sha256_file(self, tmp_path: Path) -> None:
+        """Test SHA256 computation for a file."""
+        from renacechess.eval.post_train_eval import _compute_sha256_file
+
+        # Create a test file
+        test_file = tmp_path / "test.txt"
+        test_file.write_bytes(b"hello world")
+
+        result = _compute_sha256_file(test_file)
+
+        assert isinstance(result, str)
+        assert result.startswith("sha256:")
+        assert len(result) == 71  # "sha256:" (7) + 64 hex chars
+        # Known hash for "hello world"
+        expected = "sha256:b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9"
+        assert result == expected
