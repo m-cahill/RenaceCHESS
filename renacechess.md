@@ -42,6 +42,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M31 | ✅ Closed — Training Executed | `579cd2d` | 2026-02-03 | FULL-TRAINING-RUN-001 — Training completed (25m 26s, 10 epochs each, 2 checkpoints) |
 | M32 | ✅ Closed — Evaluation Executed | `89b9a4c` | 2026-02-03 | POST-TRAIN-EVAL-PACK-001 — Evaluated 10k positions, delta metrics computed |
 | M33 | ✅ Closed (MERGED) | `m33-external-proof-pack` → `main` | 2026-02-03 | EXTERNAL-PROOF-PACK-001 — Self-contained proof bundle with M30-M32 artifacts |
+| M34 | ✅ Closed (MERGED) | `m34-release-lock` → `main` | 2026-02-03 | RELEASE-LOCK-001 — Contract registry, CI release gates, v1.0.0 tag |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -763,7 +764,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | B | Personality Framework & Style Modulation | 🔒 **CLOSED** | M15–M18 | `docs/phases/PhaseB_closeout.md` |
 | C | Elo-Appropriate Coaching & Explanation | 🔒 **CLOSED** | M19–M22 | `docs/phases/PhaseC_closeout.md` |
 | D | Data Expansion, Calibration & Quality | 🔒 **CLOSED** | M23–M28 | `docs/phases/PhaseD_closeout.md` |
-| E | Field Testing & Product Surfaces | 🔜 Planned | M29+ | — |
+| E | Scale Proof, Training Run, Release Lock | 🔒 **CLOSED** | M29–M34 | `docs/phases/PhaseE_closeout.md` |
 
 ---
 
@@ -1074,8 +1075,33 @@ From M00 forward, RenaceCHESS guarantees:
   - TrainingRunReportV1 — `proof_pack_v1/training/training_run_report.json`
   - PostTrainEvalReportV1 — `proof_pack_v1/evaluation/post_train_eval_report.json`
 
+**M34 Details:**
+- **Objective:** Formally lock RenaceCHESS v1 as a truthful, auditable, immutable research release
+- **Status:** ✅ Closed (MERGED)
+- **PR:** #40 (merged)
+- **Final Commit:** `b480f1c` (pending CI)
+- **Key Files:**
+  - `src/renacechess/contracts/registry.py` — Contract registry generator and validator
+  - `src/renacechess/contracts/models.py` — ContractEntryV1, ContractRegistryV1 models
+  - `contracts/CONTRACT_REGISTRY_v1.json` — Immutable contract inventory (33 contracts)
+  - `tests/test_m34_contract_registry.py` — 10 comprehensive tests
+  - `.github/workflows/ci.yml` — 3 new release gates
+- **Artifacts Produced:**
+  - `contracts/CONTRACT_REGISTRY_v1.json` — 33 v1 contracts with schema hashes
+  - `RELEASE_NOTES_v1.md` — v1.0.0 release notes
+  - `docs/phases/PhaseE_closeout.md` — Phase E formal closeout
+- **CI Release Gates:**
+  - `release-dependency-freeze` — Blocks dependency changes
+  - `release-contract-freeze` — Validates registry and blocks v1 schema changes
+  - `release-proof-pack-verification` — Verifies M33 proof pack integrity
+- **Governance:**
+  - All v1 contracts frozen with schema hashes
+  - CI gates enforce immutability
+  - Future changes require v2+ versioning
+- **Phase E Status:** ✅ **CLOSED**
+
 ---
 
-**Last Updated:** 2026-02-03 (Phase E — M33 EXTERNAL-PROOF-PACK-001 Closed)
+**Last Updated:** 2026-02-03 (Phase E — M34 RELEASE-LOCK-001 Closed)
 
 

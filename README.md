@@ -4,6 +4,25 @@
 
 RenaceCHESS is a human-centered chess intelligence system that predicts what move a human of a given skill (and time pressure) is likely to play, estimates human win/draw/loss chances for that same skill level, and provides LLM-groundable context for real-time, natural-language coaching and broadcast narrative.
 
+## What This Project Is and Is Not
+
+### This Project **Is**
+
+- A **probabilistic human decision model**: Predicts human move choices conditioned on skill and time pressure
+- A **skill-conditioned human outcome model**: Estimates human win/draw/loss probabilities (not engine self-play)
+- A **context-grounding layer**: Turns probabilities into stable, structured payloads for LLM coaching/broadcast
+- A **research-grade system**: Complete, auditable, reproducible research artifact (v1.0.0)
+
+### This Project **Is Not**
+
+- ❌ A new superhuman engine
+- ❌ A replacement for Stockfish/Leela
+- ❌ A purely "chatty" LLM chess coach (we explicitly avoid hallucination by grounding advice in calibrated probabilities)
+- ❌ A production system (research artifact, not product)
+- ❌ A commercial product (no business model or product claims)
+
+See [VISION.md](VISION.md) for the complete project vision and [RELEASE_NOTES_v1.md](RELEASE_NOTES_v1.md) for v1.0.0 release details.
+
 ## Overview
 
 The endgame is *not* "stronger-than-Stockfish." The endgame is a **human decision & difficulty simulator** that supports:
@@ -120,11 +139,14 @@ renacechess/
 
 ## Documentation
 
+- [Project Vision](VISION.md) - Complete project vision and north star
+- [Release Notes v1.0.0](RELEASE_NOTES_v1.md) - v1.0.0 release details and limitations
 - [Project Anchor](docs/ANCHOR.md) - Project vision and north star
 - [Governance](docs/GOVERNANCE.md) - Milestone conventions and workflow
 - [Assumed Guarantees](docs/ASSUMED_GUARANTEES.md) - What we inherit from RediAI v3
 - [Dataset Format](docs/DATASETS.md) - Dataset structure, build process, and deterministic rules
 - [Ingestion](docs/INGESTION.md) - Lichess database export ingestion and cache management
+- [Proof Pack](proof_pack_v1/README.md) - External verification bundle (M33)
 
 ## License
 

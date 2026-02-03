@@ -1,0 +1,237 @@
+{
+  "schemaVersion": 1,
+  "frozenAt": "2026-02-03T09:38:10.357169Z",
+  "contracts": [
+    {
+      "filename": "advice_facts.v1.schema.json",
+      "schemaHash": "e63096e9ac2aba99534b59f000cb8e16dd82b73507873614ec47eaef2fdd921e",
+      "introducedMilestone": "M19",
+      "purpose": "Coaching advice facts contract",
+      "pydanticModel": "AdviceFactsV1"
+    },
+    {
+      "filename": "calibration_delta.v1.schema.json",
+      "schemaHash": "59e0da5dfdb938f72dea7245f059560787490bf12e870a9ee3ad076eb1208662",
+      "introducedMilestone": "M25",
+      "purpose": "Calibration improvement delta",
+      "pydanticModel": "CalibrationDeltaV1"
+    },
+    {
+      "filename": "calibration_metrics.v1.schema.json",
+      "schemaHash": "1de40f74983c432b65e107e35cf7dd28fea5d20a288f4612e8f9b847a6c7151b",
+      "introducedMilestone": "M24",
+      "purpose": "Calibration metrics (ECE, Brier, NLL)",
+      "pydanticModel": "CalibrationMetricsV1"
+    },
+    {
+      "filename": "coaching_draft.v1.schema.json",
+      "schemaHash": "e846bf46f5af0095d2b6507c7f019846393aaf39109cb2f82212cf5b5ebf8909",
+      "introducedMilestone": "M21",
+      "purpose": "LLM-generated coaching draft",
+      "pydanticModel": "CoachingDraftV1"
+    },
+    {
+      "filename": "coaching_evaluation.v1.schema.json",
+      "schemaHash": "96ae462f582664d904f810dfb990a7928629cd67b3fa78b7cf6498c2ac9d0026",
+      "introducedMilestone": "M21",
+      "purpose": "Coaching translation evaluation metrics",
+      "pydanticModel": "CoachingEvaluationV1"
+    },
+    {
+      "filename": "coaching_surface.v1.schema.json",
+      "schemaHash": "b43ee16b0f8ea6f88f297f171e90f8cad32f77da51065555e4923b274f7ab3e9",
+      "introducedMilestone": "M22",
+      "purpose": "Coaching CLI surface output",
+      "pydanticModel": "CoachingSurfaceV1"
+    },
+    {
+      "filename": "context_bridge.schema.json",
+      "schemaHash": "ea8c59ae145760671f9cc261e6e3bf10be4a8cdb88ae2dafa503adb562f30be0",
+      "introducedMilestone": "M04",
+      "purpose": "Context Bridge payload for LLM grounding (v1)",
+      "pydanticModel": "ContextBridgePayload"
+    },
+    {
+      "filename": "context_bridge.v2.schema.json",
+      "schemaHash": "809c5d300c22d20ff1c411e952452d1e4d5e7b7838f5eab76afdfb1049ed082a",
+      "introducedMilestone": "M11",
+      "purpose": "Context Bridge payload with structural cognition (v2)",
+      "pydanticModel": "ContextBridgePayloadV2"
+    },
+    {
+      "filename": "dataset_manifest.schema.json",
+      "schemaHash": "4e3ad023e603a812f9e6dadf6edc13f925f799aabf1c4135d85b5a781b9f1766",
+      "introducedMilestone": "M01",
+      "purpose": "Dataset manifest (v1)",
+      "pydanticModel": "DatasetManifest"
+    },
+    {
+      "filename": "dataset_manifest.v2.schema.json",
+      "schemaHash": "85a14abf81e8e87143b984309cd8988d0e0be927576810fbbf14554c242bd0d5",
+      "introducedMilestone": "M03",
+      "purpose": "Dataset manifest with assembly config (v2)",
+      "pydanticModel": "DatasetManifestV2"
+    },
+    {
+      "filename": "delta_metrics.v1.schema.json",
+      "schemaHash": "a4f4a21bfe3d16284dc2e9daa3ad12e6228516ff72ae2f9d0da83a864d40e2e7",
+      "introducedMilestone": "M32",
+      "purpose": "Delta metrics (trained vs baseline)",
+      "pydanticModel": "DeltaMetricsV1"
+    },
+    {
+      "filename": "elo_bucket_deltas.v1.schema.json",
+      "schemaHash": "9750bb15391432eb17a0ca449ff22de488137fedcfa6878da2f9ca41d01ea584",
+      "introducedMilestone": "M20",
+      "purpose": "Elo-bucket delta facts for cross-bucket comparison",
+      "pydanticModel": "EloBucketDeltaFactsV1"
+    },
+    {
+      "filename": "eval_report.v1.schema.json",
+      "schemaHash": "de469668a274a6e8b1b76b32914bb4a5db86e84c4524ea5630313ee58f5cd4ab",
+      "introducedMilestone": "M04",
+      "purpose": "Evaluation report (v1)",
+      "pydanticModel": "EvalReportV1"
+    },
+    {
+      "filename": "eval_set_provenance.v1.schema.json",
+      "schemaHash": "f175ba805746c7cd3d670a9bcdeb2ed00681f0975a879157424d2e222692cac2",
+      "introducedMilestone": "M30",
+      "purpose": "Evaluation set provenance artifact",
+      "pydanticModel": "EvalSetProvenanceV1"
+    },
+    {
+      "filename": "external_proof_pack.v1.schema.json",
+      "schemaHash": "abc6cb78c1a105ba63d102a8c88a415e86157f7f3607567a711622d3389a3248",
+      "introducedMilestone": "M33",
+      "purpose": "External proof pack manifest",
+      "pydanticModel": "ExternalProofPackV1"
+    },
+    {
+      "filename": "frozen_eval_manifest.v1.schema.json",
+      "schemaHash": "b117ef08d6e1bc421e028f2bc443834e497888b1a77ec492f6f85320163aae78",
+      "introducedMilestone": "M06",
+      "purpose": "Frozen evaluation set manifest (v1)",
+      "pydanticModel": "FrozenEvalManifestV1"
+    },
+    {
+      "filename": "ingest_receipt.schema.json",
+      "schemaHash": "e810fb1c3f5b5fe0f7bfb132b1d9ee970d025456bfd8ffe9fe118c8003bb0cbf",
+      "introducedMilestone": "M02",
+      "purpose": "Ingestion receipt artifact",
+      "pydanticModel": "IngestReceiptV1"
+    },
+    {
+      "filename": "outcome_eval_metrics.v1.schema.json",
+      "schemaHash": "5951d2c511e44229692177427c1c0057b291cf8ecc55d3f7fc12a19e319a355d",
+      "introducedMilestone": "M32",
+      "purpose": "Outcome evaluation metrics",
+      "pydanticModel": "OutcomeEvalMetricsV1"
+    },
+    {
+      "filename": "PerPieceFeaturesV1.schema.json",
+      "schemaHash": "c7bc69bdb2c1a725b45a1831f85d4adc985eabee484d34889289c148fdcd3c11",
+      "introducedMilestone": "M11",
+      "purpose": "Per-piece structural cognition features",
+      "pydanticModel": "PerPieceFeaturesV1"
+    },
+    {
+      "filename": "personality_config.v1.schema.json",
+      "schemaHash": "82cb957f66bbc7f3d80add61ed5db99ce88f8528039cdbe68cba02464c8e0f34",
+      "introducedMilestone": "M15",
+      "purpose": "Personality module configuration",
+      "pydanticModel": "PersonalityConfigV1"
+    },
+    {
+      "filename": "personality_eval_artifact.v1.schema.json",
+      "schemaHash": "76d024ff58920a525db544d3a354bee37fef1255bf616a786c862a546f2a0d74",
+      "introducedMilestone": "M18",
+      "purpose": "Personality evaluation artifact",
+      "pydanticModel": "PersonalityEvalArtifactV1"
+    },
+    {
+      "filename": "policy_eval_metrics.v1.schema.json",
+      "schemaHash": "83ca08b425ae730dc9416ebd6a0202594b7643ee9a1002459b492ac929e64e14",
+      "introducedMilestone": "M32",
+      "purpose": "Policy evaluation metrics",
+      "pydanticModel": "PolicyEvalMetricsV1"
+    },
+    {
+      "filename": "post_train_eval_report.v1.schema.json",
+      "schemaHash": "418ce7e409e50c8bad88dec100ac3b81e5e76e3eea956a7d1ded3b755c3f603f",
+      "introducedMilestone": "M32",
+      "purpose": "Post-training evaluation report",
+      "pydanticModel": "PostTrainEvalReportV1"
+    },
+    {
+      "filename": "recalibration_gate.v1.schema.json",
+      "schemaHash": "13cfa22f24acbf3ece46878e814a04c086ead8731d68e3c42b1bb83f168633e9",
+      "introducedMilestone": "M26",
+      "purpose": "Runtime recalibration gate artifact",
+      "pydanticModel": "RecalibrationGateV1"
+    },
+    {
+      "filename": "recalibration_parameters.v1.schema.json",
+      "schemaHash": "ced254f443a8acca19d72044daccc6cceb4d8f88f9c0a647682e1cc3aa02ec43",
+      "introducedMilestone": "M25",
+      "purpose": "Temperature scaling recalibration parameters",
+      "pydanticModel": "RecalibrationParametersV1"
+    },
+    {
+      "filename": "runtime_recalibration_activation_policy.v1.schema.json",
+      "schemaHash": "f13e65962b2316921ecad5489523e579bbecddd00541baf985e2f9d916ce7e72",
+      "introducedMilestone": "M28",
+      "purpose": "Recalibration activation policy",
+      "pydanticModel": "RuntimeRecalibrationActivationPolicyV1"
+    },
+    {
+      "filename": "runtime_recalibration_decision.v1.schema.json",
+      "schemaHash": "5fed69110b600767191e30aac967aa85e66e40721145fd302ccd0c4670ef23db",
+      "introducedMilestone": "M28",
+      "purpose": "Recalibration activation decision",
+      "pydanticModel": "RuntimeRecalibrationDecisionV1"
+    },
+    {
+      "filename": "runtime_recalibration_delta.v1.schema.json",
+      "schemaHash": "cad3b4f33a7f69369ce5818882c658e60e6bebbcf1f199d0d071d13a98c89fe8",
+      "introducedMilestone": "M27",
+      "purpose": "Runtime recalibration delta metrics",
+      "pydanticModel": "RuntimeRecalibrationDeltaV1"
+    },
+    {
+      "filename": "runtime_recalibration_report.v1.schema.json",
+      "schemaHash": "a7a1ee588ddeadffd4f86367175346d90077c024ae16dfdac1fd5636ed7dac19",
+      "introducedMilestone": "M27",
+      "purpose": "Runtime recalibration evaluation report",
+      "pydanticModel": "RuntimeRecalibrationReportV1"
+    },
+    {
+      "filename": "SquareMapFeaturesV1.schema.json",
+      "schemaHash": "fcca91f538448075d4b21d0d7ac0b4582c5f5a7f6a9121a7088e0a7fd947ce85",
+      "introducedMilestone": "M11",
+      "purpose": "Square-level structural cognition features",
+      "pydanticModel": "SquareMapFeaturesV1"
+    },
+    {
+      "filename": "training_benchmark_report.v1.schema.json",
+      "schemaHash": "42c16be95d9b705ab5ad903f5cd652a4324be0b93d9577c3cc467c335d45bba5",
+      "introducedMilestone": "M29",
+      "purpose": "Training benchmark report",
+      "pydanticModel": "TrainingBenchmarkReportV1"
+    },
+    {
+      "filename": "training_config_lock.v1.schema.json",
+      "schemaHash": "87bb957aea51044d83063ac8d7aa9320ed1fef1bf162f965678725ebd2dce8e2",
+      "introducedMilestone": "M31",
+      "purpose": "Immutable training configuration lock",
+      "pydanticModel": "TrainingConfigLockV1"
+    },
+    {
+      "filename": "training_run_report.v1.schema.json",
+      "schemaHash": "31c78929e182fb8fd49d338cc05ea4267eec24ad27f9acb4855b461e974947a4",
+      "introducedMilestone": "M31",
+      "purpose": "Training run execution report",
+      "pydanticModel": "TrainingRunReportV1"
+    }
+  ]
+}

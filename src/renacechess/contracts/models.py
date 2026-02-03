@@ -5973,3 +5973,47 @@ class ExternalProofPackV1(BaseModel):
         pattern=r"^sha256:[a-f0-9]{64}$",
         description="SHA-256 hash of this manifest computed from canonical JSON representation",
     )
+
+
+# =============================================================================
+# Contract Registry Models (M34)
+# =============================================================================
+
+
+class ContractEntryV1(BaseModel):
+    """Single contract entry in the registry (M34)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    filename: str = Field(
+        ..., description="Schema filename (e.g., 'frozen_eval_manifest.v2.schema.json')"
+    )
+    schema_hash: str = Field(
+        ...,
+        alias="schemaHash",
+        description="SHA-256 hash of the schema file content",
+        pattern="^[a-f0-9]{64}$",
+    )
+    introduced_milestone: str = Field(
+        ...,
+        alias="introducedMilestone",
+        description="Milestone where this contract was introduced (e.g., 'M30')",
+    )
+    purpose: str = Field(..., description="Human-readable purpose of this contract")
+    pydantic_model: str | None = Field(
+        None,
+        alias="pydanticModel",
+        description="Name of the corresponding Pydantic model (if applicable)",
+    )
+
+
+class ContractRegistryV1(BaseModel):
+    """Immutable contract registry for v1 release lock (M34)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    schema_version: int = Field(1, alias="schemaVersion", description="Registry schema version")
+    frozen_at: datetime = Field(
+        ..., alias="frozenAt", description="ISO 8601 timestamp when registry was frozen"
+    )
+    contracts: list[ContractEntryV1] = Field(..., description="List of all v1 contracts")
