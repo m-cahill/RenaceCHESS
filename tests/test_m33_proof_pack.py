@@ -255,9 +255,7 @@ class TestVerifyProofPack:
         assert is_valid is True, f"Verification failed: {errors}"
         assert len(errors) == 0
 
-    def test_verify_proof_pack_fails_missing_manifest(
-        self, tmp_path: Path
-    ) -> None:
+    def test_verify_proof_pack_fails_missing_manifest(self, tmp_path: Path) -> None:
         """Test that verify_proof_pack fails if manifest is missing."""
         output_dir = tmp_path / "proof_pack_v1"
         output_dir.mkdir()
@@ -330,9 +328,7 @@ class TestVerifyProofPack:
         assert len(errors) > 0
         assert any("hash mismatch" in error.lower() for error in errors)
 
-    def test_verify_proof_pack_fails_invalid_manifest_schema(
-        self, tmp_path: Path
-    ) -> None:
+    def test_verify_proof_pack_fails_invalid_manifest_schema(self, tmp_path: Path) -> None:
         """Test that verify_proof_pack fails on invalid manifest schema."""
         output_dir = tmp_path / "proof_pack_v1"
         output_dir.mkdir()
@@ -380,4 +376,3 @@ def training_run_report_path() -> Path:
 def post_train_eval_report_path() -> Path:
     """Path to post-train eval report."""
     return Path("artifacts/m32_post_train_eval/post_train_eval_report.json")
-

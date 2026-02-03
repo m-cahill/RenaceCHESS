@@ -11,7 +11,7 @@ import json
 from pathlib import Path
 
 from renacechess.contracts.models import ExternalProofPackV1
-from renacechess.determinism import canonical_json_dump, compute_determinism_hash
+from renacechess.determinism import compute_determinism_hash
 
 
 def _compute_sha256_file(path: Path) -> str:
@@ -162,18 +162,11 @@ def verify_proof_pack(proof_pack_dir: Path) -> tuple[bool, list[str]]:
     ):
         errors.append("Hash chain training config lock hash mismatch")
 
-    if (
-        manifest.hash_chain.training_run_report_hash
-        != manifest.artifacts.training.run_report_hash
-    ):
+    if manifest.hash_chain.training_run_report_hash != manifest.artifacts.training.run_report_hash:
         errors.append("Hash chain training run report hash mismatch")
 
-    if (
-        manifest.hash_chain.post_train_eval_report_hash
-        != manifest.artifacts.evaluation.report_hash
-    ):
+    if manifest.hash_chain.post_train_eval_report_hash != manifest.artifacts.evaluation.report_hash:
         errors.append("Hash chain post-train eval report hash mismatch")
 
     is_valid = len(errors) == 0
     return is_valid, errors
-

@@ -1244,7 +1244,7 @@ jobs:
                       not_proven=["Test not proven"],
                   ),
               ),
-              determinism_hash="sha256:" + "h" * 64,
+              determinism_hash="sha256:" + "a" * 64,
           )
           json_dict = manifest.model_dump(by_alias=True)
           assert json_dict["schemaVersion"] == 1

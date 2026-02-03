@@ -42,9 +42,7 @@ def _compute_sha256_file(path: Path) -> str:
     return f"sha256:{hasher.hexdigest()}"
 
 
-def _copy_file_to_pack(
-    source: Path, dest_dir: Path, relative_path: str
-) -> tuple[Path, str]:
+def _copy_file_to_pack(source: Path, dest_dir: Path, relative_path: str) -> tuple[Path, str]:
     """Copy a file to proof pack directory and compute hash.
 
     Args:
@@ -76,7 +74,7 @@ def _load_json(path: Path) -> dict[str, Any]:
         Parsed JSON as dict.
     """
     with path.open(encoding="utf-8") as f:
-        return json.load(f)
+        return json.load(f)  # type: ignore[no-any-return]
 
 
 def build_proof_pack(
@@ -115,12 +113,8 @@ def build_proof_pack(
 
     # Extract checkpoint metadata from training run report
     checkpoints_data = training_run_report.get("checkpoints", [])
-    policy_checkpoint = next(
-        (c for c in checkpoints_data if c.get("headType") == "policy"), None
-    )
-    outcome_checkpoint = next(
-        (c for c in checkpoints_data if c.get("headType") == "outcome"), None
-    )
+    policy_checkpoint = next((c for c in checkpoints_data if c.get("headType") == "policy"), None)
+    outcome_checkpoint = next((c for c in checkpoints_data if c.get("headType") == "outcome"), None)
 
     if not policy_checkpoint or not outcome_checkpoint:
         raise ValueError("Training run report missing checkpoint metadata")
@@ -334,4 +328,3 @@ def _copy_schemas(output_dir: Path) -> None:
             shutil.copy2(source, dest)
         else:
             raise FileNotFoundError(f"Required schema not found: {source}")
-

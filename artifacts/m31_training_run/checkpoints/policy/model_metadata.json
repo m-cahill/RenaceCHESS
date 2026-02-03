@@ -1,0 +1,20 @@
+{
+  "batch_size": 32,
+  "epochs": 10,
+  "frozen_eval_manifest_path": "data\\frozen_eval_v2\\manifest.json",
+  "learning_rate": 0.001,
+  "manifest_path": "artifacts\\m31_training_run\\training_dataset_v2\\manifest.json",
+  "model_type": "BaselinePolicyV1",
+  "move_vocab": [
+    "c2c4",
+    "c7c5",
+    "d2d4",
+    "d7d5",
+    "e2e4",
+    "e7e5",
+    "g1f3",
+    "g8f6"
+  ],
+  "move_vocab_size": 8,
+  "seed": 42
+}

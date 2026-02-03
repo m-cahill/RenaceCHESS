@@ -1,0 +1,101 @@
+## M33: EXTERNAL-PROOF-PACK-001 — External Proof Pack Builder and Verifier
+
+**Phase:** E (Scale Proof, Training Run, Release Lock)
+**Predecessor:** M32 (Post-Train Eval ✅)
+**Successor:** M34 (Release Lock)
+
+---
+
+### Single Objective
+
+Produce a self-contained, auditor-friendly proof bundle that demonstrates RenaceCHESS's end-to-end integrity, determinism, and scientific honesty — without requiring trust in the codebase.
+
+---
+
+### What This PR Delivers
+
+| Category | Artifact | Lines |
+|----------|----------|-------|
+| **Schemas** | `external_proof_pack.v1.schema.json` | 350 |
+| **Models** | 12 new Pydantic models in `contracts/models.py` | +600 |
+| **Builder** | `src/renacechess/proof_pack/build_proof_pack.py` | 330 |
+| **Verifier** | `src/renacechess/proof_pack/verify_proof_pack.py` | 170 |
+| **Tests** | `tests/test_m33_proof_pack.py` | 380 |
+| **CI** | `m33-proof-pack-validation` job | +120 |
+| **Template** | `README_TEMPLATE.md` | 170 |
+
+---
+
+### Locked Decisions Applied
+
+| Decision | Implementation |
+|----------|----------------|
+| **Root directory `proof_pack_v1/`** | Builder creates pack at specified root directory |
+| **README with both sections** | Executive Summary + Technical Verification Guide |
+| **Only required schemas** | Copies schemas needed to validate all included artifacts |
+| **Checkpoint metadata only** | Hashes + sizes + filenames, external storage flag |
+| **Full hash recomputation** | Verifier recomputes all hashes, no quick mode |
+| **CI validates 3 things** | Schema, existence, full hash verification |
+
+---
+
+### Key Features
+
+- **ExternalProofPackV1**: Top-level manifest indexing all artifacts
+- **Hash chain**: Proves artifact integrity and causal relationships
+- **Limitations section**: Explicit documentation of what is/isn't proven
+- **Checkpoint metadata**: SHA-256 hashes, file sizes, expected filenames (files external)
+- **Schema inclusion**: All schemas required to validate included artifacts
+- **README generation**: Auto-generated from template with executive + technical sections
+
+---
+
+### Test Results
+
+```
+12 passed in 0.37s
+- Build proof pack: 6 tests
+- Verify proof pack: 5 tests
+- Error handling: 1 test
+```
+
+---
+
+### CI Job Added
+
+**`m33-proof-pack-validation`**
+- Validates ExternalProofPackV1 schema exists and is valid JSON
+- Validates Pydantic models match schema
+- Runs M33 unit tests
+- Verifies builder/verifier importability
+- Does NOT load checkpoints or run evaluation
+
+---
+
+### Exit Criteria
+
+- [x] ExternalProofPackV1 schema defined
+- [x] Pydantic models created and tested
+- [x] Builder implemented (gathers M30-M32 artifacts)
+- [x] Verifier implemented (full hash recomputation)
+- [x] README template with both sections
+- [x] Schema copying implemented
+- [x] CI validation job added
+- [x] All tests passing (12/12)
+- [ ] CI green (awaiting run)
+
+---
+
+### What Comes Next (After Merge)
+
+**Execution Phase (Local):**
+1. Run `build_proof_pack()` with actual M30-M32 artifacts
+2. Generate `proof_pack_v1/` directory
+3. Verify pack integrity with `verify_proof_pack()`
+4. Commit proof pack directory (if desired for distribution)
+5. Package for external auditors
+
+---
+
+**Governance:** Per M33 plan, this is Phase 1 (Implementation). Actual proof pack generation is a separate execution step after this PR merges.
+
