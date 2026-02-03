@@ -34,8 +34,15 @@
 | 2026-02-03 | run_terminal_cmd | Commit and push fixes | git | ✅ Complete (661e2a9) |
 | 2026-02-03 | run_terminal_cmd | Monitor CI run 2 | gh CLI | ✅ Complete (2 failures remain) |
 | 2026-02-03 | write | Generate M34 CI run 1 report | docs/milestones/PhaseE/M34/M34_run1.md | ✅ Complete |
+| 2026-02-03 | run_terminal_cmd | Run ruff format on registry and test files | src/renacechess/contracts/registry.py, tests/test_m34_contract_registry.py | ✅ Complete |
+| 2026-02-03 | run_terminal_cmd | Normalize all 38 JSON schema files to LF | src/renacechess/contracts/schemas/v1/ | ✅ Complete |
+| 2026-02-03 | run_terminal_cmd | Regenerate contract registry | contracts/CONTRACT_REGISTRY_v1.json | ✅ Complete |
+| 2026-02-03 | run_terminal_cmd | Verify registry validation passes | Python validation | ✅ Complete |
+| 2026-02-03 | run_terminal_cmd | Commit and push final fixes | git | ✅ Complete (3f3f98f) |
+| 2026-02-03 | run_terminal_cmd | Monitor CI run 3 | gh CLI | ✅ Complete (ALL GREEN ✅) |
 
 ---
 
-**Last Updated:** 2026-02-03
+**Last Updated:** 2026-02-03  
+**Status:** ✅ CI Run 3 - ALL JOBS PASSED
 
