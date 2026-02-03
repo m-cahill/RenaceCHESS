@@ -1,0 +1,326 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://renacechess.dev/schemas/v1/post_train_eval_report.v1.schema.json",
+  "title": "PostTrainEvalReportV1",
+  "description": "Canonical post-training evaluation report (M32). Compares trained models against frozen eval v2 and produces reproducible metrics.",
+  "type": "object",
+  "required": [
+    "version",
+    "generatedAt",
+    "frozenEvalManifestHash",
+    "trainingRunReportHash",
+    "policyCheckpointHash",
+    "outcomeCheckpointHash",
+    "evalBaselineSeed",
+    "positionsEvaluated",
+    "trainedPolicyMetrics",
+    "trainedOutcomeMetrics",
+    "baselinePolicyMetrics",
+    "baselineOutcomeMetrics",
+    "policyDelta",
+    "outcomeDelta",
+    "determinismHash"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version identifier"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of evaluation"
+    },
+    "frozenEvalManifestHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of frozen eval v2 manifest used"
+    },
+    "trainingRunReportHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of M31 training run report"
+    },
+    "policyCheckpointHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of trained policy checkpoint file"
+    },
+    "outcomeCheckpointHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of trained outcome checkpoint file"
+    },
+    "codeCommitSha": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{40}$",
+      "description": "Git commit SHA of evaluation code"
+    },
+    "evalBaselineSeed": {
+      "type": "integer",
+      "description": "Fixed seed used for baseline model initialization (1337)"
+    },
+    "positionsEvaluated": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Total positions evaluated from frozen eval set"
+    },
+    "trainedPolicyMetrics": {
+      "$ref": "#/$defs/PolicyEvalMetricsV1",
+      "description": "Policy metrics for trained checkpoint"
+    },
+    "trainedOutcomeMetrics": {
+      "$ref": "#/$defs/OutcomeEvalMetricsV1",
+      "description": "Outcome metrics for trained checkpoint"
+    },
+    "baselinePolicyMetrics": {
+      "$ref": "#/$defs/PolicyEvalMetricsV1",
+      "description": "Policy metrics for fresh-init baseline"
+    },
+    "baselineOutcomeMetrics": {
+      "$ref": "#/$defs/OutcomeEvalMetricsV1",
+      "description": "Outcome metrics for fresh-init baseline"
+    },
+    "policyDelta": {
+      "$ref": "#/$defs/DeltaMetricsV1",
+      "description": "Delta between trained and baseline policy"
+    },
+    "outcomeDelta": {
+      "$ref": "#/$defs/DeltaMetricsV1",
+      "description": "Delta between trained and baseline outcome"
+    },
+    "bySkillBucket": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/SkillBucketEvalV1"
+      },
+      "description": "Per-skill bucket evaluation breakdown"
+    },
+    "frozenEvalIntegrity": {
+      "$ref": "#/$defs/FrozenEvalIntegrityV1",
+      "description": "Frozen eval integrity proof"
+    },
+    "auditNotes": {
+      "type": ["string", "null"],
+      "description": "Optional audit notes"
+    },
+    "determinismHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash for determinism verification"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "PolicyEvalMetricsV1": {
+      "type": "object",
+      "required": ["top1Accuracy", "top3Accuracy", "top5Accuracy", "nll", "entropy"],
+      "properties": {
+        "top1Accuracy": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Accuracy of top-1 predicted move matching chosen move"
+        },
+        "top3Accuracy": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Accuracy of chosen move being in top-3 predictions"
+        },
+        "top5Accuracy": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Accuracy of chosen move being in top-5 predictions"
+        },
+        "nll": {
+          "type": "number",
+          "minimum": 0.0,
+          "description": "Negative log-likelihood of chosen moves"
+        },
+        "entropy": {
+          "type": "number",
+          "minimum": 0.0,
+          "description": "Mean entropy of move distributions"
+        },
+        "samplesEvaluated": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of samples evaluated"
+        }
+      },
+      "additionalProperties": false
+    },
+    "OutcomeEvalMetricsV1": {
+      "type": "object",
+      "required": ["accuracy", "brierScore", "nll", "ece"],
+      "properties": {
+        "accuracy": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Accuracy of predicted outcome class (argmax)"
+        },
+        "brierScore": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Brier score for W/D/L probabilities (lower is better)"
+        },
+        "nll": {
+          "type": "number",
+          "minimum": 0.0,
+          "description": "Negative log-likelihood of true outcome"
+        },
+        "ece": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Expected Calibration Error (lower is better)"
+        },
+        "winAccuracy": {
+          "type": ["number", "null"],
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Accuracy on win-labeled positions"
+        },
+        "drawAccuracy": {
+          "type": ["number", "null"],
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Accuracy on draw-labeled positions"
+        },
+        "lossAccuracy": {
+          "type": ["number", "null"],
+          "minimum": 0.0,
+          "maximum": 1.0,
+          "description": "Accuracy on loss-labeled positions"
+        },
+        "samplesEvaluated": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of samples evaluated"
+        }
+      },
+      "additionalProperties": false
+    },
+    "DeltaMetricsV1": {
+      "type": "object",
+      "required": ["primaryMetric", "primaryMetricDelta", "direction"],
+      "properties": {
+        "primaryMetric": {
+          "type": "string",
+          "description": "Name of primary metric used for comparison"
+        },
+        "primaryMetricBaseline": {
+          "type": "number",
+          "description": "Baseline value of primary metric"
+        },
+        "primaryMetricTrained": {
+          "type": "number",
+          "description": "Trained value of primary metric"
+        },
+        "primaryMetricDelta": {
+          "type": "number",
+          "description": "Delta: trained - baseline"
+        },
+        "direction": {
+          "type": "string",
+          "enum": ["improved", "degraded", "unchanged"],
+          "description": "Direction of change (improved = training helped)"
+        },
+        "percentageChange": {
+          "type": ["number", "null"],
+          "description": "Percentage change from baseline (null if baseline is 0)"
+        },
+        "isSignificant": {
+          "type": "boolean",
+          "description": "Whether delta exceeds significance threshold (1%)"
+        }
+      },
+      "additionalProperties": false
+    },
+    "SkillBucketEvalV1": {
+      "type": "object",
+      "required": ["skillBucket", "samples"],
+      "properties": {
+        "skillBucket": {
+          "type": "string",
+          "enum": [
+            "lt_800",
+            "800_999",
+            "1000_1199",
+            "1200_1399",
+            "1400_1599",
+            "1600_1799",
+            "gte_1800",
+            "unknown"
+          ],
+          "description": "Skill bucket ID"
+        },
+        "samples": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of samples in this bucket"
+        },
+        "trainedPolicyMetrics": {
+          "$ref": "#/$defs/PolicyEvalMetricsV1",
+          "description": "Trained policy metrics for this bucket"
+        },
+        "trainedOutcomeMetrics": {
+          "$ref": "#/$defs/OutcomeEvalMetricsV1",
+          "description": "Trained outcome metrics for this bucket"
+        },
+        "baselinePolicyMetrics": {
+          "$ref": "#/$defs/PolicyEvalMetricsV1",
+          "description": "Baseline policy metrics for this bucket"
+        },
+        "baselineOutcomeMetrics": {
+          "$ref": "#/$defs/OutcomeEvalMetricsV1",
+          "description": "Baseline outcome metrics for this bucket"
+        }
+      },
+      "additionalProperties": false
+    },
+    "FrozenEvalIntegrityV1": {
+      "type": "object",
+      "required": ["manifestHash", "positionCount", "iterationDeterministic"],
+      "properties": {
+        "manifestHash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$",
+          "description": "SHA-256 hash of manifest file"
+        },
+        "positionCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Total positions in frozen eval set"
+        },
+        "shardCount": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of shards loaded"
+        },
+        "skillBucketCounts": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "description": "Position counts by skill bucket"
+        },
+        "noTrainingOverlap": {
+          "type": "boolean",
+          "description": "Verified no overlap with training set"
+        },
+        "iterationDeterministic": {
+          "type": "boolean",
+          "description": "Verified deterministic iteration order"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
+

@@ -4970,3 +4970,720 @@ class TrainingRunReportV1(BaseModel):
         pattern=r"^sha256:[a-f0-9]{64}$",
         description="SHA-256 hash of canonical report content for reproducibility",
     )
+
+
+# =============================================================================
+# M32 Post-Train Evaluation Models
+# =============================================================================
+
+
+class PolicyEvalMetricsInlineV1(BaseModel):
+    """Inline policy evaluation metrics (M32).
+
+    Embedded within PostTrainEvalReportV1 for compact representation.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    top1_accuracy: float = Field(
+        ...,
+        alias="top1Accuracy",
+        ge=0.0,
+        le=1.0,
+        description="Accuracy of top-1 predicted move matching chosen move",
+    )
+    top3_accuracy: float = Field(
+        ...,
+        alias="top3Accuracy",
+        ge=0.0,
+        le=1.0,
+        description="Accuracy of chosen move being in top-3 predictions",
+    )
+    top5_accuracy: float = Field(
+        ...,
+        alias="top5Accuracy",
+        ge=0.0,
+        le=1.0,
+        description="Accuracy of chosen move being in top-5 predictions",
+    )
+    nll: float = Field(
+        ...,
+        ge=0.0,
+        description="Negative log-likelihood of chosen moves",
+    )
+    entropy: float = Field(
+        ...,
+        ge=0.0,
+        description="Mean entropy of move distributions",
+    )
+    samples_evaluated: int | None = Field(
+        None,
+        alias="samplesEvaluated",
+        ge=0,
+        description="Number of samples evaluated",
+    )
+
+
+class OutcomeEvalMetricsInlineV1(BaseModel):
+    """Inline outcome evaluation metrics (M32).
+
+    Embedded within PostTrainEvalReportV1 for compact representation.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    accuracy: float = Field(
+        ...,
+        ge=0.0,
+        le=1.0,
+        description="Accuracy of predicted outcome class (argmax)",
+    )
+    brier_score: float = Field(
+        ...,
+        alias="brierScore",
+        ge=0.0,
+        le=1.0,
+        description="Brier score for W/D/L probabilities (lower is better)",
+    )
+    nll: float = Field(
+        ...,
+        ge=0.0,
+        description="Negative log-likelihood of true outcome",
+    )
+    ece: float = Field(
+        ...,
+        ge=0.0,
+        le=1.0,
+        description="Expected Calibration Error (lower is better)",
+    )
+    win_accuracy: float | None = Field(
+        None,
+        alias="winAccuracy",
+        ge=0.0,
+        le=1.0,
+        description="Accuracy on win-labeled positions",
+    )
+    draw_accuracy: float | None = Field(
+        None,
+        alias="drawAccuracy",
+        ge=0.0,
+        le=1.0,
+        description="Accuracy on draw-labeled positions",
+    )
+    loss_accuracy: float | None = Field(
+        None,
+        alias="lossAccuracy",
+        ge=0.0,
+        le=1.0,
+        description="Accuracy on loss-labeled positions",
+    )
+    samples_evaluated: int | None = Field(
+        None,
+        alias="samplesEvaluated",
+        ge=0,
+        description="Number of samples evaluated",
+    )
+
+
+class DeltaMetricsInlineV1(BaseModel):
+    """Inline delta metrics for trained vs baseline comparison (M32).
+
+    Embedded within PostTrainEvalReportV1 for compact representation.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    primary_metric: str = Field(
+        ...,
+        alias="primaryMetric",
+        description="Name of primary metric used for comparison",
+    )
+    primary_metric_baseline: float | None = Field(
+        None,
+        alias="primaryMetricBaseline",
+        description="Baseline value of primary metric",
+    )
+    primary_metric_trained: float | None = Field(
+        None,
+        alias="primaryMetricTrained",
+        description="Trained value of primary metric",
+    )
+    primary_metric_delta: float = Field(
+        ...,
+        alias="primaryMetricDelta",
+        description="Delta: trained - baseline",
+    )
+    direction: Literal["improved", "degraded", "unchanged"] = Field(
+        ...,
+        description="Direction of change (improved = training helped)",
+    )
+    percentage_change: float | None = Field(
+        None,
+        alias="percentageChange",
+        description="Percentage change from baseline (null if baseline is 0)",
+    )
+    is_significant: bool = Field(
+        ...,
+        alias="isSignificant",
+        description="Whether delta exceeds significance threshold (1%)",
+    )
+
+
+class FrozenEvalIntegrityV1(BaseModel):
+    """Frozen eval integrity proof (M32).
+
+    Documents that frozen eval was loaded correctly and has no training overlap.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    manifest_hash: str = Field(
+        ...,
+        alias="manifestHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of manifest file",
+    )
+    position_count: int = Field(
+        ...,
+        alias="positionCount",
+        ge=0,
+        description="Total positions in frozen eval set",
+    )
+    shard_count: int | None = Field(
+        None,
+        alias="shardCount",
+        ge=0,
+        description="Number of shards loaded",
+    )
+    skill_bucket_counts: dict[str, int] | None = Field(
+        None,
+        alias="skillBucketCounts",
+        description="Position counts by skill bucket",
+    )
+    no_training_overlap: bool | None = Field(
+        None,
+        alias="noTrainingOverlap",
+        description="Verified no overlap with training set",
+    )
+    iteration_deterministic: bool = Field(
+        ...,
+        alias="iterationDeterministic",
+        description="Verified deterministic iteration order",
+    )
+
+
+class SkillBucketEvalV1(BaseModel):
+    """Per-skill bucket evaluation breakdown (M32)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    skill_bucket: str = Field(
+        ...,
+        alias="skillBucket",
+        description="Skill bucket ID",
+    )
+    samples: int = Field(
+        ...,
+        ge=0,
+        description="Number of samples in this bucket",
+    )
+    trained_policy_metrics: PolicyEvalMetricsInlineV1 | None = Field(
+        None,
+        alias="trainedPolicyMetrics",
+        description="Trained policy metrics for this bucket",
+    )
+    trained_outcome_metrics: OutcomeEvalMetricsInlineV1 | None = Field(
+        None,
+        alias="trainedOutcomeMetrics",
+        description="Trained outcome metrics for this bucket",
+    )
+    baseline_policy_metrics: PolicyEvalMetricsInlineV1 | None = Field(
+        None,
+        alias="baselinePolicyMetrics",
+        description="Baseline policy metrics for this bucket",
+    )
+    baseline_outcome_metrics: OutcomeEvalMetricsInlineV1 | None = Field(
+        None,
+        alias="baselineOutcomeMetrics",
+        description="Baseline outcome metrics for this bucket",
+    )
+
+
+class PostTrainEvalReportV1(BaseModel):
+    """Canonical post-training evaluation report (M32).
+
+    Compares trained models against frozen eval v2 and produces reproducible
+    metrics. This is the primary artifact proving what training accomplished.
+
+    Key guarantees:
+    - Compares trained vs fresh-init baseline (same architecture, fixed seed)
+    - Uses frozen eval v2 as the evaluation ruler
+    - Produces deterministic, reproducible results
+    - Documents training effect with delta metrics
+
+    See docs/milestones/PhaseE/M32/M32_plan.md for the governing specification.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    version: Literal["1.0"] = Field(
+        "1.0",
+        description="Schema version",
+    )
+    generated_at: datetime = Field(
+        ...,
+        alias="generatedAt",
+        description="ISO 8601 timestamp of evaluation",
+    )
+    frozen_eval_manifest_hash: str = Field(
+        ...,
+        alias="frozenEvalManifestHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of frozen eval v2 manifest used",
+    )
+    training_run_report_hash: str = Field(
+        ...,
+        alias="trainingRunReportHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of M31 training run report",
+    )
+    policy_checkpoint_hash: str = Field(
+        ...,
+        alias="policyCheckpointHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of trained policy checkpoint file",
+    )
+    outcome_checkpoint_hash: str = Field(
+        ...,
+        alias="outcomeCheckpointHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of trained outcome checkpoint file",
+    )
+    code_commit_sha: str | None = Field(
+        None,
+        alias="codeCommitSha",
+        pattern=r"^[a-f0-9]{40}$",
+        description="Git commit SHA of evaluation code",
+    )
+    eval_baseline_seed: int = Field(
+        ...,
+        alias="evalBaselineSeed",
+        description="Fixed seed used for baseline model initialization (1337)",
+    )
+    positions_evaluated: int = Field(
+        ...,
+        alias="positionsEvaluated",
+        ge=0,
+        description="Total positions evaluated from frozen eval set",
+    )
+    trained_policy_metrics: PolicyEvalMetricsInlineV1 = Field(
+        ...,
+        alias="trainedPolicyMetrics",
+        description="Policy metrics for trained checkpoint",
+    )
+    trained_outcome_metrics: OutcomeEvalMetricsInlineV1 = Field(
+        ...,
+        alias="trainedOutcomeMetrics",
+        description="Outcome metrics for trained checkpoint",
+    )
+    baseline_policy_metrics: PolicyEvalMetricsInlineV1 = Field(
+        ...,
+        alias="baselinePolicyMetrics",
+        description="Policy metrics for fresh-init baseline",
+    )
+    baseline_outcome_metrics: OutcomeEvalMetricsInlineV1 = Field(
+        ...,
+        alias="baselineOutcomeMetrics",
+        description="Outcome metrics for fresh-init baseline",
+    )
+    policy_delta: DeltaMetricsInlineV1 = Field(
+        ...,
+        alias="policyDelta",
+        description="Delta between trained and baseline policy",
+    )
+    outcome_delta: DeltaMetricsInlineV1 = Field(
+        ...,
+        alias="outcomeDelta",
+        description="Delta between trained and baseline outcome",
+    )
+    by_skill_bucket: list[SkillBucketEvalV1] | None = Field(
+        None,
+        alias="bySkillBucket",
+        description="Per-skill bucket evaluation breakdown",
+    )
+    frozen_eval_integrity: FrozenEvalIntegrityV1 | None = Field(
+        None,
+        alias="frozenEvalIntegrity",
+        description="Frozen eval integrity proof",
+    )
+    audit_notes: str | None = Field(
+        None,
+        alias="auditNotes",
+        description="Optional audit notes",
+    )
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash for determinism verification",
+    )
+
+
+class SkillBucketPolicyMetricsV1(BaseModel):
+    """Per-skill bucket policy metrics (M32)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    skill_bucket: str = Field(
+        ...,
+        alias="skillBucket",
+        description="Skill bucket ID",
+    )
+    samples: int = Field(
+        ...,
+        ge=0,
+        description="Number of samples in this bucket",
+    )
+    top1_accuracy: float = Field(
+        ...,
+        alias="top1Accuracy",
+        ge=0.0,
+        le=1.0,
+    )
+    top3_accuracy: float | None = Field(
+        None,
+        alias="top3Accuracy",
+        ge=0.0,
+        le=1.0,
+    )
+    top5_accuracy: float | None = Field(
+        None,
+        alias="top5Accuracy",
+        ge=0.0,
+        le=1.0,
+    )
+    nll: float = Field(
+        ...,
+        ge=0.0,
+    )
+    entropy: float = Field(
+        ...,
+        ge=0.0,
+    )
+
+
+class PolicyEvalMetricsArtifactV1(BaseModel):
+    """Standalone policy evaluation metrics artifact (M32).
+
+    Used for detailed per-model policy evaluation.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    version: Literal["1.0"] = Field(
+        "1.0",
+        description="Schema version",
+    )
+    generated_at: datetime = Field(
+        ...,
+        alias="generatedAt",
+        description="ISO 8601 timestamp of evaluation",
+    )
+    source_manifest_hash: str = Field(
+        ...,
+        alias="sourceManifestHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of frozen eval manifest used",
+    )
+    model_id: str = Field(
+        ...,
+        alias="modelId",
+        description="Model identifier (e.g., 'trained', 'baseline-1337')",
+    )
+    checkpoint_hash: str | None = Field(
+        None,
+        alias="checkpointHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+        description="SHA-256 hash of checkpoint file (null for baseline)",
+    )
+    top1_accuracy: float = Field(
+        ...,
+        alias="top1Accuracy",
+        ge=0.0,
+        le=1.0,
+    )
+    top3_accuracy: float = Field(
+        ...,
+        alias="top3Accuracy",
+        ge=0.0,
+        le=1.0,
+    )
+    top5_accuracy: float = Field(
+        ...,
+        alias="top5Accuracy",
+        ge=0.0,
+        le=1.0,
+    )
+    nll: float = Field(
+        ...,
+        ge=0.0,
+    )
+    entropy: float = Field(
+        ...,
+        ge=0.0,
+    )
+    samples_evaluated: int = Field(
+        ...,
+        alias="samplesEvaluated",
+        ge=0,
+    )
+    by_skill_bucket: list[SkillBucketPolicyMetricsV1] | None = Field(
+        None,
+        alias="bySkillBucket",
+        description="Per-skill bucket breakdown",
+    )
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+    )
+
+
+class SkillBucketOutcomeMetricsV1(BaseModel):
+    """Per-skill bucket outcome metrics (M32)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    skill_bucket: str = Field(
+        ...,
+        alias="skillBucket",
+        description="Skill bucket ID",
+    )
+    samples: int = Field(
+        ...,
+        ge=0,
+    )
+    accuracy: float = Field(
+        ...,
+        ge=0.0,
+        le=1.0,
+    )
+    brier_score: float = Field(
+        ...,
+        alias="brierScore",
+        ge=0.0,
+        le=1.0,
+    )
+    nll: float = Field(
+        ...,
+        ge=0.0,
+    )
+    ece: float = Field(
+        ...,
+        ge=0.0,
+        le=1.0,
+    )
+
+
+class OutcomeEvalMetricsArtifactV1(BaseModel):
+    """Standalone outcome evaluation metrics artifact (M32).
+
+    Used for detailed per-model outcome evaluation.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    version: Literal["1.0"] = Field(
+        "1.0",
+        description="Schema version",
+    )
+    generated_at: datetime = Field(
+        ...,
+        alias="generatedAt",
+        description="ISO 8601 timestamp of evaluation",
+    )
+    source_manifest_hash: str = Field(
+        ...,
+        alias="sourceManifestHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+    )
+    model_id: str = Field(
+        ...,
+        alias="modelId",
+    )
+    checkpoint_hash: str | None = Field(
+        None,
+        alias="checkpointHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+    )
+    accuracy: float = Field(
+        ...,
+        ge=0.0,
+        le=1.0,
+    )
+    brier_score: float = Field(
+        ...,
+        alias="brierScore",
+        ge=0.0,
+        le=1.0,
+    )
+    nll: float = Field(
+        ...,
+        ge=0.0,
+    )
+    ece: float = Field(
+        ...,
+        ge=0.0,
+        le=1.0,
+    )
+    win_accuracy: float | None = Field(
+        None,
+        alias="winAccuracy",
+        ge=0.0,
+        le=1.0,
+    )
+    draw_accuracy: float | None = Field(
+        None,
+        alias="drawAccuracy",
+        ge=0.0,
+        le=1.0,
+    )
+    loss_accuracy: float | None = Field(
+        None,
+        alias="lossAccuracy",
+        ge=0.0,
+        le=1.0,
+    )
+    samples_evaluated: int = Field(
+        ...,
+        alias="samplesEvaluated",
+        ge=0,
+    )
+    by_skill_bucket: list[SkillBucketOutcomeMetricsV1] | None = Field(
+        None,
+        alias="bySkillBucket",
+    )
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+    )
+
+
+class HeadDeltaV1(BaseModel):
+    """Delta metrics for a single head (policy or outcome) (M32)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    primary_metric: str = Field(
+        ...,
+        alias="primaryMetric",
+        description="Name of primary metric (e.g., 'top1Accuracy', 'accuracy')",
+    )
+    primary_metric_baseline: float | None = Field(
+        None,
+        alias="primaryMetricBaseline",
+    )
+    primary_metric_trained: float | None = Field(
+        None,
+        alias="primaryMetricTrained",
+    )
+    primary_metric_delta: float = Field(
+        ...,
+        alias="primaryMetricDelta",
+    )
+    direction: Literal["improved", "degraded", "unchanged"] = Field(
+        ...,
+    )
+    percentage_change: float | None = Field(
+        None,
+        alias="percentageChange",
+    )
+    is_significant: bool = Field(
+        ...,
+        alias="isSignificant",
+    )
+    all_metric_deltas: dict[str, float] | None = Field(
+        None,
+        alias="allMetricDeltas",
+        description="All metric deltas (trained - baseline)",
+    )
+
+
+class SkillBucketDeltaV1(BaseModel):
+    """Per-skill bucket delta metrics (M32)."""
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    skill_bucket: str = Field(
+        ...,
+        alias="skillBucket",
+    )
+    samples: int = Field(
+        ...,
+        ge=0,
+    )
+    policy_delta: HeadDeltaV1 = Field(
+        ...,
+        alias="policyDelta",
+    )
+    outcome_delta: HeadDeltaV1 = Field(
+        ...,
+        alias="outcomeDelta",
+    )
+
+
+class DeltaMetricsArtifactV1(BaseModel):
+    """Standalone delta metrics artifact (M32).
+
+    Captures the effect of training by comparing trained vs baseline.
+    """
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    version: Literal["1.0"] = Field(
+        "1.0",
+        description="Schema version",
+    )
+    generated_at: datetime = Field(
+        ...,
+        alias="generatedAt",
+    )
+    source_manifest_hash: str | None = Field(
+        None,
+        alias="sourceManifestHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+    )
+    baseline_model_id: str = Field(
+        ...,
+        alias="baselineModelId",
+    )
+    trained_model_id: str = Field(
+        ...,
+        alias="trainedModelId",
+    )
+    eval_baseline_seed: int = Field(
+        ...,
+        alias="evalBaselineSeed",
+    )
+    policy_delta: HeadDeltaV1 = Field(
+        ...,
+        alias="policyDelta",
+    )
+    outcome_delta: HeadDeltaV1 = Field(
+        ...,
+        alias="outcomeDelta",
+    )
+    by_skill_bucket: list[SkillBucketDeltaV1] | None = Field(
+        None,
+        alias="bySkillBucket",
+    )
+    summary: str | None = Field(
+        None,
+        description="Human-readable summary of training effect",
+    )
+    determinism_hash: str = Field(
+        ...,
+        alias="determinismHash",
+        pattern=r"^sha256:[a-f0-9]{64}$",
+    )

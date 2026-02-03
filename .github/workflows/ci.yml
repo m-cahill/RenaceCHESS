@@ -978,3 +978,162 @@ jobs:
               print(f"   Positions: {total}")
               print(f"   Shards: {len(manifest.shard_refs)}")
           EOF
+
+  m32-eval-pack-validation:
+    name: M32 Eval Pack Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683  # v4.2.2
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065  # v5.6.0
+        with:
+          python-version: "3.12"
+          cache: "pip"
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Validate M32 schemas exist
+        run: |
+          echo "Validating M32 schema files exist..."
+          test -f src/renacechess/contracts/schemas/v1/post_train_eval_report.v1.schema.json
+          test -f src/renacechess/contracts/schemas/v1/policy_eval_metrics.v1.schema.json
+          test -f src/renacechess/contracts/schemas/v1/outcome_eval_metrics.v1.schema.json
+          test -f src/renacechess/contracts/schemas/v1/delta_metrics.v1.schema.json
+          echo "✅ All M32 schema files exist"
+      - name: Validate M32 schemas are valid JSON
+        run: |
+          python << 'EOF'
+          import json
+          from pathlib import Path
+          
+          schemas_dir = Path("src/renacechess/contracts/schemas/v1")
+          m32_schemas = [
+              "post_train_eval_report.v1.schema.json",
+              "policy_eval_metrics.v1.schema.json",
+              "outcome_eval_metrics.v1.schema.json",
+              "delta_metrics.v1.schema.json",
+          ]
+          
+          for schema_name in m32_schemas:
+              schema_path = schemas_dir / schema_name
+              schema = json.loads(schema_path.read_text())
+              assert "$schema" in schema, f"Missing $schema in {schema_name}"
+              assert "title" in schema, f"Missing title in {schema_name}"
+              print(f"✅ {schema_name}: {schema['title']}")
+          
+          print("✅ All M32 schemas are valid JSON")
+          EOF
+      - name: Validate Pydantic models match schemas
+        run: |
+          python << 'EOF'
+          from datetime import UTC, datetime
+          from renacechess.contracts.models import (
+              PostTrainEvalReportV1,
+              PolicyEvalMetricsInlineV1,
+              OutcomeEvalMetricsInlineV1,
+              DeltaMetricsInlineV1,
+              FrozenEvalIntegrityV1,
+              SkillBucketEvalV1,
+              PolicyEvalMetricsArtifactV1,
+              OutcomeEvalMetricsArtifactV1,
+              DeltaMetricsArtifactV1,
+              HeadDeltaV1,
+          )
+          
+          # Test PolicyEvalMetricsInlineV1
+          policy = PolicyEvalMetricsInlineV1(
+              top1_accuracy=0.25,
+              top3_accuracy=0.45,
+              top5_accuracy=0.55,
+              nll=2.5,
+              entropy=3.0,
+          )
+          json_dict = policy.model_dump(by_alias=True)
+          assert "top1Accuracy" in json_dict
+          print("✅ PolicyEvalMetricsInlineV1 validated")
+          
+          # Test OutcomeEvalMetricsInlineV1
+          outcome = OutcomeEvalMetricsInlineV1(
+              accuracy=0.4,
+              brier_score=0.4,
+              nll=1.0,
+              ece=0.05,
+          )
+          json_dict = outcome.model_dump(by_alias=True)
+          assert "brierScore" in json_dict
+          print("✅ OutcomeEvalMetricsInlineV1 validated")
+          
+          # Test DeltaMetricsInlineV1
+          delta = DeltaMetricsInlineV1(
+              primary_metric="top1Accuracy",
+              primary_metric_delta=0.15,
+              direction="improved",
+              is_significant=True,
+          )
+          json_dict = delta.model_dump(by_alias=True)
+          assert "primaryMetricDelta" in json_dict
+          print("✅ DeltaMetricsInlineV1 validated")
+          
+          # Test PostTrainEvalReportV1
+          now = datetime.now(UTC)
+          report = PostTrainEvalReportV1(
+              version="1.0",
+              generated_at=now,
+              frozen_eval_manifest_hash="sha256:" + "a" * 64,
+              training_run_report_hash="sha256:" + "b" * 64,
+              policy_checkpoint_hash="sha256:" + "c" * 64,
+              outcome_checkpoint_hash="sha256:" + "d" * 64,
+              eval_baseline_seed=1337,
+              positions_evaluated=10000,
+              trained_policy_metrics=policy,
+              trained_outcome_metrics=outcome,
+              baseline_policy_metrics=policy,
+              baseline_outcome_metrics=outcome,
+              policy_delta=delta,
+              outcome_delta=delta,
+              determinism_hash="sha256:" + "e" * 64,
+          )
+          json_dict = report.model_dump(by_alias=True)
+          assert "evalBaselineSeed" in json_dict
+          assert json_dict["evalBaselineSeed"] == 1337
+          print("✅ PostTrainEvalReportV1 validated")
+          
+          print("✅ All M32 Pydantic models validated")
+          EOF
+      - name: Run M32 unit tests
+        run: |
+          echo "Running M32 unit tests..."
+          pytest tests/test_m32_post_train_eval.py -v --tb=short --no-cov
+      - name: Verify delta computation logic
+        run: |
+          python << 'EOF'
+          from renacechess.contracts.models import (
+              PolicyEvalMetricsInlineV1,
+              OutcomeEvalMetricsInlineV1,
+          )
+          from renacechess.eval.post_train_eval import compute_delta, M32_EVAL_BASELINE_SEED
+          
+          # Verify baseline seed constant
+          assert M32_EVAL_BASELINE_SEED == 1337, "Baseline seed must be 1337"
+          print("✅ M32_EVAL_BASELINE_SEED = 1337")
+          
+          # Test improved delta
+          baseline = PolicyEvalMetricsInlineV1(
+              top1_accuracy=0.1, top3_accuracy=0.2, top5_accuracy=0.3, nll=4.0, entropy=4.0
+          )
+          trained = PolicyEvalMetricsInlineV1(
+              top1_accuracy=0.25, top3_accuracy=0.45, top5_accuracy=0.55, nll=2.5, entropy=3.0
+          )
+          delta = compute_delta(baseline, trained, "top1_accuracy", higher_is_better=True)
+          assert delta.direction == "improved"
+          assert abs(delta.primary_metric_delta - 0.15) < 0.001
+          print("✅ compute_delta: improved direction verified")
+          
+          # Test unchanged delta
+          delta = compute_delta(baseline, baseline, "top1_accuracy", higher_is_better=True)
+          assert delta.direction == "unchanged"
+          assert delta.primary_metric_delta == 0.0
+          print("✅ compute_delta: unchanged direction verified")
+          
+          print("✅ Delta computation logic validated")
+          EOF

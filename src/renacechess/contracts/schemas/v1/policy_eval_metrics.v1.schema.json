@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://renacechess.dev/schemas/v1/policy_eval_metrics.v1.schema.json",
+  "title": "PolicyEvalMetricsV1",
+  "description": "Policy head evaluation metrics artifact (M32). Measures move prediction quality.",
+  "type": "object",
+  "required": [
+    "version",
+    "generatedAt",
+    "sourceManifestHash",
+    "modelId",
+    "top1Accuracy",
+    "top3Accuracy",
+    "top5Accuracy",
+    "nll",
+    "entropy",
+    "samplesEvaluated",
+    "determinismHash"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "const": "1.0",
+      "description": "Schema version identifier"
+    },
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp of evaluation"
+    },
+    "sourceManifestHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of frozen eval manifest used"
+    },
+    "modelId": {
+      "type": "string",
+      "description": "Model identifier (e.g., 'trained', 'baseline-1337')"
+    },
+    "checkpointHash": {
+      "type": ["string", "null"],
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of checkpoint file (null for baseline)"
+    },
+    "top1Accuracy": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Accuracy of top-1 predicted move matching chosen move"
+    },
+    "top3Accuracy": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Accuracy of chosen move being in top-3 predictions"
+    },
+    "top5Accuracy": {
+      "type": "number",
+      "minimum": 0.0,
+      "maximum": 1.0,
+      "description": "Accuracy of chosen move being in top-5 predictions"
+    },
+    "nll": {
+      "type": "number",
+      "minimum": 0.0,
+      "description": "Negative log-likelihood of chosen moves"
+    },
+    "entropy": {
+      "type": "number",
+      "minimum": 0.0,
+      "description": "Mean entropy of move distributions"
+    },
+    "samplesEvaluated": {
+      "type": "integer",
+      "minimum": 0,
+      "description": "Number of samples evaluated"
+    },
+    "bySkillBucket": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/SkillBucketPolicyMetricsV1"
+      },
+      "description": "Per-skill bucket breakdown"
+    },
+    "determinismHash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash for determinism verification"
+    }
+  },
+  "additionalProperties": false,
+  "$defs": {
+    "SkillBucketPolicyMetricsV1": {
+      "type": "object",
+      "required": ["skillBucket", "samples", "top1Accuracy", "nll", "entropy"],
+      "properties": {
+        "skillBucket": {
+          "type": "string",
+          "enum": [
+            "lt_800",
+            "800_999",
+            "1000_1199",
+            "1200_1399",
+            "1400_1599",
+            "1600_1799",
+            "gte_1800",
+            "unknown"
+          ],
+          "description": "Skill bucket ID"
+        },
+        "samples": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Number of samples in this bucket"
+        },
+        "top1Accuracy": {
+          "type": "number",
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "top3Accuracy": {
+          "type": ["number", "null"],
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "top5Accuracy": {
+          "type": ["number", "null"],
+          "minimum": 0.0,
+          "maximum": 1.0
+        },
+        "nll": {
+          "type": "number",
+          "minimum": 0.0
+        },
+        "entropy": {
+          "type": "number",
+          "minimum": 0.0
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
+
