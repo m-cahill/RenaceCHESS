@@ -335,7 +335,9 @@ def test_baseline_policy_v1_forward_uniform_distribution_guaranteed() -> None:
     assert len(move_probs) == len(legal_moves)
     expected_prob = 1.0 / len(legal_moves)
     for move, prob in move_probs.items():
-        assert abs(prob - expected_prob) < 1e-6, f"Expected uniform {expected_prob}, got {prob} for {move}"
+        assert abs(prob - expected_prob) < 1e-6, (
+            f"Expected uniform {expected_prob}, got {prob} for {move}"
+        )
 
     # Probabilities must sum to 1.0
     total = sum(move_probs.values())
