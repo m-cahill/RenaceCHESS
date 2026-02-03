@@ -18,7 +18,6 @@ See docs/milestones/PhaseE/M31/M31_plan.md for the governing specification.
 from __future__ import annotations
 
 import hashlib
-import json
 import os
 import platform
 import random
@@ -136,17 +135,19 @@ def _format_duration(seconds: float) -> str:
 
 def _format_bytes(size_bytes: int) -> str:
     """Format bytes to human-readable string."""
+    size_float = float(size_bytes)
     for unit in ["B", "KB", "MB", "GB", "TB"]:
-        if size_bytes < 1024:
-            return f"{size_bytes:.1f} {unit}"
-        size_bytes /= 1024
-    return f"{size_bytes:.1f} PB"
+        if size_float < 1024:
+            return f"{size_float:.1f} {unit}"
+        size_float /= 1024
+    return f"{size_float:.1f} PB"
 
 
 def load_template_config(template_path: Path) -> dict[str, Any]:
     """Load and return YAML template config."""
     with template_path.open() as f:
-        return yaml.safe_load(f)
+        result: dict[str, Any] = yaml.safe_load(f)
+        return result
 
 
 def create_config_lock(
@@ -376,14 +377,9 @@ def run_training(
 
         policy_epochs_completed = config_lock.policy_config.epochs
 
-        # Read metadata for loss history
-        metadata_path = policy_output_dir / "model_metadata.json"
-        if metadata_path.exists():
-            with metadata_path.open() as f:
-                metadata = json.load(f)
-                # Note: Current training doesn't capture per-epoch loss
-                # This would be enhanced in a real implementation
-                policy_final_loss = 0.0  # Placeholder
+        # Note: Current training doesn't capture per-epoch loss in metadata
+        # This would be enhanced in a real implementation
+        policy_final_loss = 0.0  # Placeholder
 
         # Create checkpoint reference
         if policy_model_path.exists():
@@ -487,7 +483,7 @@ def run_training(
         loss_history=policy_loss_history if policy_loss_history else None,
         samples_processed=None,  # Would need to track in training
         training_time_seconds=policy_time,
-        status=policy_status,  # type: ignore[arg-type]
+        status=policy_status,
         error_message=policy_error,
     )
 
@@ -500,7 +496,7 @@ def run_training(
         loss_history=outcome_loss_history if outcome_loss_history else None,
         samples_processed=None,
         training_time_seconds=outcome_time,
-        status=outcome_status,  # type: ignore[arg-type]
+        status=outcome_status,
         error_message=outcome_error,
     )
 
@@ -513,13 +509,15 @@ def run_training(
         run_id=run_id,
         started_at=started_at,
         completed_at=completed_at,
-        status=overall_status,  # type: ignore[arg-type]
+        status=overall_status,
         config_lock_hash=config_lock_hash,
         config_lock_path=str(output_dir / "config_lock.json"),
         environment=environment,
         policy_run_summary=policy_summary,
         outcome_run_summary=outcome_summary,
-        checkpoints=checkpoints if checkpoints else [
+        checkpoints=checkpoints
+        if checkpoints
+        else [
             # Placeholder if no checkpoints (shouldn't happen in success case)
             CheckpointReferenceV1(
                 checkpoint_id=f"{run_id}-placeholder",
@@ -565,4 +563,3 @@ def run_training(
     report_path.write_bytes(report_json)
 
     return report
-

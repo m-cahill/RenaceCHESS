@@ -18,7 +18,6 @@ from __future__ import annotations
 import hashlib
 import json
 import random
-from collections import defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Literal
@@ -356,9 +355,6 @@ def generate_training_dataset_v2(
 
             shard_hash = _compute_sha256(shard_bytes)
 
-            # Determine splits in this shard
-            shard_splits = list(set(r["meta"]["split"] for r in current_shard_records))
-
             shard_refs.append(
                 DatasetManifestShardRefV2(
                     shard_id=shard_id,
@@ -382,7 +378,6 @@ def generate_training_dataset_v2(
         shard_path.write_bytes(shard_bytes)
 
         shard_hash = _compute_sha256(shard_bytes)
-        shard_splits = list(set(r["meta"]["split"] for r in current_shard_records))
 
         shard_refs.append(
             DatasetManifestShardRefV2(
@@ -469,4 +464,3 @@ def verify_training_dataset_v2(manifest_path: Path) -> bool:
             return False
 
     return True
-

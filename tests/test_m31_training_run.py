@@ -16,8 +16,6 @@ import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 
-import pytest
-
 from renacechess.contracts.models import (
     CheckpointPolicyV1,
     CheckpointReferenceV1,
@@ -40,8 +38,6 @@ from renacechess.dataset.training_dataset_v2 import (
     generate_training_dataset_v2,
     verify_training_dataset_v2,
 )
-from renacechess.determinism import canonical_json_dump
-
 
 # =============================================================================
 # TrainingConfigLockV1 Schema Tests
@@ -720,4 +716,3 @@ class TestM31Integration:
         from renacechess.models.m31_training_runner import M31_EPOCHS
 
         assert M31_EPOCHS == 10
-
