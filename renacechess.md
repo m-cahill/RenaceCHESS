@@ -40,6 +40,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M29 | ✅ Closed | `m28-recalibration-activation-decision` | 2026-02-02 | GPU-BENCHMARKING-001 — RTX 5090 Blackwell Validation + Benchmark Infrastructure |
 | M30 | ✅ Closed (MERGED) | `m30-frozen-eval-scaleset` → `main` | 2026-02-02 | FROZEN-EVAL-SCALESET-001 — 10k Synthetic Frozen Eval Set v2 |
 | M31 | ✅ Closed — Training Executed | `579cd2d` | 2026-02-03 | FULL-TRAINING-RUN-001 — Training completed (25m 26s, 10 epochs each, 2 checkpoints) |
+| M32 | ✅ Closed — Evaluation Executed | `89b9a4c` | 2026-02-03 | POST-TRAIN-EVAL-PACK-001 — Evaluated 10k positions, delta metrics computed |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -1015,10 +1016,35 @@ From M00 forward, RenaceCHESS guarantees:
   - `training_run_report.json` — Execution summary
   - Policy checkpoint (external) + hash
   - Outcome checkpoint (external) + hash
-- **Phase E Status:** Schemas and infrastructure ready; awaiting execution approval
+- **Phase E Status:** ✅ CLOSED — Training Executed
+
+**M32 Details:**
+- **Objective:** Evaluate M31 trained checkpoints against frozen eval v2, comparing to baselines
+- **Status:** ✅ Closed — Evaluation Executed
+- **PR:** #38 (merged)
+- **Execution Commit:** `89b9a4c`
+- **Key Files:**
+  - `src/renacechess/contracts/schemas/v1/post_train_eval_report.v1.schema.json` — PostTrainEvalReportV1 schema
+  - `src/renacechess/contracts/schemas/v1/policy_eval_metrics.v1.schema.json` — PolicyEvalMetricsV1 schema
+  - `src/renacechess/contracts/schemas/v1/outcome_eval_metrics.v1.schema.json` — OutcomeEvalMetricsV1 schema
+  - `src/renacechess/contracts/schemas/v1/delta_metrics.v1.schema.json` — DeltaMetricsV1 schema
+  - `src/renacechess/eval/post_train_eval.py` — Evaluation orchestrator
+  - `tests/test_m32_post_train_eval.py` — 59 comprehensive tests
+- **Artifacts Produced:**
+  - `artifacts/m32_post_train_eval/post_train_eval_report.json` — Full evaluation report
+- **Evaluation Results:**
+  - Positions evaluated: 10,000 (100% of frozen eval v2)
+  - Policy Top-1 Accuracy: 0.04% (trained) vs 0.51% (baseline) → degraded (expected)
+  - No training overlap confirmed
+  - Baseline seed: 1337 (fixed, recorded)
+- **Known Limitation:** M31 trained with 8-move vocab; degradation is expected and correctly explained
+- **Referenced Artifacts:**
+  - PostTrainEvalReportV1 — `artifacts/m32_post_train_eval/post_train_eval_report.json`
+  - TrainingRunReportV1 — `artifacts/m31_training_run/training_run_report.json`
+  - FrozenEvalManifestV2 — `data/frozen_eval_v2/manifest.json`
 
 ---
 
-**Last Updated:** 2026-02-02 (Phase E — M30 FROZEN-EVAL-SCALESET-001 Closed, M31 Scaffolded)
+**Last Updated:** 2026-02-03 (Phase E — M32 POST-TRAIN-EVAL-PACK-001 Closed)
 
 
