@@ -190,6 +190,44 @@ manifestHash
 | 2026-02-03 18:05 | gh pr checks | CI Run 2 (Test fail) | coverage regression | ✅ Complete |
 | 2026-02-03 18:10 | write test | Add mixed vocab coverage test | lines 274-278 | ✅ Complete |
 | 2026-02-03 18:15 | gh pr checks | CI Run 3 | 🟢 All 11 jobs pass | ✅ Complete |
+| 2026-02-03 18:20 | write | M31_run1.md | CI analysis doc | ✅ Complete |
+| 2026-02-03 18:25 | gh pr merge | Merge PR #37 | Squash merge | ✅ Complete |
+
+---
+
+## M31 Execution Attempt #2 — POST-FIX (SUCCESS ✅)
+
+| Date | Tool | Purpose | Files/Target | Status |
+|------|------|---------|--------------|--------|
+| 2026-02-03 18:26 | git checkout | Switch to main | c9c3e4e | ✅ Complete |
+| 2026-02-03 18:27 | verify_training_dataset_v2 | Verify dataset | PASS | ✅ Complete |
+| 2026-02-03 18:28 | python | Regenerate config lock | config_lock.json | ✅ Complete |
+| 2026-02-03 18:30 | run_training | M31 Training Run | 25m 26s | ✅ **SUCCESS** |
+
+### Training Results
+
+| Metric | Value |
+|--------|-------|
+| Status | **success** |
+| Run ID | m31-training-run-001 |
+| Total Time | 25m 26s |
+| Policy Epochs | 10/10 |
+| Outcome Epochs | 10/10 |
+| Checkpoints | 2 (policy, outcome) |
+
+### Checkpoints Produced
+
+| Head | File | Metadata |
+|------|------|----------|
+| Policy | `checkpoints/policy/model.pt` | `model_metadata.json` |
+| Outcome | `checkpoints/outcome/outcome_head_v1.pt` | `outcome_head_v1_metadata.json` |
+
+### Training Observations
+
+- Policy head loss: 0.0000 (converged early, synthetic data)
+- Outcome head loss: 1.1295 → 1.0833 (steady improvement over 10 epochs)
+- No errors or warnings
+- FrozenEval V2 correctly loaded via compatibility layer
 
 ---
 

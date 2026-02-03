@@ -1,1 +1,76 @@
-{"auditNotes":"M31 FULL-TRAINING-RUN-001: Locked configuration for first full training run. FP32 only, 10 epochs, no hyperparameter tuning.","checkpointPolicy":{"outputDir":"artifacts\\m31_training_run\\checkpoints","saveEveryNEpochs":null,"saveFinal":true,"saveMidpoint":true},"codeCommitSha":"2707b1b1e9c6d9850af660c0a9a65ddbb36dff2e","createdAt":"2026-02-03T01:37:28.265935Z","datasetManifestHash":"sha256:6f01109c544f655469538014b6070d3116c2d1d6867c9aad1a9bdb1430ae2b32","datasetManifestPath":"artifacts\\m31_training_run\\training_dataset_v2\\manifest.json","determinismHash":"sha256:5f503657ebd26fee83a1db458e033d93f1252a0d08ec0ea4c5297bf67cb927c5","environmentRequirements":{"deterministic":true,"device":"auto","mixedPrecision":false,"numWorkers":4,"pinMemory":true},"frozenEvalManifestHash":"sha256:73a0c4aa599b156303c5978a310326038be6494a2f5130c4d33e26d2eeefe595","frozenEvalManifestPath":"data\\frozen_eval_v2\\manifest.json","outcomeConfig":{"batchSize":32,"epochs":10,"learningRate":0.001,"lossFunction":"CrossEntropyLoss","modelType":"OutcomeHeadV1","moveVocabSize":null,"optimizer":{"betas":null,"momentum":null,"type":"AdamW","weightDecay":0.01},"scheduler":{"enabled":false,"gamma":0.5,"stepSize":5,"type":"StepLR"},"seed":42},"policyConfig":{"batchSize":32,"epochs":10,"learningRate":0.001,"lossFunction":"CrossEntropyLoss","modelType":"BaselinePolicyV1","moveVocabSize":1000,"optimizer":{"betas":null,"momentum":null,"type":"AdamW","weightDecay":0.01},"scheduler":{"enabled":false,"gamma":0.5,"stepSize":5,"type":"StepLR"},"seed":42},"sourceTemplates":[{"hash":"sha256:4340ccef97f06ec943464e68892bf54491099004d3e138e0440fcf2dfb964fe9","path":"training\\configs\\template_policy.yaml"},{"hash":"sha256:8c175565100659f27d4c2ff40176375e08d8bd01acd2d1f901af3c2ba3dba398","path":"training\\configs\\template_outcome.yaml"}],"version":"1.0"}
+{
+  "version": "1.0",
+  "createdAt": "2026-02-03T02:31:47.193558Z",
+  "codeCommitSha": "c9c3e4e8aac38dc13a9f3d4219172de8632c2b5d",
+  "datasetManifestHash": "sha256:e577b1dd8edf65130af7f336e16bb2542e63d9c25ee9d6cbf28c25758b0d94fe",
+  "datasetManifestPath": "artifacts\\m31_training_run\\training_dataset_v2\\manifest.json",
+  "frozenEvalManifestHash": "sha256:00a13e916d6b0a8770688e8623097f67b3224c4b32c64ce133785fda0a58e11f",
+  "frozenEvalManifestPath": "data\\frozen_eval_v2\\manifest.json",
+  "policyConfig": {
+    "modelType": "BaselinePolicyV1",
+    "epochs": 10,
+    "batchSize": 32,
+    "learningRate": 0.001,
+    "seed": 42,
+    "optimizer": {
+      "type": "Adam",
+      "weightDecay": 0.0,
+      "betas": null,
+      "momentum": null
+    },
+    "scheduler": {
+      "enabled": false,
+      "type": null,
+      "stepSize": null,
+      "gamma": null
+    },
+    "lossFunction": "CrossEntropyLoss",
+    "moveVocabSize": 4096
+  },
+  "outcomeConfig": {
+    "modelType": "OutcomeHeadV1",
+    "epochs": 10,
+    "batchSize": 32,
+    "learningRate": 0.001,
+    "seed": 42,
+    "optimizer": {
+      "type": "Adam",
+      "weightDecay": 0.0,
+      "betas": null,
+      "momentum": null
+    },
+    "scheduler": {
+      "enabled": false,
+      "type": null,
+      "stepSize": null,
+      "gamma": null
+    },
+    "lossFunction": "CrossEntropyLoss",
+    "moveVocabSize": null
+  },
+  "environmentRequirements": {
+    "device": "auto",
+    "mixedPrecision": false,
+    "deterministic": true,
+    "numWorkers": 4,
+    "pinMemory": true
+  },
+  "checkpointPolicy": {
+    "saveMidpoint": true,
+    "saveFinal": true,
+    "saveEveryNEpochs": null,
+    "outputDir": "training_output"
+  },
+  "sourceTemplates": [
+    {
+      "path": "training/configs/template_policy.yaml",
+      "hash": "sha256:4340ccef97f06ec943464e68892bf54491099004d3e138e0440fcf2dfb964fe9"
+    },
+    {
+      "path": "training/configs/template_outcome.yaml",
+      "hash": "sha256:8c175565100659f27d4c2ff40176375e08d8bd01acd2d1f901af3c2ba3dba398"
+    }
+  ],
+  "auditNotes": "M31 execution attempt #2 (post-compat-fix)",
+  "determinismHash": "sha256:4be36cfdc8226e5342fd7babac3ce4be11578711165f33c59ce02002fb88e229"
+}
