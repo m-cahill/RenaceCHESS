@@ -1068,18 +1068,14 @@ class TestComputeDeltaModule:
 class TestLoadFrozenEvalV2RecordsModule:
     """Tests for loading frozen eval v2 records from module."""
 
-    def test_load_frozen_eval_v2_records_file_not_found(
-        self, tmp_path: Path
-    ) -> None:
+    def test_load_frozen_eval_v2_records_file_not_found(self, tmp_path: Path) -> None:
         """Test error handling for missing manifest."""
         from renacechess.eval.post_train_eval import load_frozen_eval_v2_records
 
         with pytest.raises(FileNotFoundError):
             load_frozen_eval_v2_records(tmp_path / "nonexistent.json")
 
-    def test_load_frozen_eval_v2_records_from_manifest(
-        self, tmp_path: Path
-    ) -> None:
+    def test_load_frozen_eval_v2_records_from_manifest(self, tmp_path: Path) -> None:
         """Test loading records from manifest."""
         import json
 

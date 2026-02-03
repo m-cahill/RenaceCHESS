@@ -208,15 +208,11 @@ class OutcomeMetricsAccumulator:
         else:
             true_vec["l"] = 1.0
 
-        brier = sum(
-            (wdl_probs.get(k, 0.0) - true_vec[k]) ** 2 for k in ["w", "d", "l"]
-        )
+        brier = sum((wdl_probs.get(k, 0.0) - true_vec[k]) ** 2 for k in ["w", "d", "l"])
         self.brier_sum += brier
 
         # NLL
-        prob_true = wdl_probs.get(
-            {"win": "w", "draw": "d", "loss": "l"}[true_outcome], 1e-10
-        )
+        prob_true = wdl_probs.get({"win": "w", "draw": "d", "loss": "l"}[true_outcome], 1e-10)
         prob_true = max(1e-10, min(1.0, prob_true))
         self.nll_sum += -math.log(prob_true)
 
@@ -237,11 +233,7 @@ class OutcomeMetricsAccumulator:
 
         for i in range(n_bins):
             low, high = bin_edges[i], bin_edges[i + 1]
-            bin_items = [
-                j
-                for j, conf in enumerate(self.confidences)
-                if low <= conf < high
-            ]
+            bin_items = [j for j, conf in enumerate(self.confidences) if low <= conf < high]
             if not bin_items:
                 continue
 
@@ -602,4 +594,3 @@ def run_post_train_evaluation(
     report_path.write_bytes(report_json)
 
     return report
-
