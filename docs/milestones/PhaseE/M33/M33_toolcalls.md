@@ -2,7 +2,7 @@
 
 **Milestone:** M33 — EXTERNAL-PROOF-PACK-001  
 **Phase:** E (Scale Proof, Training Run, Release Lock)  
-**Status:** ✅ Implementation Complete — PR #39 Created
+**Status:** ✅ **CI Green** — All 13 jobs passing, ready for merge
 
 ---
 
@@ -35,8 +35,14 @@
 | 2026-02-03 | run_terminal_cmd | Commit and push fixes | git | ✅ Complete |
 | 2026-02-03 | run_terminal_cmd | Check CI status for Run 2 | gh CLI | ✅ Complete |
 | 2026-02-03 | write | Generate M33_run2.md CI analysis | docs/milestones/PhaseE/M33/M33_run2.md | ✅ Complete |
+| 2026-02-03 | run_terminal_cmd | Apply all three CI fixes (formatting, type, test data) | ruff, build_proof_pack.py, ci.yml | ✅ Complete |
+| 2026-02-03 | run_terminal_cmd | Validate fixes locally (ruff, pytest) | ruff, pytest | ✅ Complete (all passing) |
+| 2026-02-03 | run_terminal_cmd | Commit and push fixes | git | ✅ Complete |
+| 2026-02-03 | run_terminal_cmd | Monitor CI Run 3 | gh CLI | ✅ Complete (all 13 jobs passing) |
+| 2026-02-03 | write | Generate M33_run3.md CI analysis | docs/milestones/PhaseE/M33/M33_run3.md | ✅ Complete |
 
 ---
 
-**Last Updated:** 2026-02-03
+**Last Updated:** 2026-02-03  
+**Status:** ✅ **CI Green** — All 13 jobs passing, ready for merge
 
