@@ -2,9 +2,10 @@
 
 **Milestone:** M32 — POST-TRAIN-EVAL-PACK-001  
 **Phase:** E (Scale Proof, Training Run, Release Lock)  
-**Status:** 🔄 EXECUTION PHASE — Running Evaluation  
+**Status:** ✅ EXECUTION COMPLETE — Awaiting Closeout Permission  
 **PR:** #38 ✅ MERGED  
 **Merge Commit:** 698d242  
+**Execution Commit:** 89b9a4c  
 **CI Run 1:** 21615933043 (failed: lint error + coverage)  
 **CI Run 2:** 21616239642 (failed: format check)  
 **CI Run 3:** 21616461957 (failed: coverage 89.53%)  
@@ -37,6 +38,11 @@
 | 2026-02-03 23:10 | git push | Push coverage fix | m32-post-train-eval-pack branch | ✅ Complete |
 | 2026-02-03 23:20 | gh run view | Verify CI Run 4 success | Run 21616680739 | ✅ Complete |
 | 2026-02-03 23:25 | write | Create M32_run1.md analysis | docs/milestones/PhaseE/M32/M32_run1.md | ✅ Complete |
+| 2026-02-03 23:30 | gh pr merge | Merge PR #38 (squash) | main branch | ✅ Complete |
+| 2026-02-03 23:35 | search_replace | Fix model vocab size loading | src/renacechess/eval/post_train_eval.py | ✅ Complete |
+| 2026-02-03 23:40 | search_replace | Fix frozen eval record parsing | src/renacechess/eval/post_train_eval.py | ✅ Complete |
+| 2026-02-03 23:45 | python | Run post-training evaluation | 10000 positions evaluated | ✅ Complete |
+| 2026-02-03 23:50 | git push | Commit evaluation artifact | artifacts/m32_post_train_eval | ✅ Complete |
 
 ---
 
