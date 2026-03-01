@@ -43,6 +43,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M32 | ✅ Closed — Evaluation Executed | `89b9a4c` | 2026-02-03 | POST-TRAIN-EVAL-PACK-001 — Evaluated 10k positions, delta metrics computed |
 | M33 | ✅ Closed (MERGED) | `m33-external-proof-pack` → `main` | 2026-02-03 | EXTERNAL-PROOF-PACK-001 — Self-contained proof bundle with M30-M32 artifacts |
 | M34 | ✅ Closed (MERGED) | `m34-release-lock` → `main` | 2026-02-03 | RELEASE-LOCK-001 — Contract registry, CI release gates, Phase E closeout |
+| LiveM01 | ✅ Closed (TAGGED v0.2.0) | `main` | 2026-02-28 | Deterministic Skill Conditioning — Temperature scaling for BaselinePolicyV1 |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -1100,8 +1101,34 @@ From M00 forward, RenaceCHESS guarantees:
   - Future changes require v2+ versioning
 - **Phase E Status:** ✅ **CLOSED**
 
+**LiveM01 Details:**
+- **Objective:** Add deterministic temperature scaling to BaselinePolicyV1 for skill-conditioned move distributions
+- **Status:** ✅ Closed (TAGGED v0.2.0)
+- **Tag:** `v0.2.0`
+- **Tag Commit:** `3b959d97d0bb786934a4056d80ff0f88f3a68d2b`
+- **Wheel SHA256:** `DB1C0B2B0AE8F696750055D3889157E7186D609887F3AC79EA9B30482FB3C3DD`
+- **Version Bump:** 0.1.0 → 0.2.0
+- **Key Files:**
+  - `src/renacechess/models/baseline_v1.py` — Temperature scaling implementation (dual-key: named + Elo)
+  - `tests/test_livem01_skill_conditioning.py` — 19 new tests (differentiation, entropy ordering, determinism)
+  - `docs/milestones/Live/LiveM01/LiveM01_summary.md` — Milestone summary
+  - `docs/milestones/Live/LiveM01/LiveM01_audit.md` — Milestone audit
+- **Temperature Map (Named Keys):**
+  - beginner → 1.6, intermediate → 1.2, advanced → 0.9, expert → 0.75, master → 0.6
+- **Temperature Map (Elo Keys):**
+  - lt_800, 800_999 → 1.6 | 1000_1199, 1200_1399 → 1.2 | 1400_1599, 1600_1799 → 0.9 | 1800_1999 → 0.75 | gte_2000 → 0.6
+- **Entropy Monotonicity:** Confirmed (beginner > intermediate > advanced > expert > master)
+- **Determinism:** Confirmed (same fen + skill → identical output across runs and instances)
+- **Test Results:** 1028 passed, 1 skipped (full CI suite); 19 new + 16 prior model tests all passing
+- **CI Run:** 22533660254
+- **What Did Not Change:**
+  - No schema changes, no contract changes, no `_encode_skill_bucket()` refactor
+  - All M08 tests pass unchanged
+  - Temperature scaling is additive, not a breaking change
+- **Context:** Driven by RenaceCHESS-Live M09 (Skill Conditioning Exposure); this is the research-side prerequisite
+
 ---
 
-**Last Updated:** 2026-02-03 (Phase E — M34 RELEASE-LOCK-001 Closed)
+**Last Updated:** 2026-02-28 (LiveM01 — Deterministic Skill Conditioning Closed)
 
 
