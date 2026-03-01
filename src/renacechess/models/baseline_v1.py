@@ -2,6 +2,8 @@
 
 This module implements a minimal, interpretable baseline model that learns
 to predict human move distributions from position features and conditioning.
+
+LiveM01: Deterministic temperature scaling for skill-conditioned inference.
 """
 
 import hashlib
@@ -9,6 +11,52 @@ import hashlib
 import torch
 import torch.nn as nn
 from torch.nn import functional
+
+# ─── Skill conditioning: deterministic temperature scaling (LiveM01) ──────────
+# Higher temperature → flatter distribution (lower skill, more "random" play)
+# Lower temperature  → sharper distribution (higher skill, more "focused" play)
+
+_SKILL_TEMPERATURE_NAMED: dict[str, float] = {
+    "beginner": 1.6,
+    "intermediate": 1.2,
+    "advanced": 0.9,
+    "expert": 0.75,
+    "master": 0.6,
+}
+
+_SKILL_TEMPERATURE_ELO: dict[str, float] = {
+    "lt_800": 1.6,  # → beginner
+    "800_999": 1.6,  # → beginner
+    "1000_1199": 1.2,  # → intermediate
+    "1200_1399": 1.2,  # → intermediate
+    "1400_1599": 0.9,  # → advanced
+    "1600_1799": 0.9,  # → advanced
+    "1800_1999": 0.75,  # → expert
+    "gte_1800": 0.75,  # → expert (legacy key)
+    "gte_2000": 0.6,  # → master
+}
+
+_DEFAULT_TEMPERATURE = 1.6  # Unknown → beginner (safest default)
+
+
+def temperature_for_skill(skill_id: str) -> float:
+    """Return deterministic temperature for a skill identifier.
+
+    Supports both named keys (beginner, intermediate, ...) and
+    Elo-range keys (lt_800, 1200_1399, ...).
+
+    Args:
+        skill_id: Skill bucket identifier (named or Elo-range).
+
+    Returns:
+        Temperature scalar (> 0).
+    """
+    key = skill_id.lower().strip()
+    if key in _SKILL_TEMPERATURE_NAMED:
+        return _SKILL_TEMPERATURE_NAMED[key]
+    if key in _SKILL_TEMPERATURE_ELO:
+        return _SKILL_TEMPERATURE_ELO[key]
+    return _DEFAULT_TEMPERATURE
 
 
 class BaselinePolicyV1(nn.Module):
@@ -260,8 +308,12 @@ class BaselinePolicyV1(nn.Module):
         move_probs: dict[str, float] = {}
 
         if len(legal_logits) > 0:
-            # Softmax over legal moves
-            probs = functional.softmax(legal_logits, dim=0)
+            # Temperature scaling on masked logits (LiveM01)
+            temp = max(temperature_for_skill(skill_bucket), 1e-8)
+            scaled_logits = legal_logits / temp
+
+            # Softmax over temperature-scaled legal-move logits
+            probs = functional.softmax(scaled_logits, dim=0)
 
             for i, move in enumerate(legal_moves_filtered):
                 # Clamp to [0, 1] to prevent tiny negative values from floating point precision
