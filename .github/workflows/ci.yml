@@ -243,7 +243,10 @@ jobs:
         if: steps.coverage_check.outputs.mode == 'absolute'
         shell: bash
         run: |
-          python -m pytest --cov-fail-under=${{ steps.coverage_check.outputs.threshold }}
+          # Mirror PR-mode cleanup: stray parallel .coverage files make pytest-cov's combine fail
+          # (statement vs branch) under pytest>=9/coverage stacks on push-to-main paths.
+          rm -f .coverage .coverage.*
+          python -m pytest --cov=src/renacechess --cov-branch --cov-fail-under=${{ steps.coverage_check.outputs.threshold }}
       - name: Run tests with absolute threshold (PR mode)
         if: steps.coverage_check.outputs.mode == 'both'
         shell: bash
