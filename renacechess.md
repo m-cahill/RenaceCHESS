@@ -44,6 +44,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M33 | ✅ Closed (MERGED) | `m33-external-proof-pack` → `main` | 2026-02-03 | EXTERNAL-PROOF-PACK-001 — Self-contained proof bundle with M30-M32 artifacts |
 | M34 | ✅ Closed (MERGED) | `m34-release-lock` → `main` | 2026-02-03 | RELEASE-LOCK-001 — Contract registry, CI release gates, Phase E closeout |
 | LiveM01 | ✅ Closed (TAGGED v0.2.0) | `main` | 2026-02-28 | Deterministic Skill Conditioning — Temperature scaling for BaselinePolicyV1 |
+| M35 | 🔶 Implemented (pending merge / CI green) | `m35-public-release-boundary-guardrails` → `main` | 2026-05-06 | PUBLIC-RELEASE-BOUNDARY — `.gitignore` + index untrack + CI script for `docs/prompts/`, `docs/foundationdocs/`, `.cursorrules` |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -766,6 +767,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | C | Elo-Appropriate Coaching & Explanation | 🔒 **CLOSED** | M19–M22 | `docs/phases/PhaseC_closeout.md` |
 | D | Data Expansion, Calibration & Quality | 🔒 **CLOSED** | M23–M28 | `docs/phases/PhaseD_closeout.md` |
 | E | Scale Proof, Training Run, Release Lock | 🔒 **CLOSED** | M29–M34 | `docs/phases/PhaseE_closeout.md` |
+| F | Public Release Hardening | 🚧 **OPEN** | M35– | _(no phase closeout yet)_ |
 
 ---
 
@@ -1127,8 +1129,21 @@ From M00 forward, RenaceCHESS guarantees:
   - Temperature scaling is additive, not a breaking change
 - **Context:** Driven by RenaceCHESS-Live M09 (Skill Conditioning Exposure); this is the research-side prerequisite
 
+**M35 Details:**
+- **Objective:** Prevent accidental publication of private workflow surfaces (`docs/prompts/`, `docs/foundationdocs/`, `.cursorrules`) via `.gitignore`, Git index cleanup, scripted check, CI gate, and public documentation — without deleting local copies or changing contracts / models / proof pack.
+- **Phase:** Phase F — Public Release Hardening (Phase E remains closed; M35 does not reopen it).
+- **Key Files:**
+  - `.gitignore` — Private path entries
+  - `scripts/check_public_release_boundary.py` — `git ls-files` guard
+  - `.github/workflows/ci.yml` — Boundary step in **Lint and Format** job
+  - `docs/release/PUBLIC_REPO_BOUNDARY.md` — Boundary + reviewer checklist
+  - `tests/test_m35_public_release_boundary.py` — Regression test
+  - `docs/milestones/PhaseF/M35/` — Plan, summary, audit, toolcalls stub
+- **Credential scanning:** `gitleaks` not added in M35; defer to M36 if desired. Existing **pip-audit** + **bandit** CI unchanged.
+- **Audit / Summary:** `docs/milestones/PhaseF/M35/M35_audit.md`, `M35_summary.md`
+
 ---
 
-**Last Updated:** 2026-02-28 (LiveM01 — Deterministic Skill Conditioning Closed)
+**Last Updated:** 2026-05-06 (M35 — Public Release Boundary Guardrails; Phase F opened)
 
 

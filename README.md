@@ -139,6 +139,7 @@ renacechess/
 
 ## Documentation
 
+- [Public repository boundary](docs/release/PUBLIC_REPO_BOUNDARY.md) - Which paths are private vs public-eligible (M35)
 - [Project Vision](VISION.md) - Complete project vision and north star
 - [Release Notes v1.0.0](RELEASE_NOTES_v1.md) - v1.0.0 release details and limitations
 - [Project Anchor](docs/ANCHOR.md) - Project vision and north star
