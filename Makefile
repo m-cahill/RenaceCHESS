@@ -1,4 +1,4 @@
-.PHONY: help install install-dev lint format-check type test test-fast docs-check boundary-check verify demo clean clean-coverage
+.PHONY: help install install-dev lint format-check type test test-fast docs-check boundary-check secret-scan secret-scan-no-git verify demo clean clean-coverage
 
 help:
 	@echo "RenaceCHESS developer shortcuts"
@@ -13,6 +13,8 @@ help:
 	@echo "  test-fast       Run public docs/boundary guardrail tests without coverage"
 	@echo "  docs-check      Run docs navigation test"
 	@echo "  boundary-check  Verify private paths are not tracked"
+	@echo "  secret-scan     Run gitleaks detect if gitleaks is installed"
+	@echo "  secret-scan-no-git  Run gitleaks dir (current tree, no git integration)"
 	@echo "  verify          Run common pre-PR verification"
 	@echo "  demo            Run sample demo command if sample data exists"
 	@echo "  clean           Remove build artifacts and common caches"
@@ -36,7 +38,7 @@ test:
 	pytest
 
 test-fast:
-	pytest tests/test_m36_docs_navigation.py tests/test_m35_public_release_boundary.py --no-cov
+	pytest tests/test_m38_credential_scanner_config.py tests/test_m37_dx_shortcuts.py tests/test_m36_docs_navigation.py tests/test_m35_public_release_boundary.py --no-cov
 
 docs-check:
 	pytest tests/test_m36_docs_navigation.py --no-cov
@@ -44,6 +46,20 @@ docs-check:
 boundary-check:
 	python scripts/check_public_release_boundary.py
 	git ls-files docs/prompts docs/foundationdocs .cursorrules
+
+secret-scan:
+	@if command -v gitleaks >/dev/null 2>&1; then \
+		gitleaks detect --source . --redact --config .gitleaks.toml; \
+	else \
+		echo "gitleaks is not installed. Install it or rely on CI credential scanning."; \
+	fi
+
+secret-scan-no-git:
+	@if command -v gitleaks >/dev/null 2>&1; then \
+		gitleaks dir . --redact --config .gitleaks.toml; \
+	else \
+		echo "gitleaks is not installed. Install it or rely on CI credential scanning."; \
+	fi
 
 verify: boundary-check lint format-check type test-fast
 

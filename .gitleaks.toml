@@ -1,0 +1,18 @@
+title = "RenaceCHESS gitleaks configuration"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Public examples and documentation allowlist"
+
+paths = [
+  '''^docs/release/PUBLIC_REPO_BOUNDARY\.md$''',
+  '''^docs/milestones/PhaseG/M38/''',
+]
+
+regexes = [
+  '''example[_-]?key''',
+  '''dummy[_-]?token''',
+  '''fake[_-]?secret''',
+]

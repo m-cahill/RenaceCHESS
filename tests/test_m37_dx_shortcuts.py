@@ -21,6 +21,8 @@ def test_makefile_exists_with_public_targets() -> None:
         "test-fast:",
         "docs-check:",
         "boundary-check:",
+        "secret-scan:",
+        "secret-scan-no-git:",
         "verify:",
         "clean-coverage:",
     ]:

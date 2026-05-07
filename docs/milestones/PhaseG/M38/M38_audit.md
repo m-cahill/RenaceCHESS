@@ -1,0 +1,45 @@
+# M38 — Audit
+
+**Milestone:** M38 — Credential Scanner Hardening  
+**Branch:** `m38-credential-scanner-hardening`
+
+## Checklist
+
+- [x] `.gitleaks.toml` exists and extends defaults with a narrow allowlist.
+- [x] **Security Scan** job includes a **blocking** credential step (**current tree** via `gitleaks dir`, pinned CLI **8.24.3**).
+- [x] Full-history scan is **manual / reporting only** (`credential-scan-full-history.yml` + docs); **not** a required PR gate.
+- [x] `docs/security/CREDENTIAL_SCANNING.md` covers purpose, scope, private boundary, local commands, incident response, false positives, and limitation note (history / **history rewrite**).
+- [x] `Makefile` includes `secret-scan` and `secret-scan-no-git`; `secret-scan` **not** in `verify`.
+- [x] `CONTRIBUTING.md` PR checklist mentions credential / **gitleaks** expectations.
+- [x] `tests/test_m38_credential_scanner_config.py` passes; `test-fast` includes M35–M38 structural guardrails.
+- [x] `renacechess.md` lists M38 (**active**) and Phase G still **active**.
+- [x] No changes under `docs/prompts/`, `docs/foundationdocs/`, `.cursorrules` (untracked private paths).
+- [x] No edits to `contracts/CONTRACT_REGISTRY_v1.json`, `proof_pack_v1/`, `src/renacechess/contracts/schemas/`, `src/renacechess/models/`.
+- [ ] PR opened, CI green, merge by maintainer (post-implementation).
+
+## Resolved references
+
+| Reference | Value |
+|-----------|--------|
+| `gitleaks/gitleaks-action` `v2` (dereferenced) | `ff98106e4c7b2bc287b24eaf42907196329070c7` |
+| `gitleaks/gitleaks-action` `v2` (annotated tag object) | `dcedce43c6f43de0b836d1fe38946645c9c638dc` |
+| Blocking CI CLI | **gitleaks** **8.24.3** (matches gitleaks-action default in `v2` sources) |
+
+## Known limitation (explicit)
+
+- **gitleaks-action** was **not** invoked as `uses:` because its `detect` + `--log-opts` path targets **git commit ranges**, not the **filesystem-only current tree** required for the blocking gate. The resolved action SHA is still **recorded** in CI comments and milestone docs for audit.
+
+## Verification commands (local)
+
+```bash
+python scripts/check_public_release_boundary.py
+git ls-files docs/prompts docs/foundationdocs .cursorrules
+pytest tests/test_m38_credential_scanner_config.py tests/test_m37_dx_shortcuts.py tests/test_m36_docs_navigation.py tests/test_m35_public_release_boundary.py --no-cov
+```
+
+Optional (if `gitleaks` installed):
+
+```bash
+gitleaks dir . --redact --config .gitleaks.toml
+make secret-scan-no-git
+```

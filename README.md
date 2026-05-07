@@ -10,6 +10,7 @@ RenaceCHESS is a human-centered chess intelligence system that predicts what mov
 - Contributing? Read [`CONTRIBUTING.md`](CONTRIBUTING.md).
 - Looking for the documentation map? Read [`docs/DOCS_INDEX.md`](docs/DOCS_INDEX.md).
 - Reviewing public-release boundaries? Read [`docs/release/PUBLIC_REPO_BOUNDARY.md`](docs/release/PUBLIC_REPO_BOUNDARY.md).
+- Credential / **secret** scanning scope and local options? Read [`docs/security/CREDENTIAL_SCANNING.md`](docs/security/CREDENTIAL_SCANNING.md).
 
 ## Common Developer Shortcuts
 
