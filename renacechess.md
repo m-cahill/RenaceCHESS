@@ -45,6 +45,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M34 | ✅ Closed (MERGED) | `m34-release-lock` → `main` | 2026-02-03 | RELEASE-LOCK-001 — Contract registry, CI release gates, Phase E closeout |
 | LiveM01 | ✅ Closed (TAGGED v0.2.0) | `main` | 2026-02-28 | Deterministic Skill Conditioning — Temperature scaling for BaselinePolicyV1 |
 | M35 | ✅ Closed (MERGED) | `m35-public-release-boundary-guardrails` → `main` | 2026-05-06 | Public Release Boundary Guardrails |
+| M36 | 🚧 Active | `m36-public-release-docs-onboarding` → `main` | — | Public Release Documentation Onboarding |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -768,6 +769,16 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | D | Data Expansion, Calibration & Quality | 🔒 **CLOSED** | M23–M28 | `docs/phases/PhaseD_closeout.md` |
 | E | Scale Proof, Training Run, Release Lock | 🔒 **CLOSED** | M29–M34 | `docs/phases/PhaseE_closeout.md` |
 | F | Public Release Hardening | 🔒 **CLOSED** | M35 | Public release boundary enforced |
+| G | Public Release Readiness | **ACTIVE** | M36–M39 | Documentation, DX, credential scanning, Torch CVE review |
+
+### Public Release Readiness Roadmap (Phase G)
+
+| Milestone | Title | Scope |
+|-----------|--------|--------|
+| M36 | Public Release Documentation Onboarding | Start Here docs, contributor guide, docs index |
+| M37 | Public Release DX Shortcuts | Makefile, setup helper, common command shortcuts |
+| M38 | Credential Scanner Hardening | gitleaks or equivalent scanner in CI |
+| M39 | Torch CVE Upgrade / Deferral Review | Attempt torch upgrade or formalize reviewed deferral |
 
 ---
 
@@ -1144,8 +1155,26 @@ From M00 forward, RenaceCHESS guarantees:
 - **Credential scanning:** `gitleaks` not added in M35; optional future milestone. Existing **pip-audit** + **bandit** CI unchanged.
 - **Audit / Summary:** `docs/milestones/PhaseF/M35/M35_audit.md`, `M35_summary.md`
 
+**M36 Details:**
+- **Objective:** Create a single public onboarding path for contributors, auditors, and reviewers
+- **Audit driver:** Full codebase audit in `docs/milestones/PhaseG/M36/M36_fullaudit.md` — Docs **3.5/5**; documentation fragmentation; no root `CONTRIBUTING.md` / consolidated Start Here path
+- **Branch:** `m36-public-release-docs-onboarding`
+- **Key files:**
+  - `CONTRIBUTING.md`
+  - `docs/GETTING_STARTED.md`
+  - `docs/DOCS_INDEX.md`
+  - `tests/test_m36_docs_navigation.py`
+  - `docs/milestones/PhaseG/M36/M36_plan.md`, `M36_summary.md`, `M36_audit.md`
+- **Notable features:**
+  - Audience-based docs index
+  - Public Start Here path (README + CONTRIBUTING)
+  - Contributor setup and PR checklist
+  - Public boundary linked from onboarding docs
+- **No behavior changes:** Docs-only guardrail test; no schema/model/proof-pack/CI semantic changes
+- **PR / CI:** (fill in after merge: PR #, merge commit, post-merge CI run)
+
 ---
 
-**Last Updated:** 2026-05-07 (M35 merged to `main`; Phase F closed)
+**Last Updated:** 2026-05-07 (Phase G opened with M36 in progress; Phase F closed with M35)
 
 

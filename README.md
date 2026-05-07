@@ -4,6 +4,13 @@
 
 RenaceCHESS is a human-centered chess intelligence system that predicts what move a human of a given skill (and time pressure) is likely to play, estimates human win/draw/loss chances for that same skill level, and provides LLM-groundable context for real-time, natural-language coaching and broadcast narrative.
 
+## Start Here
+
+- New to the project? Read [`docs/GETTING_STARTED.md`](docs/GETTING_STARTED.md).
+- Contributing? Read [`CONTRIBUTING.md`](CONTRIBUTING.md).
+- Looking for the documentation map? Read [`docs/DOCS_INDEX.md`](docs/DOCS_INDEX.md).
+- Reviewing public-release boundaries? Read [`docs/release/PUBLIC_REPO_BOUNDARY.md`](docs/release/PUBLIC_REPO_BOUNDARY.md).
+
 ## What This Project Is and Is Not
 
 ### This Project **Is**
@@ -139,6 +146,7 @@ renacechess/
 
 ## Documentation
 
+- **Start here:** [`docs/GETTING_STARTED.md`](docs/GETTING_STARTED.md) · [`CONTRIBUTING.md`](CONTRIBUTING.md) · [`docs/DOCS_INDEX.md`](docs/DOCS_INDEX.md) · [`docs/release/PUBLIC_REPO_BOUNDARY.md`](docs/release/PUBLIC_REPO_BOUNDARY.md)
 - [Public repository boundary](docs/release/PUBLIC_REPO_BOUNDARY.md) - Which paths are private vs public-eligible (M35)
 - [Project Vision](VISION.md) - Complete project vision and north star
 - [Release Notes v1.0.0](RELEASE_NOTES_v1.md) - v1.0.0 release details and limitations
