@@ -10,6 +10,8 @@ paths = [
   '''^docs/release/PUBLIC_REPO_BOUNDARY\.md$''',
   '''^docs/milestones/PhaseG/M38/''',
   '''^data/frozen_eval_v2/shard_[0-9]+\.jsonl$''',
+  '''^tests/.*\.py$''',
+  '''^tests/fixtures/''',
 ]
 
 regexes = [

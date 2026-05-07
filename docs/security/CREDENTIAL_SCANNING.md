@@ -78,7 +78,9 @@ Maintainers may also run the GitHub Action **Credential Scan (Full History, Manu
 
 False positives must use the narrowest possible allowlist entry in `.gitleaks.toml` (or fingerprint-based `.gitleaksignore` where appropriate) with a documented rationale. Do not add broad allowlists for real-looking tokens.
 
-**Example (M38):** Frozen eval v2 JSONL shards under `data/frozen_eval_v2/shard_*.jsonl` contain `meta.recordKey` strings derived from position keys. Gitleaks `generic-api-key` can flag those lines. Those shard paths are allowlisted with an explicit regex in `.gitleaks.toml` (see `M38_audit.md`).
+**Example (M38):** Frozen eval v2 JSONL shards under `data/frozen_eval_v2/shard_*.jsonl` contain `meta.recordKey` strings derived from position keys. Gitleaks `generic-api-key` can flag those lines; those shard paths are allowlisted with an explicit regex in `.gitleaks.toml` (see `M38_audit.md`).
+
+The **test suite** (`tests/**/*.py` and `tests/fixtures/**`) embeds FEN / `recordKey` literals for deterministic tests; `generic-api-key` can match patterns like `key2 = "... b KQkq ..."`. Those paths are allowlisted. **Do not** store real credentials under `tests/`; reviewers should reject any non-test secret material there.
 
 ## CI vs `gitleaks-action` Pin
 

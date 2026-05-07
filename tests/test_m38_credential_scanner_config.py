@@ -15,11 +15,10 @@ def test_gitleaks_config_exists() -> None:
     assert (ROOT / ".gitleaks.toml").is_file()
 
 
-def test_gitleaks_allowlists_frozen_eval_shard_false_positives() -> None:
-    """M30 JSONL shards: meta.recordKey triggers generic-api-key false positives."""
+def test_gitleaks_allowlists_test_sources_for_fen_false_positives() -> None:
     text = (ROOT / ".gitleaks.toml").read_text(encoding="utf-8")
-    assert "frozen_eval_v2" in text
-    assert "shard_" in text
+    assert "tests/" in text
+    assert "fixtures" in text
 
 
 def test_credential_scanning_doc_exists() -> None:
