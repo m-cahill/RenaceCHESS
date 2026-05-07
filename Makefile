@@ -13,8 +13,8 @@ help:
 	@echo "  test-fast       Run public docs/boundary guardrail tests without coverage"
 	@echo "  docs-check      Run docs navigation test"
 	@echo "  boundary-check  Verify private paths are not tracked"
-	@echo "  secret-scan     Run gitleaks detect if gitleaks is installed"
-	@echo "  secret-scan-no-git  Run gitleaks dir (current tree, no git integration)"
+	@echo "  secret-scan     Scan git-tracked tree at HEAD via gitleaks (if installed)"
+	@echo "  secret-scan-no-git  Same as secret-scan (uses git archive + gitleaks dir)"
 	@echo "  verify          Run common pre-PR verification"
 	@echo "  demo            Run sample demo command if sample data exists"
 	@echo "  clean           Remove build artifacts and common caches"
@@ -49,14 +49,20 @@ boundary-check:
 
 secret-scan:
 	@if command -v gitleaks >/dev/null 2>&1; then \
-		gitleaks detect --source . --redact --config .gitleaks.toml; \
+		scan_root=$$(mktemp -d); \
+		git archive HEAD | tar -x -C "$$scan_root"; \
+		gitleaks dir "$$scan_root" --redact --config .gitleaks.toml; \
+		rm -rf "$$scan_root"; \
 	else \
 		echo "gitleaks is not installed. Install it or rely on CI credential scanning."; \
 	fi
 
 secret-scan-no-git:
 	@if command -v gitleaks >/dev/null 2>&1; then \
-		gitleaks dir . --redact --config .gitleaks.toml; \
+		scan_root=$$(mktemp -d); \
+		git archive HEAD | tar -x -C "$$scan_root"; \
+		gitleaks dir "$$scan_root" --redact --config .gitleaks.toml; \
+		rm -rf "$$scan_root"; \
 	else \
 		echo "gitleaks is not installed. Install it or rely on CI credential scanning."; \
 	fi

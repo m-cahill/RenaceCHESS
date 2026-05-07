@@ -1201,7 +1201,7 @@ From M00 forward, RenaceCHESS guarantees:
 **M38 Details:**
 - **Objective:** Add credential scanning to CI and contributor workflows for public release readiness.
 - **Audit driver:** Phase G roadmap; M35 established private boundary, M38 adds scanner enforcement.
-- **gitleaks/gitleaks-action** `v2` resolved SHA: `ff98106e4c7b2bc287b24eaf42907196329070c7` (annotated tag `dcedce43c6f43de0b836d1fe38946645c9c638dc`). Blocking CI uses pinned **gitleaks CLI** `8.24.3` with `gitleaks dir` (current tree only); see `docs/security/CREDENTIAL_SCANNING.md`.
+- **gitleaks/gitleaks-action** `v2` resolved SHA: `ff98106e4c7b2bc287b24eaf42907196329070c7` (annotated tag `dcedce43c6f43de0b836d1fe38946645c9c638dc`). Blocking CI uses pinned **gitleaks CLI** `8.24.3` with **`git archive HEAD` → `gitleaks dir`** (tracked tree at `HEAD`); see `docs/security/CREDENTIAL_SCANNING.md`.
 - **Key files:**
   - `.gitleaks.toml`
   - `.github/workflows/ci.yml`

@@ -6,7 +6,7 @@
 ## Checklist
 
 - [x] `.gitleaks.toml` exists and extends defaults with a narrow allowlist.
-- [x] **Security Scan** job includes a **blocking** credential step (**current tree** via `gitleaks dir`, pinned CLI **8.24.3**).
+- [x] **Security Scan** job includes a **blocking** credential step (**`git archive HEAD`** → **`gitleaks dir`**, pinned CLI **8.24.3**).
 - [x] Full-history scan is **manual / reporting only** (`credential-scan-full-history.yml` + docs); **not** a required PR gate.
 - [x] `docs/security/CREDENTIAL_SCANNING.md` covers purpose, scope, private boundary, local commands, incident response, false positives, and limitation note (history / **history rewrite**).
 - [x] `Makefile` includes `secret-scan` and `secret-scan-no-git`; `secret-scan` **not** in `verify`.
@@ -25,9 +25,20 @@
 | `gitleaks/gitleaks-action` `v2` (annotated tag object) | `dcedce43c6f43de0b836d1fe38946645c9c638dc` |
 | Blocking CI CLI | **gitleaks** **8.24.3** (matches gitleaks-action default in `v2` sources) |
 
+## PR #51 — first CI run (credential scan false positives)
+
+**Security Scan** failed on the first push: **`generic-api-key`** on `data/frozen_eval_v2/shard_*.jsonl` at `meta.recordKey` (FEN-derived identifiers, not API keys).
+
+**Resolution (M38-scoped):**
+
+1. **Narrow allowlist** in `.gitleaks.toml`: `^data/frozen_eval_v2/shard_[0-9]+\\.jsonl$` with rationale in `docs/security/CREDENTIAL_SCANNING.md`.
+2. **CI / Makefile** unpack **`git archive HEAD`** before `gitleaks dir` so the scan matches **tracked files at HEAD** and ignores local-only trees (e.g. `.venv/`).
+
+Commit: `fix(security): narrow credential scan allowlist` (after `757eee4`).
+
 ## Known limitation (explicit)
 
-- **gitleaks-action** was **not** invoked as `uses:` because its `detect` + `--log-opts` path targets **git commit ranges**, not the **filesystem-only current tree** required for the blocking gate. The resolved action SHA is still **recorded** in CI comments and milestone docs for audit.
+- **gitleaks-action** was **not** invoked as `uses:` because its `detect` + `--log-opts` path targets **git commit ranges**, not the **tracked-tree-at-HEAD** snapshot used for the blocking gate. The resolved action SHA is still **recorded** in CI comments and milestone docs for audit.
 
 ## Verification commands (local)
 
@@ -37,9 +48,8 @@ git ls-files docs/prompts docs/foundationdocs .cursorrules
 pytest tests/test_m38_credential_scanner_config.py tests/test_m37_dx_shortcuts.py tests/test_m36_docs_navigation.py tests/test_m35_public_release_boundary.py --no-cov
 ```
 
-Optional (if `gitleaks` installed):
+Optional (if `gitleaks` installed, Unix-style shell):
 
 ```bash
-gitleaks dir . --redact --config .gitleaks.toml
 make secret-scan-no-git
 ```

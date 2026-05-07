@@ -8,7 +8,7 @@ M38 adds credential scanning as part of Phase G public release readiness. CI run
 
 | Scope | Where | Blocking? |
 |-------|--------|-----------|
-| Current tree | `gitleaks dir` / CI “Security Scan” step | Yes (PR + `main`) |
+| Current tracked tree | `git archive HEAD` → `gitleaks dir` (CI **Security Scan**) | Yes (PR + `main`) |
 | Full git history | Local `gitleaks detect` or manual workflow | No — reporting only |
 
 - **CI** uses a pinned [Gitleaks](https://github.com/gitleaks/gitleaks) binary and repo-local [`.gitleaks.toml`](../../.gitleaks.toml).
@@ -33,23 +33,25 @@ The second command must print nothing (no tracked files under those paths).
 
 ## Local Use
 
-Optional — requires [gitleaks](https://github.com/gitleaks/gitleaks) installed locally:
+Optional — requires [gitleaks](https://github.com/gitleaks/gitleaks) and a Unix-style environment for `mktemp` / `tar` (e.g. Git Bash on Windows):
 
 ```bash
 make secret-scan
 ```
 
-or current tree without relying on Git state:
-
 ```bash
 make secret-scan-no-git
 ```
 
-or directly:
+Both targets unpack **`git archive HEAD`** into a temporary directory, then run **`gitleaks dir`** with the repo-root `.gitleaks.toml`. That matches CI (tracked files at `HEAD` only) and skips paths that exist only locally (for example `.venv/`).
+
+To run manually:
 
 ```bash
-gitleaks detect --source . --redact --config .gitleaks.toml
-gitleaks dir . --redact --config .gitleaks.toml
+scan_root="$(mktemp -d)"
+git archive HEAD | tar -x -C "${scan_root}"
+gitleaks dir "${scan_root}" --redact --config .gitleaks.toml
+rm -rf "${scan_root}"
 ```
 
 ## Full History (Manual / Reporting Only)
@@ -76,9 +78,11 @@ Maintainers may also run the GitHub Action **Credential Scan (Full History, Manu
 
 False positives must use the narrowest possible allowlist entry in `.gitleaks.toml` (or fingerprint-based `.gitleaksignore` where appropriate) with a documented rationale. Do not add broad allowlists for real-looking tokens.
 
+**Example (M38):** Frozen eval v2 JSONL shards under `data/frozen_eval_v2/shard_*.jsonl` contain `meta.recordKey` strings derived from position keys. Gitleaks `generic-api-key` can flag those lines. Those shard paths are allowlisted with an explicit regex in `.gitleaks.toml` (see `M38_audit.md`).
+
 ## CI vs `gitleaks-action` Pin
 
-The tag `gitleaks/gitleaks-action@v2` resolves to commit `ff98106e4c7b2bc287b24eaf42907196329070c7` (recorded in `docs/milestones/PhaseG/M38/` closeout docs). That action invokes `gitleaks detect` with `--log-opts` over **git commit ranges**, which does not match this repository’s **current-tree-only** blocking policy. Blocking CI therefore uses the pinned **gitleaks CLI** (default **8.24.3**, aligned with the action’s bundled default) and `gitleaks dir` for the required gate.
+The tag `gitleaks/gitleaks-action@v2` resolves to commit `ff98106e4c7b2bc287b24eaf42907196329070c7` (recorded in `docs/milestones/PhaseG/M38/` closeout docs). That action invokes `gitleaks detect` with `--log-opts` over **git commit ranges**, which does not match this repository’s **current tracked tree** blocking policy. Blocking CI therefore uses the pinned **gitleaks CLI** (default **8.24.3**, aligned with the action’s bundled default), unpacks **`git archive HEAD`**, and runs **`gitleaks dir`** on that tree.
 
 ## Auditable Evidence
 

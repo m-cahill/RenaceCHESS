@@ -14,7 +14,7 @@ Add a **blocking** CI credential scan over the **current tracked repository tree
 
 | Gate | Mode |
 |------|------|
-| PR / `main` **Security Scan** | **Current tree only** (`gitleaks dir` via pinned **gitleaks** CLI `8.24.3`) |
+| PR / `main` **Security Scan** | **Tracked files at `HEAD`** (`git archive HEAD` → `gitleaks dir`; pinned CLI **8.24.3**) |
 | Full git history | **`workflow_dispatch`** workflow + documented local `gitleaks detect`; **not** a required branch check |
 
 **gitleaks/gitleaks-action@v2** dereferenced commit SHA (supply-chain record): `ff98106e4c7b2bc287b24eaf42907196329070c7` (annotated tag `dcedce43c6f43de0b836d1fe38946645c9c638dc`). The action invokes `detect` with `--log-opts` over **git commit ranges**; it is **not** used for the blocking gate so CI matches the current-tree-only policy.
