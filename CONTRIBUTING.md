@@ -19,6 +19,26 @@ python -m pip install --upgrade pip
 pip install -e ".[dev]"
 ```
 
+## Developer Shortcuts
+
+The canonical commands remain the plain Python/Ruff/MyPy/Pytest commands below. For convenience, M37 adds a `Makefile` with aliases:
+
+```bash
+make help
+make verify
+make test-fast
+make boundary-check
+```
+
+A conservative setup helper prints recommended venv steps and installs dev dependencies only when you pass `--install`:
+
+```bash
+python scripts/setup_dev.py
+python scripts/setup_dev.py --install
+```
+
+These shortcuts do not replace CI. They are local convenience wrappers.
+
 ## Common Verification
 
 ```bash

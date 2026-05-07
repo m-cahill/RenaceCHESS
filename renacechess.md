@@ -45,7 +45,8 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M34 | ✅ Closed (MERGED) | `m34-release-lock` → `main` | 2026-02-03 | RELEASE-LOCK-001 — Contract registry, CI release gates, Phase E closeout |
 | LiveM01 | ✅ Closed (TAGGED v0.2.0) | `main` | 2026-02-28 | Deterministic Skill Conditioning — Temperature scaling for BaselinePolicyV1 |
 | M35 | ✅ Closed (MERGED) | `m35-public-release-boundary-guardrails` → `main` | 2026-05-06 | Public Release Boundary Guardrails |
-| M36 | 🚧 Active | `m36-public-release-docs-onboarding` → `main` | — | Public Release Documentation Onboarding |
+| M36 | ✅ Closed (MERGED) | `m36-public-release-docs-onboarding` → `main` | 2026-05-07 | Public Release Documentation Onboarding |
+| M37 | 🚧 Active | `m37-public-release-dx-shortcuts` | — | Public Release DX Shortcuts |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -1171,10 +1172,27 @@ From M00 forward, RenaceCHESS guarantees:
   - Contributor setup and PR checklist
   - Public boundary linked from onboarding docs
 - **No behavior changes:** Docs-only guardrail test; no schema/model/proof-pack/CI semantic changes
-- **PR / CI:** (fill in after merge: PR #, merge commit, post-merge CI run)
+- **PR / CI:** PR #47 — merge commit `b83271560b0306f876195bce953c1f967dbe01ad` (squash on `main`; short `b832715`)
+
+**M37 Details:**
+- **Objective:** Add local DX shortcuts that make the M36 onboarding path executable.
+- **Audit driver:** M36/M37 public-release readiness roadmap; M36 created onboarding docs, M37 adds command shortcuts.
+- **Key files:**
+  - `Makefile`
+  - `scripts/setup_dev.py`
+  - `tests/test_m37_dx_shortcuts.py`
+  - `CONTRIBUTING.md`
+  - `docs/GETTING_STARTED.md`
+  - `docs/DOCS_INDEX.md`
+- **Notable features:**
+  - `make verify` for common pre-PR checks
+  - `make boundary-check` for public/private boundary verification
+  - `make test-fast` for low-cost onboarding checks
+  - conservative setup helper that does not mutate shell state by default
+- **No behavior changes:** DX-only; no schema/model/proof-pack changes
 
 ---
 
-**Last Updated:** 2026-05-07 (Phase G opened with M36 in progress; Phase F closed with M35)
+**Last Updated:** 2026-05-07 (Phase G active; M36 merged; M37 in progress)
 
 

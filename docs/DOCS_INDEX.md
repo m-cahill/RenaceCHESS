@@ -7,6 +7,8 @@ Audience-based entry points into the repo. Paths are repo-relative from the chec
 - [`docs/GETTING_STARTED.md`](GETTING_STARTED.md) — fastest safe path from zero to verified checkout
 - [`CONTRIBUTING.md`](../CONTRIBUTING.md) — workflows, gates, boundaries, checklist
 - [`README.md`](../README.md) — project overview and common commands
+- [`Makefile`](../Makefile) — optional local shortcuts (`make help`, `make verify`)
+- [`scripts/setup_dev.py`](../scripts/setup_dev.py) — setup guidance; `--install` runs editable dev install
 
 ## Auditors
 
@@ -36,7 +38,7 @@ Canonical dict/kwargs rules: [CONTRACT_INPUT_SEMANTICS.md](contracts/CONTRACT_IN
 - [`docs/milestones/`](milestones/)
 - [`renacechess.md`](../renacechess.md) — authoritative milestone table and phase status
 
-Phase G (public release readiness) artifacts: [`docs/milestones/PhaseG/M36/`](milestones/PhaseG/M36/) and successors.
+Phase G (public release readiness) artifacts: [`docs/milestones/PhaseG/M36/`](milestones/PhaseG/M36/), [`docs/milestones/PhaseG/M37/`](milestones/PhaseG/M37/).
 
 ## Public Release Boundary
 

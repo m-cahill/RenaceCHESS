@@ -11,6 +11,18 @@ RenaceCHESS is a human-centered chess intelligence system that predicts what mov
 - Looking for the documentation map? Read [`docs/DOCS_INDEX.md`](docs/DOCS_INDEX.md).
 - Reviewing public-release boundaries? Read [`docs/release/PUBLIC_REPO_BOUNDARY.md`](docs/release/PUBLIC_REPO_BOUNDARY.md).
 
+## Common Developer Shortcuts
+
+If `make` is available:
+
+```bash
+make help
+make verify
+make test-fast
+```
+
+Without `make`, use the commands listed in [`CONTRIBUTING.md`](CONTRIBUTING.md).
+
 ## What This Project Is and Is Not
 
 ### This Project **Is**
@@ -96,18 +108,16 @@ See [Ingestion Documentation](docs/INGESTION.md) for detailed usage and cache ma
 ### Development
 
 ```bash
-# Run linter
+make help       # list all targets
+make verify     # boundary + lint + format-check + type + fast guardrail tests
 make lint
-
-# Run type checker
+make format-check
 make type
-
-# Run tests
 make test
-
-# Generate demo
 make demo
 ```
+
+Without `make`, use the commands in [`CONTRIBUTING.md`](CONTRIBUTING.md).
 
 ### Pre-commit Hooks (Optional)
 
