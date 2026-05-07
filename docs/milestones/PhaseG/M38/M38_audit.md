@@ -32,9 +32,9 @@
 **Resolution (M38-scoped):**
 
 1. **Narrow allowlist** in `.gitleaks.toml`: `^data/frozen_eval_v2/shard_[0-9]+\\.jsonl$` with rationale in `docs/security/CREDENTIAL_SCANNING.md`.
-2. **CI / Makefile** unpack **`git archive HEAD`** before `gitleaks dir` so the scan matches **tracked files at HEAD** and ignores local-only trees (e.g. `.venv/`).
+2. **CI / Makefile** unpack **`git archive HEAD`** into a temp directory, **`cd` into it**, and run **`gitleaks dir .`** so allowlist paths match repo-relative paths (for example `^data/frozen_eval_v2/...`).
 
-Commit: `fix(security): narrow credential scan allowlist` (after `757eee4`).
+**Commits:** `757eee4` (initial M38), `4eead77` (frozen-eval allowlist + `git archive`), then a follow-up fixing **allowlist application** by running **`gitleaks dir .` from inside the archive directory** (paths in logs were absolute under `/tmp/...`, so `^data/` did not match until the working directory was the archive root).
 
 ## Known limitation (explicit)
 

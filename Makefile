@@ -51,7 +51,7 @@ secret-scan:
 	@if command -v gitleaks >/dev/null 2>&1; then \
 		scan_root=$$(mktemp -d); \
 		git archive HEAD | tar -x -C "$$scan_root"; \
-		gitleaks dir "$$scan_root" --redact --config .gitleaks.toml; \
+		( cd "$$scan_root" && gitleaks dir . --redact --config .gitleaks.toml ); \
 		rm -rf "$$scan_root"; \
 	else \
 		echo "gitleaks is not installed. Install it or rely on CI credential scanning."; \
@@ -61,7 +61,7 @@ secret-scan-no-git:
 	@if command -v gitleaks >/dev/null 2>&1; then \
 		scan_root=$$(mktemp -d); \
 		git archive HEAD | tar -x -C "$$scan_root"; \
-		gitleaks dir "$$scan_root" --redact --config .gitleaks.toml; \
+		( cd "$$scan_root" && gitleaks dir . --redact --config .gitleaks.toml ); \
 		rm -rf "$$scan_root"; \
 	else \
 		echo "gitleaks is not installed. Install it or rely on CI credential scanning."; \

@@ -50,7 +50,7 @@ To run manually:
 ```bash
 scan_root="$(mktemp -d)"
 git archive HEAD | tar -x -C "${scan_root}"
-gitleaks dir "${scan_root}" --redact --config .gitleaks.toml
+( cd "${scan_root}" && gitleaks dir . --redact --config .gitleaks.toml )
 rm -rf "${scan_root}"
 ```
 
