@@ -46,7 +46,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | LiveM01 | ✅ Closed (TAGGED v0.2.0) | `main` | 2026-02-28 | Deterministic Skill Conditioning — Temperature scaling for BaselinePolicyV1 |
 | M35 | ✅ Closed (MERGED) | `m35-public-release-boundary-guardrails` → `main` | 2026-05-06 | Public Release Boundary Guardrails |
 | M36 | ✅ Closed (MERGED) | `m36-public-release-docs-onboarding` → `main` | 2026-05-07 | Public Release Documentation Onboarding |
-| M37 | 🚧 Active | `m37-public-release-dx-shortcuts` | — | Public Release DX Shortcuts |
+| M37 | ✅ Closed (MERGED) | `m37-public-release-dx-shortcuts` → `main` | 2026-05-07 | Public Release DX Shortcuts |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -1177,6 +1177,11 @@ From M00 forward, RenaceCHESS guarantees:
 **M37 Details:**
 - **Objective:** Add local DX shortcuts that make the M36 onboarding path executable.
 - **Audit driver:** M36/M37 public-release readiness roadmap; M36 created onboarding docs, M37 adds command shortcuts.
+- **PR:** [#48](https://github.com/m-cahill/RenaceCHESS/pull/48) (squash)
+- **Implementation commit:** `cef888c3179ffdae00c6599fe4a614b9aa8ddd4e`
+- **Merge commit:** `9e9c1478f866bf4d5e33d08087e2aa6f185b904b`
+- **Pre-merge PR CI:** [25481712932](https://github.com/m-cahill/RenaceCHESS/actions/runs/25481712932) — success
+- **Post-merge `main` CI:** [25483024592](https://github.com/m-cahill/RenaceCHESS/actions/runs/25483024592) — success
 - **Key files:**
   - `Makefile`
   - `scripts/setup_dev.py`
@@ -1190,9 +1195,10 @@ From M00 forward, RenaceCHESS guarantees:
   - `make test-fast` for low-cost onboarding checks
   - conservative setup helper that does not mutate shell state by default
 - **No behavior changes:** DX-only; no schema/model/proof-pack changes
+- **Final verification (post-merge `main`):** boundary script pass; private paths untracked; M35/M36/M37 guardrail tests pass; `setup_dev.py` default is no-op install
 
 ---
 
-**Last Updated:** 2026-05-07 (Phase G active; M36 merged; M37 in progress)
+**Last Updated:** 2026-05-07 (Phase G active; M37 merged; M38–M39 planned)
 
 
