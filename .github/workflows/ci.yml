@@ -128,7 +128,10 @@ jobs:
           # Install dependencies for base commit (in case they differ)
           python -m pip install --upgrade pip --quiet
           pip install -e ".[dev]" --quiet
-          
+
+          # Fresh DB: .coverage is gitignored so git clean -fd will not remove it later
+          rm -f .coverage .coverage.*
+
           # Generate coverage XML at PR base (with branch coverage to match head)
           python -m pytest --cov=src/renacechess --cov-branch --cov-report=xml --cov-fail-under=0 -q
           mv coverage.xml coverage-base.xml
@@ -148,6 +151,9 @@ jobs:
         if: steps.coverage_check.outputs.mode == 'both'
         shell: bash
         run: |
+          # Baseline pytest leaves .coverage on disk; head run must not merge into that DB or XML skews
+          rm -f .coverage .coverage.*
+
           # Generate coverage XML at PR head (with branch coverage to match baseline)
           python -m pytest --cov=src/renacechess --cov-branch --cov-report=xml --cov-fail-under=0 -q
           mv coverage.xml coverage-head.xml
