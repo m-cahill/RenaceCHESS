@@ -62,6 +62,8 @@ jobs:
         run: ruff format --check .
       - name: Import boundary check
         run: lint-imports --config=importlinter_contracts.ini
+      - name: Public release boundary check
+        run: python scripts/check_public_release_boundary.py
 
   typecheck:
     name: Type Check
