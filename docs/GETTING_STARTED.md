@@ -30,6 +30,22 @@ pip install -e ".[dev]"
 
 Minimum Python version: see `requires-python` in [`pyproject.toml`](../pyproject.toml).
 
+## Fast Local Verification
+
+```bash
+make verify
+```
+
+If `make` is unavailable, run:
+
+```bash
+python scripts/check_public_release_boundary.py
+ruff check .
+ruff format --check .
+mypy src/renacechess
+pytest tests/test_m36_docs_navigation.py tests/test_m35_public_release_boundary.py --no-cov
+```
+
 ## Run a Quick Verification
 
 ```bash
