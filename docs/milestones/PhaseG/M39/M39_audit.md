@@ -13,7 +13,7 @@
 | Check | Evidence |
 |-------|----------|
 | pip-audit (no Torch ignores post-change) | Local run: exit 0, no known vulns listed for audited installs after `pip install -e ".[dev]"`; local-project editable entry skipped per pip-audit default |
-| Security Scan CI | `.github/workflows/ci.yml` — Torch `--ignore-vuln` lines removed; `pip-audit` command matches local gate |
+| Security Scan CI | `.github/workflows/ci.yml` — Torch `--ignore-vuln` lines removed; **Test** job uses CPU-only Torch reinstall (see `TORCH_SECURITY_REVIEW.md` CI section) |
 
 ### Quality gates
 
@@ -31,13 +31,15 @@ Companion changes:
 
 - Unused-import cleanup in **`src/renacechess/contracts/registry.py`** (`typing.Any`), **`tests/test_m34_contract_registry.py`** (`pytest`) surfaced by lint during verification — aligns with enforced Ruff CI.
 
+### CI / Test job (PR #52)
+
+**Test** job failed on first push: CUDA-linked Torch on `ubuntu-latest` (`libtorch_cuda.so` / NCCL). Addressed by reinstalling Torch from **`https://download.pytorch.org/whl/cpu`** after `pip install -e ".[dev]"`, using the `torch` line from the **current checkout’s** `pyproject.toml` (baseline vs PR head stay consistent).
+
 ---
 
 ## PR / Freeze
 
 - **`release-dependency-freeze` bypass:** Maintainer must include **`RELDEPS-EXCEPTION`** token in PR body per existing workflow.
-
----
 
 ## Post-merge
 

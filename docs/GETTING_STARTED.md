@@ -28,6 +28,8 @@ python -m pip install --upgrade pip
 pip install -e ".[dev]"
 ```
 
+On GitHub Actions Linux runners the CI workflow reinstalls Torch from PyTorch’s **CPU** wheel index (`download.pytorch.org`) so tests import cleanly without a CUDA stack; local installs pick wheels for your platform normally.
+
 Minimum Python version: see `requires-python` in [`pyproject.toml`](../pyproject.toml).
 
 ## Fast Local Verification

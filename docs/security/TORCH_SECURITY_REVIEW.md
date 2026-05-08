@@ -30,6 +30,14 @@ pip-audit (no ignores): reported multiple Torch findings on 2.2.x plus setuptool
 
 Bounded dependency change only: no schema, contract registry, proof-pack, architecture, or training-logic edits.
 
+## CI install policy (GitHub Actions)
+
+GitHub Actions uses **CPU-only** Torch wheels for the **Test** job (including PR baseline/head coverage installs), by force-reinstalling the **same** `torch` PEP 508 spec from **`pyproject.toml`** against `--index-url https://download.pytorch.org/whl/cpu`.
+
+**Rationale:** Default PyPI/Linux resolution can pull CUDA-linked wheels that fail to load on hosted `ubuntu-latest` runners (NCCL/driver mismatch). CPU wheels match project tests (no GPU asserted in CI) and preserve the declarative Torch constraint across base vs PR checkouts—**without** changing model semantics.
+
+Other CI jobs unchanged unless they need the same workaround; **Security Scan** remains on the editable environment used for `pip-audit` / `bandit`.
+
 ## Evidence
 
 | Gate | Status |
@@ -38,7 +46,7 @@ Bounded dependency change only: no schema, contract registry, proof-pack, archit
 | mypy (`src/renacechess`) | Pass |
 | ruff (`check`; `format --check`) | Pass |
 | pip-audit (no Torch ignores; setuptools addressed) | Pass — no known vulns reported for audited packages beyond local-project skip for editable name |
-| Security Scan CI | Expected green on PR (**dependency + bandit steps** unchanged except pip-audit command) |
+| Security Scan CI | Pip-audit + scanners without Torch ignores; **Test** job uses CPU-only Torch reinstall on Linux runners (see **CI install policy**) |
 
 Bandit retains `--skip B614` for deliberate `torch.save` / serialization patterns unrelated to Torch version bumps.
 

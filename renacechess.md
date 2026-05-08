@@ -1231,12 +1231,12 @@ From M00 forward, RenaceCHESS guarantees:
   - `docs/milestones/PhaseG/M39/` (plan, summary, audit)
   - `docs/phases/PhaseG_closeout.md`
   - `pyproject.toml` (`torch>=2.8.0,<3`; `setuptools>=78.1.1,<82`)
-  - `.github/workflows/ci.yml` (Security Scan pip-audit without Torch `--ignore-vuln`)
+  - `.github/workflows/ci.yml` (Security Scan pip-audit without Torch `--ignore-vuln`; Test job CPU-only Torch reinstall on `ubuntu-latest`)
   - `Makefile`, `tests/test_m39_torch_security_docs.py`
 - **Torch before:** constraint `~=2.2.0`; typical resolve **2.2.x**.
 - **Torch after:** lower bound **2.8.0** (`GHSA-887c` fix line); editable install resolves to latest in range (e.g. **2.11.0** on PyPI CPU wheels during implementation).
 - **pip-audit before:** Torch + setuptools flagged without ignores; CI used ignores for Torch.
-- **pip-audit after (no Torch ignores):** clean on validated environment after setuptools pin.
+- **CI:** GitHub-hosted Linux **Test** job reinstalls Torch from the PyTorch **CPU** wheel index (`download.pytorch.org`) so imports succeed without CUDA/NCCL on `ubuntu-latest`; spec always matches checkout `pyproject.toml` (PR baseline vs head).
 - **PR body:** include **`RELDEPS-EXCEPTION`** for `release-dependency-freeze`; open PR URL and CI URLs are recorded post-submit (not placeholders in-branch).
 - **No behavior changes:** dependency / security-scan posture only; no schema/model/proof-pack semantic changes.
 

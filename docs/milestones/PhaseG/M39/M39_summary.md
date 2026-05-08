@@ -20,7 +20,7 @@
 | File | Change |
 |------|--------|
 | `pyproject.toml` | Torch range; setuptools companion pin |
-| `.github/workflows/ci.yml` | Security Scan pip-audit invocation |
+| `.github/workflows/ci.yml` | Security Scan pip-audit; Test job reinstalls Torch from **`https://download.pytorch.org/whl/cpu`** (spec from `pyproject.toml`) |
 | `docs/security/TORCH_SECURITY_REVIEW.md` | Before/after, evidence, decision |
 | `tests/test_m39_torch_security_docs.py` | Structural doc guards |
 | `docs/milestones/PhaseG/M39/*` | Plan, summary, audit |
@@ -35,6 +35,10 @@ Linux CI remains authoritative for **coverage thresholds** and integration.
 - `ruff check .`, `ruff format --check .` — pass  
 - `mypy src/renacechess` — pass  
 - `pytest -q --no-cov` — pass  
+
+## CI (GitHub Actions)
+
+PR #52 follow-up: default Linux wheels for recent Torch can be CUDA-linked and fail to import on `ubuntu-latest` (NCCL symbol errors). The **Test** job (including PR baseline/head coverage installs) force-reinstalls Torch from the **official CPU index** using the **same** PEP 508 spec as the checked-out `pyproject.toml` — CI install policy only; not a model semantic change. See `docs/security/TORCH_SECURITY_REVIEW.md`.
 
 ## Merge Note
 
