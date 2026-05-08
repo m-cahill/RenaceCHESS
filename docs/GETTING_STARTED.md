@@ -43,8 +43,16 @@ python scripts/check_public_release_boundary.py
 ruff check .
 ruff format --check .
 mypy src/renacechess
-pytest tests/test_m36_docs_navigation.py tests/test_m35_public_release_boundary.py --no-cov
+pytest tests/test_m38_credential_scanner_config.py tests/test_m37_dx_shortcuts.py tests/test_m36_docs_navigation.py tests/test_m35_public_release_boundary.py --no-cov
 ```
+
+Optional — if [gitleaks](https://github.com/gitleaks/gitleaks) is installed:
+
+```bash
+make secret-scan
+```
+
+See [`docs/security/CREDENTIAL_SCANNING.md`](security/CREDENTIAL_SCANNING.md) for scope (CI blocking gate vs manual full-history) and what to do if a **secret** is found.
 
 ## Run a Quick Verification
 

@@ -47,6 +47,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M35 | ✅ Closed (MERGED) | `m35-public-release-boundary-guardrails` → `main` | 2026-05-06 | Public Release Boundary Guardrails |
 | M36 | ✅ Closed (MERGED) | `m36-public-release-docs-onboarding` → `main` | 2026-05-07 | Public Release Documentation Onboarding |
 | M37 | ✅ Closed (MERGED) | `m37-public-release-dx-shortcuts` → `main` | 2026-05-07 | Public Release DX Shortcuts |
+| M38 | 🚧 Active | `m38-credential-scanner-hardening` | — | Credential Scanner Hardening |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -1197,8 +1198,27 @@ From M00 forward, RenaceCHESS guarantees:
 - **No behavior changes:** DX-only; no schema/model/proof-pack changes
 - **Final verification (post-merge `main`):** boundary script pass; private paths untracked; M35/M36/M37 guardrail tests pass; `setup_dev.py` default is no-op install
 
+**M38 Details:**
+- **Objective:** Add credential scanning to CI and contributor workflows for public release readiness.
+- **Audit driver:** Phase G roadmap; M35 established private boundary, M38 adds scanner enforcement.
+- **gitleaks/gitleaks-action** `v2` resolved SHA: `ff98106e4c7b2bc287b24eaf42907196329070c7` (annotated tag `dcedce43c6f43de0b836d1fe38946645c9c638dc`). Blocking CI uses pinned **gitleaks CLI** `8.24.3` with **`git archive HEAD` → `gitleaks dir`** (tracked tree at `HEAD`); see `docs/security/CREDENTIAL_SCANNING.md`.
+- **Key files:**
+  - `.gitleaks.toml`
+  - `.github/workflows/ci.yml`
+  - `.github/workflows/credential-scan-full-history.yml`
+  - `docs/security/CREDENTIAL_SCANNING.md`
+  - `tests/test_m38_credential_scanner_config.py`
+  - `Makefile`
+- **Notable features:**
+  - CI credential scan (blocking, current tree)
+  - local `make secret-scan` / `make secret-scan-no-git` helpers
+  - manual `workflow_dispatch` full-history workflow (reporting only)
+  - documented response process for real secrets and false positives
+  - private boundary remains enforced
+- **No behavior changes:** security tooling only; no schema/model/proof-pack changes
+
 ---
 
-**Last Updated:** 2026-05-07 (Phase G active; M37 merged; M38–M39 planned)
+**Last Updated:** 2026-05-07 (Phase G active; M38 in progress; M39 planned)
 
 
