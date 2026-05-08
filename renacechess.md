@@ -47,7 +47,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M35 | ✅ Closed (MERGED) | `m35-public-release-boundary-guardrails` → `main` | 2026-05-06 | Public Release Boundary Guardrails |
 | M36 | ✅ Closed (MERGED) | `m36-public-release-docs-onboarding` → `main` | 2026-05-07 | Public Release Documentation Onboarding |
 | M37 | ✅ Closed (MERGED) | `m37-public-release-dx-shortcuts` → `main` | 2026-05-07 | Public Release DX Shortcuts |
-| M38 | 🚧 Active | `m38-credential-scanner-hardening` | — | Credential Scanner Hardening |
+| M38 | ✅ Closed (MERGED) | `m38-credential-scanner-hardening` → `main` | 2026-05-07 | Credential Scanner Hardening |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -1201,6 +1201,10 @@ From M00 forward, RenaceCHESS guarantees:
 **M38 Details:**
 - **Objective:** Add credential scanning to CI and contributor workflows for public release readiness.
 - **Audit driver:** Phase G roadmap; M35 established private boundary, M38 adds scanner enforcement.
+- **PR / merge:** [#51](https://github.com/m-cahill/RenaceCHESS/pull/51) — squash merge commit **`14a386119d6f73b0d90c995d5eb7a29f1c2a4040`** (merged 2026-05-08 UTC).
+- **Pre-merge CI (tip):** [25527801670](https://github.com/m-cahill/RenaceCHESS/actions/runs/25527801670) — success (**Security Scan** / credential step pass).
+- **Post-merge `main` CI:** [25529051353](https://github.com/m-cahill/RenaceCHESS/actions/runs/25529051353) — success; **Security Scan** job [74931082954](https://github.com/m-cahill/RenaceCHESS/actions/runs/25529051353/job/74931082954) — **Credential scan (gitleaks current tree)** pass.
+- **Allowlist review:** Path allowlists are limited to docs boundary + PhaseG/M38 milestone text + frozen-eval `shard_*.jsonl` regex + `tests/**/*.py` + `tests/fixtures/` (FEN / `recordKey` false positives for `generic-api-key`); dummy example regexes only. Documented in `docs/security/CREDENTIAL_SCANNING.md` and `M38_audit.md`.
 - **gitleaks/gitleaks-action** `v2` resolved SHA: `ff98106e4c7b2bc287b24eaf42907196329070c7` (annotated tag `dcedce43c6f43de0b836d1fe38946645c9c638dc`). Blocking CI uses pinned **gitleaks CLI** `8.24.3` with **`git archive HEAD` → `gitleaks dir`** (tracked tree at `HEAD`); see `docs/security/CREDENTIAL_SCANNING.md`.
 - **Key files:**
   - `.gitleaks.toml`
@@ -1210,15 +1214,16 @@ From M00 forward, RenaceCHESS guarantees:
   - `tests/test_m38_credential_scanner_config.py`
   - `Makefile`
 - **Notable features:**
-  - CI credential scan (blocking, current tree)
+  - CI credential scan (blocking, tracked tree at `HEAD` only)
   - local `make secret-scan` / `make secret-scan-no-git` helpers
   - manual `workflow_dispatch` full-history workflow (reporting only)
   - documented response process for real secrets and false positives
   - private boundary remains enforced
 - **No behavior changes:** security tooling only; no schema/model/proof-pack changes
+- **Post-merge verification:** boundary script pass; private paths untracked; M35–M38 guardrail tests pass on `main`.
 
 ---
 
-**Last Updated:** 2026-05-07 (Phase G active; M38 in progress; M39 planned)
+**Last Updated:** 2026-05-08 (Phase G active; M38 merged; M39 planned)
 
 

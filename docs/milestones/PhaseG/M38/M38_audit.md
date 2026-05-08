@@ -12,10 +12,10 @@
 - [x] `Makefile` includes `secret-scan` and `secret-scan-no-git`; `secret-scan` **not** in `verify`.
 - [x] `CONTRIBUTING.md` PR checklist mentions credential / **gitleaks** expectations.
 - [x] `tests/test_m38_credential_scanner_config.py` passes; `test-fast` includes M35–M38 structural guardrails.
-- [x] `renacechess.md` lists M38 (**active**) and Phase G still **active**.
+- [x] `renacechess.md` lists M38 **Closed (MERGED)** and Phase G still **active** (M39 planned).
 - [x] No changes under `docs/prompts/`, `docs/foundationdocs/`, `.cursorrules` (untracked private paths).
 - [x] No edits to `contracts/CONTRACT_REGISTRY_v1.json`, `proof_pack_v1/`, `src/renacechess/contracts/schemas/`, `src/renacechess/models/`.
-- [ ] PR opened, CI green, merge by maintainer (post-implementation).
+- [x] PR [#51](https://github.com/m-cahill/RenaceCHESS/pull/51) merged (squash) — commit `14a386119d6f73b0d90c995d5eb7a29f1c2a4040`; pre-merge CI [25527801670](https://github.com/m-cahill/RenaceCHESS/actions/runs/25527801670); post-merge `main` CI [25529051353](https://github.com/m-cahill/RenaceCHESS/actions/runs/25529051353).
 
 ## Resolved references
 
@@ -35,6 +35,15 @@
 2. **CI / Makefile** unpack **`git archive HEAD`** into a temp directory, **`cd` into it**, and run **`gitleaks dir .`** so allowlist paths match repo-relative paths (for example `^data/frozen_eval_v2/...`).
 
 **Commits:** `757eee4` (initial M38), `4eead77` (frozen-eval allowlist + `git archive`), then a follow-up fixing **allowlist application** by running **`gitleaks dir .` from inside the archive directory** (paths in logs were absolute under `/tmp/...`, so `^data/` did not match until the working directory was the archive root).
+
+## Allowlist review (pre-merge gate)
+
+| Question | Result |
+|----------|--------|
+| Broad regexes that could hide real API keys/tokens? | **No** — only documented dummy/example/fake string patterns. |
+| Broad path suppressions? | **Limited** — `^tests/.*\.py$`, `^tests/fixtures/`, path entries for public-boundary and Phase G M38 docs, plus `^data/frozen_eval_v2/shard_[0-9]+\.jsonl$`. **Not** applied to `src/`. |
+| Rationale documented? | **Yes** — [`docs/security/CREDENTIAL_SCANNING.md`](../../../docs/security/CREDENTIAL_SCANNING.md) (False Positives). |
+| **Recommendation** | Merge approved; keep allowlists narrow; revisit if new high-entropy fixtures land under `tests/`. |
 
 ## Known limitation (explicit)
 
