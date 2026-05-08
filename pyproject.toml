@@ -25,7 +25,8 @@ dependencies = [
     "pydantic~=2.10.0",
     "jsonschema~=4.20.0",
     "requests>=2.32.4",
-    "torch~=2.2.0",
+    "setuptools>=78.1.1,<82",
+    "torch>=2.8.0,<3",
     "zstandard~=0.22",
 ]
 

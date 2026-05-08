@@ -12,6 +12,7 @@ Audience-based entry points into the repo. Paths are repo-relative from the chec
 
 ## Auditors
 
+- [`docs/security/TORCH_SECURITY_REVIEW.md`](security/TORCH_SECURITY_REVIEW.md) — Torch CVE upgrade / deferral review (Phase G — M39)
 - [`docs/security/CREDENTIAL_SCANNING.md`](security/CREDENTIAL_SCANNING.md) — CI and local credential (**secret**) scanning scope, private boundary, and response process
 - [`docs/release/PUBLIC_REPO_BOUNDARY.md`](release/PUBLIC_REPO_BOUNDARY.md) — tracked-file boundary and reviewer checklist
 - [`contracts/CONTRACT_REGISTRY_v1.json`](../contracts/CONTRACT_REGISTRY_v1.json) — frozen v1 contract inventory with schema hashes
@@ -39,7 +40,7 @@ Canonical dict/kwargs rules: [CONTRACT_INPUT_SEMANTICS.md](contracts/CONTRACT_IN
 - [`docs/milestones/`](milestones/)
 - [`renacechess.md`](../renacechess.md) — authoritative milestone table and phase status
 
-Phase G (public release readiness) artifacts: [`docs/milestones/PhaseG/M36/`](milestones/PhaseG/M36/), [`docs/milestones/PhaseG/M37/`](milestones/PhaseG/M37/), [`docs/milestones/PhaseG/M38/`](milestones/PhaseG/M38/).
+Phase G (public release readiness) artifacts: [`docs/milestones/PhaseG/M36/`](milestones/PhaseG/M36/), [`docs/milestones/PhaseG/M37/`](milestones/PhaseG/M37/), [`docs/milestones/PhaseG/M38/`](milestones/PhaseG/M38/), [`docs/milestones/PhaseG/M39/`](milestones/PhaseG/M39/), [`docs/phases/PhaseG_closeout.md`](phases/PhaseG_closeout.md).
 
 ## Public Release Boundary
 

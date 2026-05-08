@@ -47,17 +47,11 @@ jobs:
       - name: Dependency vulnerability scan (pip-audit)
         run: |
           echo "Running pip-audit against installed environment..."
-          # Ignore deferred torch vulnerabilities (see M23_audit.md TORCH-SEC-001)
-          pip-audit --desc on --progress-spinner off \
-            --ignore-vuln PYSEC-2025-41 \
-            --ignore-vuln PYSEC-2024-259 \
-            --ignore-vuln GHSA-3749-ghw9-m3mg \
-            --ignore-vuln GHSA-887c-mr87-cxwp
+          pip-audit --desc on --progress-spinner off
       - name: Static security analysis (bandit)
         run: |
           echo "Running bandit SAST scan..."
-          # Skip B614 (pytorch_load_save) - torch.save(state_dict) is safe pattern
-          # Related to TORCH-SEC-001 deferral in M23_audit.md
+          # Skip B614 (pytorch_load_save): controlled torch.save(state_dict); see docs/security/TORCH_SECURITY_REVIEW.md
           bandit -r src/renacechess -ll -ii --skip B614
 
   lint:

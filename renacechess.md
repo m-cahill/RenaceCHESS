@@ -48,6 +48,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M36 | ✅ Closed (MERGED) | `m36-public-release-docs-onboarding` → `main` | 2026-05-07 | Public Release Documentation Onboarding |
 | M37 | ✅ Closed (MERGED) | `m37-public-release-dx-shortcuts` → `main` | 2026-05-07 | Public Release DX Shortcuts |
 | M38 | ✅ Closed (MERGED) | `m38-credential-scanner-hardening` → `main` | 2026-05-07 | Credential Scanner Hardening |
+| M39 | ✅ Complete (Outcome A) | `m39-torch-cve-upgrade-review` | — | Torch CVE Upgrade / Deferral Review |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -771,7 +772,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | D | Data Expansion, Calibration & Quality | 🔒 **CLOSED** | M23–M28 | `docs/phases/PhaseD_closeout.md` |
 | E | Scale Proof, Training Run, Release Lock | 🔒 **CLOSED** | M29–M34 | `docs/phases/PhaseE_closeout.md` |
 | F | Public Release Hardening | 🔒 **CLOSED** | M35 | Public release boundary enforced |
-| G | Public Release Readiness | **ACTIVE** | M36–M39 | Documentation, DX, credential scanning, Torch CVE review |
+| G | Public Release Readiness | 🔒 **CLOSED** | M36–M39 | `docs/phases/PhaseG_closeout.md` |
 
 ### Public Release Readiness Roadmap (Phase G)
 
@@ -780,7 +781,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M36 | Public Release Documentation Onboarding | Start Here docs, contributor guide, docs index |
 | M37 | Public Release DX Shortcuts | Makefile, setup helper, common command shortcuts |
 | M38 | Credential Scanner Hardening | gitleaks or equivalent scanner in CI |
-| M39 | Torch CVE Upgrade / Deferral Review | Attempt torch upgrade or formalize reviewed deferral |
+| M39 | Torch CVE Upgrade / Deferral Review — **complete (Outcome A)** | Bounded torch/setuptools upgrade; remove Torch-only pip-audit ignores |
 
 ---
 
@@ -1222,8 +1223,25 @@ From M00 forward, RenaceCHESS guarantees:
 - **No behavior changes:** security tooling only; no schema/model/proof-pack changes
 - **Post-merge verification:** boundary script pass; private paths untracked; M35–M38 guardrail tests pass on `main`.
 
+**M39 Details:**
+- **Objective:** Resolve or formally govern Torch CVE debt before public release — **Outcome A (upgrade accepted).**
+- **Audit driver:** Phase G roadmap — M39 closes deferred TORCH posture from CI (`TORCH-SEC-001`), replacing ignores with audited fix-backed versions after one bounded bump.
+- **Key files:**
+  - `docs/security/TORCH_SECURITY_REVIEW.md`
+  - `docs/milestones/PhaseG/M39/` (plan, summary, audit)
+  - `docs/phases/PhaseG_closeout.md`
+  - `pyproject.toml` (`torch>=2.8.0,<3`; `setuptools>=78.1.1,<82`)
+  - `.github/workflows/ci.yml` (Security Scan pip-audit without Torch `--ignore-vuln`)
+  - `Makefile`, `tests/test_m39_torch_security_docs.py`
+- **Torch before:** constraint `~=2.2.0`; typical resolve **2.2.x**.
+- **Torch after:** lower bound **2.8.0** (`GHSA-887c` fix line); editable install resolves to latest in range (e.g. **2.11.0** on PyPI CPU wheels during implementation).
+- **pip-audit before:** Torch + setuptools flagged without ignores; CI used ignores for Torch.
+- **pip-audit after (no Torch ignores):** clean on validated environment after setuptools pin.
+- **PR body:** include **`RELDEPS-EXCEPTION`** for `release-dependency-freeze`; open PR URL and CI URLs are recorded post-submit (not placeholders in-branch).
+- **No behavior changes:** dependency / security-scan posture only; no schema/model/proof-pack semantic changes.
+
 ---
 
-**Last Updated:** 2026-05-08 (Phase G active; M38 merged; M39 planned)
+**Last Updated:** 2026-05-08 (Phase G closed; M39 finalized)
 
 

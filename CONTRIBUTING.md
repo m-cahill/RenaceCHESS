@@ -92,6 +92,7 @@ Sanctioned dependency bumps on merged release branches may require the `RELDEPS-
 - [ ] Scope matches the milestone / issue.
 - [ ] `ruff check .`, `ruff format --check .`, `mypy src/renacechess`, and `pytest` pass locally when feasible (**Linux CI is authoritative** if Windows coverage or tooling differs).
 - [ ] **Credential scan:** optional locally with `make secret-scan` if [gitleaks](https://github.com/gitleaks/gitleaks) is installed; **CI always runs** the blocking `gitleaks` current-tree scan in **Security Scan** (see [`docs/security/CREDENTIAL_SCANNING.md`](docs/security/CREDENTIAL_SCANNING.md)).
+- [ ] **`pip-audit`:** optional locally (`pip-audit --desc on --progress-spinner off` after `pip install -e ".[dev]"`); mirrors the **dependency vulnerability scan** step in **Security Scan** (see [`docs/security/TORCH_SECURITY_REVIEW.md`](docs/security/TORCH_SECURITY_REVIEW.md)).
 - [ ] `python scripts/check_public_release_boundary.py` passes.
 - [ ] `git ls-files docs/prompts docs/foundationdocs .cursorrules` produces no output.
 - [ ] Documentation updated when behavior or process changes; onboarding links preserved (see [`tests/test_m36_docs_navigation.py`](tests/test_m36_docs_navigation.py)).

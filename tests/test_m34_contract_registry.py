@@ -6,8 +6,6 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
-import pytest
-
 from renacechess.contracts.models import ContractEntryV1, ContractRegistryV1
 from renacechess.contracts.registry import (
     compute_file_hash,
