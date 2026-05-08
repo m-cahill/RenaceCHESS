@@ -32,7 +32,7 @@ Bounded dependency change only: no schema, contract registry, proof-pack, archit
 
 ## CI install policy (GitHub Actions)
 
-GitHub Actions uses **CPU-only** Torch wheels for the **Test** job (including PR baseline/head coverage installs), by force-reinstalling the **same** `torch` PEP 508 spec from **`pyproject.toml`** against `--index-url https://download.pytorch.org/whl/cpu`.
+GitHub Actions uses **CPU-only** Torch wheels for the **Test** job (including PR baseline/head coverage installs), by force-reinstalling the **same** `torch` PEP 508 spec from **`pyproject.toml`** against `--index-url https://download.pytorch.org/whl/cpu`. The same step then re-applies the **`setuptools`** line from **`pyproject.toml`** via default PyPI (`pip install`), because the CPU index resolution can otherwise satisfy Torch’s transitive pins with an older setuptools than this project requires.
 
 **Rationale:** Default PyPI/Linux resolution can pull CUDA-linked wheels that fail to load on hosted `ubuntu-latest` runners (NCCL/driver mismatch). CPU wheels match project tests (no GPU asserted in CI) and preserve the declarative Torch constraint across base vs PR checkouts—**without** changing model semantics.
 

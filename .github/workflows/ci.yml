@@ -141,6 +141,18 @@ jobs:
               ]
           )
 
+          setuptools_spec = None
+          for line in deps:
+              entry = line.split(";")[0].strip()
+              if entry.startswith("setuptools"):
+                  setuptools_spec = entry
+                  break
+          if setuptools_spec is None:
+              setuptools_spec = "setuptools>=78.1.1,<82"
+          subprocess.check_call(
+              [sys.executable, "-m", "pip", "install", "--upgrade", setuptools_spec]
+          )
+
           import torch as t
 
           print("torch", t.__version__)
@@ -213,6 +225,18 @@ jobs:
               ]
           )
 
+          setuptools_spec = None
+          for line in deps:
+              entry = line.split(";")[0].strip()
+              if entry.startswith("setuptools"):
+                  setuptools_spec = entry
+                  break
+          if setuptools_spec is None:
+              setuptools_spec = "setuptools>=78.1.1,<82"
+          subprocess.check_call(
+              [sys.executable, "-m", "pip", "install", "--upgrade", setuptools_spec]
+          )
+
           import torch as t
 
           print("baseline checkout torch", t.__version__, "cuda_available", str(t.cuda.is_available()))
@@ -267,6 +291,18 @@ jobs:
                   "https://download.pytorch.org/whl/cpu",
                   torch_spec,
               ]
+          )
+
+          setuptools_spec = None
+          for line in deps:
+              entry = line.split(";")[0].strip()
+              if entry.startswith("setuptools"):
+                  setuptools_spec = entry
+                  break
+          if setuptools_spec is None:
+              setuptools_spec = "setuptools>=78.1.1,<82"
+          subprocess.check_call(
+              [sys.executable, "-m", "pip", "install", "--upgrade", setuptools_spec]
           )
 
           import torch as t
