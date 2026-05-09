@@ -2,7 +2,7 @@
 
 **Branch:** `m40-public-release-candidate-review`  
 **Recorded:** 2026-05-08  
-**PR:** [#54](https://github.com/m-cahill/RenaceCHESS/pull/54) — latest workflow [25593728282](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593728282) **SUCCESS** (PR tip `745439749414b769874681020f4833ef92fa4361`; prior runs [25593545258](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593545258), [25593352964](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593352964) also **SUCCESS**)  
+**PR:** [#54](https://github.com/m-cahill/RenaceCHESS/pull/54) — latest workflow [25593925084](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593925084) **SUCCESS** (PR tip `608ef6afa9aaa9b1d19348c14e367dc581951fe5`; prior runs also green: [25593728282](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593728282), [25593545258](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593545258), [25593352964](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593352964))  
 
 ## Starting point
 
