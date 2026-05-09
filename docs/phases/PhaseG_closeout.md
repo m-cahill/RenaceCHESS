@@ -4,7 +4,7 @@
 **Phase:** G — Public Release Readiness  
 **Status:** 🔒 **CLOSED**  
 **Milestones:** M36–M39  
-**Closeout Reference Date:** 2026-05-08  
+**Closeout Reference Date:** 2026-05-09  
 
 ---
 
@@ -18,6 +18,10 @@ Phase G prepared the repository for trustworthy public onboarding and auditabili
 - **Torch CVE governance** resolved via bounded dependency upgrade (`M39`; see `docs/security/TORCH_SECURITY_REVIEW.md`)
 
 No Phase G milestone modified frozen v1 contracts, the registry, or proof-pack semantics.
+
+### Canonical closure on `main` (M39)
+
+Torch CVE governance landed via **PR [#52](https://github.com/m-cahill/RenaceCHESS/pull/52)** (**squash**; merge commit **`ab74a2d75918f7aaf7b881468ccf06c64d2f5b2c`**). Authoritative **`main`** CI after merge: [25587676084](https://github.com/m-cahill/RenaceCHESS/actions/runs/25587676084) — **SUCCESS** (same gate family as Phase G predecessors: Security Scan, Lint, Type Check, Test, benchmarks, release locks). Detailed evidence: `docs/milestones/PhaseG/M39/M39_summary.md`, `docs/milestones/PhaseG/M39/M39_audit.md`, `docs/security/TORCH_SECURITY_REVIEW.md`.
 
 ---
 
