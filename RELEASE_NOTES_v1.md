@@ -47,7 +47,7 @@ This is **not** a product release. This is a **complete, auditable research syst
 - ✅ 10,000-position evaluation (100% of frozen eval v2)
 - ✅ Baseline comparison with delta metrics
 - ✅ No training/eval overlap verified
-- ✅ Honest reporting of degraded metrics (expected due to 8-move vocab)
+- ✅ Honest reporting of degraded metrics (expected due to narrow effective training regime; see Known Limitations)
 
 ### M33: External Proof Pack
 - ✅ Self-contained proof bundle (`proof_pack_v1/`)
@@ -59,8 +59,8 @@ This is **not** a product release. This is a **complete, auditable research syst
 
 ## What Was Not Proven
 
-- ❌ **Playing strength** — Training used 8-move vocabulary only
-- ❌ **Full-vocab performance** — Model specialized on narrow move set
+- ❌ **Playing strength** — Training used a constrained policy head; effective move diversity from synthetic data was narrow
+- ❌ **Full-vocab performance** — Model not trained on full legal-move vocabulary
 - ❌ **Production readiness** — Research system, not production
 - ❌ **Commercial viability** — No business model or product claims
 
@@ -69,15 +69,13 @@ This is **not** a product release. This is a **complete, auditable research syst
 ## Known Limitations
 
 ### Training Vocabulary
-M31 training used only 8 moves:
-- White: `e2e4`, `d2d4`, `g1f3`, `c2c4`
-- Black: `e7e5`, `d7d5`, `g8f6`, `c7c5`
+M31 policy training is locked in **`TrainingConfigLockV1`** with **`moveVocabSize`: 4096** (see `proof_pack_v1/training/config_lock.json` and `proof_pack_v1/proof_pack_manifest.json`). The synthetic training run exercised a **small set of common opening lines**—often summarized for readability as eight representative UCI moves (`e2e4`, `d2d4`, `g1f3`, `c2c4`, `e7e5`, `d7d5`, `g8f6`, `c7c5`)—so the **effective** move distribution in training is narrow compared to full human play.
 
 **Impact:** Trained model shows "degraded" metrics compared to baseline because:
-- Baseline has uniform probability over vocab, occasionally matching by chance
-- Trained model is confident in wrong moves for positions outside its distribution
+- Baseline has uniform probability over the evaluated vocabulary, occasionally matching by chance
+- Trained model concentrates probability on a regime that does not match the full frozen-eval move space
 
-**This is expected behavior** for a proof-of-concept. Production training will use full move vocabulary.
+**This is expected behavior** for a proof-of-concept. Production training will target a full move vocabulary and richer data.
 
 ### Synthetic Evaluation Set
 Frozen eval v2 is **synthetic** (algorithmically generated, not from real games).
