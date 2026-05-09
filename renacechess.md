@@ -1251,9 +1251,9 @@ From M00 forward, RenaceCHESS guarantees:
 - **Objective:** Final public release candidate review before any public release action (review/evidence only)
 - **Branch:** `m40-public-release-candidate-review`
 - **PR:** [#54](https://github.com/m-cahill/RenaceCHESS/pull/54)
-- **PR head (current tip):** `e84adc43cbd9feb7d22a6ba244dc83a9cc50aeee`
+- **PR head (current tip):** `e3718399b5bf3b9b26d2148a31e741ee2d528621`
 - **Final Commit:** TBD (GitHub squash merge commit on `main`, if merged)
-- **CI Run (tip / green):** [25594812746](https://github.com/m-cahill/RenaceCHESS/actions/runs/25594812746) — **SUCCESS**
+- **CI Run (tip / green):** [25612106853](https://github.com/m-cahill/RenaceCHESS/actions/runs/25612106853) — **SUCCESS**
 - **Note:** Earlier green runs on this PR branch include [25594450506](https://github.com/m-cahill/RenaceCHESS/actions/runs/25594450506) (`44e24c1…`). A docs-only commit once failed **Test** overlap comparison ([25594294614](https://github.com/m-cahill/RenaceCHESS/actions/runs/25594294614)); branch was reset; subsequent full runs **SUCCESS**.
 - **Verdict:** `APPROVE_PUBLIC_RC` (local + PR CI)
 - **Key Files:**
@@ -1269,6 +1269,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-05-09 (M40 PR [#54](https://github.com/m-cahill/RenaceCHESS/pull/54); CI **SUCCESS** [25594812746](https://github.com/m-cahill/RenaceCHESS/actions/runs/25594812746) at tip `e84adc43cbd9feb7d22a6ba244dc83a9cc50aeee`; not merged)
+**Last Updated:** 2026-05-09 (M40 PR [#54](https://github.com/m-cahill/RenaceCHESS/pull/54); CI **SUCCESS** [25612106853](https://github.com/m-cahill/RenaceCHESS/actions/runs/25612106853) at tip `e3718399b5bf3b9b26d2148a31e741ee2d528621`; not merged)
 
 
