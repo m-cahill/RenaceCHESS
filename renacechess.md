@@ -49,7 +49,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M37 | ✅ Closed (MERGED) | `m37-public-release-dx-shortcuts` → `main` | 2026-05-07 | Public Release DX Shortcuts |
 | M38 | ✅ Closed (MERGED) | `m38-credential-scanner-hardening` → `main` | 2026-05-07 | Credential Scanner Hardening |
 | M39 | ✅ Closed (MERGED) | `m39-torch-cve-upgrade-review` → `main` | 2026-05-09 | Torch CVE Upgrade / Deferral Review (Outcome A) |
-| M40 | 🚧 In Progress | `m40-public-release-candidate-review` → `main` | — | PUBLIC-RELEASE-CANDIDATE-REVIEW — Public boundary, release artifact, proof-pack, and claim-safety review |
+| M40 | 🚧 In Progress ([PR #54](https://github.com/m-cahill/RenaceCHESS/pull/54)) | `m40-public-release-candidate-review` → `main` | — | PUBLIC-RELEASE-CANDIDATE-REVIEW — Public boundary, release artifact, proof-pack, and claim-safety review |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -1250,11 +1250,11 @@ From M00 forward, RenaceCHESS guarantees:
 **M40 Details:**
 - **Objective:** Final public release candidate review before any public release action (review/evidence only)
 - **Branch:** `m40-public-release-candidate-review`
-- **PR:** #TBD
-- **PR head (pre-merge):** TBD (`git rev-parse HEAD` on `m40-public-release-candidate-review` when pushing)
-- **Final Commit:** TBD (GitHub squash merge commit on `main`, if applicable)
-- **CI Run:** TBD
-- **Verdict:** `APPROVE_PUBLIC_RC` (local review); pending PR CI
+- **PR:** [#54](https://github.com/m-cahill/RenaceCHESS/pull/54)
+- **PR head (pre-merge):** `cac0fb05377fb9fdb66924f2bf238cf9f70d3384`
+- **Final Commit:** TBD (GitHub squash merge commit on `main`, if merged)
+- **CI Run:** [25593352964](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593352964) — **SUCCESS** (all jobs; PR **`m40-public-release-candidate-review`**)
+- **Verdict:** `APPROVE_PUBLIC_RC` (local + PR CI)
 - **Key Files:**
   - `docs/milestones/PhaseG/M40/M40_public_release_candidate_review.md`
   - `docs/milestones/PhaseG/M40/M40_summary.md`
@@ -1268,6 +1268,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-05-08 (M40 branch; public RC review in progress)
+**Last Updated:** 2026-05-09 (M40 PR [#54](https://github.com/m-cahill/RenaceCHESS/pull/54) opened; CI green [25593352964](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593352964); not merged)
 
 
