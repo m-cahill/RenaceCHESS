@@ -33,7 +33,7 @@ Companion changes:
 
 ### CI / Test job (PR #52)
 
-**Test** job failed on first push: CUDA-linked Torch on `ubuntu-latest` (`libtorch_cuda.so` / NCCL). Addressed by reinstalling Torch from **`https://download.pytorch.org/whl/cpu`** after `pip install -e ".[dev]"`, using the `torch` line from the **current checkout’s** `pyproject.toml` (baseline vs PR head stay consistent).
+**Test** job failed on first push: CUDA-linked Torch on `ubuntu-latest` (`libtorch_cuda.so` / NCCL). Addressed by reinstalling Torch from **`https://download.pytorch.org/whl/cpu`** after `pip install -e ".[dev]"`, using the `torch` line from the **current checkout’s** `pyproject.toml` (baseline vs PR head stay consistent); **setuptools** is then re-installed from PyPI using the **`setuptools`** line from the same file so the CPU-index transitive pin does not violate **`setuptools>=78.1.1,<82`**.
 
 ---
 
@@ -41,6 +41,11 @@ Companion changes:
 
 - **`release-dependency-freeze` bypass:** Maintainer must include **`RELDEPS-EXCEPTION`** token in PR body per existing workflow.
 
-## Post-merge
+## Post-merge (`main`)
 
-Confirm **GitHub Actions** green on **`main`** after merge; rerun closeout narratives if CI numbers differ slightly from local (expected for coverage/OS).
+- **Merge:** squash [#52](https://github.com/m-cahill/RenaceCHESS/pull/52) → **`ab74a2d75918f7aaf7b881468ccf06c64d2f5b2c`** (2026-05-09 UTC).
+- **`main` CI:** [25587676084](https://github.com/m-cahill/RenaceCHESS/actions/runs/25587676084) — **SUCCESS** (**Security Scan** job incl. pip-audit / credential scan / bandit; **Test** with CPU-only Torch reinstall; **Release Dependency Freeze** / **Contract Freeze** / **Proof Pack Verification** pass).
+
+**Torch import (Linux Test job diagnostic on PR CI):** `torch 2.11.0+cpu`, **`cuda_available` false** ([25537724848](https://github.com/m-cahill/RenaceCHESS/actions/runs/25537724848) logs).
+
+**Maintainer spot-check:** boundary script pass; untracked private paths; **`pip-audit`** clean aside from editable skip; Phase G guardrail pytest subset pass (expected OS variance vs Linux for full suite counts).

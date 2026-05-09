@@ -48,7 +48,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M36 | ✅ Closed (MERGED) | `m36-public-release-docs-onboarding` → `main` | 2026-05-07 | Public Release Documentation Onboarding |
 | M37 | ✅ Closed (MERGED) | `m37-public-release-dx-shortcuts` → `main` | 2026-05-07 | Public Release DX Shortcuts |
 | M38 | ✅ Closed (MERGED) | `m38-credential-scanner-hardening` → `main` | 2026-05-07 | Credential Scanner Hardening |
-| M39 | ✅ Complete (Outcome A) | `m39-torch-cve-upgrade-review` | — | Torch CVE Upgrade / Deferral Review |
+| M39 | ✅ Closed (MERGED) | `m39-torch-cve-upgrade-review` → `main` | 2026-05-09 | Torch CVE Upgrade / Deferral Review (Outcome A) |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -781,7 +781,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M36 | Public Release Documentation Onboarding | Start Here docs, contributor guide, docs index |
 | M37 | Public Release DX Shortcuts | Makefile, setup helper, common command shortcuts |
 | M38 | Credential Scanner Hardening | gitleaks or equivalent scanner in CI |
-| M39 | Torch CVE Upgrade / Deferral Review — **complete (Outcome A)** | Bounded torch/setuptools upgrade; remove Torch-only pip-audit ignores |
+| M39 | Torch CVE Upgrade / Deferral Review — **merged to `main` (#52)** | Bounded torch/setuptools upgrade; remove Torch-only pip-audit ignores; Linux CI CPU Torch policy |
 
 ---
 
@@ -1226,6 +1226,10 @@ From M00 forward, RenaceCHESS guarantees:
 **M39 Details:**
 - **Objective:** Resolve or formally govern Torch CVE debt before public release — **Outcome A (upgrade accepted).**
 - **Audit driver:** Phase G roadmap — M39 closes deferred TORCH posture from CI (`TORCH-SEC-001`), replacing ignores with audited fix-backed versions after one bounded bump.
+- **PR / merge:** [#52](https://github.com/m-cahill/RenaceCHESS/pull/52) — squash merge commit **`ab74a2d75918f7aaf7b881468ccf06c64d2f5b2c`** (merged 2026-05-09 UTC).
+- **PR tip CI:** [25537724848](https://github.com/m-cahill/RenaceCHESS/actions/runs/25537724848) — success (**Security Scan** incl. pip-audit without Torch-specific ignores; **Test** with CPU-only Torch reinstall + setuptools restore from `pyproject.toml`; release gates).
+- **Post-merge `main` CI:** [25587676084](https://github.com/m-cahill/RenaceCHESS/actions/runs/25587676084) — success (Run ID **25587676084**; head matches merge commit).
+- **Torch import (Linux Test diagnostic, PR CI):** **`2.11.0+cpu`**, **`cuda_available` false** ([25537724848](https://github.com/m-cahill/RenaceCHESS/actions/runs/25537724848)).
 - **Key files:**
   - `docs/security/TORCH_SECURITY_REVIEW.md`
   - `docs/milestones/PhaseG/M39/` (plan, summary, audit)
@@ -1236,12 +1240,13 @@ From M00 forward, RenaceCHESS guarantees:
 - **Torch before:** constraint `~=2.2.0`; typical resolve **2.2.x**.
 - **Torch after:** lower bound **2.8.0** (`GHSA-887c` fix line); editable install resolves to latest in range (e.g. **2.11.0** on PyPI CPU wheels during implementation).
 - **pip-audit before:** Torch + setuptools flagged without ignores; CI used ignores for Torch.
-- **CI:** GitHub-hosted Linux **Test** job reinstalls Torch from the PyTorch **CPU** wheel index (`download.pytorch.org`) so imports succeed without CUDA/NCCL on `ubuntu-latest`; spec always matches checkout `pyproject.toml` (PR baseline vs head).
+- **CI:** GitHub-hosted Linux **Test** job reinstalls Torch from the PyTorch **CPU** wheel index (`download.pytorch.org`) so imports succeed without CUDA/NCCL on `ubuntu-latest`; spec always matches checkout `pyproject.toml` (PR baseline vs head); **setuptools** is then reapplied from PyPI using the project's declared pin.
 - **PR body:** include **`RELDEPS-EXCEPTION`** for `release-dependency-freeze`; open PR URL and CI URLs are recorded post-submit (not placeholders in-branch).
 - **No behavior changes:** dependency / security-scan posture only; no schema/model/proof-pack semantic changes.
+- **Post-merge verification:** boundary script pass; private paths untracked; M35–M39 guardrail tests pass; **`pip-audit`** clean (editable skip); Phase G **`main`** CI authoritative for coverage thresholds.
 
 ---
 
-**Last Updated:** 2026-05-08 (Phase G closed; M39 finalized)
+**Last Updated:** 2026-05-09 (M39 merged #52; Phase G canon on `main`)
 
 

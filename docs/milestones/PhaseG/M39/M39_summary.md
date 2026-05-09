@@ -2,8 +2,8 @@
 
 **Milestone:** M39  
 **Status:** ✅ Complete (Outcome A — upgrade accepted)  
-**Branch:** `m39-torch-cve-upgrade-review`  
-**Date:** 2026-05-08  
+**Branch:** `m39-torch-cve-upgrade-review` → **`main`** (squash [#52](https://github.com/m-cahill/RenaceCHESS/pull/52))  
+**Date:** 2026-05-09 (merged)  
 
 ---
 
@@ -38,8 +38,18 @@ Linux CI remains authoritative for **coverage thresholds** and integration.
 
 ## CI (GitHub Actions)
 
-PR #52 follow-up: default Linux wheels for recent Torch can be CUDA-linked and fail to import on `ubuntu-latest` (NCCL symbol errors). The **Test** job (including PR baseline/head coverage installs) force-reinstalls Torch from the **official CPU index** using the **same** PEP 508 spec as the checked-out `pyproject.toml` — CI install policy only; not a model semantic change. See `docs/security/TORCH_SECURITY_REVIEW.md`.
+PR #52 follow-up: default Linux wheels for recent Torch can be CUDA-linked and fail to import on `ubuntu-latest` (NCCL symbol errors). The **Test** job (including PR baseline/head coverage installs) force-reinstalls Torch from the **official CPU index** using the **same** PEP 508 spec as the checked-out `pyproject.toml`, then restores **`setuptools`** from PyPI per `pyproject.toml` — CI install policy only; not a model semantic change. See `docs/security/TORCH_SECURITY_REVIEW.md`.
 
-## Merge Note
+## Merge closure (`main`)
 
-Sanctioned `pyproject.toml` change requires **`RELDEPS-EXCEPTION`** in the PR description body for **`release-dependency-freeze`** CI.
+| Item | Evidence |
+|------|----------|
+| **PR #52** (squash) | Merge commit **`ab74a2d75918f7aaf7b881468ccf06c64d2f5b2c`** (merged 2026-05-09 UTC) |
+| **PR tip CI** | [25537724848](https://github.com/m-cahill/RenaceCHESS/actions/runs/25537724848) — **success** (Security Scan incl. pip-audit without Torch ignores; **Test** with CPU Torch + setuptools restore; release gates) |
+| **Post-merge `main` CI** | [25587676084](https://github.com/m-cahill/RenaceCHESS/actions/runs/25587676084) (`databaseId`: **25587676084**) — **success**, head **`ab74a2d…`** |
+
+**Maintainer verification on `main` (post-merge):** `scripts/check_public_release_boundary.py` pass; `git ls-files` on private prefixes empty; guardrail pytest subset pass; **`pip-audit`** no known vulns (editable skip as usual).
+
+## Merge Note (historical — PR gate)
+
+Sanctioned `pyproject.toml` change requires **`RELDEPS-EXCEPTION`** in the PR description body for **`release-dependency-freeze`** CI (#52 included token).
