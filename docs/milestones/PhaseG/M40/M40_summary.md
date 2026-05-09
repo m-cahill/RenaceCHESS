@@ -2,7 +2,7 @@
 
 **Phase:** G  
 **Branch:** `m40-public-release-candidate-review`  
-**PR:** [#54](https://github.com/m-cahill/RenaceCHESS/pull/54) — CI **SUCCESS** [25612611602](https://github.com/m-cahill/RenaceCHESS/actions/runs/25612611602) (PR head `20b625034c275a5b1d3168a6c94e566cb73d4c31`)  
+**PR:** [#54](https://github.com/m-cahill/RenaceCHESS/pull/54) — CI **SUCCESS** [25612790368](https://github.com/m-cahill/RenaceCHESS/actions/runs/25612790368) (PR head `df4fb4790c374f9aca7e9f2edb23e56c3713c74c`)  
 **Status:** Review-only milestone complete; **merge pending maintainer authorization**
 
 ## Objective
