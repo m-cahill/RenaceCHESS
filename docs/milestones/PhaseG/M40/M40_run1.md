@@ -2,7 +2,7 @@
 
 **Branch:** `m40-public-release-candidate-review`  
 **Recorded:** 2026-05-08  
-**PR:** [#54](https://github.com/m-cahill/RenaceCHESS/pull/54) — workflow [25612106853](https://github.com/m-cahill/RenaceCHESS/actions/runs/25612106853) **SUCCESS** for tip `e3718399b5bf3b9b26d2148a31e741ee2d528621`  
+**PR:** [#54](https://github.com/m-cahill/RenaceCHESS/pull/54) — workflow [25612270010](https://github.com/m-cahill/RenaceCHESS/actions/runs/25612270010) **SUCCESS** for tip `6b831fe8015bea89a71a9230bddfbe4a29840106`  
 
 ## Starting point
 
