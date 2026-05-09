@@ -5,7 +5,7 @@
 **Status:** 🔒 **CLOSED**  
 **Milestones:** M36–M39 (plus **M40** — final public release candidate review appended after Phase G closeout; no feature scope reopened)
 
-**Closeout Reference Date:** 2026-05-09 (**M40** governance review: 2026-05-08 — see `docs/milestones/PhaseG/M40/`)  
+**Closeout Reference Date:** 2026-05-09 (**M40** merged to `main` — see `docs/milestones/PhaseG/M40/` and canonical closure below)  
 
 ---
 
@@ -23,6 +23,14 @@ No Phase G milestone modified frozen v1 contracts, the registry, or proof-pack s
 ### M40 — Final public release candidate review (after M39)
 
 **M40** was added as a **governance-only** public release candidate review after the Phase G feature milestones closed. It does not reopen Phase G for product work. Evidence and verdict: `docs/milestones/PhaseG/M40/M40_public_release_candidate_review.md`.
+
+### Canonical closure on `main` (M40)
+
+Public release candidate review landed via **PR [#54](https://github.com/m-cahill/RenaceCHESS/pull/54)** (**squash**; merge commit **`f175c8999a70772c6a2df0246cc92efd17c73097`**). Final PR head: **`e65fc462178540f7316b4d3bac318141d77d31ec`**. Pre-merge PR CI: [25612956250](https://github.com/m-cahill/RenaceCHESS/actions/runs/25612956250) — **SUCCESS**. Authoritative **`main`** CI after merge: [25614956502](https://github.com/m-cahill/RenaceCHESS/actions/runs/25614956502) — **SUCCESS**. **Verdict:** `APPROVE_PUBLIC_RC`. **M40 does not authorize** tag, package publish, GitHub Release, or repository visibility change — **M41** or explicit release command only.
+
+Detailed evidence: `docs/milestones/PhaseG/M40/M40_summary.md`, `M40_run1.md`, `M40_public_release_candidate_review.md`.
+
+---
 
 ### Canonical closure on `main` (M39)
 
@@ -44,4 +52,4 @@ Torch CVE governance landed via **PR [#52](https://github.com/m-cahill/RenaceCHE
 
 ## What Remains After Phase G
 
-Ongoing hygiene is embedded in CI and contributor workflows (boundary check, scanners, editable install). Future security work proceeds under normal milestones and governance; no standing Phase-G-only backlog assumed here.
+Ongoing hygiene is embedded in CI and contributor workflows (boundary check, scanners, editable install). **Public release action** (tag, package publish, GitHub Release, visibility) is **not** implied by Phase G or M40 — use **M41** or an explicit release command. Future security work proceeds under normal milestones and governance.

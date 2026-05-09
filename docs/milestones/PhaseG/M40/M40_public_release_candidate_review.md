@@ -138,6 +138,6 @@ Full transcript: `docs/milestones/PhaseG/M40/M40_run1.md`.
 - Quality gates pass in authoritative CI scope; `mypy src tests` failure is out-of-scope for current CI
 - TORCH-SEC-001 addressed in M39; no new residual observed in M40 pip-audit spot check
 
-**Not authorized by this milestone:** merge to `main`, tagging, publishing packages, or any public release **action** — explicit maintainer approval required per M40 charter.
+**Not authorized by this milestone (still):** tagging, publishing packages, GitHub Releases, or repository visibility changes — **M41** or an explicit release command.
 
-**Next step:** Open PR for M40; await CI; record PR URL, head SHA, and final verdict in `renacechess.md` when closed.
+**Merge boundary (completed 2026-05-09):** Maintainer-authorized **squash merge** of PR [#54](https://github.com/m-cahill/RenaceCHESS/pull/54) landed review/evidence docs on `main` as commit **`f175c8999a70772c6a2df0246cc92efd17c73097`**. Final PR head: **`e65fc462178540f7316b4d3bac318141d77d31ec`**. Pre-merge PR CI: [25612956250](https://github.com/m-cahill/RenaceCHESS/actions/runs/25612956250) — **success**. Post-merge `main` CI: [25614956502](https://github.com/m-cahill/RenaceCHESS/actions/runs/25614956502) — **success**.

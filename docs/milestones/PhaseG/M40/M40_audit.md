@@ -38,6 +38,22 @@
 
 ---
 
+## Merge boundary (closeout)
+
+| Field | Value |
+|-------|--------|
+| PR | [#54](https://github.com/m-cahill/RenaceCHESS/pull/54) |
+| Final PR head | `e65fc462178540f7316b4d3bac318141d77d31ec` |
+| Squash on `main` | `f175c8999a70772c6a2df0246cc92efd17c73097` |
+| Pre-merge PR CI | [25612956250](https://github.com/m-cahill/RenaceCHESS/actions/runs/25612956250) — **success** |
+| Post-merge `main` CI | [25614956502](https://github.com/m-cahill/RenaceCHESS/actions/runs/25614956502) — **success** |
+
+M40 **did not** authorize tag, publish, package release, or visibility change.
+
+---
+
 ## Prompt sources
 
 Milestone audit prompt files under `docs/prompts/` are not present in the tracked repository (private boundary). This audit follows the structure of prior Phase G milestones (e.g. M39 audit) and the M40 plan acceptance criteria.
+
+**Refresh:** Closeout metrics recorded above; no separate prompt-driven regeneration available in-repo.

@@ -2,7 +2,15 @@
 
 **Branch:** `m40-public-release-candidate-review`  
 **Recorded:** 2026-05-08  
-**PR:** [#54](https://github.com/m-cahill/RenaceCHESS/pull/54) — workflow [25612790368](https://github.com/m-cahill/RenaceCHESS/actions/runs/25612790368) **SUCCESS** for tip `df4fb4790c374f9aca7e9f2edb23e56c3713c74c`  
+**PR:** [#54](https://github.com/m-cahill/RenaceCHESS/pull/54) — workflow [25612790368](https://github.com/m-cahill/RenaceCHESS/actions/runs/25612790368) **SUCCESS** for tip `df4fb4790c374f9aca7e9f2edb23e56c3713c74c` (pre–SoT-align commits; see merge boundary below for authoritative closeout)
+
+## Merge boundary (post-merge `main`)
+
+- **Final PR head (squash parent tip):** `e65fc462178540f7316b4d3bac318141d77d31ec`
+- **Pre-merge PR CI (tip):** [25612956250](https://github.com/m-cahill/RenaceCHESS/actions/runs/25612956250) — **SUCCESS**
+- **Squash merge commit on `main`:** `f175c8999a70772c6a2df0246cc92efd17c73097`
+- **Post-merge `main` CI:** [25614956502](https://github.com/m-cahill/RenaceCHESS/actions/runs/25614956502) — **SUCCESS**
+- **Merged:** 2026-05-09 UTC. **M40 did not authorize** tag, publish, package release, or visibility change.  
 
 ## Starting point
 

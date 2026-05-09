@@ -49,7 +49,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M37 | ✅ Closed (MERGED) | `m37-public-release-dx-shortcuts` → `main` | 2026-05-07 | Public Release DX Shortcuts |
 | M38 | ✅ Closed (MERGED) | `m38-credential-scanner-hardening` → `main` | 2026-05-07 | Credential Scanner Hardening |
 | M39 | ✅ Closed (MERGED) | `m39-torch-cve-upgrade-review` → `main` | 2026-05-09 | Torch CVE Upgrade / Deferral Review (Outcome A) |
-| M40 | 🚧 In Progress ([PR #54](https://github.com/m-cahill/RenaceCHESS/pull/54)) | `m40-public-release-candidate-review` → `main` | — | PUBLIC-RELEASE-CANDIDATE-REVIEW — Public boundary, release artifact, proof-pack, and claim-safety review |
+| M40 | ✅ Closed (MERGED) | `m40-public-release-candidate-review` → `main` | 2026-05-09 | PUBLIC-RELEASE-CANDIDATE-REVIEW — Public boundary, release artifact, proof-pack, and claim-safety review |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -783,7 +783,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M37 | Public Release DX Shortcuts | Makefile, setup helper, common command shortcuts |
 | M38 | Credential Scanner Hardening | gitleaks or equivalent scanner in CI |
 | M39 | Torch CVE Upgrade / Deferral Review — **merged to `main` (#52)** | Bounded torch/setuptools upgrade; remove Torch-only pip-audit ignores; Linux CI CPU Torch policy |
-| M40 | Public Release Candidate Review | Final boundary + artifact + verification + claim-safety gate before any public release **action** |
+| M40 | Public Release Candidate Review — **merged to `main` (#54)** | Final boundary + artifact + verification + claim-safety gate before any public release **action** (RC verdict only; no tag/publish by M40) |
 
 ---
 
@@ -1248,27 +1248,26 @@ From M00 forward, RenaceCHESS guarantees:
 - **Post-merge verification:** boundary script pass; private paths untracked; M35–M39 guardrail tests pass; **`pip-audit`** clean (editable skip); Phase G **`main`** CI authoritative for coverage thresholds.
 
 **M40 Details:**
-- **Objective:** Final public release candidate review before any public release action (review/evidence only)
-- **Branch:** `m40-public-release-candidate-review`
-- **PR:** [#54](https://github.com/m-cahill/RenaceCHESS/pull/54)
-- **PR head (current tip):** `df4fb4790c374f9aca7e9f2edb23e56c3713c74c`
-- **Final Commit:** TBD (GitHub squash merge commit on `main`, if merged)
-- **CI Run (tip / green):** [25612790368](https://github.com/m-cahill/RenaceCHESS/actions/runs/25612790368) — **SUCCESS**
-- **Note:** Earlier green runs on this PR branch include [25594450506](https://github.com/m-cahill/RenaceCHESS/actions/runs/25594450506) (`44e24c1…`). A docs-only commit once failed **Test** overlap comparison ([25594294614](https://github.com/m-cahill/RenaceCHESS/actions/runs/25594294614)); branch was reset; subsequent full runs **SUCCESS**.
-- **Verdict:** `APPROVE_PUBLIC_RC` (local + PR CI)
+- **Objective:** Final public release candidate review before any public release action (review/evidence only). **M40 did not authorize tag, publish, package release, or visibility change** — public release action remains **M41** or an explicit release command.
+- **Branch:** `m40-public-release-candidate-review` (merged; branch deleted on remote after squash)
+- **PR / merge:** [#54](https://github.com/m-cahill/RenaceCHESS/pull/54) — squash merge commit **`f175c8999a70772c6a2df0246cc92efd17c73097`** (merged 2026-05-09 UTC).
+- **Final PR head (pre-merge tip):** `e65fc462178540f7316b4d3bac318141d77d31ec`
+- **Pre-merge PR CI (tip):** [25612956250](https://github.com/m-cahill/RenaceCHESS/actions/runs/25612956250) — **SUCCESS**
+- **Post-merge `main` CI:** [25614956502](https://github.com/m-cahill/RenaceCHESS/actions/runs/25614956502) — **SUCCESS** (head matches squash merge commit)
+- **Verdict:** `APPROVE_PUBLIC_RC` (see `M40_public_release_candidate_review.md`)
 - **Key Files:**
   - `docs/milestones/PhaseG/M40/M40_public_release_candidate_review.md`
   - `docs/milestones/PhaseG/M40/M40_summary.md`
   - `docs/milestones/PhaseG/M40/M40_audit.md`
+  - `docs/milestones/PhaseG/M40/M40_run1.md`
 - **Release Candidate Review:**
   - Public boundary: PASS
   - Documentation: PASS (with frozen proof-pack manifest prose caveat in review doc)
   - Contract registry: PASS (CI-equivalent; Windows LF caveat in `M40_run1.md`)
   - Proof pack: PASS
-  - Known deferrals: MyPy on `tests/`, benchmark thresholds, optional manifest prose reconciliation → M41+
+  - Known deferrals: MyPy on `tests/`, benchmark thresholds, optional manifest prose reconciliation → M41+ (non-blocking for RC)
+- **Post-merge verification:** `main` at squash merge **SUCCESS** [25614956502](https://github.com/m-cahill/RenaceCHESS/actions/runs/25614956502); charter preserved (no tag/publish/release by M40)
 
----
-
-**Last Updated:** 2026-05-09 (M40 PR [#54](https://github.com/m-cahill/RenaceCHESS/pull/54); CI **SUCCESS** [25612790368](https://github.com/m-cahill/RenaceCHESS/actions/runs/25612790368) at tip `df4fb4790c374f9aca7e9f2edb23e56c3713c74c`; not merged)
+**Last Updated:** 2026-05-09 (M40 merged via PR [#54](https://github.com/m-cahill/RenaceCHESS/pull/54); squash **`f175c8999a70772c6a2df0246cc92efd17c73097`**; post-merge **`main`** CI **SUCCESS** [25614956502](https://github.com/m-cahill/RenaceCHESS/actions/runs/25614956502); verdict **`APPROVE_PUBLIC_RC`**; no public release action authorized by M40)
 
 
