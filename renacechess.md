@@ -1251,9 +1251,10 @@ From M00 forward, RenaceCHESS guarantees:
 - **Objective:** Final public release candidate review before any public release action (review/evidence only)
 - **Branch:** `m40-public-release-candidate-review`
 - **PR:** [#54](https://github.com/m-cahill/RenaceCHESS/pull/54)
-- **PR head (pre-merge):** `cac0fb05377fb9fdb66924f2bf238cf9f70d3384`
+- **PR head (current tip):** `745439749414b769874681020f4833ef92fa4361`
 - **Final Commit:** TBD (GitHub squash merge commit on `main`, if merged)
-- **CI Run:** [25593352964](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593352964) — **SUCCESS** (all jobs; PR **`m40-public-release-candidate-review`**)
+- **CI Run (current tip):** [25593728282](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593728282) — **SUCCESS** (`7454397…`)
+- **CI Run (prior):** [25593545258](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593545258) — **SUCCESS** (`167c02d…`); [25593352964](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593352964) — **SUCCESS** (`cac0fb0…`, initial M40 payload)
 - **Verdict:** `APPROVE_PUBLIC_RC` (local + PR CI)
 - **Key Files:**
   - `docs/milestones/PhaseG/M40/M40_public_release_candidate_review.md`
@@ -1268,6 +1269,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-05-09 (M40 PR [#54](https://github.com/m-cahill/RenaceCHESS/pull/54) opened; CI green [25593352964](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593352964); not merged)
+**Last Updated:** 2026-05-09 (M40 PR [#54](https://github.com/m-cahill/RenaceCHESS/pull/54); CI **SUCCESS** [25593728282](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593728282) at tip `745439749414b769874681020f4833ef92fa4361`; not merged)
 
 
