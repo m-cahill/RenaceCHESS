@@ -3,8 +3,9 @@
 **Project:** RenaceCHESS  
 **Phase:** G — Public Release Readiness  
 **Status:** 🔒 **CLOSED**  
-**Milestones:** M36–M39  
-**Closeout Reference Date:** 2026-05-09  
+**Milestones:** M36–M39 (plus **M40** — final public release candidate review appended after Phase G closeout; no feature scope reopened)
+
+**Closeout Reference Date:** 2026-05-09 (**M40** governance review: 2026-05-08 — see `docs/milestones/PhaseG/M40/`)  
 
 ---
 
@@ -18,6 +19,10 @@ Phase G prepared the repository for trustworthy public onboarding and auditabili
 - **Torch CVE governance** resolved via bounded dependency upgrade (`M39`; see `docs/security/TORCH_SECURITY_REVIEW.md`)
 
 No Phase G milestone modified frozen v1 contracts, the registry, or proof-pack semantics.
+
+### M40 — Final public release candidate review (after M39)
+
+**M40** was added as a **governance-only** public release candidate review after the Phase G feature milestones closed. It does not reopen Phase G for product work. Evidence and verdict: `docs/milestones/PhaseG/M40/M40_public_release_candidate_review.md`.
 
 ### Canonical closure on `main` (M39)
 
@@ -33,6 +38,7 @@ Torch CVE governance landed via **PR [#52](https://github.com/m-cahill/RenaceCHE
 | M37 | `Makefile`, `setup_dev.py`, fast checks |
 | M38 | gitleaks-blocking current-tree credential scan + policy docs |
 | M39 | Torch/setuptools pins; removal of Torch-only `pip-audit` ignores; `TORCH_SECURITY_REVIEW.md` |
+| M40 | Public release candidate review (boundary, artifacts, verification, claim safety) — `docs/milestones/PhaseG/M40/` |
 
 ---
 

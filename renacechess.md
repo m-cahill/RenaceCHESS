@@ -49,6 +49,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M37 | ✅ Closed (MERGED) | `m37-public-release-dx-shortcuts` → `main` | 2026-05-07 | Public Release DX Shortcuts |
 | M38 | ✅ Closed (MERGED) | `m38-credential-scanner-hardening` → `main` | 2026-05-07 | Credential Scanner Hardening |
 | M39 | ✅ Closed (MERGED) | `m39-torch-cve-upgrade-review` → `main` | 2026-05-09 | Torch CVE Upgrade / Deferral Review (Outcome A) |
+| M40 | 🚧 In Progress | `m40-public-release-candidate-review` → `main` | — | PUBLIC-RELEASE-CANDIDATE-REVIEW — Public boundary, release artifact, proof-pack, and claim-safety review |
 
 **M00 Details:**
 - **CI Run 1:** 21271461853 (FAILURE - 28 Ruff errors, 7 MyPy errors)
@@ -772,7 +773,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | D | Data Expansion, Calibration & Quality | 🔒 **CLOSED** | M23–M28 | `docs/phases/PhaseD_closeout.md` |
 | E | Scale Proof, Training Run, Release Lock | 🔒 **CLOSED** | M29–M34 | `docs/phases/PhaseE_closeout.md` |
 | F | Public Release Hardening | 🔒 **CLOSED** | M35 | Public release boundary enforced |
-| G | Public Release Readiness | 🔒 **CLOSED** | M36–M39 | `docs/phases/PhaseG_closeout.md` |
+| G | Public Release Readiness | 🔒 **CLOSED** | M36–M40 (M40: final RC review after closeout; see `PhaseG_closeout.md`) | `docs/phases/PhaseG_closeout.md` |
 
 ### Public Release Readiness Roadmap (Phase G)
 
@@ -782,6 +783,7 @@ This document tracks milestones, schema, migrations, and governance decisions fo
 | M37 | Public Release DX Shortcuts | Makefile, setup helper, common command shortcuts |
 | M38 | Credential Scanner Hardening | gitleaks or equivalent scanner in CI |
 | M39 | Torch CVE Upgrade / Deferral Review — **merged to `main` (#52)** | Bounded torch/setuptools upgrade; remove Torch-only pip-audit ignores; Linux CI CPU Torch policy |
+| M40 | Public Release Candidate Review | Final boundary + artifact + verification + claim-safety gate before any public release **action** |
 
 ---
 
@@ -1056,7 +1058,7 @@ From M00 forward, RenaceCHESS guarantees:
   - Policy Top-1 Accuracy: 0.04% (trained) vs 0.51% (baseline) → degraded (expected)
   - No training overlap confirmed
   - Baseline seed: 1337 (fixed, recorded)
-- **Known Limitation:** M31 trained with 8-move vocab; degradation is expected and correctly explained
+- **Known Limitation:** M31 policy lock uses `moveVocabSize: 4096` with narrow effective training distribution; eval degradation vs uniform baseline is expected (see `RELEASE_NOTES_v1.md`)
 - **Referenced Artifacts:**
   - PostTrainEvalReportV1 — `artifacts/m32_post_train_eval/post_train_eval_report.json`
   - TrainingRunReportV1 — `artifacts/m31_training_run/training_run_report.json`
@@ -1245,8 +1247,27 @@ From M00 forward, RenaceCHESS guarantees:
 - **No behavior changes:** dependency / security-scan posture only; no schema/model/proof-pack semantic changes.
 - **Post-merge verification:** boundary script pass; private paths untracked; M35–M39 guardrail tests pass; **`pip-audit`** clean (editable skip); Phase G **`main`** CI authoritative for coverage thresholds.
 
+**M40 Details:**
+- **Objective:** Final public release candidate review before any public release action (review/evidence only)
+- **Branch:** `m40-public-release-candidate-review`
+- **PR:** #TBD
+- **PR head (pre-merge):** TBD (`git rev-parse HEAD` on `m40-public-release-candidate-review` when pushing)
+- **Final Commit:** TBD (GitHub squash merge commit on `main`, if applicable)
+- **CI Run:** TBD
+- **Verdict:** `APPROVE_PUBLIC_RC` (local review); pending PR CI
+- **Key Files:**
+  - `docs/milestones/PhaseG/M40/M40_public_release_candidate_review.md`
+  - `docs/milestones/PhaseG/M40/M40_summary.md`
+  - `docs/milestones/PhaseG/M40/M40_audit.md`
+- **Release Candidate Review:**
+  - Public boundary: PASS
+  - Documentation: PASS (with frozen proof-pack manifest prose caveat in review doc)
+  - Contract registry: PASS (CI-equivalent; Windows LF caveat in `M40_run1.md`)
+  - Proof pack: PASS
+  - Known deferrals: MyPy on `tests/`, benchmark thresholds, optional manifest prose reconciliation → M41+
+
 ---
 
-**Last Updated:** 2026-05-09 (M39 merged #52; Phase G canon on `main`)
+**Last Updated:** 2026-05-08 (M40 branch; public RC review in progress)
 
 

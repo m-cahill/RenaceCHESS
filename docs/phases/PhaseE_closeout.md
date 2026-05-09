@@ -75,7 +75,7 @@ M29 established RTX 5090 Blackwell compatibility:
 * 10,000-position evaluation (100% of frozen eval v2)
 * Baseline comparison with delta metrics
 * No training/eval overlap verified
-* Honest reporting of degraded metrics (expected due to 8-move vocab)
+* Honest reporting of degraded metrics (expected due to narrow effective training regime; locked `moveVocabSize` in `TrainingConfigLockV1` is 4096 — see proof pack `config_lock.json`)
 
 **Key invariant:** Evaluation is honest; limitations are explicit.
 
@@ -153,8 +153,8 @@ It does **not** claim:
 ## 5. What Phase E Did Not Prove
 
 ### Playing Strength
-- Training used 8-move vocabulary only
-- Model specialized on narrow move set
+- Policy head locked with **`moveVocabSize`: 4096**; synthetic M31 data exercised a small opening set (often summarized as ~8 UCI moves), so **effective** training diversity was narrow
+- Model specialized away from general human move distributions on frozen eval
 - Metrics degraded compared to baseline (expected)
 
 ### Full-Vocab Performance
@@ -171,13 +171,13 @@ It does **not** claim:
 ## 6. Known Limitations (Explicitly Documented)
 
 ### Training Vocabulary
-M31 training used only 8 moves (common openings). This is **by design** for proof-of-concept scope.
+M31 policy training records **`moveVocabSize`: 4096** in **`TrainingConfigLockV1`**. The executed synthetic dataset emphasized a **small opening move set** (often summarized as eight UCI moves for readability), so the effective training distribution remains narrow. This is **by design** for proof-of-concept scope.
 
 **Impact:** Trained model shows "degraded" metrics because:
-- Baseline has uniform probability over vocab, occasionally matching by chance
-- Trained model is confident in wrong moves for positions outside its distribution
+- Baseline has uniform probability over the evaluation vocabulary, occasionally matching by chance
+- Trained model concentrates mass on a regime that mismatches much of frozen eval
 
-**Mitigation:** Production training will use full move vocabulary.
+**Mitigation:** Production training will use full move vocabulary and richer data.
 
 ### Synthetic Evaluation Set
 Frozen eval v2 is **synthetic** (algorithmically generated, not from real games).
