@@ -1251,10 +1251,10 @@ From M00 forward, RenaceCHESS guarantees:
 - **Objective:** Final public release candidate review before any public release action (review/evidence only)
 - **Branch:** `m40-public-release-candidate-review`
 - **PR:** [#54](https://github.com/m-cahill/RenaceCHESS/pull/54)
-- **PR head (current tip):** `608ef6afa9aaa9b1d19348c14e367dc581951fe5`
+- **PR head (current tip):** `3dcd03d1667224c7269e5a02f636c9a7841cfb14`
 - **Final Commit:** TBD (GitHub squash merge commit on `main`, if merged)
-- **CI Run (current tip):** [25593925084](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593925084) — **SUCCESS** (`608ef6a…`)
-- **CI Run (prior):** [25593728282](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593728282) — **SUCCESS** (`7454397…`); [25593545258](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593545258) — **SUCCESS** (`167c02d…`); [25593352964](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593352964) — **SUCCESS** (`cac0fb0…`, initial M40 payload)
+- **CI Run (for this tip / green):** [25594101402](https://github.com/m-cahill/RenaceCHESS/actions/runs/25594101402) — **SUCCESS**
+- **CI Run (prior):** [25593925084](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593925084) — **SUCCESS** (`608ef6a…`); [25593728282](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593728282) — **SUCCESS** (`7454397…`); [25593545258](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593545258) — **SUCCESS** (`167c02d…`); [25593352964](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593352964) — **SUCCESS** (`cac0fb0…`, initial M40 payload)
 - **Verdict:** `APPROVE_PUBLIC_RC` (local + PR CI)
 - **Key Files:**
   - `docs/milestones/PhaseG/M40/M40_public_release_candidate_review.md`
@@ -1269,6 +1269,6 @@ From M00 forward, RenaceCHESS guarantees:
 
 ---
 
-**Last Updated:** 2026-05-09 (M40 PR [#54](https://github.com/m-cahill/RenaceCHESS/pull/54); CI **SUCCESS** [25593925084](https://github.com/m-cahill/RenaceCHESS/actions/runs/25593925084) at tip `608ef6afa9aaa9b1d19348c14e367dc581951fe5`; not merged)
+**Last Updated:** 2026-05-09 (M40 PR [#54](https://github.com/m-cahill/RenaceCHESS/pull/54); CI **SUCCESS** [25594101402](https://github.com/m-cahill/RenaceCHESS/actions/runs/25594101402) at tip `3dcd03d1667224c7269e5a02f636c9a7841cfb14`; not merged)
 
 
