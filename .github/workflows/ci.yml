@@ -47,17 +47,11 @@ jobs:
       - name: Dependency vulnerability scan (pip-audit)
         run: |
           echo "Running pip-audit against installed environment..."
-          # Ignore deferred torch vulnerabilities (see M23_audit.md TORCH-SEC-001)
-          pip-audit --desc on --progress-spinner off \
-            --ignore-vuln PYSEC-2025-41 \
-            --ignore-vuln PYSEC-2024-259 \
-            --ignore-vuln GHSA-3749-ghw9-m3mg \
-            --ignore-vuln GHSA-887c-mr87-cxwp
+          pip-audit --desc on --progress-spinner off
       - name: Static security analysis (bandit)
         run: |
           echo "Running bandit SAST scan..."
-          # Skip B614 (pytorch_load_save) - torch.save(state_dict) is safe pattern
-          # Related to TORCH-SEC-001 deferral in M23_audit.md
+          # Skip B614 (pytorch_load_save): controlled torch.save(state_dict); see docs/security/TORCH_SECURITY_REVIEW.md
           bandit -r src/renacechess -ll -ii --skip B614
 
   lint:
@@ -113,6 +107,57 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install -e ".[dev]"
+      - name: Force CPU-only Torch wheel (ubuntu-latest hosted runners)
+        run: |
+          python << 'PYTORCH_CI_CPU'
+          import pathlib
+          import subprocess
+          import sys
+
+          import tomllib
+
+          cfg = tomllib.loads(pathlib.Path("pyproject.toml").read_text(encoding="utf-8"))
+          deps = cfg.get("project", {}).get("dependencies", [])
+          torch_spec = None
+          for line in deps:
+              entry = line.split(";")[0].strip()
+              if entry.startswith("torch"):
+                  torch_spec = entry
+                  break
+          if torch_spec is None:
+              print("ERROR: torch not listed in pyproject.toml [project] dependencies", file=sys.stderr)
+              sys.exit(1)
+          subprocess.check_call(
+              [
+                  sys.executable,
+                  "-m",
+                  "pip",
+                  "install",
+                  "--upgrade",
+                  "--force-reinstall",
+                  "--index-url",
+                  "https://download.pytorch.org/whl/cpu",
+                  torch_spec,
+              ]
+          )
+
+          setuptools_spec = None
+          for line in deps:
+              entry = line.split(";")[0].strip()
+              if entry.startswith("setuptools"):
+                  setuptools_spec = entry
+                  break
+          if setuptools_spec is None:
+              setuptools_spec = "setuptools>=78.1.1,<82"
+          subprocess.check_call(
+              [sys.executable, "-m", "pip", "install", "--upgrade", setuptools_spec]
+          )
+
+          import torch as t
+
+          print("torch", t.__version__)
+          print("cuda_available", str(t.cuda.is_available()))
+          PYTORCH_CI_CPU
       - name: Determine coverage mode
         id: coverage_check
         shell: bash
@@ -148,6 +193,55 @@ jobs:
           python -m pip install --upgrade pip --quiet
           pip install -e ".[dev]" --quiet
 
+          python << 'PYTORCH_CI_CPU'
+          import pathlib
+          import subprocess
+          import sys
+
+          import tomllib
+
+          cfg = tomllib.loads(pathlib.Path("pyproject.toml").read_text(encoding="utf-8"))
+          deps = cfg.get("project", {}).get("dependencies", [])
+          torch_spec = None
+          for line in deps:
+              entry = line.split(";")[0].strip()
+              if entry.startswith("torch"):
+                  torch_spec = entry
+                  break
+          if torch_spec is None:
+              print("ERROR: torch not listed in pyproject.toml [project] dependencies", file=sys.stderr)
+              sys.exit(1)
+          subprocess.check_call(
+              [
+                  sys.executable,
+                  "-m",
+                  "pip",
+                  "install",
+                  "--upgrade",
+                  "--force-reinstall",
+                  "--index-url",
+                  "https://download.pytorch.org/whl/cpu",
+                  torch_spec,
+              ]
+          )
+
+          setuptools_spec = None
+          for line in deps:
+              entry = line.split(";")[0].strip()
+              if entry.startswith("setuptools"):
+                  setuptools_spec = entry
+                  break
+          if setuptools_spec is None:
+              setuptools_spec = "setuptools>=78.1.1,<82"
+          subprocess.check_call(
+              [sys.executable, "-m", "pip", "install", "--upgrade", setuptools_spec]
+          )
+
+          import torch as t
+
+          print("baseline checkout torch", t.__version__, "cuda_available", str(t.cuda.is_available()))
+          PYTORCH_CI_CPU
+
           # Fresh DB: .coverage is gitignored so git clean -fd will not remove it later
           rm -f .coverage .coverage.*
 
@@ -166,6 +260,55 @@ jobs:
           mv /tmp/coverage-base.xml coverage-base.xml
           python -m pip install --upgrade pip --quiet
           pip install -e ".[dev]" --quiet
+
+          python << 'PYTORCH_CI_CPU'
+          import pathlib
+          import subprocess
+          import sys
+
+          import tomllib
+
+          cfg = tomllib.loads(pathlib.Path("pyproject.toml").read_text(encoding="utf-8"))
+          deps = cfg.get("project", {}).get("dependencies", [])
+          torch_spec = None
+          for line in deps:
+              entry = line.split(";")[0].strip()
+              if entry.startswith("torch"):
+                  torch_spec = entry
+                  break
+          if torch_spec is None:
+              print("ERROR: torch not listed in pyproject.toml [project] dependencies", file=sys.stderr)
+              sys.exit(1)
+          subprocess.check_call(
+              [
+                  sys.executable,
+                  "-m",
+                  "pip",
+                  "install",
+                  "--upgrade",
+                  "--force-reinstall",
+                  "--index-url",
+                  "https://download.pytorch.org/whl/cpu",
+                  torch_spec,
+              ]
+          )
+
+          setuptools_spec = None
+          for line in deps:
+              entry = line.split(";")[0].strip()
+              if entry.startswith("setuptools"):
+                  setuptools_spec = entry
+                  break
+          if setuptools_spec is None:
+              setuptools_spec = "setuptools>=78.1.1,<82"
+          subprocess.check_call(
+              [sys.executable, "-m", "pip", "install", "--upgrade", setuptools_spec]
+          )
+
+          import torch as t
+
+          print("PR head checkout torch", t.__version__, "cuda_available", str(t.cuda.is_available()))
+          PYTORCH_CI_CPU
       - name: Run tests and generate PR coverage XML
         if: steps.coverage_check.outputs.mode == 'both'
         shell: bash

@@ -38,7 +38,7 @@ test:
 	pytest
 
 test-fast:
-	pytest tests/test_m38_credential_scanner_config.py tests/test_m37_dx_shortcuts.py tests/test_m36_docs_navigation.py tests/test_m35_public_release_boundary.py --no-cov
+	pytest tests/test_m39_torch_security_docs.py tests/test_m38_credential_scanner_config.py tests/test_m37_dx_shortcuts.py tests/test_m36_docs_navigation.py tests/test_m35_public_release_boundary.py --no-cov
 
 docs-check:
 	pytest tests/test_m36_docs_navigation.py --no-cov

@@ -28,6 +28,8 @@ python -m pip install --upgrade pip
 pip install -e ".[dev]"
 ```
 
+On GitHub Actions Linux runners the CI workflow reinstalls Torch from PyTorch’s **CPU** wheel index (`download.pytorch.org`) so tests import cleanly without a CUDA stack; local installs pick wheels for your platform normally.
+
 Minimum Python version: see `requires-python` in [`pyproject.toml`](../pyproject.toml).
 
 ## Fast Local Verification
@@ -43,7 +45,7 @@ python scripts/check_public_release_boundary.py
 ruff check .
 ruff format --check .
 mypy src/renacechess
-pytest tests/test_m38_credential_scanner_config.py tests/test_m37_dx_shortcuts.py tests/test_m36_docs_navigation.py tests/test_m35_public_release_boundary.py --no-cov
+pytest tests/test_m39_torch_security_docs.py tests/test_m38_credential_scanner_config.py tests/test_m37_dx_shortcuts.py tests/test_m36_docs_navigation.py tests/test_m35_public_release_boundary.py --no-cov
 ```
 
 Optional — if [gitleaks](https://github.com/gitleaks/gitleaks) is installed:
@@ -52,7 +54,13 @@ Optional — if [gitleaks](https://github.com/gitleaks/gitleaks) is installed:
 make secret-scan
 ```
 
-See [`docs/security/CREDENTIAL_SCANNING.md`](security/CREDENTIAL_SCANNING.md) for scope (CI blocking gate vs manual full-history) and what to do if a **secret** is found.
+Optional — dependency audit (matches **Security Scan** pip-audit on CI):
+
+```bash
+pip-audit --desc on --progress-spinner off
+```
+
+See [`docs/security/CREDENTIAL_SCANNING.md`](security/CREDENTIAL_SCANNING.md) for scope (CI blocking gate vs manual full-history) and what to do if a **secret** is found. See [`docs/security/TORCH_SECURITY_REVIEW.md`](security/TORCH_SECURITY_REVIEW.md) for how Torch/tooling vulnerability posture is governed before release.
 
 ## Run a Quick Verification
 
