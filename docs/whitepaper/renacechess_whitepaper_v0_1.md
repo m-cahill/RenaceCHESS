@@ -1,6 +1,6 @@
 # RenaceCHESS: Audit-Governed Human Chess Cognition and Grounded Coaching
 
-**Version:** 0.1 (draft)  
+**Version:** 0.2 (draft; refinement of v0.1)  
 **Document type:** Technical white paper (research repository snapshot)  
 **Repository:** RenaceCHESS — Cognitive Human Evaluation & Skill Simulation  
 **Audience:** ML researchers; chess AI / informatics readers; AI infrastructure engineers; governance-minded technical reviewers; external research evaluators  
@@ -42,7 +42,7 @@ None of these contributions substitutes for a claim that RenaceCHESS currently m
 
 ### 1.2 Roadmap of the paper
 
-Section 2 contrasts engines, human-move predictors, and LLMs. Section 3 states the RenaceCHESS thesis in probabilistic and systems terms. Sections 4–7 walk architecture, modeling, difficulty/structure, and coaching. Section 8 details reproducibility mechanisms. Section 9 restates v1.0.0 limitations without euphemism. Section 10 synthesizes architectural patterns valuable beyond chess. Section 11 lists future work; Section 12 concludes.
+Section 2 contrasts engines, human-move predictors, and LLMs; **§2.6** states data-availability expectations for external circulation. Section 3 states the RenaceCHESS thesis in probabilistic and systems terms. Sections 4–7 walk architecture (including a one-glance figure), modeling, difficulty/structure, and coaching. Section 8 details reproducibility mechanisms and a **governance threat model**. Section 9 restates v1.0.0 limitations—including a scannable checklist. Section 10 synthesizes architectural patterns valuable beyond chess. Section 11 lists future work; Section 12 concludes. **Appendix C** is a compact milestone glossary.
 
 ---
 
@@ -62,15 +62,15 @@ This matters for reviewers: a project can be *interesting* without claiming to b
 
 ### 2.2 Human move prediction is a distinct research thread
 
-Human move prediction—learning from large corpora of human games to predict moves people actually play—has been explored in notable research systems such as **Maia**, which trains models from human games to predict human moves across skill levels [Maia-2020]; Microsoft Research’s project pages provide accessible framing of the “predict humans, not only optimal moves” agenda [Maia-MSR], [MSR-Blog-HumanChess]. RenaceCHESS belongs to the **same problem family** at the level of intent—human behavior modeling—but the repository evidence in this draft should not be read as claiming parity with any specific external benchmark unless future work measures it under a declared protocol (see §13).
+Human move prediction—learning from large corpora of human games to predict moves people actually play—has been explored in notable research systems such as **Maia**, which trains models from human games to predict human moves across skill levels [Maia-2020]; Microsoft Research’s project pages provide accessible framing of the “predict humans, not only optimal moves” agenda [Maia-MSR], [MSR-Blog-HumanChess]. RenaceCHESS belongs to the **same problem family** at the level of intent—human behavior modeling—but the repository evidence in this draft should not be read as claiming parity with any specific external benchmark unless future work measures it under a declared protocol (see §11).
 
 ### 2.3 Generic LLM chess assistants mix language with unsupported calculation
 
 LLMs can summarize, tutor at a high level, and engage users—but under time pressure they may confabulate tactics, misestimate probabilities, or blend training lore with position-specific claims. Surveys of **hallucination** in natural language generation catalog failure modes and mitigation families at a field level [Ji-2022]; they support the **design motivation** for grounding, not a claim that any single pipeline eliminates hallucination.
 
-### 2.4 Data availability and licensing context
+### 2.4 Data availability and licensing context (summary)
 
-The project vision references **Lichess** public database exports as an example of scalable, permissively licensed human game data [Lichess-DB]. Any camera-ready publication should cite Lichess’s **primary license documentation** for the specific artifacts used in experiments; the public vision states a **CC0** stance for database exports at a high level, but packaging details remain a diligence item.
+The project vision references **Lichess** public database exports as scalable, permissively licensed human game data [Lichess-DB]. **§2.6** states what a camera-ready empirical paper must add; this draft’s **v1.0.0** evidence section relies primarily on **synthetic** frozen eval and proof-pack artifacts, not a fresh real-game benchmark suite.
 
 ### 2.5 Why this matters for partners and reviewers
 
@@ -86,6 +86,23 @@ At the same time, reviewers should not confuse **verification of integrity** wit
 | Typical W/D/L | Engine W/D/L (evaluation-grounded) | Unreliable unless grounded | Model-specific | **Human outcome head** + calibration artifacts (scope depends on milestone) |
 | Grounding | Search + value | Learned language prior | Human game statistics | **Contracts** + deterministic builders + CI |
 | Governance emphasis | Engine correctness | Prompting | Research papers | **Registry + proof pack + release gates** |
+
+### 2.6 Data availability (for external circulation)
+
+**Vision-level stance:** `VISION.md` cites Lichess public database exports and their **CC0** licensing posture [Lichess-DB]. That supports the *long-term data scaling story* but is **not** a substitute for a formal data card in a submitted paper.
+
+**What a camera-ready empirical publication should specify (future work for authors):**
+
+- Exact **database dumps** (months / variants), **filters** (rated-only, time controls, rating floors), and **duplicate / pairing** policy.
+- **Train / val / frozen-eval** splits with **manifests** and hashes (the repository’s contract style anticipates such manifests).
+- A **primary license citation** from Lichess’s documentation—not only a secondary summary.
+- Clear separation of **real-game** shards from **synthetic** frozen eval v2 used in v1.0.0.
+
+**What this white paper’s v1.0.0 narrative actually leans on:**
+
+- **M30 frozen eval v2:** 10k **synthetic**, stratified positions—excellent for **determinism and relative metrics**, not for claiming coverage of human online play.
+- **M31–M32 artifacts and M33 proof pack:** end-to-end **integrity** of training and evaluation **reports**, not proof of leaderboard performance.
+- **No claim** is made here that v1.0.0 reproduces a full Maia-style real-game benchmark; that remains **future work** with an explicit protocol.
 
 ---
 
@@ -166,6 +183,64 @@ Following `VISION.md` and `RELEASE_NOTES_v1.md`, RenaceCHESS is **not**:
 
 ## 4. System architecture
 
+### 4.0 RenaceCHESS at a glance (big-picture)
+
+The figure below is **onboarding-oriented**: it is not a substitute for `CONTRACT_REGISTRY_v1.json` or `ci.yml`, but orients a new reviewer to how **inputs**, **signals**, **grounding artifacts**, **translation**, and **governance** connect.
+
+```mermaid
+flowchart TB
+  subgraph in [Inputs]
+    FEN[Position / FEN]
+    CND[Skill + time conditioning]
+    DATA[Training / ingest data — future real-game scale]
+  end
+  subgraph sig [Core human-centered signals]
+    MOV[Human move distribution]
+    WDL[Human W/D/L]
+    HDI[Human difficulty / HDI]
+    STR[Structural cognition tensors]
+  end
+  subgraph ground [Grounding payloads]
+    CB[Context Bridge]
+    AF[AdviceFacts]
+    DF[EloBucketDeltaFacts]
+  end
+  subgraph xfrm [Translation / surfaces]
+    STUB[DeterministicStubLLM / harness — M21]
+    CLI[Coaching CLI — M22]
+  end
+  subgraph gov [Governance layer]
+    REG[Contract registry + schema hashes]
+    PP[Proof pack + verify_proof_pack]
+    CI[CI gates incl. release-contract-freeze]
+  end
+  FEN --> MOV
+  FEN --> WDL
+  FEN --> HDI
+  FEN --> STR
+  CND --> MOV
+  CND --> WDL
+  CND --> HDI
+  DATA -.->|future full-vocab empirical training| MOV
+  MOV --> CB
+  WDL --> CB
+  HDI --> CB
+  STR --> CB
+  CB --> AF
+  CB --> DF
+  AF --> STUB
+  DF --> STUB
+  AF --> CLI
+  DF --> CLI
+  REG --- CB
+  REG --- AF
+  REG --- DF
+  PP --- MOV
+  PP --- WDL
+  CI --- REG
+  CI --- PP
+```
+
 ### 4.1 Schema-first contracts
 
 RenaceCHESS is organized around **versioned JSON Schemas** and matching **Pydantic** models. The **contract registry** (`contracts/CONTRACT_REGISTRY_v1.json`) inventories **33** frozen v1 schemas with **SHA-256** content hashes and records the milestone that introduced each contract—making drift visible and auditable (`RELEASE_NOTES_v1.md`). Validation code enforces registry integrity in CI via the **`release-contract-freeze`** job family (see `.github/workflows/ci.yml`, summarized in §8).
@@ -207,6 +282,19 @@ Phase B introduces **personality modulation** as an auditable, bounded variation
 ---
 
 ## 5. Modeling approach
+
+### 5.0 Four tracks readers must not conflate
+
+RenaceCHESS’s repository mixes **multiple experimental threads**; merging them in prose is a common source of mis-review.
+
+| Track | What it is | Primary evidence |
+|-------|------------|------------------|
+| **A — PoC learned baseline** | Early policy + outcome training under PoC discipline | `docs/POC_RELEASE_MANIFEST.md` (M08–M09); explicit non-inclusions (no RL, no engine optimization) |
+| **B — LiveM01 baseline temperatures** | Deterministic **temperature scaling** on `BaselinePolicyV1` by skill id—**no** claim about M31 checkpoints | `docs/milestones/Live/LiveM01/LiveM01_summary.md` |
+| **C — Phase E v1.0.0 run** | **M31** executed training + locks; **M32** post-train eval on **synthetic** frozen eval v2 | `RELEASE_NOTES_v1.md`; M31/M32 summaries |
+| **D — Future full-vocabulary / real-game work** | Not proven by v1.0.0; explicitly the next empirical phase | `RELEASE_NOTES_v1.md` Known Limitations; §11 |
+
+When this draft says “narrow effective training regime,” it refers to **Track C** (and the relationship of **Track C** metrics to frozen eval v2), not to **Track B** temperature knobs.
 
 ### 5.1 PoC learning baseline
 
@@ -345,15 +433,30 @@ The workflow in `.github/workflows/ci.yml` includes—among many jobs—linting,
 
 This is not “CI proves the AI is strong”; it is “CI makes specific dishonesty modes **expensive** and **visible**.”
 
-### 8.5 Imported platform posture (careful scope)
+### 8.5 Governance threat model: what the architecture is designed to prevent
+
+RenaceCHESS’s governance stack is **not** a formal security certification (no Common Criteria, no penetration-test narrative). It is nevertheless useful to name the **misbehaviors** the architecture is engineered to make painful—so reviewers do not mistake “green CI” for “magic safety.”
+
+| Threat / failure mode | What could go wrong | How the repo pushes back (evidence-grounded) |
+|-----------------------|---------------------|-----------------------------------------------|
+| **Silent schema drift** | JSON artifacts change shape without version bumps; old papers cite meanings that no longer hold | Frozen **`CONTRACT_REGISTRY_v1.json`** + **`release-contract-freeze`**; v2+ evolution explicit (`RELEASE_NOTES_v1.md`) |
+| **Claim inflation / overclaiming** | Marketing language outruns what artifacts support | Release notes + proof-pack README **list non-claims**; M32 reports degradation honestly |
+| **Eval leakage / frozen-eval misuse** | Training touches supposedly frozen evaluation; metrics lie | PoC manifest and Phase E process emphasize separation; manifests and tests (see Milestone summaries) |
+| **Prompt / LLM invention outside facts** | Model improvises tactics not backed by AdviceFacts/DeltaFacts | Phase C pipeline requires structured inputs; M21 evaluation hooks (does **not** guarantee all future integrations) |
+| **CI “greenwashing”** | Tests weakened to stay green while quality drops | **Overlap-set coverage non-regression** on PRs; broad job matrix in `ci.yml` (not exhaustive but nontrivial) |
+| **Post-release mutation of v1 meanings** | Silent edits to v1 schemas redefine history | Registry hashes + proof pack bind **specific** bytes; changes require intentional v2+ path |
+
+**Caveat:** A determined insider could always bypass these controls outside the protected workflow; the claim here is **ordinary engineering dishonesty becomes noisier**, not that malice is impossible.
+
+### 8.6 Imported platform posture (careful scope)
 
 `docs/governance/REDIAI_V3_ASSUMED_GUARANTEES.md` records **inherited** posture claims from an external RediAI / R2L lineage. RenaceCHESS-specific evidence for this draft rests on **this repo’s** CI + artifacts; readers should not treat external program audits as substitutes for RenaceCHESS verification without explicit mapping.
 
-### 8.6 Practical verification hooks
+### 8.7 Practical verification hooks
 
 For readers who want to **touch** the governance story rather than only read about it, `RELEASE_NOTES_v1.md` documents commands to validate the contract registry and run proof-pack verification locally. These hooks matter because they **reduce** the distance between “claims in a PDF” and “commands you can run.” A v1 integrity failure should present as a **hard error**, not an ambiguous log line—that is part of the project’s **truthfulness infrastructure** narrative.
 
-### 8.7 Security and hygiene (governance adjacent)
+### 8.8 Security and hygiene (governance adjacent)
 
 Modern repositories face scanning expectations for credentials and dependencies. RenaceCHESS’s public readiness milestones (Phase G) include boundary and scanner posture; while this draft is not a security white paper, **public-release readiness** work illustrates that the maintainers treat the repo as a **long-lived artifact** rather than a disposable prototype. Exact scanner versions and policies evolve; readers should consult the current `ci.yml` and policy docs when preparing an enterprise review.
 
@@ -383,7 +486,19 @@ Also from `RELEASE_NOTES_v1.md`:
 
 Frozen eval v2 is **synthetic** by design: metrics support **relative** evaluation and stability claims—not absolute real-world strength. This is a **feature** for reproducibility, not a bug to hide.
 
-### 9.4 Closing the loop: what v1.0.0 enables for outsiders
+### 9.4 Limitations at a glance (scannable)
+
+| Limitation | Status in v1.0.0 / this draft |
+|------------|------------------------------|
+| **Research-grade, not production** | Explicit in `RELEASE_NOTES_v1.md`; not a SaaS or deployment product |
+| **Synthetic frozen eval v2** | M30: 10k positions; **not** a real-game benchmark suite |
+| **Narrow effective training regime** | Despite **`moveVocabSize`: 4096** in `TrainingConfigLockV1`, training emphasized a **small** common-opening regime (`RELEASE_NOTES_v1.md`) |
+| **No full-vocabulary performance proof** | Stated non-goal; broader legal move space not validated here |
+| **No Stockfish / engine replacement claim** | Human modeling thesis; no Elo-vs-engine narrative |
+| **Deterministic stub LLM in CI harness** | M21; **not** live vendor evidence for production coaching |
+| **Proof pack ≠ model correctness** | Verifies **artifact integrity** and honest packaging (`proof_pack_v1/README.md`) |
+
+### 9.5 Closing the loop: what v1.0.0 enables for outsiders
 
 Independent teams can, in principle, (i) validate registry hashes against schemas, (ii) run proof-pack verification, and (iii) inspect deterministic generators for frozen eval and structural features—**without** accepting maintainer narrative on faith. That capability is particularly relevant for “research evaluation” cultures (corporate and academic) that have become skeptical of one-off demos. Again, integrity verification is **not** model superiority verification; the draft repeats this distinction because it is the most common misunderstanding of hash-governed ML repositories.
 
@@ -471,10 +586,27 @@ The authors’ recommended mental model for readers and partners: **trust the go
 
 ### Appendix B — Suggested reviewer questions
 
-1. What real-game eval protocol will accompany future strength claims?
+1. What real-game split protocol will accompany future strength claims?
 2. How will live LLM providers be bounded by the same contracts as the stub?
 3. What human baseline metrics will be reported alongside calibration metrics?
 
+### Appendix C — Milestone glossary (compact)
+
+| ID | Name / theme | Role in this draft |
+|----|----------------|-------------------|
+| **M07** | HDI v1 | Human Difficulty Index frozen in PoC semantics (`docs/POC_RELEASE_MANIFEST.md`) |
+| **M11** | Structural cognition | `PerPieceFeaturesV1`, `SquareMapFeaturesV1`; **Context Bridge v2** |
+| **M19** | AdviceFacts | Facts-only coaching substrate; ADR-level “LLM translates” posture |
+| **M20** | EloBucketDeltaFacts | Cross-bucket deltas (policy, outcome, HDI, structure) without prose |
+| **M21** | Translation harness | `DeterministicStubLLM`, draft + evaluation contracts; **offline CI** |
+| **M22** | Coaching CLI | `renacechess coach`; `CoachingSurfaceV1` output surface |
+| **M30** | Frozen eval v2 | 10k **synthetic** stratified eval set |
+| **M31** | Training run | `TrainingConfigLockV1`, executed training, reports |
+| **M32** | Post-train eval | Delta vs baseline; honest mismatch behavior |
+| **M33** | Proof pack | External verification bundle for M30–M32 artifacts |
+| **M34** | Release lock | Contract registry + `release-*` CI gates |
+| **LiveM01** | Baseline skill conditioning | Temperature map on `BaselinePolicyV1`; **distinct** from M31 checkpoints |
+
 ---
 
-**End of draft v0.1.**
+**End of draft v0.2.**

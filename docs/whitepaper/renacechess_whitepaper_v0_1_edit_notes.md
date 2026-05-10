@@ -1,62 +1,39 @@
-# RenaceCHESS White Paper v0.1 — Edit Notes
+# RenaceCHESS White Paper — Edit Notes
 
-## Summary of deliverable
+## v0.2 refinement (same file name, PR #56 branch)
 
-- **`renacechess_whitepaper_v0_1.md`:** First full draft (standalone readable narrative) synthesizing the merged research pack (PR #55) and authoritative repo sources. Audience: ML + chess informatics + infra + governance reviewers.
-- **`…_claim_check.md`:** Maps major paper claims to Safe / Risky / Removed per the research claims register.
+### What changed (v0.1 → v0.2)
 
-## Sources used (primary)
+1. **Header:** Version bumped to **0.2**; roadmap updated for new §2.6, §8.5, §9.4, Appendix C.
+2. **§2.6 Data availability:** Explicit disclosure for external circulation—Lichess CC0 at vision level; required elements for a future empirical paper; what v1.0.0 evidence actually uses (synthetic eval + proof pack).
+3. **§4.0 Big-picture diagram:** Single Mermaid “RenaceCHESS at a glance” (inputs → signals → grounding → translation → governance).
+4. **§5.0 Four tracks:** Table separating PoC learned baseline, LiveM01, Phase E v1.0.0, and future full-vocab work.
+5. **§8.5 Governance threat model:** Table of failure modes (schema drift, overclaiming, eval misuse, LLM invention, greenwashing, v1 mutation) vs repo responses; **explicit non-claim** of formal security certification.
+6. **§9.4 Limitations at a glance:** Scannable table mirroring conservative claim posture.
+7. **Appendix C:** Compact milestone glossary (M07, M11, M19–M22, M30–M34, LiveM01).
+8. **Fix:** §2.2 cross-reference `§13` → `§11`.
 
-Internal:
+### Sources used
 
-- `docs/whitepaper/research/renacechess_whitepaper_research_pack.md`
-- `docs/whitepaper/research/renacechess_whitepaper_outline.md`
-- `docs/whitepaper/research/renacechess_whitepaper_sources.md`
-- `docs/whitepaper/research/renacechess_whitepaper_open_questions.md`
-- `VISION.md`, `RELEASE_NOTES_v1.md`, `docs/POC_RELEASE_MANIFEST.md`, `docs/postpocphasemap.md`, `docs/postpocanchor.md`
-- `contracts/CONTRACT_REGISTRY_v1.json` (intro + milestone labels)
-- `proof_pack_v1/README.md`, `importlinter_contracts.ini`, `.github/workflows/ci.yml` (job families, described conceptually)
-- Phase C summaries M19–M22, Phase E M30–M34, LiveM01 summary (cited paths)
+Unchanged core: research pack PR #55, `VISION.md`, `RELEASE_NOTES_v1.md`, milestone summaries, `proof_pack_v1/README.md`, `importlinter_contracts.ini`, `ci.yml`, registry.
 
-External (bibliography as link anchors in paper):
+### Claims strengthened or softened
 
-- Maia [Maia-2020], MSR pages, Lichess DB, Stockfish UCI, Guo calibration, Ji hallucination survey, Pineau reproducibility report.
+- **Softened:** Governance section now **explicitly denies** formal security/certification language while still describing **dishonesty resistance**.
+- **Clarified (not strengthened):** Four-way modeling split; data availability expects future dumps/splits—**no** invented data card.
+- **Unchanged:** No production, Stockfish, hallucination-prevention, or full-vocab proof claims introduced.
 
-## Claims intentionally softened or avoided
+### Word count
 
-- **No** “prevents hallucination”; **yes** to “reduces reliance on LLM calculation” **in designed pipeline** and structured evaluation hooks.
-- **No** production / SaaS / commercial framing.
-- **No** Stockfish comparison or “stronger engine.”
-- **moveVocabSize: 4096** + **narrow effective regime** per `RELEASE_NOTES_v1.md` (not “only eight moves” in isolation).
-- M32 metrics framed as **integrity / mismatch** reading, not tactical superiority of baseline.
-- RediAI doc referenced only as **pedigree caution**, not proof transfer.
+**Approximate word count** (Python `str.split` on `renacechess_whitepaper_v0_1.md`): **6,145** (meets ≥6,000 target for v0.2).
 
-## Figures / tables included
+### Remaining open questions
 
-- Markdown tables: comparison, capability catalog, v1 proven vs not claimed, patterns.
-- Mermaid: signal pipeline, translator sequence, proof-pack flow (may render in GitHub / compatible viewers).
+- Concrete Lichess split manifest for any submitted empirical paper.
+- Live LLM evaluation under contract.
+- Human baseline (e.g., Maia-class) protocol.
+- Optional v0.3: single consolidated PDF figure from Mermaid for publishers that do not render diagrams.
 
-## Word count
+### Repo changes
 
-Approximate word count (`python` whitespace split) at authoring time: **~5,001 words** (meets **≥4,500** minimum; **6,000–8,000** stretch can be done in v0.2 with deeper phase detail or appendices).
-
-## Unresolved gaps (carry forward)
-
-Aligned with `renacechess_whitepaper_open_questions.md`:
-
-- No formal human-baseline / Maia-protocol comparison numbers.
-- Live LLM vendor results not in scope of M21 stub narrative.
-- Lichess license + concrete data splits for any future empirical section.
-- Missing root `v1*.md` anchors remain a doc hygiene item, not blocking this draft.
-
-## Recommended next edit pass (v0.2)
-
-1. Add **numeric** pointers only where frozen in artifacts (e.g., exact registry contract count re-verified against `CONTRACT_REGISTRY_v1.json` on branch).
-2. Optional **appendix** with verbatim `RELEASE_NOTES_v1.md` limitation bullets for legal/compliance readers.
-3. Expand **related work** with Maia-2 [arXiv:2409.20553] **only if** positioning requires it.
-4. Consistency pass: ensure every milestone codename appears with phase label once in a glossary-linked form.
-5. If targeting 7k+ words: deepen Phase D milestone enumeration and Phase G public-readiness **one-page** summary (M35–M40) — **only** if charter allows expanding scope.
-
-## Repo changes in this milestone
-
-Docs only under `docs/whitepaper/`; no code, CI, schema, registry, proof pack, or milestone history edits.
+Docs only under `docs/whitepaper/` (`renacechess_whitepaper_v0_1*.md`). No code, CI, registry, proof pack, or milestone history.
